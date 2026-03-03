@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Resultaat - {{ category }}</title>
+  </head>
+  <body>
+    <h1>Resultaat: {{ category }}</h1>
+    <h2>Score: {{ score }} / {{ total }}</h2>
+
+    <p><a href="/">Nieuwe quiz</a></p>
+
+    <hr />
+    {% for r in results %}
+      <h3>{{ loop.index }}. {{ r["Vraag"] }}</h3>
+
+      {% if r["is_correct"] %}
+        <p style="color:green;"><b>✅ Correct</b></p>
+      {% else %}
+        <p style="color:red;"><b>❌ Fout</b></p>
+      {% endif %}
+
+      <p><b>Jouw antwoord:</b> {{ r["user"]|join(", ") if r["user"] else "—" }}</p>
+      <p><b>Juiste antwoord:</b> {{ r["correct"]|join(", ") }}</p>
+
+      <ul>
+        <li>A. {{ r["options"]["A"] }}</li>
+        <li>B. {{ r["options"]["B"] }}</li>
+        <li>C. {{ r["options"]["C"] }}</li>
+        <li>D. {{ r["options"]["D"] }}</li>
+      </ul>
+      <hr />
+    {% endfor %}
+  </body>
+</html>

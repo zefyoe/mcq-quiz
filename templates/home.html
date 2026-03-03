@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MCQ Quiz</title>
+  </head>
+  <body>
+    <h1>Welkom bij de MCQ Quiz</h1>
+
+    {% if error %}
+      <p style="color:red;"><b>{{ error }}</b></p>
+    {% endif %}
+
+    <form method="post">
+      <label>Kies categorie:</label>
+      <select name="category" required>
+        {% for c in categories %}
+          <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Start</button>
+    </form>
+  </body>
+</html>
