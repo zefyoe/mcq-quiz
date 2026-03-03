@@ -3,35 +3,47 @@
   <head>
     <meta charset="utf-8" />
     <title>Quiz - {{ category }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <h1>Quiz: {{ category }}</h1>
+    <div style="background:#1e3a8a; color:white; padding:12px 20px;">
+  <strong>Dr. Youssef – MCQ Platform</strong>
+</div>
+    <div class="container">
+      <div class="card">
+        <h1>Quiz: <span class="codepill">{{ category }}</span></h1>
+        <p class="small">Beantwoord alle vragen en klik op Indienen.</p>
 
-    <form method="post">
-      {% for qid in order %}
-        {% set q = questions_by_id[qid] %}
-        <hr />
-        <h3>{{ loop.index }}. {{ q["Vraag"] }}</h3>
+        <form method="post">
+          {% for qid in order %}
+            {% set q = questions_by_id[qid] %}
+            <div class="question">
+              <h3>{{ loop.index }}. {{ q["Vraag"] }}</h3>
 
-        {% set correct = q["Correct"] %}
-        {% set is_multi = (correct is sequence) and (correct is not string) %}
+              {% set correct = q["Correct"] %}
+              {% set is_multi = (correct is sequence) and (correct is not string) %}
 
-        {% if is_multi %}
-          <p><i>Meerdere antwoorden mogelijk (checkboxes).</i></p>
-          <label><input type="checkbox" name="ans_{{ qid }}" value="A"> A. {{ q["A"] }}</label><br>
-          <label><input type="checkbox" name="ans_{{ qid }}" value="B"> B. {{ q["B"] }}</label><br>
-          <label><input type="checkbox" name="ans_{{ qid }}" value="C"> C. {{ q["C"] }}</label><br>
-          <label><input type="checkbox" name="ans_{{ qid }}" value="D"> D. {{ q["D"] }}</label><br>
-        {% else %}
-          <label><input type="radio" name="ans_{{ qid }}" value="A" required> A. {{ q["A"] }}</label><br>
-          <label><input type="radio" name="ans_{{ qid }}" value="B"> B. {{ q["B"] }}</label><br>
-          <label><input type="radio" name="ans_{{ qid }}" value="C"> C. {{ q["C"] }}</label><br>
-          <label><input type="radio" name="ans_{{ qid }}" value="D"> D. {{ q["D"] }}</label><br>
-        {% endif %}
-      {% endfor %}
+              {% if is_multi %}
+                <p class="small"><i>Meerdere antwoorden mogelijk: vink alle juiste aan.</i></p>
+                <label class="option"><input type="checkbox" name="ans_{{ qid }}" value="A"> A. {{ q["A"] }}</label>
+                <label class="option"><input type="checkbox" name="ans_{{ qid }}" value="B"> B. {{ q["B"] }}</label>
+                <label class="option"><input type="checkbox" name="ans_{{ qid }}" value="C"> C. {{ q["C"] }}</label>
+                <label class="option"><input type="checkbox" name="ans_{{ qid }}" value="D"> D. {{ q["D"] }}</label>
+              {% else %}
+                <label class="option"><input type="radio" name="ans_{{ qid }}" value="A" required> A. {{ q["A"] }}</label>
+                <label class="option"><input type="radio" name="ans_{{ qid }}" value="B"> B. {{ q["B"] }}</label>
+                <label class="option"><input type="radio" name="ans_{{ qid }}" value="C"> C. {{ q["C"] }}</label>
+                <label class="option"><input type="radio" name="ans_{{ qid }}" value="D"> D. {{ q["D"] }}</label>
+              {% endif %}
+            </div>
+          {% endfor %}
 
-      <hr />
-      <button type="submit">Indienen</button>
-    </form>
+          <div class="actions">
+            <button class="primary" type="submit">Indienen</button>
+            <a class="secondary" href="/" style="text-decoration:none; display:inline-block;">Andere categorie</a>
+          </div>
+        </form>
+      </div>
+    </div>
   </body>
 </html>

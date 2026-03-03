@@ -3,33 +3,47 @@
   <head>
     <meta charset="utf-8" />
     <title>Resultaat - {{ category }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <h1>Resultaat: {{ category }}</h1>
-    <h2>Score: {{ score }} / {{ total }}</h2>
+    <div style="background:#1e3a8a; color:white; padding:12px 20px;">
+  <strong>Dr. Youssef – MCQ Platform</strong>
+</div>
+    <div class="container">
+      <div class="card">
+        <h1>Resultaat: <span class="codepill">{{ category }}</span></h1>
+        <p class="small">Score</p>
+        <h2>{{ score }} / {{ total }}</h2>
 
-    <p><a href="/">Nieuwe quiz</a></p>
+        <div class="actions">
+          <a class="secondary" href="/" style="text-decoration:none; display:inline-block;">Nieuwe quiz</a>
+        </div>
 
-    <hr />
-    {% for r in results %}
-      <h3>{{ loop.index }}. {{ r["Vraag"] }}</h3>
+        <hr>
 
-      {% if r["is_correct"] %}
-        <p style="color:green;"><b>✅ Correct</b></p>
-      {% else %}
-        <p style="color:red;"><b>❌ Fout</b></p>
-      {% endif %}
+        {% for r in results %}
+          <div class="question">
+            <h3>{{ loop.index }}. {{ r["Vraag"] }}</h3>
 
-      <p><b>Jouw antwoord:</b> {{ r["user"]|join(", ") if r["user"] else "—" }}</p>
-      <p><b>Juiste antwoord:</b> {{ r["correct"]|join(", ") }}</p>
+            {% if r["is_correct"] %}
+              <p class="good">✅ Correct</p>
+            {% else %}
+              <p class="bad">❌ Fout</p>
+            {% endif %}
 
-      <ul>
-        <li>A. {{ r["options"]["A"] }}</li>
-        <li>B. {{ r["options"]["B"] }}</li>
-        <li>C. {{ r["options"]["C"] }}</li>
-        <li>D. {{ r["options"]["D"] }}</li>
-      </ul>
-      <hr />
-    {% endfor %}
+            <p class="small"><b>Jouw antwoord:</b> {{ r["user"]|join(", ") if r["user"] else "—" }}</p>
+            <p class="small"><b>Juiste antwoord:</b> {{ r["correct"]|join(", ") }}</p>
+
+            <hr>
+            <div class="small">
+              <div>A. {{ r["options"]["A"] }}</div>
+              <div>B. {{ r["options"]["B"] }}</div>
+              <div>C. {{ r["options"]["C"] }}</div>
+              <div>D. {{ r["options"]["D"] }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
   </body>
 </html>
