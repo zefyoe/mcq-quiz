@@ -248,7 +248,7 @@ def admin_new_question():
 # Admin setup (veilig met token)
 # -------------------------
 
-@app.route("/create-admin")
+
 def create_admin():
     """
     Maak één admin gebruiker aan.
@@ -304,5 +304,22 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("home"))
+
+@app.route("/change-admin-password")
+def change_admin_password():
+
+    email = "y@bymed.be"
+    new_password = "43Pe34SR*0"
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return "Admin niet gevonden"
+
+    user.set_password(new_password)
+    db.session.commit()
+
+    return "Admin password changed!"
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
