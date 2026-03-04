@@ -1,9 +1,17 @@
 import os
+from models import db
 from flask import Flask, render_template, request, session, redirect, url_for
 import random
 from questions_data import questions
 
 app = Flask(__name__)
+@app.get("/setup-db")
+def setup_db():
+    db.create_all()
+    return "DB tables created."
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db.init_app(app)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")  # nodig voor session
 
 def get_categories():
@@ -87,4 +95,5 @@ def quiz(category):
     return render_template("result.html", category=category, score=score, total=len(order), results=results)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
+    
