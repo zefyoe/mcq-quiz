@@ -1,25 +1,69 @@
 import os
-from models import db
-from flask import Flask, render_template, request, session, redirect, url_for
 import random
+
+from flask import Flask, render_template, request, session, redirect, url_for
+
+from models import db
 from questions_data import questions
 
+
+def build_database_uri() -> str:
+    """
+    - Gebruikt DATABASE_URL als die bestaat (Render Postgres).
+    - Anders fallback naar lokale SQLite.
+    - Fix voor Render: postgres:// -> postgresql://
+    - Forceer psycopg v3 driver: postgresql+psycopg:// (als je psycopg[binary] gebruikt)
+    """
+    uri = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
+
+    # Render/Heroku geven soms postgres://, SQLAlchemy verwacht postgresql://
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+
+    # Als we Postgres gebruiken: forceer psycopg v3 driver
+    if uri.startswith("postgresql://"):
+        uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
+
+    return uri
+
+
 app = Flask(__name__)
-@app.get("/setup-db")
-def setup_db():
-    db.create_all()
-    return "DB tables created."
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
+
+# --- Config eerst ---
+app.config["SQLALCHEMY_DATABASE_URI"] = build_database_uri()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db.init_app(app)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")  # nodig voor session
+
+# --- DB init daarna ---
+db.init_app(app)
+
 
 def get_categories():
     return sorted({q["Category"] for q in questions})
 
+
 def normalize_correct(q):
     # Zorg dat correct altijd een lijst is (ook bij 1 antwoord)
     return q["Correct"] if isinstance(q["Correct"], list) else [q["Correct"]]
+
+
+@app.get("/setup-db")
+def setup_db():
+    """
+    Maak tabellen aan.
+    TIP: zet SETUP_TOKEN als env var op Render en roep aan met:
+    /setup-db?token=JOUW_TOKEN
+    """
+    token_required = os.environ.get("SETUP_TOKEN")
+    if token_required:
+        provided = request.args.get("token")
+        if provided != token_required:
+            return "Forbidden", 403
+
+    with app.app_context():
+        db.create_all()
+    return "DB tables created."
+
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -32,6 +76,7 @@ def home():
         return redirect(url_for("quiz", category=category))
 
     return render_template("home.html", categories=categories, error=None)
+
 
 @app.route("/quiz/<category>", methods=["GET", "POST"])
 def quiz(category):
@@ -50,7 +95,12 @@ def quiz(category):
         random.shuffle(order)
         session["order"] = order
         session["category"] = category
-        return render_template("quiz.html", category=category, questions_by_id={q["ID"]: q for q in selected}, order=order)
+        return render_template(
+            "quiz.html",
+            category=category,
+            questions_by_id={q["ID"]: q for q in selected},
+            order=order,
+        )
 
     # POST: antwoorden nakijken
     order = session.get("order", [])
@@ -83,17 +133,19 @@ def quiz(category):
         if is_correct:
             score += 1
 
-        results.append({
-            "ID": q["ID"],
-            "Vraag": q["Vraag"],
-            "user": user_answers,
-            "correct": correct,
-            "is_correct": is_correct,
-            "options": {"A": q["A"], "B": q["B"], "C": q["C"], "D": q["D"]},
-        })
+        results.append(
+            {
+                "ID": q["ID"],
+                "Vraag": q["Vraag"],
+                "user": user_answers,
+                "correct": correct,
+                "is_correct": is_correct,
+                "options": {"A": q["A"], "B": q["B"], "C": q["C"], "D": q["D"]},
+            }
+        )
 
     return render_template("result.html", category=category, score=score, total=len(order), results=results)
 
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
-    
+    app.run(debug=True, port=5002)
