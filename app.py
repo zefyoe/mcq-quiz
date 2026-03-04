@@ -308,8 +308,8 @@ def logout():
 @app.route("/change-admin-password")
 def change_admin_password():
 
-    email = "y@bymed.be"
-    new_password = "43Pe34SR*0"
+     email = "admin@example.com"
+    new_password = "MyNewStrongPassword123"
 
     user = User.query.filter_by(email=email).first()
 
