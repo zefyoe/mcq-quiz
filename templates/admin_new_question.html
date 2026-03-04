@@ -1,0 +1,30 @@
+<h1>Nieuwe vraag</h1>
+
+{% if error %}
+<p style="color:red">{{ error }}</p>
+{% endif %}
+
+{% if success %}
+<p style="color:green">{{ success }}</p>
+{% endif %}
+
+<form method="POST">
+
+<p>QID<br><input name="qid"></p>
+
+<p>Categorie<br><input name="category"></p>
+
+<p>Vraag<br><textarea name="text"></textarea></p>
+
+<p>A<br><input name="a"></p>
+<p>B<br><input name="b"></p>
+<p>C<br><input name="c"></p>
+<p>D<br><input name="d"></p>
+
+<p>Correct (A/B/C/D)<br><input name="correct"></p>
+
+<p>Image URL (optioneel)<br><input name="image_url"></p>
+
+<button type="submit">Opslaan</button>
+
+</form>
