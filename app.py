@@ -183,6 +183,26 @@ def admin_new_question():
 
 
 # =====================
+@app.route("/create-admin")
+def create_admin():
 
+    email = "admin@example.com"
+    password = "admin123"
+
+    if User.query.filter_by(email=email).first():
+        return "Admin bestaat al."
+
+    admin = User(
+        email=email,
+        is_admin=True
+    )
+
+    admin.set_password(password)
+
+    db.session.add(admin)
+    db.session.commit()
+
+    return "Admin user created!"
+    
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
