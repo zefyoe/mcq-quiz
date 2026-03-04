@@ -123,3 +123,13 @@ select {
     font-size: 20px;
   }
 }
+
+.qimage {
+  margin: 12px 0 16px;
+}
+
+.qimage img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
