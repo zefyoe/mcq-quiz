@@ -13,7 +13,17 @@ def setup_db():
     db.create_all()
     return "DB tables created."
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
+uri = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
+
+# Render geeft soms postgres://, SQLAlchemy verwacht postgresql://
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+
+# Forceer psycopg v3 driver
+if uri.startswith("postgresql://"):
+    uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
@@ -203,6 +213,6 @@ def create_admin():
     db.session.commit()
 
     return "Admin user created!"
-    
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
