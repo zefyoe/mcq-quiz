@@ -34,7 +34,7 @@ db.init_app(app)
 
 # Login setup
 login_manager = LoginManager()
-login_manager.login_view = "home"  # als je later een echte /login pagina maakt: zet dit naar "login"
+login_manager.login_view = "login"
 login_manager.init_app(app)
 
 
@@ -277,6 +277,32 @@ def create_admin():
 
     return f"Admin user created: {email}"
 
+from flask_login import login_user, logout_user  # bovenaan bij imports toevoegen
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    next_url = request.args.get("next") or url_for("home")
+
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+        next_url = request.form.get("next") or url_for("home")
+
+        user = User.query.filter_by(email=email).first()
+        if not user or not user.check_password(password):
+            error = "Foute email of wachtwoord."
+        else:
+            login_user(user)
+            return redirect(next_url)
+
+    return render_template("login.html", error=error, next=next_url)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
