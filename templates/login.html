@@ -1,24 +1,50 @@
 <!doctype html>
 <html>
-  <body>
-    <h1>Login</h1>
+<head>
+<meta charset="utf-8">
+<title>Login - MCQ Platform</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
 
-    {% if error %}
-      <p style="color:red">{{ error }}</p>
-    {% endif %}
+<body>
 
-    <form method="POST">
-      <input type="hidden" name="next" value="{{ next }}">
+<div class="login-container">
 
-      <p>Email<br>
-        <input name="email" type="email" required style="width: 300px;">
-      </p>
+    <div class="login-left">
+        <div class="brand">Dr. Youssef MCQ</div>
 
-      <p>Wachtwoord<br>
-        <input name="password" type="password" required style="width: 300px;">
-      </p>
+        <div class="hero-text">
+            <h2>Medical QBank</h2>
+            <p>Advanced MCQ training platform</p>
+        </div>
+    </div>
 
-      <button type="submit">Inloggen</button>
-    </form>
-  </body>
+
+    <div class="login-right">
+
+        <h1>Sign in</h1>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <label>Email</label>
+            <input type="email" name="email" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Login</button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
 </html>
