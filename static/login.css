@@ -129,14 +129,11 @@ body{
 }
 
 .hero-card{
-  position:relative;
-  z-index:2;
-  margin-top: 34px;
   padding: 22px;
   border-radius: 22px;
-  border:1px solid rgba(255,255,255,.12);
-  background: none
-  backdrop-filter: blur(10px);
+  border:none;
+  background: transparent;
+}
 }
 .hero-badge{
   display:inline-block;
