@@ -2,20 +2,32 @@ import os
 import random
 
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_login import LoginManager, login_required, current_user
+from flask_login import (
+    LoginManager,
+    login_required,
+    current_user,
+    login_user,
+    logout_user,
+)
+
+from sqlalchemy import func
 
 from models import db, Question, User
 from questions_data import questions
 
 
+# -------------------------
+# App + DB config
+# -------------------------
+
 def build_database_uri() -> str:
     uri = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
 
-    # Render geeft soms postgres://, SQLAlchemy verwacht postgresql://
+    # Render sometimes gives postgres:// (older), SQLAlchemy expects postgresql://
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
 
-    # Forceer psycopg v3 driver (vereist: psycopg[binary] in requirements.txt)
+    # Force psycopg v3 driver (requires psycopg[binary] in requirements.txt)
     if uri.startswith("postgresql://"):
         uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
 
@@ -23,16 +35,17 @@ def build_database_uri() -> str:
 
 
 app = Flask(__name__)
-
-# Config eerst
 app.config["SQLALCHEMY_DATABASE_URI"] = build_database_uri()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
-# DB init
 db.init_app(app)
 
+
+# -------------------------
 # Login setup
+# -------------------------
+
 login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
@@ -47,19 +60,38 @@ def load_user(user_id):
 # Helpers
 # -------------------------
 
-def normalize_correct_from_file(q):
-    # Zorg dat correct altijd een lijst is (ook bij 1 antwoord)
+def normalize_correct(q: dict) -> list[str]:
+    """Make sure correct is always a list."""
     return q["Correct"] if isinstance(q["Correct"], list) else [q["Correct"]]
 
 
-def get_categories():
-    # categorieën uit DB + fallback file
+def normalize_category(s: str) -> str:
+    return (s or "").strip().lower()
+
+
+def db_question_to_dict(q: Question) -> dict:
+    """Convert DB Question -> dict format used by templates."""
+    return {
+        "ID": q.qid,
+        "Category": q.category,
+        "Vraag": q.text,
+        "A": q.a,
+        "B": q.b,
+        "C": q.c,
+        "D": q.d,
+        "Correct": [q.correct],     # keep your existing answer checking logic
+        "image_url": q.image_url,   # <-- this enables images in quiz.html
+    }
+
+
+def get_categories() -> list[str]:
+    """Return categories from DB + questions_data.py (merged)."""
     cats = set()
 
     # DB categories
     for (c,) in db.session.query(Question.category).distinct().all():
         if c:
-            cats.add(c)
+            cats.add(c.strip())
 
     # File categories
     cats |= {q["Category"] for q in questions}
@@ -67,32 +99,24 @@ def get_categories():
     return sorted(cats)
 
 
-def get_questions_for_category(category: str):
+def get_questions_for_category(category: str) -> list[dict]:
     """
-    Database-first:
-    - Als er DB vragen zijn voor deze categorie => gebruik die
-    - Anders => fallback naar questions_data.py
+    Database-first (case-insensitive):
+    - If DB has questions for category => use DB questions (with image_url)
+    - Else fallback to questions_data.py
     """
-    db_qs = Question.query.filter_by(category=category).all()
-    if db_qs:
-        # Zet om naar hetzelfde formaat als jouw templates verwachten
-        as_dicts = []
-        for q in db_qs:
-            as_dicts.append({
-                "ID": q.qid,          # belangrijk: jouw template verwacht ID
-                "Category": q.category,
-                "Vraag": q.text,
-                "A": q.a,
-                "B": q.b,
-                "C": q.c,
-                "D": q.d,
-                "Correct": [q.correct],   # jij vergelijkt met lijst
-                "image_url": q.image_url,
-            })
-        return as_dicts
+    cat_norm = normalize_category(category)
 
-    # fallback naar file
-    return [q for q in questions if q.get("Category") == category]
+    db_qs = (
+        Question.query
+        .filter(func.lower(func.trim(Question.category)) == cat_norm)
+        .all()
+    )
+    if db_qs:
+        return [db_question_to_dict(q) for q in db_qs]
+
+    # Fallback to file questions (case-insensitive)
+    return [q for q in questions if normalize_category(q.get("Category")) == cat_norm]
 
 
 # -------------------------
@@ -101,7 +125,7 @@ def get_questions_for_category(category: str):
 
 @app.get("/setup-db")
 def setup_db():
-    # Optioneel token (aanrader op productie)
+    # Optional token (recommended on production)
     token_required = os.environ.get("SETUP_DB_TOKEN")
     if token_required and request.args.get("token") != token_required:
         return "Forbidden", 403
@@ -140,6 +164,7 @@ def quiz(category):
         random.shuffle(order)
         session["order"] = order
         session["category"] = category
+
         return render_template(
             "quiz.html",
             category=category,
@@ -147,7 +172,7 @@ def quiz(category):
             order=order
         )
 
-    # POST: antwoorden nakijken
+    # POST: grade answers
     order = session.get("order", [])
     if not order or session.get("category") != category:
         return redirect(url_for("quiz", category=category))
@@ -162,7 +187,7 @@ def quiz(category):
         if not q:
             continue
 
-        correct = normalize_correct_from_file(q)
+        correct = normalize_correct(q)
 
         user_multi = request.form.getlist(f"ans_{qid}")
         user_single = request.form.get(f"ans_{qid}")
@@ -189,7 +214,38 @@ def quiz(category):
 
 
 # -------------------------
-# Admin Routes
+# Auth routes
+# -------------------------
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    next_url = request.args.get("next") or url_for("home")
+
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+        next_url = request.form.get("next") or url_for("home")
+
+        user = User.query.filter_by(email=email).first()
+        if not user or not user.check_password(password):
+            error = "Foute email of wachtwoord."
+        else:
+            login_user(user)
+            return redirect(next_url)
+
+    return render_template("login.html", error=error, next=next_url)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
+
+
+# -------------------------
+# Admin routes
 # -------------------------
 
 @app.route("/admin")
@@ -235,7 +291,7 @@ def admin_new_question():
                 text=text,
                 a=a, b=b, c=c, d=d,
                 correct=correct,
-                image_url=image_url
+                image_url=image_url,
             )
             db.session.add(q)
             db.session.commit()
@@ -245,81 +301,23 @@ def admin_new_question():
 
 
 # -------------------------
-# Admin setup (veilig met token)
+# Temporary: change admin password (REMOVE AFTER USE)
 # -------------------------
-
-
-def create_admin():
-    """
-    Maak één admin gebruiker aan.
-    Beveiligd met ADMIN_SETUP_TOKEN zodat niemand anders dit kan doen.
-    Gebruik:
-    /create-admin?token=JOUW_TOKEN
-    """
-    token_required = os.environ.get("ADMIN_SETUP_TOKEN")
-    if not token_required:
-        return "ADMIN_SETUP_TOKEN is not set", 500
-
-    if request.args.get("token") != token_required:
-        return "Forbidden", 403
-
-    email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
-    password = os.environ.get("ADMIN_PASSWORD", "admin123")
-
-    if User.query.filter_by(email=email).first():
-        return "Admin bestaat al."
-
-    admin = User(email=email, is_admin=True)
-    admin.set_password(password)
-
-    db.session.add(admin)
-    db.session.commit()
-
-    return f"Admin user created: {email}"
-
-from flask_login import login_user, logout_user  # bovenaan bij imports toevoegen
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    error = None
-    next_url = request.args.get("next") or url_for("home")
-
-    if request.method == "POST":
-        email = (request.form.get("email") or "").strip().lower()
-        password = request.form.get("password") or ""
-        next_url = request.form.get("next") or url_for("home")
-
-        user = User.query.filter_by(email=email).first()
-        if not user or not user.check_password(password):
-            error = "Foute email of wachtwoord."
-        else:
-            login_user(user)
-            return redirect(next_url)
-
-    return render_template("login.html", error=error, next=next_url)
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("home"))
 
 @app.route("/change-admin-password")
 def change_admin_password():
-
+    # ⚠️ Remove this route after you change the password.
     email = "admin@example.com"
     new_password = "MyNewStrongPassword123"
 
     user = User.query.filter_by(email=email).first()
-
     if not user:
-        return "Admin niet gevonden"
+        return "Admin niet gevonden", 404
 
     user.set_password(new_password)
     db.session.commit()
-
     return "Admin password changed!"
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
