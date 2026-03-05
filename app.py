@@ -79,8 +79,8 @@ def db_question_to_dict(q: Question) -> dict:
         "B": q.b,
         "C": q.c,
         "D": q.d,
-        "Correct": [q.correct],     # keep your existing answer checking logic
-        "image_url": q.image_url,   # <-- this enables images in quiz.html
+        "Correct": [q.correct],
+        "image_url": q.image_url,
     }
 
 
@@ -125,7 +125,6 @@ def get_questions_for_category(category: str) -> list[dict]:
 
 @app.get("/setup-db")
 def setup_db():
-    # Optional token (recommended on production)
     token_required = os.environ.get("SETUP_DB_TOKEN")
     if token_required and request.args.get("token") != token_required:
         return "Forbidden", 403
@@ -136,8 +135,12 @@ def setup_db():
     return "DB tables created."
 
 
+# ✅ CHANGED: homepage redirects to /login when not authenticated
 @app.route("/", methods=["GET", "POST"])
 def home():
+    if not current_user.is_authenticated:
+        return redirect(url_for("login"))
+
     categories = get_categories()
 
     if request.method == "POST":
@@ -149,7 +152,9 @@ def home():
     return render_template("home.html", categories=categories, error=None)
 
 
+# ✅ CHANGED: protect quiz route
 @app.route("/quiz/<category>", methods=["GET", "POST"])
+@login_required
 def quiz(category):
     categories = get_categories()
     if category not in categories:
@@ -172,7 +177,6 @@ def quiz(category):
             order=order
         )
 
-    # POST: grade answers
     order = session.get("order", [])
     if not order or session.get("category") != category:
         return redirect(url_for("quiz", category=category))
@@ -217,8 +221,12 @@ def quiz(category):
 # Auth routes
 # -------------------------
 
+# ✅ CHANGED: if already logged in, don't show login again
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+
     error = None
     next_url = request.args.get("next") or url_for("home")
 
@@ -241,7 +249,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
 
 # -------------------------
@@ -306,7 +314,6 @@ def admin_new_question():
 
 @app.route("/change-admin-password")
 def change_admin_password():
-    # ⚠️ Remove this route after you change the password.
     email = "admin@example.com"
     new_password = "MyNewStrongPassword123"
 
