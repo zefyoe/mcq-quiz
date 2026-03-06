@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login • bymed</title>
+  <title>Login • Bymed</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 <body>
@@ -17,7 +17,7 @@
           <h1>
             Rady</h1>
           <p class="hero-text">
-            Bienvenue. Herzlich willkommen
+            Bienvenue. Herzlich willkommen.
           </p>
         </div>
       </section>
@@ -26,7 +26,7 @@
         <div class="login-card">
           <div class="login-header">
             <h2>Sign in</h2>
-            <p>Gebruik je admin account om verder te gaan.</p>
+            <p>Use your admin account to continue.</p>
           </div>
 
           {% if error %}
@@ -39,10 +39,10 @@
             <label for="email">Email</label>
             <input id="email" name="email" type="email" placeholder="admin@example.com" required>
 
-            <label for="password">Wachtwoord</label>
+            <label for="password">Password</label>
             <div class="password-wrap">
               <input id="password" name="password" type="password" placeholder="Wachtwoord" required>
-              <button type="button" class="toggle-password" onclick="togglePassword()">Toon</button>
+              <button type="button" class="toggle-password" onclick="togglePassword()">Show password</button>
             </div>
 
             <button type="submit" class="login-button">Login</button>
