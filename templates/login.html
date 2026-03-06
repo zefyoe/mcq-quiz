@@ -1,116 +1,67 @@
 <!doctype html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sign in • Dr. Youssef MCQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login • bymed</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
-
 <body>
-  <div class="bg">
-    <div class="blob b1"></div>
-    <div class="blob b2"></div>
-    <div class="blob b3"></div>
-    <div class="noise"></div>
-  </div>
+  <div class="login-page">
+    <div class="login-shell">
 
-  <main class="shell">
-    <section class="layout">
-
-     
-        </div>
-
-        <div class="hero-card">
-          <div class="hero-badge">Medical QBank</div>
-          <h2>Train like the real exam.</h2>
-          <h2>Radius</h2>
-          <p>
-            High-yield MCQs with images, explanations, and structured categories.
-            Private access for admin only.
+      <section class="login-hero">
+        <div class="login-hero-overlay"></div>
+        <div class="login-hero-content">
+          <p class="eyebrow">Anatomy QBank</p>
+          <h1>Welkom terug</h1>
+          <p class="hero-text">
+            Log in om toegang te krijgen tot je private vraagbank.
           </p>
-
-          <div class="hero-stats">
-            <div class="stat">
-              <div class="statnum">Fast</div>
-              <div class="statlabel">Search & practice</div>
-            </div>
-            <div class="stat">
-              <div class="statnum">Clean</div>
-              <div class="statlabel">Exam-style UI</div>
-            </div>
-            <div class="stat">
-              <div class="statnum">Secure</div>
-              <div class="statlabel">Login protected</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero-img" aria-hidden="true"></div>
-
-        <div class="hero-footer">
-          <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
-          <span class="hero-foottext">© 2026 Dr. Youssef</span>
-        </div>
-      </aside>
-
-      <!-- RIGHT FORM -->
-      <section class="panel">
-        <div class="panel-inner">
-
-          <div class="panel-head">
-            <h1>Sign in</h1>
-            <p>Use your admin account to access the QBank.</p>
-          </div>
-
-          {% if error %}
-            <div class="alert">
-              <div class="alert-title">Login failed</div>
-              <div class="alert-msg">{{ error }}</div>
-            </div>
-          {% endif %}
-
-          <form method="post" class="form">
-            <input type="hidden" name="next" value="{{ next }}">
-
-            <label class="lbl">Email</label>
-            <input class="in" type="email" name="email" placeholder="admin@example.com" required>
-
-            <label class="lbl">Password</label>
-            <div class="pw">
-              <input id="pw" class="in" type="password" name="password" placeholder="Enter password" required>
-              <button class="pwbtn" type="button" onclick="togglePw()" aria-label="Toggle password">
-                <span id="eye">Show</span>
-              </button>
-            </div>
-
-            <button class="btn" type="submit">Login</button>
-
-            <div class="hint">
-              Tip: bookmark <span class="mono">/login</span> for quick access.
-            </div>
-          </form>
-
-          <div class="panel-foot">
-            <div class="fine">Protected content • Admin-only access</div>
-          </div>
-
         </div>
       </section>
 
-    </section>
-  </main>
+      <section class="login-panel">
+        <div class="login-card">
+          <div class="login-header">
+            <h2>Sign in</h2>
+            <p>Gebruik je admin account om verder te gaan.</p>
+          </div>
+
+          {% if error %}
+          <div class="login-error">{{ error }}</div>
+          {% endif %}
+
+          <form method="post" class="login-form">
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="admin@example.com" required>
+
+            <label for="password">Wachtwoord</label>
+            <div class="password-wrap">
+              <input id="password" name="password" type="password" placeholder="Wachtwoord" required>
+              <button type="button" class="toggle-password" onclick="togglePassword()">Toon</button>
+            </div>
+
+            <button type="submit" class="login-button">Login</button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </div>
 
   <script>
-    function togglePw(){
-      const el = document.getElementById('pw');
-      const eye = document.getElementById('eye');
-      if(el.type === 'password'){
-        el.type = 'text';
-        eye.textContent = 'Hide';
+    function togglePassword() {
+      const input = document.getElementById("password");
+      const btn = document.querySelector(".toggle-password");
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "Verberg";
       } else {
-        el.type = 'password';
-        eye.textContent = 'Show';
+        input.type = "password";
+        btn.textContent = "Toon";
       }
     }
   </script>
