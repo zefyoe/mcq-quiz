@@ -23,11 +23,11 @@ from questions_data import questions
 def build_database_uri() -> str:
     uri = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
 
-    # Render sometimes gives postgres:// (older), SQLAlchemy expects postgresql://
+    # Render sometimes gives postgres://, SQLAlchemy expects postgresql://
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
 
-    # Force psycopg v3 driver (requires psycopg[binary] in requirements.txt)
+    # Force psycopg v3 driver
     if uri.startswith("postgresql://"):
         uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
 
@@ -61,7 +61,6 @@ def load_user(user_id):
 # -------------------------
 
 def normalize_correct(q: dict) -> list[str]:
-    """Make sure correct is always a list."""
     return q["Correct"] if isinstance(q["Correct"], list) else [q["Correct"]]
 
 
@@ -70,7 +69,6 @@ def normalize_category(s: str) -> str:
 
 
 def db_question_to_dict(q: Question) -> dict:
-    """Convert DB Question -> dict format used by templates."""
     return {
         "ID": q.qid,
         "Category": q.category,
@@ -85,26 +83,18 @@ def db_question_to_dict(q: Question) -> dict:
 
 
 def get_categories() -> list[str]:
-    """Return categories from DB + questions_data.py (merged)."""
     cats = set()
 
-    # DB categories
     for (c,) in db.session.query(Question.category).distinct().all():
         if c:
             cats.add(c.strip())
 
-    # File categories
     cats |= {q["Category"] for q in questions}
 
     return sorted(cats)
 
 
 def get_questions_for_category(category: str) -> list[dict]:
-    """
-    Database-first (case-insensitive):
-    - If DB has questions for category => use DB questions (with image_url)
-    - Else fallback to questions_data.py
-    """
     cat_norm = normalize_category(category)
 
     db_qs = (
@@ -115,7 +105,6 @@ def get_questions_for_category(category: str) -> list[dict]:
     if db_qs:
         return [db_question_to_dict(q) for q in db_qs]
 
-    # Fallback to file questions (case-insensitive)
     return [q for q in questions if normalize_category(q.get("Category")) == cat_norm]
 
 
@@ -132,10 +121,9 @@ def setup_db():
     with app.app_context():
         db.create_all()
 
-    return "DB tables created."
+    return "Database tables created."
 
 
-# ✅ CHANGED: homepage redirects to /login when not authenticated
 @app.route("/", methods=["GET", "POST"])
 def home():
     if not current_user.is_authenticated:
@@ -146,13 +134,12 @@ def home():
     if request.method == "POST":
         category = request.form.get("category")
         if category not in categories:
-            return render_template("home.html", categories=categories, error="Ongeldige categorie.")
+            return render_template("home.html", categories=categories, error="Invalid category.")
         return redirect(url_for("quiz", category=category))
 
     return render_template("home.html", categories=categories, error=None)
 
 
-# ✅ CHANGED: protect quiz route
 @app.route("/quiz/<category>", methods=["GET", "POST"])
 @login_required
 def quiz(category):
@@ -162,7 +149,7 @@ def quiz(category):
 
     selected = get_questions_for_category(category)
     if not selected:
-        return render_template("home.html", categories=categories, error="Geen vragen in deze categorie.")
+        return render_template("home.html", categories=categories, error="No questions found in this category.")
 
     if request.method == "GET":
         order = [q["ID"] for q in selected]
@@ -214,14 +201,19 @@ def quiz(category):
             "options": {"A": q["A"], "B": q["B"], "C": q["C"], "D": q["D"]},
         })
 
-    return render_template("result.html", category=category, score=score, total=len(order), results=results)
+    return render_template(
+        "result.html",
+        category=category,
+        score=score,
+        total=len(order),
+        results=results
+    )
 
 
 # -------------------------
 # Auth routes
 # -------------------------
 
-# ✅ CHANGED: if already logged in, don't show login again
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -237,12 +229,44 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            error = "Foute email of wachtwoord."
+            error = "Incorrect email or password."
         else:
             login_user(user)
             return redirect(next_url)
 
     return render_template("login.html", error=error, next=next_url)
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+
+    error = None
+
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+        confirm_password = request.form.get("confirm_password") or ""
+
+        if not email or not password or not confirm_password:
+            error = "Please fill in all fields."
+        elif password != confirm_password:
+            error = "Passwords do not match."
+        elif len(password) < 8:
+            error = "Password must be at least 8 characters long."
+        elif User.query.filter_by(email=email).first():
+            error = "An account with this email already exists."
+        else:
+            user = User(email=email, is_admin=False)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+
+            login_user(user)
+            return redirect(url_for("home"))
+
+    return render_template("register.html", error=error)
 
 
 @app.route("/logout")
@@ -287,23 +311,26 @@ def admin_new_question():
         image_url = (request.form.get("image_url") or "").strip() or None
 
         if not all([qid, category, text, a, b, c, d, correct]):
-            error = "Vul alle velden in (image_url is optioneel)."
+            error = "Please fill in all required fields."
         elif correct not in ["A", "B", "C", "D"]:
-            error = "Correct moet A, B, C of D zijn."
+            error = "Correct answer must be A, B, C, or D."
         elif db.session.query(Question.id).filter_by(qid=qid).first():
-            error = f"Vraag bestaat al: {qid}"
+            error = f"Question already exists: {qid}"
         else:
             q = Question(
                 qid=qid,
                 category=category,
                 text=text,
-                a=a, b=b, c=c, d=d,
+                a=a,
+                b=b,
+                c=c,
+                d=d,
                 correct=correct,
                 image_url=image_url,
             )
             db.session.add(q)
             db.session.commit()
-            success = "Vraag toegevoegd!"
+            success = "Question added successfully."
 
     return render_template("admin_new_question.html", error=error, success=success)
 
@@ -319,11 +346,11 @@ def change_admin_password():
 
     user = User.query.filter_by(email=email).first()
     if not user:
-        return "Admin niet gevonden", 404
+        return "Admin not found.", 404
 
     user.set_password(new_password)
     db.session.commit()
-    return "Admin password changed!"
+    return "Admin password changed."
 
 
 if __name__ == "__main__":

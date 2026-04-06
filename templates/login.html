@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,11 +13,10 @@
       <section class="login-hero">
         <div class="login-hero-overlay"></div>
         <div class="login-hero-content">
-          <p class="eyebrow">Anatomy/FMH1 QBank</p>
-          <h1>
-            Rady</h1>
+          <p class="eyebrow">Anatomy / FMH1 QBank</p>
+          <h1>Rady</h1>
           <p class="hero-text">
-            Bienvenue. Herzlich willkommen.
+            Welcome to your private medical question bank.
           </p>
         </div>
       </section>
@@ -26,7 +25,7 @@
         <div class="login-card">
           <div class="login-header">
             <h2>Sign in</h2>
-            <p>Use your admin account to continue.</p>
+            <p>Use your account to continue.</p>
           </div>
 
           {% if error %}
@@ -41,12 +40,19 @@
 
             <label for="password">Password</label>
             <div class="password-wrap">
-              <input id="password" name="password" type="password" placeholder="password" required>
-              <button type="button" class="toggle-password" onclick="togglePassword()">Show password</button>
+              <input id="password" name="password" type="password" placeholder="Password" required>
+              <button type="button" class="toggle-password" onclick="togglePassword()">Show</button>
             </div>
 
             <button type="submit" class="login-button">Login</button>
           </form>
+
+          <!-- 🔥 NEW: REGISTER BUTTON -->
+          <p style="margin-top:18px; text-align:center; font-size:14px;">
+            Don't have an account?
+            <a href="{{ url_for('register') }}" style="font-weight:600;">Create account</a>
+          </p>
+
         </div>
       </section>
 
@@ -59,10 +65,10 @@
       const btn = document.querySelector(".toggle-password");
       if (input.type === "password") {
         input.type = "text";
-        btn.textContent = "Verberg";
+        btn.textContent = "Hide";
       } else {
         input.type = "password";
-        btn.textContent = "Toon";
+        btn.textContent = "Show";
       }
     }
   </script>
