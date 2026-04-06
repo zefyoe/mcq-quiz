@@ -1,7 +1,9 @@
 import os
 import random
+from datetime import timedelta
+from urllib.parse import urlparse
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, abort
 from flask_login import (
     LoginManager,
     login_required,
@@ -9,7 +11,6 @@ from flask_login import (
     login_user,
     logout_user,
 )
-
 from sqlalchemy import func
 
 from models import db, Question, User
@@ -28,7 +29,7 @@ def build_database_uri() -> str:
         uri = uri.replace("postgres://", "postgresql://", 1)
 
     # Force psycopg v3 driver
-    if uri.startswith("postgresql://"):
+    if uri.startswith("postgresql://") and not uri.startswith("postgresql+psycopg://"):
         uri = uri.replace("postgresql://", "postgresql+psycopg://", 1)
 
     return uri
@@ -37,7 +38,16 @@ def build_database_uri() -> str:
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = build_database_uri()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# En production, SECRET_KEY doit exister sur Render
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me-please-set-secret-key")
+
+# Si Render est derrière HTTPS, sécurise le cookie en prod
+if os.environ.get("RENDER") or os.environ.get("FLASK_ENV") == "production":
+    app.config["SESSION_COOKIE_SECURE"] = True
 
 db.init_app(app)
 
@@ -48,12 +58,16 @@ db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.login_view = "login"
+login_manager.login_message = None
 login_manager.init_app(app)
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    try:
+        return db.session.get(User, int(user_id))
+    except (TypeError, ValueError):
+        return None
 
 
 # -------------------------
@@ -61,7 +75,8 @@ def load_user(user_id):
 # -------------------------
 
 def normalize_correct(q: dict) -> list[str]:
-    return q["Correct"] if isinstance(q["Correct"], list) else [q["Correct"]]
+    correct = q["Correct"] if isinstance(q["Correct"], list) else [q["Correct"]]
+    return sorted([(c or "").strip().upper() for c in correct if c])
 
 
 def normalize_category(s: str) -> str:
@@ -89,8 +104,7 @@ def get_categories() -> list[str]:
         if c:
             cats.add(c.strip())
 
-    cats |= {q["Category"] for q in questions}
-
+    cats |= {q["Category"].strip() for q in questions if q.get("Category")}
     return sorted(cats)
 
 
@@ -108,21 +122,80 @@ def get_questions_for_category(category: str) -> list[dict]:
     return [q for q in questions if normalize_category(q.get("Category")) == cat_norm]
 
 
+def is_safe_next_url(target: str) -> bool:
+    if not target:
+        return False
+
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(url_for("home", _external=True) if target == "" else request.host_url.rstrip("/") + "/")
+
+    redirect_url = urlparse(target if "://" in target else url_for("home", _external=True).replace(urlparse(url_for("home", _external=True)).path, "") + target)
+
+    return (
+        redirect_url.scheme in ("http", "https")
+        and ref_url.netloc == redirect_url.netloc
+    )
+
+
+def safe_redirect_target(target: str, fallback_endpoint: str = "home") -> str:
+    if not target:
+        return url_for(fallback_endpoint)
+
+    parsed = urlparse(target)
+
+    # Autorise seulement les chemins relatifs locaux
+    if parsed.scheme or parsed.netloc:
+        return url_for(fallback_endpoint)
+
+    if not target.startswith("/"):
+        return url_for(fallback_endpoint)
+
+    return target
+
+
 # -------------------------
-# Routes
+# Response headers
+# -------------------------
+
+@app.after_request
+def add_no_cache_headers(response):
+    # Évite les comportements de cache indésirables sur les pages dynamiques
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
+# -------------------------
+# Health route
+# -------------------------
+
+@app.get("/health")
+def health():
+    return "ok", 200
+
+
+# -------------------------
+# Optional DB setup route
 # -------------------------
 
 @app.get("/setup-db")
 def setup_db():
     token_required = os.environ.get("SETUP_DB_TOKEN")
-    if token_required and request.args.get("token") != token_required:
+
+    if not token_required:
+        return "Setup route disabled.", 403
+
+    if request.args.get("token") != token_required:
         return "Forbidden", 403
 
-    with app.app_context():
-        db.create_all()
+    db.create_all()
+    return "Database tables created.", 200
 
-    return "Database tables created."
 
+# -------------------------
+# Routes
+# -------------------------
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -132,9 +205,10 @@ def home():
     categories = get_categories()
 
     if request.method == "POST":
-        category = request.form.get("category")
+        category = (request.form.get("category") or "").strip()
         if category not in categories:
             return render_template("home.html", categories=categories, error="Invalid category.")
+
         return redirect(url_for("quiz", category=category))
 
     return render_template("home.html", categories=categories, error=None)
@@ -149,13 +223,18 @@ def quiz(category):
 
     selected = get_questions_for_category(category)
     if not selected:
-        return render_template("home.html", categories=categories, error="No questions found in this category.")
+        return render_template(
+            "home.html",
+            categories=categories,
+            error="No questions found in this category."
+        )
 
     if request.method == "GET":
         order = [q["ID"] for q in selected]
         random.shuffle(order)
         session["order"] = order
         session["category"] = category
+        session.permanent = True
 
         return render_template(
             "quiz.html",
@@ -188,7 +267,7 @@ def quiz(category):
         else:
             user_answers = [user_single.strip().upper()] if user_single else []
 
-        is_correct = sorted(user_answers) == sorted(correct)
+        is_correct = user_answers == correct
         if is_correct:
             score += 1
 
@@ -198,7 +277,12 @@ def quiz(category):
             "user": user_answers,
             "correct": correct,
             "is_correct": is_correct,
-            "options": {"A": q["A"], "B": q["B"], "C": q["C"], "D": q["D"]},
+            "options": {
+                "A": q["A"],
+                "B": q["B"],
+                "C": q["C"],
+                "D": q["D"],
+            },
         })
 
     return render_template(
@@ -220,18 +304,20 @@ def login():
         return redirect(url_for("home"))
 
     error = None
-    next_url = request.args.get("next") or url_for("home")
+    next_url = safe_redirect_target(request.args.get("next"), "home")
 
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
-        next_url = request.form.get("next") or url_for("home")
+        next_url = safe_redirect_target(request.form.get("next"), "home")
 
         user = User.query.filter_by(email=email).first()
+
         if not user or not user.check_password(password):
             error = "Incorrect email or password."
         else:
             login_user(user)
+            session.permanent = True
             return redirect(next_url)
 
     return render_template("login.html", error=error, next=next_url)
@@ -264,6 +350,7 @@ def register():
             db.session.commit()
 
             login_user(user)
+            session.permanent = True
             return redirect(url_for("home"))
 
     return render_template("register.html", error=error)
@@ -273,6 +360,7 @@ def register():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for("login"))
 
 
@@ -336,22 +424,8 @@ def admin_new_question():
 
 
 # -------------------------
-# Temporary: change admin password (REMOVE AFTER USE)
+# Main
 # -------------------------
 
-@app.route("/change-admin-password")
-def change_admin_password():
-    email = "admin@example.com"
-    new_password = "MyNewStrongPassword123"
-
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return "Admin not found.", 404
-
-    user.set_password(new_password)
-    db.session.commit()
-    return "Admin password changed."
-
-
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=True, host="0.0.0.0", port=5001)
