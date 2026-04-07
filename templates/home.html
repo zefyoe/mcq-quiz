@@ -1,40 +1,148 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MCQ Quiz</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <div style="background:#1e3a8a; color:white; padding:12px 20px;">
-  <strong>Dr. Youssef – MCQ Platform</strong>
-</div>
-    <div class="container">
-      <div class="card">
-        <h1>Medical MCQ Examination</h1>
-<p class="small">Selecteer een categorie en start de test.</p>
-        <p>Kies een categorie en start de quiz.</p>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Dr. Youssef – MCQ Platform</div>
+        <div class="topbar-badge">Medical Training Dashboard</div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero card">
+        <div class="hero-text">
+          <p class="eyebrow">Welcome back</p>
+          <h1>Ready to test your medical knowledge?</h1>
+          <p class="hero-subtitle">
+            Choose a category and start a focused quiz session. Build speed, accuracy,
+            and confidence with every attempt.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <a href="#quiz-categories" class="ghost-btn">Choose Category</a>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div>
+            <p class="stat-label">Quizzes Taken</p>
+            <h3>12</h3>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div>
+            <p class="stat-label">Accuracy</p>
+            <h3>78%</h3>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div>
+            <p class="stat-label">Current Streak</p>
+            <h3>5 Days</h3>
+          </div>
+        </div>
+      </section>
+
+      <section class="card quiz-section" id="quiz-categories">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Start a new quiz</p>
+            <h2>Select a category</h2>
+            <p class="section-subtitle">
+              Pick one topic below and begin immediately.
+            </p>
+          </div>
+        </div>
 
         {% if error %}
-          <p class="bad">{{ error }}</p>
+          <div class="alert alert-error">{{ error }}</div>
         {% endif %}
 
-        <form method="post">
-          <p class="small">Categorie</p>
-          <select name="category" required>
-            {% for c in categories %}
-              <option value="{{ c }}">{{ c }}</option>
-            {% endfor %}
-          </select>
+        <form method="post" id="quizForm">
+          <input type="hidden" name="category" id="selectedCategory" required>
 
-          <div class="actions">
-            <button class="primary" type="submit">Start</button>
+          <div class="category-grid">
+            {% for c in categories %}
+              <button
+                type="button"
+                class="category-card {% if loop.first %}active{% endif %}"
+                data-category="{{ c }}"
+              >
+                <span class="category-icon">
+                  {% if c|lower == 'anatomy' %}
+                    🧠
+                  {% elif c|lower == 'physiology' %}
+                    🫀
+                  {% elif c|lower == 'pharmacology' %}
+                    💊
+                  {% elif c|lower == 'pathology' %}
+                    🦠
+                  {% elif c|lower == 'microbiology' %}
+                    🔬
+                  {% elif c|lower == 'biochemistry' %}
+                    🧪
+                  {% else %}
+                    📘
+                  {% endif %}
+                </span>
+                <span class="category-name">{{ c }}</span>
+                <span class="category-desc">Practice MCQs in {{ c }}</span>
+              </button>
+            {% endfor %}
+          </div>
+
+          <div class="form-footer">
+            <p class="selected-text">
+              Selected category:
+              <strong id="selectedCategoryText">
+                {% if categories and categories|length > 0 %}{{ categories[0] }}{% endif %}
+              </strong>
+            </p>
+
+            <button class="primary-btn" type="submit">Start New Quiz</button>
           </div>
         </form>
 
-        <hr>
-        <p class="small">Tip: de gratis server kan soms “slapen”; de eerste keer laden duurt dan wat langer.</p>
-      </div>
-    </div>
+        <div class="tip-box">
+          <strong>Tip:</strong> The free server may sometimes “sleep”, so the first load can take a little longer.
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const categoryButtons = document.querySelectorAll(".category-card");
+      const selectedInput = document.getElementById("selectedCategory");
+      const selectedText = document.getElementById("selectedCategoryText");
+
+      if (categoryButtons.length > 0) {
+        const firstCategory = categoryButtons[0].dataset.category;
+        selectedInput.value = firstCategory;
+        selectedText.textContent = firstCategory;
+      }
+
+      categoryButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          categoryButtons.forEach((btn) => btn.classList.remove("active"));
+          button.classList.add("active");
+
+          const category = button.dataset.category;
+          selectedInput.value = category;
+          selectedText.textContent = category;
+        });
+      });
+    </script>
   </body>
 </html>
