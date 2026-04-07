@@ -20,13 +20,9 @@
           <p class="eyebrow">Welcome back</p>
           <h1>Ready to test your medical knowledge?</h1>
           <p class="hero-subtitle">
-            Choose a category and start a focused quiz session. Build speed, accuracy,
-            and confidence with every attempt.
+            Choose a category and start a focused quiz session. Build speed,
+            accuracy, and confidence with every attempt.
           </p>
-        </div>
-
-        <div class="hero-actions">
-          <a href="#quiz-categories" class="ghost-btn">Choose Category</a>
         </div>
       </section>
 
@@ -35,7 +31,7 @@
           <div class="stat-icon">📝</div>
           <div>
             <p class="stat-label">Quizzes Taken</p>
-            <h3>12</h3>
+            <h3>{{ total_quizzes }}</h3>
           </div>
         </div>
 
@@ -43,7 +39,13 @@
           <div class="stat-icon">🎯</div>
           <div>
             <p class="stat-label">Accuracy</p>
-            <h3>78%</h3>
+            <h3>
+              {% if accuracy is not none %}
+                {{ accuracy }}%
+              {% else %}
+                -
+              {% endif %}
+            </h3>
           </div>
         </div>
 
@@ -51,7 +53,7 @@
           <div class="stat-icon">🔥</div>
           <div>
             <p class="stat-label">Current Streak</p>
-            <h3>5 Days</h3>
+            <h3>{{ streak_days }} Days</h3>
           </div>
         </div>
       </section>
@@ -71,16 +73,10 @@
           <div class="alert alert-error">{{ error }}</div>
         {% endif %}
 
-        <form method="post" id="quizForm">
-          <input type="hidden" name="category" id="selectedCategory" required>
-
+        <form method="post">
           <div class="category-grid">
             {% for c in categories %}
-              <button
-                type="button"
-                class="category-card {% if loop.first %}active{% endif %}"
-                data-category="{{ c }}"
-              >
+              <button type="submit" name="category" value="{{ c }}" class="category-card">
                 <span class="category-icon">
                   {% if c|lower == 'anatomy' %}
                     🧠
@@ -103,46 +99,12 @@
               </button>
             {% endfor %}
           </div>
-
-          <div class="form-footer">
-            <p class="selected-text">
-              Selected category:
-              <strong id="selectedCategoryText">
-                {% if categories and categories|length > 0 %}{{ categories[0] }}{% endif %}
-              </strong>
-            </p>
-
-            <button class="primary-btn" type="submit">Start New Quiz</button>
-          </div>
         </form>
 
         <div class="tip-box">
-          <strong>Tip:</strong> The free server may sometimes “sleep”, so the first load can take a little longer.
+          <strong>Tip:</strong> The free server may sometimes sleep, so the first load can take a little longer.
         </div>
       </section>
     </main>
-
-    <script>
-      const categoryButtons = document.querySelectorAll(".category-card");
-      const selectedInput = document.getElementById("selectedCategory");
-      const selectedText = document.getElementById("selectedCategoryText");
-
-      if (categoryButtons.length > 0) {
-        const firstCategory = categoryButtons[0].dataset.category;
-        selectedInput.value = firstCategory;
-        selectedText.textContent = firstCategory;
-      }
-
-      categoryButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          categoryButtons.forEach((btn) => btn.classList.remove("active"));
-          button.classList.add("active");
-
-          const category = button.dataset.category;
-          selectedInput.value = category;
-          selectedText.textContent = category;
-        });
-      });
-    </script>
   </body>
 </html>
