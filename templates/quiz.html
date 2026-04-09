@@ -26,7 +26,7 @@
         <div class="progress-box">
           <div class="progress-label-row">
             <span>Progress</span>
-            <span id="progressText">0 / {{ order|length }} answered</span>
+            <span id="progressText">0 / {{ order|length }} saved</span>
           </div>
           <div class="progress-bar">
             <div class="progress-bar-fill" id="progressBarFill"></div>
@@ -54,10 +54,10 @@
       <section class="quiz-main card">
         <div class="quiz-main-header">
           <div>
-            <p class="eyebrow">Medical MCQ</p>
+            <p class="eyebrow">Medical quiz</p>
             <h1>Quiz: <span class="codepill">{{ category }}</span></h1>
             <p class="small-muted">
-              Answer each question, confirm your answer, and move through the quiz.
+              Type your answer for each question, save it, and it will be locked in.
             </p>
           </div>
         </div>
@@ -65,9 +65,6 @@
         <form method="post" id="quizForm">
           {% for qid in order %}
             {% set q = questions_by_id[qid] %}
-            {% set correct = q["Correct"] %}
-            {% set is_multi = (correct is sequence) and (correct is not string) %}
-            {% set compact_options = q.get("compact_options") %}
 
             <div
               class="question-panel {% if loop.first %}active{% endif %}"
@@ -76,7 +73,7 @@
             >
               <div class="question-top">
                 <div class="question-number-badge">Question {{ loop.index }}</div>
-                <div class="question-status" id="status-{{ loop.index0 }}">Not answered</div>
+                <div class="question-status" id="status-{{ loop.index0 }}">Not saved</div>
               </div>
 
               <h3 class="question-title">{{ q["Vraag"] }}</h3>
@@ -91,105 +88,32 @@
                 </div>
               {% endif %}
 
-              {% if is_multi %}
-                <p class="question-help">
-                  Multiple answers may be correct. Select all correct options.
-                </p>
+              <p class="question-help">
+                Type your answer below, then click <strong>Save answer</strong>. Once saved, the answer is locked.
+              </p>
 
-                <div class="options-list">
-                  <label class="option-card">
-                    <input type="checkbox" name="ans_{{ qid }}" value="A">
-                    <span class="option-letter">A</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer A</span>
-                    {% else %}
-                      <span class="option-text">{{ q["A"] }}</span>
-                    {% endif %}
-                  </label>
+              <div class="answer-entry">
+                <input
+                  type="text"
+                  class="answer-input"
+                  data-answer-input
+                  placeholder="Type your answer here"
+                  autocomplete="off"
+                >
+                <input type="hidden" name="ans_{{ qid }}" data-answer-hidden>
+                <button type="button" class="primary-btn save-answer-btn" data-save-answer>
+                  Save answer
+                </button>
+              </div>
 
-                  <label class="option-card">
-                    <input type="checkbox" name="ans_{{ qid }}" value="B">
-                    <span class="option-letter">B</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer B</span>
-                    {% else %}
-                      <span class="option-text">{{ q["B"] }}</span>
-                    {% endif %}
-                  </label>
-
-                  <label class="option-card">
-                    <input type="checkbox" name="ans_{{ qid }}" value="C">
-                    <span class="option-letter">C</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer C</span>
-                    {% else %}
-                      <span class="option-text">{{ q["C"] }}</span>
-                    {% endif %}
-                  </label>
-
-                  <label class="option-card">
-                    <input type="checkbox" name="ans_{{ qid }}" value="D">
-                    <span class="option-letter">D</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer D</span>
-                    {% else %}
-                      <span class="option-text">{{ q["D"] }}</span>
-                    {% endif %}
-                  </label>
-                </div>
-              {% else %}
-                <div class="options-list">
-                  <label class="option-card">
-                    <input type="radio" name="ans_{{ qid }}" value="A">
-                    <span class="option-letter">A</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer A</span>
-                    {% else %}
-                      <span class="option-text">{{ q["A"] }}</span>
-                    {% endif %}
-                  </label>
-
-                  <label class="option-card">
-                    <input type="radio" name="ans_{{ qid }}" value="B">
-                    <span class="option-letter">B</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer B</span>
-                    {% else %}
-                      <span class="option-text">{{ q["B"] }}</span>
-                    {% endif %}
-                  </label>
-
-                  <label class="option-card">
-                    <input type="radio" name="ans_{{ qid }}" value="C">
-                    <span class="option-letter">C</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer C</span>
-                    {% else %}
-                      <span class="option-text">{{ q["C"] }}</span>
-                    {% endif %}
-                  </label>
-
-                  <label class="option-card">
-                    <input type="radio" name="ans_{{ qid }}" value="D">
-                    <span class="option-letter">D</span>
-                    {% if compact_options %}
-                      <span class="option-text">Answer D</span>
-                    {% else %}
-                      <span class="option-text">{{ q["D"] }}</span>
-                    {% endif %}
-                  </label>
-                </div>
-              {% endif %}
+              <p class="answer-lock-note" id="lock-note-{{ loop.index0 }}"></p>
             </div>
           {% endfor %}
 
           <div class="quiz-bottom-bar">
             <button type="button" class="secondary-btn" id="prevBtn">Previous</button>
-            <button type="button" class="primary-btn" id="confirmBtn">Confirm Answer</button>
             <button type="button" class="secondary-btn" id="nextBtn">Next</button>
-            <button type="submit" class="submit-btn" id="submitQuizBtn" style="display: none;">
-              Submit Quiz
-            </button>
+            <button type="submit" class="submit-btn" id="submitQuizBtn">Submit Quiz</button>
           </div>
         </form>
       </section>
@@ -200,48 +124,50 @@
       const navButtons = document.querySelectorAll(".question-nav-item");
       const prevBtn = document.getElementById("prevBtn");
       const nextBtn = document.getElementById("nextBtn");
-      const confirmBtn = document.getElementById("confirmBtn");
       const submitQuizBtn = document.getElementById("submitQuizBtn");
       const progressText = document.getElementById("progressText");
       const progressBarFill = document.getElementById("progressBarFill");
-
+      const savedAnswers = new Set();
       let currentIndex = 0;
-      const answered = new Set();
 
       function getPanel(index) {
         return document.querySelector(`.question-panel[data-question-index="${index}"]`);
       }
 
-      function getInputsForPanel(index) {
+      function updateSavedState(index) {
         const panel = getPanel(index);
-        return panel ? panel.querySelectorAll('input[type="radio"], input[type="checkbox"]') : [];
-      }
-
-      function panelHasAnswer(index) {
-        const inputs = getInputsForPanel(index);
-        for (const input of inputs) {
-          if (input.checked) return true;
-        }
-        return false;
-      }
-
-      function updateAnsweredState(index) {
         const statusEl = document.getElementById(`status-${index}`);
         const navEl = document.getElementById(`nav-${index}`);
+        const noteEl = document.getElementById(`lock-note-${index}`);
+        const answerInput = panel.querySelector("[data-answer-input]");
+        const hiddenInput = panel.querySelector("[data-answer-hidden]");
+        const saveButton = panel.querySelector("[data-save-answer]");
+        const isSaved = Boolean(hiddenInput.value);
 
-        if (panelHasAnswer(index)) {
-          answered.add(index);
-          if (statusEl) statusEl.textContent = "Answered";
+        if (isSaved) {
+          savedAnswers.add(index);
+          answerInput.value = hiddenInput.value;
+          answerInput.readOnly = true;
+          answerInput.classList.add("locked");
+          saveButton.disabled = true;
+          saveButton.textContent = "Saved";
+          if (statusEl) statusEl.textContent = "Saved and locked";
           if (navEl) navEl.classList.add("answered");
+          if (noteEl) noteEl.textContent = "Answer saved. This response is now locked.";
         } else {
-          answered.delete(index);
-          if (statusEl) statusEl.textContent = "Not answered";
+          savedAnswers.delete(index);
+          answerInput.readOnly = false;
+          answerInput.classList.remove("locked");
+          saveButton.disabled = false;
+          saveButton.textContent = "Save answer";
+          if (statusEl) statusEl.textContent = "Not saved";
           if (navEl) navEl.classList.remove("answered");
+          if (noteEl) noteEl.textContent = "";
         }
 
         const total = panels.length;
-        const done = answered.size;
-        progressText.textContent = `${done} / ${total} answered`;
+        const done = savedAnswers.size;
+        progressText.textContent = `${done} / ${total} saved`;
         progressBarFill.style.width = `${(done / total) * 100}%`;
       }
 
@@ -256,24 +182,23 @@
         if (activeNav) activeNav.classList.add("active");
 
         currentIndex = index;
-
         prevBtn.disabled = currentIndex === 0;
         nextBtn.disabled = currentIndex === panels.length - 1;
-
-        if (currentIndex === panels.length - 1) {
-          submitQuizBtn.style.display = "inline-flex";
-        } else {
-          submitQuizBtn.style.display = "none";
-        }
       }
 
-      function confirmCurrentAnswer() {
-        updateAnsweredState(currentIndex);
+      function saveCurrentAnswer() {
+        const panel = getPanel(currentIndex);
+        const answerInput = panel.querySelector("[data-answer-input]");
+        const hiddenInput = panel.querySelector("[data-answer-hidden]");
+        const value = answerInput.value.trim();
 
-        if (!panelHasAnswer(currentIndex)) {
-          alert("Please select an answer before confirming.");
+        if (!value) {
+          alert("Please type an answer before saving.");
           return false;
         }
+
+        hiddenInput.value = value;
+        updateSavedState(currentIndex);
 
         if (currentIndex < panels.length - 1) {
           showQuestion(currentIndex + 1);
@@ -301,22 +226,26 @@
         }
       });
 
-      confirmBtn.addEventListener("click", () => {
-        confirmCurrentAnswer();
-      });
-
       panels.forEach((panel) => {
         const index = Number(panel.dataset.questionIndex);
-        const inputs = panel.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+        const saveButton = panel.querySelector("[data-save-answer]");
+        const answerInput = panel.querySelector("[data-answer-input]");
 
-        inputs.forEach((input) => {
-          input.addEventListener("change", () => {
-            updateAnsweredState(index);
-          });
+        saveButton.addEventListener("click", () => {
+          currentIndex = index;
+          saveCurrentAnswer();
+        });
+
+        answerInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            currentIndex = index;
+            saveCurrentAnswer();
+          }
         });
       });
 
-      panels.forEach((_, index) => updateAnsweredState(index));
+      panels.forEach((_, index) => updateSavedState(index));
       showQuestion(0);
     </script>
   </body>
