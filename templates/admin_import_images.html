@@ -7,6 +7,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
   </head>
   <body>
+    <header class="admin-topbar">
+      <div class="admin-topbar-inner">
+        <div class="admin-brand">Dr. Youssef – MCQ Platform</div>
+        <div class="admin-topbar-actions">
+          <div class="admin-topbar-badge">Bulk Import</div>
+          {% if current_user.is_authenticated and current_user.email == 'y@bymed.be' %}
+            <div class="admin-topbar-badge admin-role-badge">ADMIN ROLE</div>
+          {% endif %}
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('home') }}">Home</a>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('logout') }}">Log out</a>
+        </div>
+      </div>
+    </header>
     <main class="admin-container">
       <h1>Bulk import image questions</h1>
       <p>

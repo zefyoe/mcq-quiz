@@ -4,6 +4,42 @@ body {
   margin: 0;
 }
 
+.admin-topbar {
+  background: linear-gradient(90deg, #1e3a8a, #2563eb);
+  color: white;
+  padding: 16px 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.admin-topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.admin-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-topbar-badge {
+  background: rgba(255, 255, 255, 0.14);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
 .admin-container {
   max-width: 900px;
   margin: 60px auto;
@@ -93,6 +129,21 @@ button:hover {
 
 .admin-link-button:hover {
   background: #1e4fd1;
+}
+
+.admin-topbar-link {
+  padding: 8px 14px;
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.admin-topbar-link:hover {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+.admin-role-badge {
+  background: #991b1b;
+  color: white;
+  font-weight: 800;
 }
 
 .imported-list {

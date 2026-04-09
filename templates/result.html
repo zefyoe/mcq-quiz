@@ -11,7 +11,14 @@
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">Dr. Youssef – MCQ Platform</div>
-        <div class="topbar-badge">Results</div>
+        <div class="topbar-actions">
+          <div class="topbar-badge">Results</div>
+          {% if current_user.is_authenticated and current_user.email == 'y@bymed.be' %}
+            <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
+          {% endif %}
+          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+        </div>
       </div>
     </header>
 

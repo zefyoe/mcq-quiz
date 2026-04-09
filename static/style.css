@@ -51,6 +51,7 @@ body {
   flex-wrap: wrap;
 }
 
+.topbar-link,
 .topbar-logout {
   display: inline-flex;
   align-items: center;
@@ -63,8 +64,15 @@ body {
   font-weight: 700;
 }
 
+.topbar-link:hover,
 .topbar-logout:hover {
   background: rgba(15, 23, 42, 0.3);
+}
+
+.admin-role-badge {
+  background: #991b1b;
+  color: white;
+  font-weight: 800;
 }
 
 /* Shared */
@@ -391,8 +399,20 @@ body {
   color: #1d4ed8;
 }
 
+.question-nav-item.locked {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
 .question-nav-item.active.answered {
   background: #2563eb;
+  color: white;
+}
+
+.question-nav-item.active.locked {
+  background: #b91c1c;
+  border-color: #b91c1c;
   color: white;
 }
 
