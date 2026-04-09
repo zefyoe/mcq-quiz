@@ -144,6 +144,11 @@
                 <button type="button" class="primary-btn save-answer-btn" data-save-answer>
                   Save answer
                 </button>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                  <button type="button" class="secondary-btn edit-answer-btn" data-edit-answer style="display: none;">
+                    Edit
+                  </button>
+                {% endif %}
               </div>
 
               <p class="answer-lock-note" id="lock-note-{{ loop.index0 }}"></p>
@@ -255,6 +260,7 @@
         const navEl = document.getElementById(`nav-${index}`);
         const noteEl = document.getElementById(`lock-note-${index}`);
         const saveButton = panel.querySelector("[data-save-answer]");
+        const editButton = panel.querySelector("[data-edit-answer]");
         const adminInputs = isAdmin
           ? ["a", "b", "c", "d"].map((key) => panel.querySelector(`[data-answer-input="${key}"]`))
           : [];
@@ -277,6 +283,7 @@
           }
           saveButton.disabled = true;
           saveButton.textContent = "Saved";
+          if (editButton) editButton.style.display = "inline-flex";
           if (statusEl) statusEl.textContent = "Saved and locked";
           if (navEl) navEl.classList.add("answered", "locked");
           if (noteEl) noteEl.textContent = "Answer saved. This response is now locked.";
@@ -294,6 +301,7 @@
           }
           saveButton.disabled = false;
           saveButton.textContent = "Save answer";
+          if (editButton) editButton.style.display = "none";
           if (statusEl) statusEl.textContent = "Not saved";
           if (navEl) navEl.classList.remove("answered", "locked");
           if (noteEl) noteEl.textContent = "";
@@ -426,6 +434,7 @@
       panels.forEach((panel) => {
         const index = Number(panel.dataset.questionIndex);
         const saveButton = panel.querySelector("[data-save-answer]");
+        const editButton = panel.querySelector("[data-edit-answer]");
         const answerInputs = isAdmin
           ? ["a", "b", "c", "d"].map((key) => panel.querySelector(`[data-answer-input="${key}"]`))
           : [panel.querySelector("[data-answer-input]")];
@@ -434,6 +443,13 @@
           currentIndex = index;
           await saveCurrentAnswer();
         });
+
+        if (editButton) {
+          editButton.addEventListener("click", () => {
+            panel.dataset.saved = "false";
+            updateSavedState(index);
+          });
+        }
 
         answerInputs.forEach((answerInput) => {
           if (!answerInput) return;

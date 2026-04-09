@@ -9,10 +9,10 @@
   <body>
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand">Dr. Youssef – MCQ Platform</div>
+        <div class="brand">Rady</div>
         <div class="topbar-actions">
           <div class="topbar-badge">Medical Training Dashboard</div>
-          {% if current_user.is_authenticated and current_user.email == 'y@bymed.be' %}
+          {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
           <a href="{{ url_for('home') }}" class="topbar-link">Home</a>

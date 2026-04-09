@@ -9,10 +9,10 @@
   <body>
     <header class="admin-topbar">
       <div class="admin-topbar-inner">
-        <div class="admin-brand">Dr. Youssef – MCQ Platform</div>
+        <div class="admin-brand">Rady</div>
         <div class="admin-topbar-actions">
           <div class="admin-topbar-badge">New Question</div>
-          {% if current_user.is_authenticated and current_user.email == 'y@bymed.be' %}
+          {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="admin-topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
           <a class="admin-link-button admin-topbar-link" href="{{ url_for('home') }}">Home</a>
