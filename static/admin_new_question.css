@@ -48,6 +48,15 @@ textarea {
   gap: 14px;
 }
 
+.option-box-full {
+  grid-column: 1 / -1;
+}
+
+.answer-textarea {
+  min-height: 88px;
+  font-size: 18px;
+}
+
 button {
   margin-top: 20px;
   padding: 14px;

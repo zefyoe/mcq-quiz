@@ -42,13 +42,11 @@
         <p>Vraag<br><textarea name="text" id="question_text" required>{{ form_data.text }}</textarea></p>
 
         <div class="option-box">
-          <p>A<br><input name="a" value="{{ form_data.a }}" required></p>
-          <p>B<br><input name="b" value="{{ form_data.b }}" required></p>
-          <p>C<br><input name="c" value="{{ form_data.c }}" required></p>
-          <p>D<br><input name="d" value="{{ form_data.d }}" required></p>
+          <p class="option-box-full">Correct answer<br><textarea name="a" id="correct_answer" class="answer-textarea" required>{{ form_data.a }}</textarea></p>
+          <p>Accepted alternative 2<br><input name="b" value="{{ form_data.b }}"></p>
+          <p>Accepted alternative 3<br><input name="c" value="{{ form_data.c }}"></p>
+          <p>Accepted alternative 4<br><input name="d" value="{{ form_data.d }}"></p>
         </div>
-
-        <p>Correct (A/B/C/D)<br><input name="correct" maxlength="1" value="{{ form_data.correct }}" required></p>
 
         <p>Image URL (optioneel)<br><input name="image_url" id="image_url" value="{{ form_data.image_url }}"></p>
 
@@ -60,21 +58,36 @@
       const existingImageSelect = document.getElementById("existing_image_url");
       const imageUrlInput = document.getElementById("image_url");
       const questionText = document.getElementById("question_text");
+      const correctAnswerInput = document.getElementById("correct_answer");
       const standardPrompt = {{ standard_image_prompt|tojson }};
 
-      existingImageSelect.addEventListener("change", () => {
+      function syncSelectedImageDefaults() {
+        const selectedOption = existingImageSelect.options[existingImageSelect.selectedIndex];
+        const selectedLabel = selectedOption ? selectedOption.dataset.label || "" : "";
+
         if (!existingImageSelect.value) {
           return;
         }
 
-        if (!imageUrlInput.value) {
-          imageUrlInput.value = existingImageSelect.value;
-        }
+        imageUrlInput.value = existingImageSelect.value;
 
         if (!questionText.value || questionText.value === standardPrompt) {
           questionText.value = standardPrompt;
         }
+
+        if (!correctAnswerInput.value || correctAnswerInput.dataset.autofilled === "true") {
+          correctAnswerInput.value = selectedLabel;
+          correctAnswerInput.dataset.autofilled = "true";
+        }
+      }
+
+      existingImageSelect.addEventListener("change", syncSelectedImageDefaults);
+
+      correctAnswerInput.addEventListener("input", () => {
+        correctAnswerInput.dataset.autofilled = "false";
       });
+
+      syncSelectedImageDefaults();
     </script>
   </body>
 </html>

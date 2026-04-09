@@ -80,6 +80,10 @@ def normalize_correct(q: dict) -> list[str]:
     return sorted([(c or "").strip().upper() for c in correct if c])
 
 
+def normalize_text_answer(value: str) -> str:
+    return re.sub(r"\s+", " ", (value or "").strip()).casefold()
+
+
 def normalize_category(s: str) -> str:
     return (s or "").strip().lower()
 
@@ -115,6 +119,31 @@ def db_question_to_dict(q: Question) -> dict:
             "image_url": q.image_url,
         }),
     }
+
+
+def get_correct_answer_texts(q: dict) -> list[str]:
+    if q.get("structure_title"):
+        return [q["structure_title"]]
+
+    correct_keys = normalize_correct(q)
+    answers = []
+
+    if correct_keys == ["T"]:
+        for key in ["A", "B", "C", "D"]:
+            option_text = (q.get(key) or "").strip()
+            if option_text:
+                answers.append(option_text)
+        return answers
+
+    for key in correct_keys:
+        if len(key) == 1 and key in {"A", "B", "C", "D"}:
+            option_text = (q.get(key) or "").strip()
+            if option_text:
+                answers.append(option_text)
+        elif key:
+            answers.append(key)
+
+    return answers
 
 
 def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
@@ -401,16 +430,20 @@ def quiz(category):
             continue
 
         correct = normalize_correct(q)
+        correct_texts = get_correct_answer_texts(q)
+        user_text = (request.form.get(f"ans_{qid}") or "").strip()
+        user_answers = [user_text] if user_text else []
 
-        user_multi = request.form.getlist(f"ans_{qid}")
-        user_single = request.form.get(f"ans_{qid}")
+        normalized_user = normalize_text_answer(user_text)
+        normalized_correct_texts = {normalize_text_answer(text) for text in correct_texts if text}
+        normalized_correct_keys = {normalize_text_answer(value) for value in correct}
 
-        if user_multi:
-            user_answers = sorted([a.strip().upper() for a in user_multi if a.strip()])
-        else:
-            user_answers = [user_single.strip().upper()] if user_single else []
-
-        is_correct = user_answers == correct
+        is_correct = bool(
+            normalized_user and (
+                normalized_user in normalized_correct_texts
+                or normalized_user in normalized_correct_keys
+            )
+        )
 
         if is_correct:
             score += 1
@@ -420,6 +453,7 @@ def quiz(category):
             "Vraag": q["Vraag"],
             "user": user_answers,
             "correct": correct,
+            "correct_texts": correct_texts,
             "is_correct": is_correct,
             "options": {
                 "A": q["A"],
@@ -465,7 +499,6 @@ def admin_new_question():
         "b": "",
         "c": "",
         "d": "",
-        "correct": "",
         "image_url": "",
         "existing_image_url": "",
     }
@@ -479,13 +512,11 @@ def admin_new_question():
             "b": (request.form.get("b") or "").strip(),
             "c": (request.form.get("c") or "").strip(),
             "d": (request.form.get("d") or "").strip(),
-            "correct": (request.form.get("correct") or "").strip().upper(),
             "image_url": (request.form.get("image_url") or "").strip(),
             "existing_image_url": (request.form.get("existing_image_url") or "").strip(),
         }
         category = form_data["category"]
         text = form_data["text"]
-        correct = form_data["correct"]
 
         option_map = {
             "a": form_data["a"],
@@ -503,10 +534,8 @@ def admin_new_question():
 
         if not category or not text:
             error = "Category and question text are required."
-        elif correct not in {"A", "B", "C", "D"}:
-            error = "Correct answer must be A, B, C, or D."
-        elif not all(option_map.values()):
-            error = "Please fill in all four answer options."
+        elif not option_map["a"]:
+            error = "Please provide the correct answer."
         elif Question.query.filter_by(qid=qid).first():
             error = "That QID already exists."
         else:
@@ -518,7 +547,7 @@ def admin_new_question():
                 b=option_map["b"],
                 c=option_map["c"],
                 d=option_map["d"],
-                correct=correct,
+                correct="T",
                 image_url=image_url,
             )
             db.session.add(question)
@@ -532,7 +561,6 @@ def admin_new_question():
                 "b": "",
                 "c": "",
                 "d": "",
-                "correct": "",
                 "image_url": "",
                 "existing_image_url": "",
             }
@@ -582,11 +610,11 @@ def admin_import_images():
                             qid=qid,
                             category=category,
                             text=STANDARD_IMAGE_PROMPT,
-                            a="A",
-                            b="B",
-                            c="C",
-                            d="D",
-                            correct=correct,
+                            a=build_structure_title(filename),
+                            b="",
+                            c="",
+                            d="",
+                            correct="T",
                             image_url=image_url,
                         )
                         db.session.add(question)
@@ -611,11 +639,11 @@ def admin_import_images():
                             qid=qid,
                             category=category,
                             text=STANDARD_IMAGE_PROMPT,
-                            a="A",
-                            b="B",
-                            c="C",
-                            d="D",
-                            correct=correct,
+                            a=build_structure_title(filename),
+                            b="",
+                            c="",
+                            d="",
+                            correct="T",
                             image_url=image_url,
                         )
                         db.session.add(question)
