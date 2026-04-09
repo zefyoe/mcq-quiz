@@ -80,6 +80,7 @@
               data-category="{{ category }}"
               data-text="{{ q['Vraag'] }}"
               data-image-url="{{ q.get('image_url', '') }}"
+              data-saved="false"
             >
               <div class="question-top">
                 <div class="question-number-badge">Question {{ loop.index }}</div>
@@ -199,8 +200,8 @@
             };
             const correctChoice = panel.querySelector("[data-correct-choice]:checked")?.value || "A";
 
-            if (Object.values(answers).some(Boolean)) {
-              payload[qid] = { ...answers, correct_choice: correctChoice };
+            if (panel.dataset.saved === "true" && Object.values(answers).some(Boolean)) {
+              payload[qid] = { ...answers, correct_choice: correctChoice, __locked: true };
             }
           } else {
             const hiddenInput = panel.querySelector("[data-answer-hidden]");
@@ -230,11 +231,15 @@
                 const radio = panel.querySelector(`[data-correct-choice][value="${savedValue.correct_choice}"]`);
                 if (radio) radio.checked = true;
               }
+              if (savedValue.__locked) {
+                panel.dataset.saved = "true";
+              }
             } else {
               const hiddenInput = panel.querySelector("[data-answer-hidden]");
               const answerInput = panel.querySelector("[data-answer-input]");
               if (hiddenInput) hiddenInput.value = savedValue;
               if (answerInput) answerInput.value = savedValue;
+              panel.dataset.saved = "true";
             }
           }
         });
@@ -255,9 +260,7 @@
           : [];
         const answerInput = isAdmin ? null : panel.querySelector("[data-answer-input]");
         const hiddenInput = isAdmin ? null : panel.querySelector("[data-answer-hidden]");
-        const isSaved = isAdmin
-          ? adminInputs.some((input) => input && input.value.trim())
-          : Boolean(hiddenInput && hiddenInput.value);
+        const isSaved = panel.dataset.saved === "true";
 
         if (isSaved) {
           savedAnswers.add(index);
@@ -390,6 +393,7 @@
           }
         }
 
+        panel.dataset.saved = "true";
         persistSavedAnswers();
         updateSavedState(currentIndex);
 
