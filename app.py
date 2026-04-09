@@ -135,6 +135,17 @@ def use_compact_answer_buttons(q: dict) -> bool:
     return all(is_placeholder_option(value or "") for value in option_values)
 
 
+def get_image_display_title(image_url: str | None) -> str | None:
+    if not image_url:
+        return None
+
+    filename = os.path.basename(image_url)
+    if not filename:
+        return None
+
+    return build_structure_title(filename)
+
+
 def db_question_to_dict(q: Question) -> dict:
     return {
         "ID": q.qid,
@@ -146,6 +157,7 @@ def db_question_to_dict(q: Question) -> dict:
         "D": q.d,
         "Correct": [q.correct],
         "image_url": q.image_url,
+        "structure_title": get_image_display_title(q.image_url),
         "compact_options": use_compact_answer_buttons({
             "A": q.a,
             "B": q.b,
@@ -369,8 +381,16 @@ def upsert_question_answer(
     category: str,
     text: str,
     image_url: str | None,
-    answer_text: str,
+    answer_text: str | None = None,
+    answer_values: list[str] | None = None,
 ) -> Question:
+    values = list((answer_values or [])[:4])
+    while len(values) < 4:
+        values.append("")
+
+    if answer_text is not None and not values[0]:
+        values[0] = answer_text
+
     question = None
 
     if qid and not qid.startswith("IMG"):
@@ -385,10 +405,10 @@ def upsert_question_answer(
             category=category,
             text=text or STANDARD_IMAGE_PROMPT,
             image_url=image_url,
-            a=answer_text,
-            b="",
-            c="",
-            d="",
+            a=values[0],
+            b=values[1],
+            c=values[2],
+            d=values[3],
             correct="T",
         )
         db.session.add(question)
@@ -396,10 +416,10 @@ def upsert_question_answer(
         question.category = category
         question.text = text or question.text or STANDARD_IMAGE_PROMPT
         question.image_url = image_url
-        question.a = answer_text
-        question.b = ""
-        question.c = ""
-        question.d = ""
+        question.a = values[0]
+        question.b = values[1]
+        question.c = values[2]
+        question.d = values[3]
         question.correct = "T"
 
     db.session.commit()
@@ -572,11 +592,15 @@ def admin_save_question_answer():
     text = (payload.get("text") or "").strip()
     image_url = (payload.get("image_url") or "").strip() or None
     answer_text = (payload.get("answer") or "").strip()
+    answer_values = [
+        (value or "").strip()
+        for value in (payload.get("answers") or [])
+    ]
 
     if not category:
         return jsonify({"error": "Category is required."}), 400
-    if not answer_text:
-        return jsonify({"error": "Answer is required."}), 400
+    if not answer_text and not any(answer_values):
+        return jsonify({"error": "At least one answer is required."}), 400
 
     try:
         question = upsert_question_answer(
@@ -585,6 +609,7 @@ def admin_save_question_answer():
             text=text or STANDARD_IMAGE_PROMPT,
             image_url=image_url,
             answer_text=answer_text,
+            answer_values=answer_values,
         )
     except Exception as exc:
         db.session.rollback()
@@ -593,7 +618,7 @@ def admin_save_question_answer():
     return jsonify({
         "ok": True,
         "qid": question.qid,
-        "answer": question.a,
+        "answers": [question.a, question.b, question.c, question.d],
     })
 
 

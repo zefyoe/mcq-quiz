@@ -473,6 +473,13 @@ body {
   line-height: 1.4;
 }
 
+.question-subtitle {
+  margin: -8px 0 18px;
+  color: #475569;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .question-help {
   margin: 0 0 18px;
   padding: 12px 14px;
@@ -509,6 +516,31 @@ body {
   gap: 12px;
   align-items: stretch;
   flex-wrap: wrap;
+}
+
+.admin-answer-grid {
+  flex: 1 1 100%;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-answer-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-answer-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 800;
 }
 
 .answer-input {
