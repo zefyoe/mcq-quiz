@@ -70,6 +70,9 @@
               class="question-panel {% if loop.first %}active{% endif %}"
               data-question-index="{{ loop.index0 }}"
               data-qid="{{ qid }}"
+              data-category="{{ category }}"
+              data-text="{{ q['Vraag'] }}"
+              data-image-url="{{ q.get('image_url', '') }}"
             >
               <div class="question-top">
                 <div class="question-number-badge">Question {{ loop.index }}</div>
@@ -120,6 +123,9 @@
     </main>
 
     <script>
+      const quizForm = document.getElementById("quizForm");
+      const isAdmin = {{ (current_user.is_authenticated and current_user.email == 'y@bymed.be')|tojson }};
+      const saveAnswerUrl = {{ url_for('admin_save_question_answer')|tojson }};
       const panels = document.querySelectorAll(".question-panel");
       const navButtons = document.querySelectorAll(".question-nav-item");
       const prevBtn = document.getElementById("prevBtn");
@@ -128,7 +134,47 @@
       const progressText = document.getElementById("progressText");
       const progressBarFill = document.getElementById("progressBarFill");
       const savedAnswers = new Set();
+      const storageKey = `quizAnswers:${{ category|tojson }}`;
       let currentIndex = 0;
+
+      function loadSavedAnswers() {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function persistSavedAnswers() {
+        const payload = {};
+
+        panels.forEach((panel) => {
+          const qid = panel.dataset.qid;
+          const hiddenInput = panel.querySelector("[data-answer-hidden]");
+
+          if (qid && hiddenInput.value) {
+            payload[qid] = hiddenInput.value;
+          }
+        });
+
+        localStorage.setItem(storageKey, JSON.stringify(payload));
+      }
+
+      function hydrateSavedAnswers() {
+        const savedByQid = loadSavedAnswers();
+
+        panels.forEach((panel) => {
+          const qid = panel.dataset.qid;
+          const hiddenInput = panel.querySelector("[data-answer-hidden]");
+          const answerInput = panel.querySelector("[data-answer-input]");
+          const savedValue = savedByQid[qid];
+
+          if (savedValue) {
+            hiddenInput.value = savedValue;
+            answerInput.value = savedValue;
+          }
+        });
+      }
 
       function getPanel(index) {
         return document.querySelector(`.question-panel[data-question-index="${index}"]`);
@@ -152,7 +198,7 @@
           saveButton.disabled = true;
           saveButton.textContent = "Saved";
           if (statusEl) statusEl.textContent = "Saved and locked";
-          if (navEl) navEl.classList.add("answered");
+          if (navEl) navEl.classList.add("answered", "locked");
           if (noteEl) noteEl.textContent = "Answer saved. This response is now locked.";
         } else {
           savedAnswers.delete(index);
@@ -161,7 +207,7 @@
           saveButton.disabled = false;
           saveButton.textContent = "Save answer";
           if (statusEl) statusEl.textContent = "Not saved";
-          if (navEl) navEl.classList.remove("answered");
+          if (navEl) navEl.classList.remove("answered", "locked");
           if (noteEl) noteEl.textContent = "";
         }
 
@@ -186,10 +232,11 @@
         nextBtn.disabled = currentIndex === panels.length - 1;
       }
 
-      function saveCurrentAnswer() {
+      async function saveCurrentAnswer() {
         const panel = getPanel(currentIndex);
         const answerInput = panel.querySelector("[data-answer-input]");
         const hiddenInput = panel.querySelector("[data-answer-hidden]");
+        const saveButton = panel.querySelector("[data-save-answer]");
         const value = answerInput.value.trim();
 
         if (!value) {
@@ -197,7 +244,43 @@
           return false;
         }
 
+        if (isAdmin) {
+          saveButton.disabled = true;
+          saveButton.textContent = "Saving...";
+
+          try {
+            const response = await fetch(saveAnswerUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                qid: panel.dataset.qid,
+                category: panel.dataset.category,
+                text: panel.dataset.text,
+                image_url: panel.dataset.imageUrl,
+                answer: value,
+              }),
+            });
+
+            const payload = await response.json();
+            if (!response.ok) {
+              throw new Error(payload.error || "Could not save answer.");
+            }
+
+            if (payload.qid) {
+              panel.dataset.qid = payload.qid;
+            }
+          } catch (error) {
+            saveButton.disabled = false;
+            saveButton.textContent = "Save answer";
+            alert(error.message || "Could not save answer.");
+            return false;
+          }
+        }
+
         hiddenInput.value = value;
+        persistSavedAnswers();
         updateSavedState(currentIndex);
 
         if (currentIndex < panels.length - 1) {
@@ -231,20 +314,25 @@
         const saveButton = panel.querySelector("[data-save-answer]");
         const answerInput = panel.querySelector("[data-answer-input]");
 
-        saveButton.addEventListener("click", () => {
+        saveButton.addEventListener("click", async () => {
           currentIndex = index;
-          saveCurrentAnswer();
+          await saveCurrentAnswer();
         });
 
-        answerInput.addEventListener("keydown", (event) => {
+        answerInput.addEventListener("keydown", async (event) => {
           if (event.key === "Enter") {
             event.preventDefault();
             currentIndex = index;
-            saveCurrentAnswer();
+            await saveCurrentAnswer();
           }
         });
       });
 
+      quizForm.addEventListener("submit", () => {
+        persistSavedAnswers();
+      });
+
+      hydrateSavedAnswers();
       panels.forEach((_, index) => updateSavedState(index));
       showQuestion(0);
     </script>

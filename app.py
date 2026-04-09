@@ -4,7 +4,7 @@ import re
 from datetime import timedelta
 from urllib.parse import urlparse
 
-from flask import Flask, abort, render_template, request, session, redirect, url_for
+from flask import Flask, abort, jsonify, render_template, request, session, redirect, url_for
 from flask_login import (
     LoginManager,
     current_user,
@@ -52,6 +52,7 @@ db.init_app(app)
 
 AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
 STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
+ADMIN_EMAIL = "y@bymed.be"
 
 
 # -------------------------
@@ -86,6 +87,40 @@ def normalize_text_answer(value: str) -> str:
 
 def normalize_category(s: str) -> str:
     return (s or "").strip().lower()
+
+
+def is_admin_email(email: str) -> bool:
+    return (email or "").strip().lower() == ADMIN_EMAIL
+
+
+def user_has_admin_access(user: User | None) -> bool:
+    return bool(user and user.is_authenticated and is_admin_email(getattr(user, "email", "")))
+
+
+def sync_user_admin_flag(user: User | None) -> bool:
+    if not user:
+        return False
+
+    should_be_admin = is_admin_email(user.email)
+    if user.is_admin != should_be_admin:
+        user.is_admin = should_be_admin
+        db.session.commit()
+        return True
+
+    return False
+
+
+def enforce_single_admin_account():
+    changed = False
+
+    for user in User.query.all():
+        should_be_admin = is_admin_email(user.email)
+        if user.is_admin != should_be_admin:
+            user.is_admin = should_be_admin
+            changed = True
+
+    if changed:
+        db.session.commit()
 
 
 def is_placeholder_option(value: str) -> bool:
@@ -148,14 +183,14 @@ def get_correct_answer_texts(q: dict) -> list[str]:
 
 def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
     merged = []
-    seen_ids = set()
+    seen_keys = set()
 
     for question_list in question_lists:
         for question in question_list:
-            qid = question.get("ID")
-            if not qid or qid in seen_ids:
+            dedupe_key = question.get("image_url") or question.get("ID")
+            if not dedupe_key or dedupe_key in seen_keys:
                 continue
-            seen_ids.add(qid)
+            seen_keys.add(dedupe_key)
             merged.append(question)
 
     return merged
@@ -323,9 +358,52 @@ def parse_answer_key(raw_value: str) -> dict[str, str]:
 def admin_required():
     if not current_user.is_authenticated:
         return redirect(url_for("login", next=request.path))
-    if not current_user.is_admin:
+    if not user_has_admin_access(current_user):
         abort(403)
     return None
+
+
+def upsert_question_answer(
+    *,
+    qid: str,
+    category: str,
+    text: str,
+    image_url: str | None,
+    answer_text: str,
+) -> Question:
+    question = None
+
+    if qid and not qid.startswith("IMG"):
+        question = Question.query.filter_by(qid=qid).first()
+
+    if question is None and image_url:
+        question = Question.query.filter_by(category=category, image_url=image_url).first()
+
+    if question is None:
+        question = Question(
+            qid=get_next_qid(),
+            category=category,
+            text=text or STANDARD_IMAGE_PROMPT,
+            image_url=image_url,
+            a=answer_text,
+            b="",
+            c="",
+            d="",
+            correct="T",
+        )
+        db.session.add(question)
+    else:
+        question.category = category
+        question.text = text or question.text or STANDARD_IMAGE_PROMPT
+        question.image_url = image_url
+        question.a = answer_text
+        question.b = ""
+        question.c = ""
+        question.d = ""
+        question.correct = "T"
+
+    db.session.commit()
+    return question
 
 
 def safe_redirect_target(target: str, fallback_endpoint: str = "home") -> str:
@@ -480,6 +558,43 @@ def admin_home():
 
     question_count = db.session.query(func.count(Question.id)).scalar() or 0
     return render_template("admin_home.html", question_count=question_count)
+
+
+@app.route("/admin/questions/save-answer", methods=["POST"])
+@login_required
+def admin_save_question_answer():
+    if not user_has_admin_access(current_user):
+        return jsonify({"error": "Forbidden"}), 403
+
+    payload = request.get_json(silent=True) or {}
+    qid = (payload.get("qid") or "").strip()
+    category = (payload.get("category") or "").strip()
+    text = (payload.get("text") or "").strip()
+    image_url = (payload.get("image_url") or "").strip() or None
+    answer_text = (payload.get("answer") or "").strip()
+
+    if not category:
+        return jsonify({"error": "Category is required."}), 400
+    if not answer_text:
+        return jsonify({"error": "Answer is required."}), 400
+
+    try:
+        question = upsert_question_answer(
+            qid=qid,
+            category=category,
+            text=text or STANDARD_IMAGE_PROMPT,
+            image_url=image_url,
+            answer_text=answer_text,
+        )
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"error": f"Could not save answer: {exc}"}), 500
+
+    return jsonify({
+        "ok": True,
+        "qid": question.qid,
+        "answer": question.a,
+    })
 
 
 @app.route("/admin/questions/new", methods=["GET", "POST"])
@@ -697,6 +812,7 @@ def login():
         if not user or not user.check_password(password):
             error = "Incorrect email or password."
         else:
+            sync_user_admin_flag(user)
             login_user(user)
             return redirect(next_url)
 
@@ -724,8 +840,7 @@ def register():
         elif User.query.filter_by(email=email).first():
             error = "An account with that email already exists."
         else:
-            is_first_user = db.session.query(func.count(User.id)).scalar() == 0
-            user = User(email=email, is_admin=is_first_user)
+            user = User(email=email, is_admin=is_admin_email(email))
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
@@ -749,6 +864,7 @@ def logout():
 
 with app.app_context():
     db.create_all()
+    enforce_single_admin_account()
 
 if __name__ == "__main__":
     app.run(debug=True)
