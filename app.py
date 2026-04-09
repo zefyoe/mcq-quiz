@@ -383,6 +383,7 @@ def upsert_question_answer(
     image_url: str | None,
     answer_text: str | None = None,
     answer_values: list[str] | None = None,
+    correct_choice: str | None = None,
 ) -> Question:
     values = list((answer_values or [])[:4])
     while len(values) < 4:
@@ -390,6 +391,10 @@ def upsert_question_answer(
 
     if answer_text is not None and not values[0]:
         values[0] = answer_text
+
+    normalized_choice = (correct_choice or "").strip().upper()
+    if normalized_choice not in {"A", "B", "C", "D"}:
+        normalized_choice = "A" if values[0] else "T"
 
     question = None
 
@@ -409,7 +414,7 @@ def upsert_question_answer(
             b=values[1],
             c=values[2],
             d=values[3],
-            correct="T",
+            correct=normalized_choice,
         )
         db.session.add(question)
     else:
@@ -420,7 +425,7 @@ def upsert_question_answer(
         question.b = values[1]
         question.c = values[2]
         question.d = values[3]
-        question.correct = "T"
+        question.correct = normalized_choice
 
     db.session.commit()
     return question
@@ -596,11 +601,14 @@ def admin_save_question_answer():
         (value or "").strip()
         for value in (payload.get("answers") or [])
     ]
+    correct_choice = (payload.get("correct_choice") or "").strip().upper()
 
     if not category:
         return jsonify({"error": "Category is required."}), 400
     if not answer_text and not any(answer_values):
         return jsonify({"error": "At least one answer is required."}), 400
+    if any(answer_values) and correct_choice not in {"A", "B", "C", "D"}:
+        return jsonify({"error": "Please choose the correct answer."}), 400
 
     try:
         question = upsert_question_answer(
@@ -610,6 +618,7 @@ def admin_save_question_answer():
             image_url=image_url,
             answer_text=answer_text,
             answer_values=answer_values,
+            correct_choice=correct_choice,
         )
     except Exception as exc:
         db.session.rollback()
@@ -619,6 +628,7 @@ def admin_save_question_answer():
         "ok": True,
         "qid": question.qid,
         "answers": [question.a, question.b, question.c, question.d],
+        "correct_choice": question.correct,
     })
 
 

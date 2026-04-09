@@ -110,6 +110,14 @@
                   <div class="admin-answer-grid">
                     {% for letter in ["A", "B", "C", "D"] %}
                       <label class="admin-answer-row">
+                        <input
+                          type="radio"
+                          class="admin-correct-radio"
+                          name="correct_choice_{{ qid }}"
+                          value="{{ letter }}"
+                          data-correct-choice
+                          {% if q["Correct"][0] == letter %}checked{% endif %}
+                        >
                         <span class="admin-answer-label">{{ letter }}</span>
                         <input
                           type="text"
@@ -117,6 +125,7 @@
                           data-answer-input="{{ letter|lower }}"
                           placeholder="Type your answer here"
                           autocomplete="off"
+                          value="{{ q[letter] }}"
                         >
                       </label>
                     {% endfor %}
@@ -188,9 +197,10 @@
               c: panel.querySelector('[data-answer-input="c"]')?.value.trim() || "",
               d: panel.querySelector('[data-answer-input="d"]')?.value.trim() || "",
             };
+            const correctChoice = panel.querySelector("[data-correct-choice]:checked")?.value || "A";
 
             if (Object.values(answers).some(Boolean)) {
-              payload[qid] = answers;
+              payload[qid] = { ...answers, correct_choice: correctChoice };
             }
           } else {
             const hiddenInput = panel.querySelector("[data-answer-hidden]");
@@ -216,6 +226,10 @@
                 const input = panel.querySelector(`[data-answer-input="${key}"]`);
                 if (input) input.value = savedValue[key] || "";
               });
+              if (savedValue.correct_choice) {
+                const radio = panel.querySelector(`[data-correct-choice][value="${savedValue.correct_choice}"]`);
+                if (radio) radio.checked = true;
+              }
             } else {
               const hiddenInput = panel.querySelector("[data-answer-hidden]");
               const answerInput = panel.querySelector("[data-answer-input]");
@@ -315,9 +329,15 @@
             return input ? input.value.trim() : "";
           });
           value = answers[0];
+          const correctChoice = panel.querySelector("[data-correct-choice]:checked")?.value || "";
 
           if (!answers.some(Boolean)) {
             alert("Please type at least one answer before saving.");
+            return false;
+          }
+
+          if (!correctChoice) {
+            alert("Please choose which answer is correct.");
             return false;
           }
         } else {
@@ -350,6 +370,7 @@
                 image_url: panel.dataset.imageUrl,
                 answer: value,
                 answers,
+                correct_choice: panel.querySelector("[data-correct-choice]:checked")?.value || "",
               }),
             });
 

@@ -526,9 +526,16 @@ body {
 
 .admin-answer-row {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
+  grid-template-columns: 28px 36px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
+}
+
+.admin-correct-radio {
+  width: 20px;
+  height: 20px;
+  accent-color: #dc2626;
+  margin: 0;
 }
 
 .admin-answer-label {
