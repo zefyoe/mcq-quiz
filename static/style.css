@@ -44,6 +44,29 @@ body {
   font-size: 0.9rem;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.topbar-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.18);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.topbar-logout:hover {
+  background: rgba(15, 23, 42, 0.3);
+}
+
 /* Shared */
 .card {
   background: white;

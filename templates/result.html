@@ -91,7 +91,7 @@
                   {% if is_user_choice and not is_correct_option %}wrong-option{% endif %}
                 ">
                   <span class="option-letter">{{ key }}</span>
-                  <span>{{ value }}</span>
+                  <span>{{ value if value not in ["A", "B", "C", "D"] else ("Answer " ~ key) }}</span>
                 </div>
               {% endfor %}
             </div>

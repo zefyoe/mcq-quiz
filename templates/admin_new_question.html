@@ -1,31 +1,80 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
-<h1>Nieuwe vraag</h1>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New Question</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
+  </head>
+  <body>
+    <main class="admin-container">
+      <h1>Nieuwe vraag</h1>
 
-{% if error %}
-<p style="color:red">{{ error }}</p>
-{% endif %}
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
 
-{% if success %}
-<p style="color:green">{{ success }}</p>
-{% endif %}
+      {% if success %}
+        <p class="success">{{ success }}</p>
+      {% endif %}
 
-<form method="POST">
+      <form method="POST">
+        <p>QID (leave blank to auto-generate)<br><input name="qid" value="{{ form_data.qid }}"></p>
 
-<p>QID<br><input name="qid"></p>
+        <p>Categorie<br><input name="category" value="{{ form_data.category }}" required></p>
 
-<p>Categorie<br><input name="category"></p>
+        <p>
+          Existing image from static/images<br>
+          <select name="existing_image_url" id="existing_image_url">
+            <option value="">Choose an image</option>
+            {% for choice in image_choices %}
+              <option
+                value="{{ choice.url }}"
+                data-label="{{ choice.label }}"
+                {% if form_data.existing_image_url == choice.url %}selected{% endif %}
+              >
+                {{ choice.label }}
+              </option>
+            {% endfor %}
+          </select>
+        </p>
 
-<p>Vraag<br><textarea name="text"></textarea></p>
+        <p>Vraag<br><textarea name="text" id="question_text" required>{{ form_data.text }}</textarea></p>
 
-<p>A<br><input name="a"></p>
-<p>B<br><input name="b"></p>
-<p>C<br><input name="c"></p>
-<p>D<br><input name="d"></p>
+        <div class="option-box">
+          <p>A<br><input name="a" value="{{ form_data.a }}" required></p>
+          <p>B<br><input name="b" value="{{ form_data.b }}" required></p>
+          <p>C<br><input name="c" value="{{ form_data.c }}" required></p>
+          <p>D<br><input name="d" value="{{ form_data.d }}" required></p>
+        </div>
 
-<p>Correct (A/B/C/D)<br><input name="correct"></p>
+        <p>Correct (A/B/C/D)<br><input name="correct" maxlength="1" value="{{ form_data.correct }}" required></p>
 
-<p>Image URL (optioneel)<br><input name="image_url"></p>
+        <p>Image URL (optioneel)<br><input name="image_url" id="image_url" value="{{ form_data.image_url }}"></p>
 
-<button type="submit">Opslaan</button>
+        <button type="submit">Opslaan</button>
+      </form>
+    </main>
 
-</form>
+    <script>
+      const existingImageSelect = document.getElementById("existing_image_url");
+      const imageUrlInput = document.getElementById("image_url");
+      const questionText = document.getElementById("question_text");
+      const standardPrompt = {{ standard_image_prompt|tojson }};
+
+      existingImageSelect.addEventListener("change", () => {
+        if (!existingImageSelect.value) {
+          return;
+        }
+
+        if (!imageUrlInput.value) {
+          imageUrlInput.value = existingImageSelect.value;
+        }
+
+        if (!questionText.value || questionText.value === standardPrompt) {
+          questionText.value = standardPrompt;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,2 +1,20 @@
-<h1>Admin</h1>
-<a href="/admin/questions/new">Nieuwe vraag toevoegen</a>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
+  </head>
+  <body>
+    <main class="admin-container">
+      <h1>Admin</h1>
+      <p>{{ question_count }} question(s) currently stored in the database.</p>
+
+      <div class="admin-actions">
+        <a class="admin-link-button" href="{{ url_for('admin_new_question') }}">Add one question</a>
+        <a class="admin-link-button" href="{{ url_for('admin_import_images') }}">Bulk import images</a>
+      </div>
+    </main>
+  </body>
+</html>

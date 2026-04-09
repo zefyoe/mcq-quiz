@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bulk Import Questions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
+  </head>
+  <body>
+    <main class="admin-container">
+      <h1>Bulk import image questions</h1>
+      <p>
+        Upload multiple images at once or choose a whole folder. Each image becomes one question automatically.
+      </p>
+
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+
+      {% if success %}
+        <p class="success">{{ success }}</p>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data">
+        <p>Categorie<br><input name="category" required></p>
+
+        <p>
+          Existing folder inside this project<br>
+          <input name="existing_folder" value="static/images" placeholder="static/images">
+        </p>
+
+        <p>
+          Images or folder upload (optional if using existing folder above)<br>
+          <input name="images" type="file" accept="image/*" multiple webkitdirectory directory>
+        </p>
+
+        <p>
+          Optional answer key<br>
+          <textarea
+            name="answer_key"
+            placeholder="question1.jpg=A&#10;question2.png=C&#10;question3.jpeg=B"
+          ></textarea>
+        </p>
+
+        <button type="submit">Import images</button>
+      </form>
+
+      {% if imported_questions %}
+        <h2>Imported questions</h2>
+        <div class="imported-list">
+          {% for item in imported_questions %}
+            <div class="imported-item">
+              <strong>{{ item.qid }}</strong> - {{ item.filename }} - correct: {{ item.correct }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </main>
+  </body>
+</html>

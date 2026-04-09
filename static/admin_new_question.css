@@ -63,6 +63,43 @@ button:hover {
   background: #1e4fd1;
 }
 
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.admin-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.admin-link-button:hover {
+  background: #1e4fd1;
+}
+
+.imported-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.imported-item {
+  padding: 12px;
+  border: 1px solid #dbe5ff;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
 .success {
   background: #e6ffed;
   color: #087f3e;

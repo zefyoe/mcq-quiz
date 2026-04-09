@@ -1,17 +1,19 @@
 import os
 import random
+import re
 from datetime import timedelta
 from urllib.parse import urlparse
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, abort, render_template, request, session, redirect, url_for
 from flask_login import (
     LoginManager,
-    login_required,
     current_user,
+    login_required,
     login_user,
     logout_user,
 )
 from sqlalchemy import func
+from werkzeug.utils import secure_filename
 
 from models import db, Question, User
 from questions_data import questions
@@ -40,11 +42,16 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me")
+app.config["UPLOAD_FOLDER"] = os.path.join(app.static_folder, "uploads", "questions")
+app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
 
 if os.environ.get("RENDER") or os.environ.get("FLASK_ENV") == "production":
     app.config["SESSION_COOKIE_SECURE"] = True
 
 db.init_app(app)
+
+AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
+STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
 
 
 # -------------------------
@@ -77,6 +84,18 @@ def normalize_category(s: str) -> str:
     return (s or "").strip().lower()
 
 
+def is_placeholder_option(value: str) -> bool:
+    return (value or "").strip().upper() in {"A", "B", "C", "D", "OPTION A", "OPTION B", "OPTION C", "OPTION D"}
+
+
+def use_compact_answer_buttons(q: dict) -> bool:
+    if not q.get("image_url"):
+        return False
+
+    option_values = [q.get("A"), q.get("B"), q.get("C"), q.get("D")]
+    return all(is_placeholder_option(value or "") for value in option_values)
+
+
 def db_question_to_dict(q: Question) -> dict:
     return {
         "ID": q.qid,
@@ -88,7 +107,29 @@ def db_question_to_dict(q: Question) -> dict:
         "D": q.d,
         "Correct": [q.correct],
         "image_url": q.image_url,
+        "compact_options": use_compact_answer_buttons({
+            "A": q.a,
+            "B": q.b,
+            "C": q.c,
+            "D": q.d,
+            "image_url": q.image_url,
+        }),
     }
+
+
+def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
+    merged = []
+    seen_ids = set()
+
+    for question_list in question_lists:
+        for question in question_list:
+            qid = question.get("ID")
+            if not qid or qid in seen_ids:
+                continue
+            seen_ids.add(qid)
+            merged.append(question)
+
+    return merged
 
 
 def get_categories() -> list[str]:
@@ -99,6 +140,10 @@ def get_categories() -> list[str]:
             cats.add(c.strip())
 
     cats |= {q["Category"].strip() for q in questions if q.get("Category")}
+
+    if build_runtime_image_questions(AUTO_IMAGE_CATEGORY):
+        cats.add(AUTO_IMAGE_CATEGORY)
+
     return sorted(cats)
 
 
@@ -111,10 +156,147 @@ def get_questions_for_category(category: str) -> list[dict]:
         .all()
     )
 
-    if db_qs:
-        return [db_question_to_dict(q) for q in db_qs]
+    db_questions = [db_question_to_dict(q) for q in db_qs]
+    runtime_image_questions = build_runtime_image_questions(category)
+    static_questions = [q for q in questions if normalize_category(q.get("Category")) == cat_norm]
 
-    return [q for q in questions if normalize_category(q.get("Category")) == cat_norm]
+    return merge_question_lists(db_questions, runtime_image_questions, static_questions)
+
+
+def extract_qid_number(qid: str) -> int:
+    match = re.search(r"(\d+)$", qid or "")
+    return int(match.group(1)) if match else 0
+
+
+def get_next_qid() -> str:
+    all_ids = [q.get("ID", "") for q in questions]
+    all_ids.extend(qid for (qid,) in db.session.query(Question.qid).all())
+    next_number = max((extract_qid_number(qid) for qid in all_ids), default=0) + 1
+    return f"Q{next_number:03d}"
+
+
+def build_structure_title(filename: str) -> str:
+    stem = os.path.splitext(filename)[0]
+    cleaned = re.sub(r"[_-]+", " ", stem).strip()
+    return cleaned or "Imported image question"
+
+
+def build_upload_subdir(category: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", normalize_category(category)).strip("-")
+    return slug or "general"
+
+
+def save_question_image(file_storage, category: str) -> str:
+    upload_root = app.config["UPLOAD_FOLDER"]
+    subdir = build_upload_subdir(category)
+    target_dir = os.path.join(upload_root, subdir)
+    os.makedirs(target_dir, exist_ok=True)
+
+    original_name = secure_filename(file_storage.filename or "")
+    if not original_name:
+        raise ValueError("Missing filename.")
+
+    name, ext = os.path.splitext(original_name)
+    candidate = original_name
+    counter = 1
+
+    while os.path.exists(os.path.join(target_dir, candidate)):
+        candidate = f"{name}-{counter}{ext}"
+        counter += 1
+
+    file_storage.save(os.path.join(target_dir, candidate))
+    return f"/static/uploads/questions/{subdir}/{candidate}"
+
+
+def is_supported_image(filename: str) -> bool:
+    return os.path.splitext(filename.lower())[1] in {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+
+
+def list_existing_image_files(folder_path: str) -> list[str]:
+    if not folder_path:
+        return []
+
+    absolute_folder = os.path.abspath(os.path.join(app.root_path, folder_path))
+    static_root = os.path.abspath(app.static_folder)
+
+    if not os.path.isdir(absolute_folder):
+        raise ValueError("Folder does not exist.")
+
+    if not absolute_folder.startswith(static_root):
+        raise ValueError("Folder must be inside the static directory.")
+
+    return [
+        os.path.join(absolute_folder, name)
+        for name in sorted(os.listdir(absolute_folder))
+        if is_supported_image(name)
+    ]
+
+
+def list_existing_image_choices(folder_path: str = "static/images") -> list[dict[str, str]]:
+    choices = []
+    for path in list_existing_image_files(folder_path):
+        filename = os.path.basename(path)
+        relative_path = os.path.relpath(path, app.static_folder).replace(os.sep, "/")
+        choices.append({
+            "label": build_structure_title(filename),
+            "filename": filename,
+            "url": f"/static/{relative_path}",
+        })
+    return choices
+
+
+def build_runtime_image_questions(category: str) -> list[dict]:
+    if normalize_category(category) != normalize_category(AUTO_IMAGE_CATEGORY):
+        return []
+
+    image_paths = list_existing_image_files("static/images")
+    generated_questions = []
+
+    for index, path in enumerate(image_paths, start=1):
+        filename = os.path.basename(path)
+        relative_path = os.path.relpath(path, app.static_folder).replace(os.sep, "/")
+        generated_questions.append({
+            "ID": f"IMG{index:03d}",
+            "Category": AUTO_IMAGE_CATEGORY,
+            "Vraag": STANDARD_IMAGE_PROMPT,
+            "structure_title": build_structure_title(filename),
+            "A": "A",
+            "B": "B",
+            "C": "C",
+            "D": "D",
+            "Correct": "A",
+            "image_url": f"/static/{relative_path}",
+            "compact_options": True,
+        })
+
+    return generated_questions
+
+
+def parse_answer_key(raw_value: str) -> dict[str, str]:
+    answer_key = {}
+
+    for line in (raw_value or "").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+
+        if "=" not in line:
+            continue
+
+        filename, answer = line.split("=", 1)
+        answer = (answer or "").strip().upper()
+        if answer in {"A", "B", "C", "D"}:
+            answer_key[secure_filename(filename.strip())] = answer
+
+    return answer_key
+
+
+def admin_required():
+    if not current_user.is_authenticated:
+        return redirect(url_for("login", next=request.path))
+    if not current_user.is_admin:
+        abort(403)
+    return None
 
 
 def safe_redirect_target(target: str, fallback_endpoint: str = "home") -> str:
@@ -256,6 +438,216 @@ def quiz(category):
     )
 
 
+@app.route("/admin")
+def admin_home():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    question_count = db.session.query(func.count(Question.id)).scalar() or 0
+    return render_template("admin_home.html", question_count=question_count)
+
+
+@app.route("/admin/questions/new", methods=["GET", "POST"])
+def admin_new_question():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    error = None
+    success = None
+    image_choices = list_existing_image_choices()
+    form_data = {
+        "qid": "",
+        "category": "",
+        "text": STANDARD_IMAGE_PROMPT,
+        "a": "",
+        "b": "",
+        "c": "",
+        "d": "",
+        "correct": "",
+        "image_url": "",
+        "existing_image_url": "",
+    }
+
+    if request.method == "POST":
+        form_data = {
+            "qid": (request.form.get("qid") or "").strip(),
+            "category": (request.form.get("category") or "").strip(),
+            "text": (request.form.get("text") or "").strip(),
+            "a": (request.form.get("a") or "").strip(),
+            "b": (request.form.get("b") or "").strip(),
+            "c": (request.form.get("c") or "").strip(),
+            "d": (request.form.get("d") or "").strip(),
+            "correct": (request.form.get("correct") or "").strip().upper(),
+            "image_url": (request.form.get("image_url") or "").strip(),
+            "existing_image_url": (request.form.get("existing_image_url") or "").strip(),
+        }
+        category = form_data["category"]
+        text = form_data["text"]
+        correct = form_data["correct"]
+
+        option_map = {
+            "a": form_data["a"],
+            "b": form_data["b"],
+            "c": form_data["c"],
+            "d": form_data["d"],
+        }
+
+        qid = form_data["qid"] or get_next_qid()
+        image_url = form_data["image_url"] or form_data["existing_image_url"] or None
+
+        if not text and image_url:
+            text = STANDARD_IMAGE_PROMPT
+            form_data["text"] = text
+
+        if not category or not text:
+            error = "Category and question text are required."
+        elif correct not in {"A", "B", "C", "D"}:
+            error = "Correct answer must be A, B, C, or D."
+        elif not all(option_map.values()):
+            error = "Please fill in all four answer options."
+        elif Question.query.filter_by(qid=qid).first():
+            error = "That QID already exists."
+        else:
+            question = Question(
+                qid=qid,
+                category=category,
+                text=text,
+                a=option_map["a"],
+                b=option_map["b"],
+                c=option_map["c"],
+                d=option_map["d"],
+                correct=correct,
+                image_url=image_url,
+            )
+            db.session.add(question)
+            db.session.commit()
+            success = f"Question {qid} saved."
+            form_data = {
+                "qid": "",
+                "category": category,
+                "text": STANDARD_IMAGE_PROMPT,
+                "a": "",
+                "b": "",
+                "c": "",
+                "d": "",
+                "correct": "",
+                "image_url": "",
+                "existing_image_url": "",
+            }
+
+    return render_template(
+        "admin_new_question.html",
+        error=error,
+        success=success,
+        image_choices=image_choices,
+        form_data=form_data,
+        standard_image_prompt=STANDARD_IMAGE_PROMPT,
+    )
+
+
+@app.route("/admin/questions/import-images", methods=["GET", "POST"])
+def admin_import_images():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    error = None
+    success = None
+    imported_questions = []
+
+    if request.method == "POST":
+        category = (request.form.get("category") or "").strip()
+        answer_key = parse_answer_key(request.form.get("answer_key") or "")
+        files = [file for file in request.files.getlist("images") if file and file.filename]
+        existing_folder = (request.form.get("existing_folder") or "").strip()
+
+        if not category:
+            error = "Category is required."
+        else:
+            try:
+                if files:
+                    for file in files:
+                        filename = secure_filename(file.filename or "")
+                        if not filename or not is_supported_image(filename):
+                            continue
+
+                        image_url = save_question_image(file, category)
+                        if Question.query.filter_by(category=category, image_url=image_url).first():
+                            continue
+                        correct = answer_key.get(filename, "A")
+                        qid = get_next_qid()
+                        question = Question(
+                            qid=qid,
+                            category=category,
+                            text=STANDARD_IMAGE_PROMPT,
+                            a="A",
+                            b="B",
+                            c="C",
+                            d="D",
+                            correct=correct,
+                            image_url=image_url,
+                        )
+                        db.session.add(question)
+                        imported_questions.append({
+                            "qid": qid,
+                            "filename": filename,
+                            "correct": correct,
+                            "image_url": image_url,
+                        })
+                else:
+                    image_paths = list_existing_image_files(existing_folder or "static/images")
+
+                    for path in image_paths:
+                        filename = os.path.basename(path)
+                        relative_path = os.path.relpath(path, app.static_folder).replace(os.sep, "/")
+                        image_url = f"/static/{relative_path}"
+                        if Question.query.filter_by(category=category, image_url=image_url).first():
+                            continue
+                        correct = answer_key.get(filename, "A")
+                        qid = get_next_qid()
+                        question = Question(
+                            qid=qid,
+                            category=category,
+                            text=STANDARD_IMAGE_PROMPT,
+                            a="A",
+                            b="B",
+                            c="C",
+                            d="D",
+                            correct=correct,
+                            image_url=image_url,
+                        )
+                        db.session.add(question)
+                        imported_questions.append({
+                            "qid": qid,
+                            "filename": filename,
+                            "correct": correct,
+                            "image_url": image_url,
+                        })
+
+                if not imported_questions:
+                    raise ValueError("No supported image files were found.")
+
+                db.session.commit()
+
+                defaulted = sum(1 for item in imported_questions if item["filename"] not in answer_key)
+                success = (
+                    f"Imported {len(imported_questions)} image question(s). "
+                    f"{defaulted} used the default correct answer A."
+                )
+            except Exception as exc:
+                db.session.rollback()
+                error = f"Import failed: {exc}"
+
+    return render_template(
+        "admin_import_images.html",
+        error=error,
+        success=success,
+        imported_questions=imported_questions,
+    )
+
+
 # -------------------------
 # Auth
 # -------------------------
@@ -283,6 +675,38 @@ def login():
     return render_template("login.html", error=error, next=next_url)
 
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+
+    error = None
+
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+        confirm_password = request.form.get("confirm_password") or ""
+
+        if not email:
+            error = "Email is required."
+        elif len(password) < 8:
+            error = "Password must be at least 8 characters."
+        elif password != confirm_password:
+            error = "Passwords do not match."
+        elif User.query.filter_by(email=email).first():
+            error = "An account with that email already exists."
+        else:
+            is_first_user = db.session.query(func.count(User.id)).scalar() == 0
+            user = User(email=email, is_admin=is_first_user)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            return redirect(url_for("home"))
+
+    return render_template("register.html", error=error)
+
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -294,6 +718,9 @@ def logout():
 # -------------------------
 # Main
 # -------------------------
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)
