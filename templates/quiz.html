@@ -67,6 +67,7 @@
             {% set q = questions_by_id[qid] %}
             {% set correct = q["Correct"] %}
             {% set is_multi = (correct is sequence) and (correct is not string) %}
+            {% set compact_options = q.get("compact_options") %}
 
             <div
               class="question-panel {% if loop.first %}active{% endif %}"
@@ -99,25 +100,41 @@
                   <label class="option-card">
                     <input type="checkbox" name="ans_{{ qid }}" value="A">
                     <span class="option-letter">A</span>
-                    <span class="option-text">{{ q["A"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer A</span>
+                    {% else %}
+                      <span class="option-text">{{ q["A"] }}</span>
+                    {% endif %}
                   </label>
 
                   <label class="option-card">
                     <input type="checkbox" name="ans_{{ qid }}" value="B">
                     <span class="option-letter">B</span>
-                    <span class="option-text">{{ q["B"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer B</span>
+                    {% else %}
+                      <span class="option-text">{{ q["B"] }}</span>
+                    {% endif %}
                   </label>
 
                   <label class="option-card">
                     <input type="checkbox" name="ans_{{ qid }}" value="C">
                     <span class="option-letter">C</span>
-                    <span class="option-text">{{ q["C"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer C</span>
+                    {% else %}
+                      <span class="option-text">{{ q["C"] }}</span>
+                    {% endif %}
                   </label>
 
                   <label class="option-card">
                     <input type="checkbox" name="ans_{{ qid }}" value="D">
                     <span class="option-letter">D</span>
-                    <span class="option-text">{{ q["D"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer D</span>
+                    {% else %}
+                      <span class="option-text">{{ q["D"] }}</span>
+                    {% endif %}
                   </label>
                 </div>
               {% else %}
@@ -125,25 +142,41 @@
                   <label class="option-card">
                     <input type="radio" name="ans_{{ qid }}" value="A">
                     <span class="option-letter">A</span>
-                    <span class="option-text">{{ q["A"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer A</span>
+                    {% else %}
+                      <span class="option-text">{{ q["A"] }}</span>
+                    {% endif %}
                   </label>
 
                   <label class="option-card">
                     <input type="radio" name="ans_{{ qid }}" value="B">
                     <span class="option-letter">B</span>
-                    <span class="option-text">{{ q["B"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer B</span>
+                    {% else %}
+                      <span class="option-text">{{ q["B"] }}</span>
+                    {% endif %}
                   </label>
 
                   <label class="option-card">
                     <input type="radio" name="ans_{{ qid }}" value="C">
                     <span class="option-letter">C</span>
-                    <span class="option-text">{{ q["C"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer C</span>
+                    {% else %}
+                      <span class="option-text">{{ q["C"] }}</span>
+                    {% endif %}
                   </label>
 
                   <label class="option-card">
                     <input type="radio" name="ans_{{ qid }}" value="D">
                     <span class="option-letter">D</span>
-                    <span class="option-text">{{ q["D"] }}</span>
+                    {% if compact_options %}
+                      <span class="option-text">Answer D</span>
+                    {% else %}
+                      <span class="option-text">{{ q["D"] }}</span>
+                    {% endif %}
                   </label>
                 </div>
               {% endif %}
