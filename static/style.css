@@ -550,6 +550,49 @@ body {
   font-weight: 800;
 }
 
+.student-options-list {
+  flex: 1 1 100%;
+  display: grid;
+  gap: 12px;
+}
+
+.student-option-card {
+  display: grid;
+  grid-template-columns: 24px 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid #dbe2ea;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.student-option-card:has(input:checked) {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.student-option-card input {
+  margin: 0;
+}
+
+.student-option-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.student-option-text {
+  color: #0f172a;
+  line-height: 1.5;
+}
+
 .answer-input {
   flex: 1 1 320px;
   min-height: 56px;
