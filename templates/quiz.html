@@ -92,10 +92,6 @@
               </div>
 
               <h3 class="question-title">{{ q["Vraag"] }}</h3>
-              {% if current_user.is_authenticated and current_user.is_admin and q.get("structure_title") %}
-                <p class="question-subtitle">{{ q["structure_title"] }}</p>
-              {% endif %}
-
               {% if q.get("image_url") %}
                 <div class="question-image-wrapper">
                   <img
@@ -181,6 +177,7 @@
     <script>
       const quizForm = document.getElementById("quizForm");
       const isAdmin = {{ (current_user.is_authenticated and current_user.is_admin)|tojson }};
+      const currentUserId = {{ current_user.id|tojson }};
       const saveAnswerUrl = {{ url_for('admin_save_question_answer')|tojson }};
       const panels = document.querySelectorAll(".question-panel");
       const navButtons = document.querySelectorAll(".question-nav-item");
@@ -190,7 +187,7 @@
       const progressText = document.getElementById("progressText");
       const progressBarFill = document.getElementById("progressBarFill");
       const savedAnswers = new Set();
-      const storageKey = `quizAnswers:${{ category|tojson }}`;
+      const storageKey = `quizAnswers:${currentUserId}:${isAdmin ? "admin" : "student"}:${{ category|tojson }}`;
       let currentIndex = 0;
 
       function loadSavedAnswers() {
