@@ -92,7 +92,7 @@
               </div>
 
               <h3 class="question-title">{{ q["Vraag"] }}</h3>
-              {% if q.get("structure_title") %}
+              {% if current_user.is_authenticated and current_user.is_admin and q.get("structure_title") %}
                 <p class="question-subtitle">{{ q["structure_title"] }}</p>
               {% endif %}
 
@@ -255,10 +255,15 @@
               }
             } else {
               const hiddenInput = panel.querySelector("[data-answer-hidden]");
-              if (hiddenInput) hiddenInput.value = savedValue;
-              const selectedOption = panel.querySelector(`[data-student-choice][value="${savedValue}"]`);
-              if (selectedOption) selectedOption.checked = true;
-              panel.dataset.saved = "true";
+              if (typeof savedValue === "string") {
+                if (hiddenInput) hiddenInput.value = savedValue;
+                const selectedOption = panel.querySelector(`[data-student-choice][value="${savedValue}"]`);
+                if (selectedOption) selectedOption.checked = true;
+                panel.dataset.saved = "true";
+              } else {
+                if (hiddenInput) hiddenInput.value = "";
+                panel.dataset.saved = "false";
+              }
             }
           }
         });
