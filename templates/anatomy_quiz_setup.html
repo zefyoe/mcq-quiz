@@ -58,6 +58,21 @@
               class="quiz-count-input"
               required
             >
+            <div class="quiz-mode-group">
+              <p class="quiz-count-label">Quiz phase</p>
+              {% for mode_key, mode in quiz_modes.items() %}
+                <label class="quiz-mode-card">
+                  <input
+                    type="radio"
+                    name="mode"
+                    value="{{ mode_key }}"
+                    {% if selected_mode == mode_key %}checked{% endif %}
+                  >
+                  <span class="quiz-mode-title">{{ mode.label }}</span>
+                  <span class="quiz-mode-description">{{ mode.description }}</span>
+                </label>
+              {% endfor %}
+            </div>
             <div class="quiz-setup-actions">
               <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">Back</a>
               <button type="submit" class="primary-btn">Start Quiz</button>

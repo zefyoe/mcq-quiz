@@ -13,7 +13,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from sqlalchemy import func
+from sqlalchemy import func, inspect, text
 from werkzeug.utils import secure_filename
 
 from models import QuizAttempt, db, Question, User
@@ -74,6 +74,20 @@ ANATOMY_SUBGROUPS = {
     },
 }
 MAX_QUIZ_QUESTIONS = 50
+ANATOMY_RUNTIME_FOLDER_CATEGORIES = {
+    "GU": "Anatomy - Genito-Urinary",
+    "HN": "Anatomy - Head and Neck",
+}
+QUIZ_MODES = {
+    "test": {
+        "label": "Test Phase",
+        "description": "Show the correct answer after each saved question.",
+    },
+    "exam": {
+        "label": "Exam Phase",
+        "description": "Auto-move to the next question after saving and show a timer.",
+    },
+}
 
 
 # -------------------------
@@ -138,6 +152,18 @@ def get_anatomy_subgroup_for_category(category: str | None) -> str | None:
     return None
 
 
+def get_runtime_image_category_for_path(path: str) -> str:
+    images_root = os.path.abspath(os.path.join(app.root_path, "static/images"))
+    absolute_path = os.path.abspath(path)
+    relative_path = os.path.relpath(absolute_path, images_root)
+    first_part = relative_path.split(os.sep, 1)[0]
+
+    if first_part in ANATOMY_RUNTIME_FOLDER_CATEGORIES:
+        return ANATOMY_RUNTIME_FOLDER_CATEGORIES[first_part]
+
+    return ANATOMY_CATEGORY
+
+
 def get_quiz_display_title(category: str, subgroup: str | None = None) -> str:
     if normalize_category(category) != normalize_category(ANATOMY_CATEGORY):
         return category
@@ -182,6 +208,19 @@ def enforce_single_admin_account():
 
     if changed:
         db.session.commit()
+
+
+def ensure_quiz_attempt_schema():
+    inspector = inspect(db.engine)
+    if "quiz_attempt" not in inspector.get_table_names():
+        return
+
+    column_names = {column["name"] for column in inspector.get_columns("quiz_attempt")}
+    if "quiz_mode" in column_names:
+        return
+
+    db.session.execute(text("ALTER TABLE quiz_attempt ADD COLUMN quiz_mode VARCHAR(20) NOT NULL DEFAULT 'test'"))
+    db.session.commit()
 
 
 def is_placeholder_option(value: str) -> bool:
@@ -379,6 +418,11 @@ def get_question_limit(requested_count: str | int | None, available_count: int) 
     return max(1, min(count, MAX_QUIZ_QUESTIONS, available_count))
 
 
+def normalize_quiz_mode(mode: str | None) -> str:
+    mode_key = normalize_category(mode)
+    return mode_key if mode_key in QUIZ_MODES else "test"
+
+
 def get_all_questions() -> list[dict]:
     db_questions = [db_question_to_dict(q) for q in Question.query.all()]
     static_questions = list(questions)
@@ -419,6 +463,7 @@ def save_quiz_attempt(
     user_id: int,
     category: str,
     subgroup: str | None,
+    quiz_mode: str,
     title: str,
     score: int,
     total_questions: int,
@@ -428,6 +473,7 @@ def save_quiz_attempt(
         user_id=user_id,
         category=category,
         subgroup=subgroup,
+        quiz_mode=normalize_quiz_mode(quiz_mode),
         title=title,
         score=score,
         total_questions=total_questions,
@@ -476,6 +522,7 @@ def build_attempt_summary(attempt: QuizAttempt) -> dict:
     return {
         "id": attempt.id,
         "title": attempt.title,
+        "quiz_mode": normalize_quiz_mode(getattr(attempt, "quiz_mode", "test")),
         "score": attempt.score,
         "total_questions": attempt.total_questions,
         "percent": percent,
@@ -535,14 +582,25 @@ def render_quiz_page(
     selected: list[dict],
     order: list[str],
     back_url: str,
+    quiz_mode: str,
     form_action: str | None = None,
 ):
+    questions_by_id = {q["ID"]: q for q in selected}
+    correct_feedback_by_id = {
+        qid: {
+            "texts": get_correct_answer_texts(question),
+            "keys": normalize_correct(question),
+        }
+        for qid, question in questions_by_id.items()
+    }
     return render_template(
         "quiz.html",
         category=display_title,
-        questions_by_id={q["ID"]: q for q in selected},
+        questions_by_id=questions_by_id,
+        correct_feedback_by_id=correct_feedback_by_id,
         order=order,
         back_url=back_url,
+        quiz_mode=normalize_quiz_mode(quiz_mode),
         form_action=form_action,
     )
 
@@ -629,11 +687,33 @@ def list_existing_image_choices(folder_path: str = "static/images") -> list[dict
     return choices
 
 
+def list_runtime_image_files(folder_path: str = "static/images") -> list[str]:
+    if not folder_path:
+        return []
+
+    absolute_folder = os.path.abspath(os.path.join(app.root_path, folder_path))
+    static_root = os.path.abspath(app.static_folder)
+
+    if not os.path.isdir(absolute_folder):
+        raise ValueError("Folder does not exist.")
+
+    if not absolute_folder.startswith(static_root):
+        raise ValueError("Folder must be inside the static directory.")
+
+    image_paths = []
+    for root, _, filenames in os.walk(absolute_folder):
+        for filename in sorted(filenames):
+            if is_supported_image(filename):
+                image_paths.append(os.path.join(root, filename))
+
+    return sorted(image_paths)
+
+
 def build_runtime_image_questions(category: str) -> list[dict]:
     if normalize_category(category) != normalize_category(AUTO_IMAGE_CATEGORY):
         return []
 
-    image_paths = list_existing_image_files("static/images")
+    image_paths = list_runtime_image_files("static/images")
     generated_questions = []
 
     for index, path in enumerate(image_paths, start=1):
@@ -641,7 +721,7 @@ def build_runtime_image_questions(category: str) -> list[dict]:
         relative_path = os.path.relpath(path, app.static_folder).replace(os.sep, "/")
         generated_questions.append({
             "ID": f"IMG{index:03d}",
-            "Category": AUTO_IMAGE_CATEGORY,
+            "Category": get_runtime_image_category_for_path(path),
             "Vraag": STANDARD_IMAGE_PROMPT,
             "structure_title": build_structure_title(filename),
             "A": "A",
@@ -834,6 +914,8 @@ def anatomy_subgroup_setup(subgroup):
         available_count=available_count,
         max_quiz_questions=MAX_QUIZ_QUESTIONS,
         suggested_count=suggested_count,
+        quiz_modes=QUIZ_MODES,
+        selected_mode=normalize_quiz_mode(request.args.get("mode")),
     )
 
 
@@ -858,10 +940,12 @@ def retake_previous_test(attempt_id):
 
     if request.method == "POST":
         results, score = grade_quiz_submission(order, selected_by_id, request.form)
+        quiz_mode = normalize_quiz_mode(getattr(attempt, "quiz_mode", "test"))
         new_attempt = save_quiz_attempt(
             user_id=current_user.id,
             category=attempt.category,
             subgroup=attempt.subgroup,
+            quiz_mode=quiz_mode,
             title=attempt.title,
             score=score,
             total_questions=len(order),
@@ -887,6 +971,7 @@ def retake_previous_test(attempt_id):
         selected=selected,
         order=order,
         back_url=url_for("previous_tests"),
+        quiz_mode=normalize_quiz_mode(getattr(attempt, "quiz_mode", "test")),
         form_action=url_for("retake_previous_test", attempt_id=attempt.id),
     )
 
@@ -901,6 +986,7 @@ def quiz(category):
 
     subgroup = None
     question_limit = None
+    quiz_mode = normalize_quiz_mode(request.args.get("mode"))
     if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
         subgroup = normalize_anatomy_subgroup(request.args.get("subgroup"))
         if subgroup not in ANATOMY_SUBGROUPS:
@@ -943,15 +1029,18 @@ def quiz(category):
         session["category"] = category
         session["subgroup"] = subgroup
         session["question_limit"] = question_limit
+        session["quiz_mode"] = quiz_mode
 
         return render_quiz_page(
             display_title=display_title,
             selected=selected,
             order=order,
             back_url=back_url,
+            quiz_mode=quiz_mode,
         )
 
     order = session.get("order", [])
+    quiz_mode = normalize_quiz_mode(session.get("quiz_mode"))
     selected_by_id = {q["ID"]: q for q in selected}
     results, score = grade_quiz_submission(order, selected_by_id, request.form)
 
@@ -959,6 +1048,7 @@ def quiz(category):
         user_id=current_user.id,
         category=category,
         subgroup=subgroup,
+        quiz_mode=quiz_mode,
         title=display_title,
         score=score,
         total_questions=len(order),
@@ -1300,6 +1390,7 @@ def logout():
 
 with app.app_context():
     db.create_all()
+    ensure_quiz_attempt_schema()
     enforce_single_admin_account()
 
 if __name__ == "__main__":

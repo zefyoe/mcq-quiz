@@ -64,13 +64,26 @@
             <p class="eyebrow">Medical quiz</p>
             <h1>Quiz: <span class="codepill">{{ category }}</span></h1>
             <p class="small-muted">
+              Mode: <strong>{{ 'Exam Phase' if quiz_mode == 'exam' else 'Test Phase' }}</strong>
+            </p>
+            <p class="small-muted">
               {% if current_user.is_authenticated and current_user.is_admin %}
                 Define the A/B/C/D choices, pick the correct one, and save to lock it in.
               {% else %}
-                Choose A, B, C, or D for each question, save your answer, and it will be locked in.
+                {% if quiz_mode == 'exam' %}
+                  Choose A, B, C, or D and save to move to the next question. You can still go back before submitting.
+                {% else %}
+                  Choose A, B, C, or D, save your answer, and see the correct answer immediately.
+                {% endif %}
               {% endif %}
             </p>
           </div>
+          {% if quiz_mode == 'exam' and not current_user.is_admin %}
+            <div class="quiz-timer-box">
+              <span class="quiz-timer-label">Timer</span>
+              <span class="quiz-timer-value" id="quizTimer">00:00</span>
+            </div>
+          {% endif %}
         </div>
 
         <form method="post" id="quizForm" action="{{ form_action or '' }}">
@@ -162,6 +175,9 @@
               </div>
 
               <p class="answer-lock-note" id="lock-note-{{ loop.index0 }}"></p>
+              {% if not current_user.is_authenticated or not current_user.is_admin %}
+                <div class="answer-feedback" id="feedback-{{ loop.index0 }}"></div>
+              {% endif %}
             </div>
           {% endfor %}
 
@@ -179,6 +195,7 @@
       const isAdmin = {{ (current_user.is_authenticated and current_user.is_admin)|tojson }};
       const currentUserId = {{ current_user.id|tojson }};
       const saveAnswerUrl = {{ url_for('admin_save_question_answer')|tojson }};
+      const quizMode = {{ quiz_mode|tojson }};
       const panels = document.querySelectorAll(".question-panel");
       const navButtons = document.querySelectorAll(".question-nav-item");
       const prevBtn = document.getElementById("prevBtn");
@@ -186,9 +203,65 @@
       const submitQuizBtn = document.getElementById("submitQuizBtn");
       const progressText = document.getElementById("progressText");
       const progressBarFill = document.getElementById("progressBarFill");
+      const quizTimer = document.getElementById("quizTimer");
       const savedAnswers = new Set();
       const storageKey = `quizAnswers:${currentUserId}:${isAdmin ? "admin" : "student"}:${{ category|tojson }}`;
       let currentIndex = 0;
+      const correctFeedbackByQid = {{ correct_feedback_by_id|tojson }};
+
+      function formatElapsedTime(totalSeconds) {
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        return `${minutes}:${seconds}`;
+      }
+
+      function startExamTimer() {
+        if (!quizTimer || quizMode !== "exam" || isAdmin) {
+          return;
+        }
+
+        const timerStorageKey = `${storageKey}:timerStartedAt`;
+        let startedAt = Number(localStorage.getItem(timerStorageKey) || 0);
+        if (!startedAt) {
+          startedAt = Date.now();
+          localStorage.setItem(timerStorageKey, String(startedAt));
+        }
+
+        const updateTimer = () => {
+          const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+          quizTimer.textContent = formatElapsedTime(elapsedSeconds);
+        };
+
+        updateTimer();
+        window.setInterval(updateTimer, 1000);
+      }
+
+      function getCorrectAnswerText(qid) {
+        const values = correctFeedbackByQid[qid]?.texts || [];
+        return values.length ? values.join(", ") : "No correct answer available.";
+      }
+
+      function showImmediateFeedback(panel, isCorrect) {
+        if (quizMode !== "test" || isAdmin) {
+          return;
+        }
+
+        const feedbackEl = document.getElementById(`feedback-${panel.dataset.questionIndex}`);
+        if (!feedbackEl) {
+          return;
+        }
+
+        const qid = panel.dataset.qid;
+        const correctText = getCorrectAnswerText(qid);
+
+        if (isCorrect) {
+          feedbackEl.className = "answer-feedback answer-feedback-correct";
+          feedbackEl.textContent = `Correct. Right answer: ${correctText}`;
+        } else {
+          feedbackEl.className = "answer-feedback answer-feedback-wrong";
+          feedbackEl.textContent = `Incorrect. Right answer: ${correctText}`;
+        }
+      }
 
       function loadSavedAnswers() {
         try {
@@ -280,7 +353,6 @@
         const adminInputs = isAdmin
           ? ["a", "b", "c", "d"].map((key) => panel.querySelector(`[data-answer-input="${key}"]`))
           : [];
-        const hiddenInput = isAdmin ? null : panel.querySelector("[data-answer-hidden]");
         const studentOptions = isAdmin ? [] : panel.querySelectorAll("[data-student-choice]");
         const isSaved = panel.dataset.saved === "true";
 
@@ -322,6 +394,11 @@
           if (statusEl) statusEl.textContent = "Not saved";
           if (navEl) navEl.classList.remove("answered", "locked");
           if (noteEl) noteEl.textContent = "";
+          const feedbackEl = document.getElementById(`feedback-${index}`);
+          if (feedbackEl) {
+            feedbackEl.className = "answer-feedback";
+            feedbackEl.textContent = "";
+          }
         }
 
         const total = panels.length;
@@ -350,6 +427,7 @@
         const saveButton = panel.querySelector("[data-save-answer]");
         let value = "";
         let answers = [];
+        let isCorrect = false;
 
         if (isAdmin) {
           answers = ["a", "b", "c", "d"].map((key) => {
@@ -379,6 +457,8 @@
           }
 
           hiddenInput.value = value;
+          const correctKeys = correctFeedbackByQid[panel.dataset.qid]?.keys || [];
+          isCorrect = correctKeys.includes(value);
         }
 
         if (isAdmin) {
@@ -421,8 +501,9 @@
         panel.dataset.saved = "true";
         persistSavedAnswers();
         updateSavedState(currentIndex);
+        showImmediateFeedback(panel, isCorrect);
 
-        if (currentIndex < panels.length - 1) {
+        if (quizMode === "exam" && currentIndex < panels.length - 1) {
           showQuestion(currentIndex + 1);
         }
 
@@ -482,11 +563,15 @@
 
       quizForm.addEventListener("submit", () => {
         persistSavedAnswers();
+        if (quizMode === "exam" && quizTimer && !isAdmin) {
+          localStorage.removeItem(`${storageKey}:timerStartedAt`);
+        }
       });
 
       hydrateSavedAnswers();
       panels.forEach((_, index) => updateSavedState(index));
       showQuestion(0);
+      startExamTimer();
     </script>
   </body>
 </html>

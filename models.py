@@ -39,6 +39,7 @@ class QuizAttempt(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
     category = db.Column(db.String(120), nullable=False)
     subgroup = db.Column(db.String(80), nullable=True)
+    quiz_mode = db.Column(db.String(20), nullable=False, default="test")
     title = db.Column(db.String(160), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
