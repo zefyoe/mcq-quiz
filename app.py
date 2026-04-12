@@ -53,6 +53,25 @@ db.init_app(app)
 AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
 STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
 ADMIN_EMAIL = "y@bymed.be"
+ANATOMY_CATEGORY = "Anatomy"
+ANATOMY_SUBGROUPS = {
+    "msk": {
+        "label": "MSK",
+        "description": "Musculoskeletal anatomy",
+    },
+    "genito-urinary": {
+        "label": "Genito-Urinary",
+        "description": "Genito-urinary anatomy",
+    },
+    "head-and-neck": {
+        "label": "Head and Neck",
+        "description": "Head and neck anatomy",
+    },
+    "mixed": {
+        "label": "Mixed",
+        "description": "Randomized from all anatomy groups",
+    },
+}
 
 
 # -------------------------
@@ -87,6 +106,46 @@ def normalize_text_answer(value: str) -> str:
 
 def normalize_category(s: str) -> str:
     return (s or "").strip().lower()
+
+
+def normalize_anatomy_subgroup(subgroup: str | None) -> str:
+    return normalize_category(subgroup).replace("_", "-").replace(" ", "-")
+
+
+def is_anatomy_category_name(category: str | None) -> bool:
+    cat_norm = normalize_category(category)
+    return cat_norm == normalize_category(ANATOMY_CATEGORY) or cat_norm.startswith("anatomy -")
+
+
+def get_anatomy_subgroup_for_category(category: str | None) -> str | None:
+    cat_norm = normalize_category(category)
+
+    if cat_norm == normalize_category(ANATOMY_CATEGORY):
+        return "msk"
+
+    if not is_anatomy_category_name(category):
+        return None
+
+    if "musculoskeletal" in cat_norm or "msk" in cat_norm:
+        return "msk"
+    if "genito" in cat_norm or "urinary" in cat_norm:
+        return "genito-urinary"
+    if "head" in cat_norm and "neck" in cat_norm:
+        return "head-and-neck"
+
+    return None
+
+
+def get_quiz_display_title(category: str, subgroup: str | None = None) -> str:
+    if normalize_category(category) != normalize_category(ANATOMY_CATEGORY):
+        return category
+
+    subgroup_key = normalize_anatomy_subgroup(subgroup)
+    subgroup_meta = ANATOMY_SUBGROUPS.get(subgroup_key)
+    if subgroup_meta:
+        return f"{ANATOMY_CATEGORY} - {subgroup_meta['label']}"
+
+    return ANATOMY_CATEGORY
 
 
 def is_admin_email(email: str) -> bool:
@@ -210,21 +269,38 @@ def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
 
 def get_categories() -> list[str]:
     cats = set()
+    has_anatomy = False
 
     for (c,) in db.session.query(Question.category).distinct().all():
         if c:
-            cats.add(c.strip())
+            if is_anatomy_category_name(c):
+                has_anatomy = True
+            else:
+                cats.add(c.strip())
 
-    cats |= {q["Category"].strip() for q in questions if q.get("Category")}
+    for q in questions:
+        category = (q.get("Category") or "").strip()
+        if not category:
+            continue
+        if is_anatomy_category_name(category):
+            has_anatomy = True
+        else:
+            cats.add(category)
 
     if build_runtime_image_questions(AUTO_IMAGE_CATEGORY):
-        cats.add(AUTO_IMAGE_CATEGORY)
+        has_anatomy = True
+
+    if has_anatomy:
+        cats.add(ANATOMY_CATEGORY)
 
     return sorted(cats)
 
 
-def get_questions_for_category(category: str) -> list[dict]:
+def get_questions_for_category(category: str, subgroup: str | None = None) -> list[dict]:
     cat_norm = normalize_category(category)
+
+    if cat_norm == normalize_category(ANATOMY_CATEGORY):
+        return get_questions_for_anatomy_subgroup(subgroup)
 
     db_qs = (
         Question.query
@@ -237,6 +313,53 @@ def get_questions_for_category(category: str) -> list[dict]:
     static_questions = [q for q in questions if normalize_category(q.get("Category")) == cat_norm]
 
     return merge_question_lists(db_questions, runtime_image_questions, static_questions)
+
+
+def get_all_anatomy_questions() -> list[dict]:
+    db_qs = Question.query.all()
+    db_questions = [
+        db_question_to_dict(q)
+        for q in db_qs
+        if is_anatomy_category_name(q.category)
+    ]
+    static_questions = [
+        q for q in questions
+        if is_anatomy_category_name(q.get("Category"))
+    ]
+    runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
+
+    return merge_question_lists(db_questions, static_questions, runtime_image_questions)
+
+
+def get_questions_for_anatomy_subgroup(subgroup: str | None) -> list[dict]:
+    subgroup_key = normalize_anatomy_subgroup(subgroup)
+    if subgroup_key not in ANATOMY_SUBGROUPS:
+        return []
+
+    anatomy_questions = get_all_anatomy_questions()
+
+    if subgroup_key == "mixed":
+        return anatomy_questions
+
+    return [
+        question for question in anatomy_questions
+        if get_anatomy_subgroup_for_category(question.get("Category")) == subgroup_key
+    ]
+
+
+def get_anatomy_subgroup_cards() -> list[dict]:
+    cards = []
+
+    for key, meta in ANATOMY_SUBGROUPS.items():
+        count = len(get_questions_for_anatomy_subgroup(key))
+        cards.append({
+            "key": key,
+            "label": meta["label"],
+            "description": meta["description"],
+            "count": count,
+        })
+
+    return cards
 
 
 def extract_qid_number(qid: str) -> int:
@@ -475,6 +598,9 @@ def home():
                 streak_days=streak_days,
             )
 
+        if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
+            return redirect(url_for("anatomy_sections"))
+
         return redirect(url_for("quiz", category=category))
 
     return render_template(
@@ -487,6 +613,13 @@ def home():
     )
 
 
+@app.route("/anatomy")
+@login_required
+def anatomy_sections():
+    subgroup_cards = get_anatomy_subgroup_cards()
+    return render_template("anatomy_sections.html", subgroup_cards=subgroup_cards)
+
+
 @app.route("/quiz/<category>", methods=["GET", "POST"])
 @login_required
 def quiz(category):
@@ -495,17 +628,31 @@ def quiz(category):
     if category not in categories:
         return redirect(url_for("home"))
 
-    selected = get_questions_for_category(category)
+    subgroup = None
+    if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
+        subgroup = normalize_anatomy_subgroup(request.args.get("subgroup"))
+        if subgroup not in ANATOMY_SUBGROUPS:
+            return redirect(url_for("anatomy_sections"))
+
+    selected = get_questions_for_category(category, subgroup)
+    display_title = get_quiz_display_title(category, subgroup)
+    back_url = url_for("anatomy_sections") if subgroup else url_for("home")
 
     if not selected:
-        return render_template(
-            "home.html",
-            categories=categories,
-            error="No questions found.",
-            total_quizzes=0,
-            accuracy=None,
-            streak_days=0,
-        )
+        template_name = "anatomy_sections.html" if subgroup else "home.html"
+        template_kwargs = {
+            "error": "No questions found.",
+        }
+        if subgroup:
+            template_kwargs["subgroup_cards"] = get_anatomy_subgroup_cards()
+        else:
+            template_kwargs.update({
+                "categories": categories,
+                "total_quizzes": 0,
+                "accuracy": None,
+                "streak_days": 0,
+            })
+        return render_template(template_name, **template_kwargs)
 
     if request.method == "GET":
         order = [q["ID"] for q in selected]
@@ -513,12 +660,14 @@ def quiz(category):
 
         session["order"] = order
         session["category"] = category
+        session["subgroup"] = subgroup
 
         return render_template(
             "quiz.html",
-            category=category,
+            category=display_title,
             questions_by_id={q["ID"]: q for q in selected},
-            order=order
+            order=order,
+            back_url=back_url,
         )
 
     order = session.get("order", [])
@@ -568,10 +717,11 @@ def quiz(category):
 
     return render_template(
         "result.html",
-        category=category,
+        category=display_title,
         score=score,
         total=len(order),
-        results=results
+        results=results,
+        back_url=back_url,
     )
 
 

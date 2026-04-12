@@ -275,6 +275,11 @@ body {
   font: inherit;
 }
 
+.category-link-card {
+  display: block;
+  text-decoration: none;
+}
+
 .category-card:hover {
   transform: translateY(-2px);
   background: #f1f5f9;
@@ -299,6 +304,17 @@ body {
   display: block;
   color: #64748b;
   font-size: 0.95rem;
+}
+
+.category-count {
+  display: inline-flex;
+  margin-top: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 .tip-box {

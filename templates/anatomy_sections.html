@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anatomy Sections</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Rady</div>
+        <div class="topbar-actions">
+          <div class="topbar-badge">Anatomy Quiz</div>
+          {% if current_user.is_authenticated and current_user.is_admin %}
+            <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
+          {% endif %}
+          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero card">
+        <div class="hero-text">
+          <p class="eyebrow">Anatomy sections</p>
+          <h1>Choose an anatomy subgroup</h1>
+          <p class="hero-subtitle">
+            Start with a focused anatomy block or use mixed mode to randomize from all anatomy questions.
+          </p>
+        </div>
+      </section>
+
+      <section class="card quiz-section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Start anatomy quiz</p>
+            <h2>Select a subgroup</h2>
+            <p class="section-subtitle">
+              MSK is active now. The other sections are ready for questions as you add them.
+            </p>
+          </div>
+        </div>
+
+        {% if error %}
+          <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        <div class="category-grid">
+          {% for subgroup in subgroup_cards %}
+            <a
+              href="{{ url_for('quiz', category='Anatomy', subgroup=subgroup.key) }}"
+              class="category-card category-link-card"
+            >
+              <span class="category-icon">
+                {% if subgroup.key == 'msk' %}
+                  🦴
+                {% elif subgroup.key == 'genito-urinary' %}
+                  🧬
+                {% elif subgroup.key == 'head-and-neck' %}
+                  👤
+                {% else %}
+                  🎲
+                {% endif %}
+              </span>
+              <span class="category-name">{{ subgroup.label }}</span>
+              <span class="category-desc">{{ subgroup.description }}</span>
+              <span class="category-count">{{ subgroup.count }} questions</span>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
