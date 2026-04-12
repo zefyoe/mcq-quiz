@@ -73,7 +73,7 @@
           </div>
         </div>
 
-        <form method="post" id="quizForm">
+        <form method="post" id="quizForm" action="{{ form_action or '' }}">
           {% for qid in order %}
             {% set q = questions_by_id[qid] %}
 

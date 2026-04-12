@@ -50,7 +50,7 @@
         <div class="category-grid">
           {% for subgroup in subgroup_cards %}
             <a
-              href="{{ url_for('quiz', category='Anatomy', subgroup=subgroup.key) }}"
+              href="{{ url_for('anatomy_subgroup_setup', subgroup=subgroup.key) }}"
               class="category-card category-link-card"
             >
               <span class="category-icon">

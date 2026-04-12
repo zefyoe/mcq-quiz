@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Previous Tests</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Rady</div>
+        <div class="topbar-actions">
+          <div class="topbar-badge">Previous Tests</div>
+          {% if current_user.is_authenticated and current_user.is_admin %}
+            <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
+          {% endif %}
+          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero card">
+        <div class="hero-text">
+          <p class="eyebrow">Your history</p>
+          <h1>My Previous Tests</h1>
+          <p class="hero-subtitle">
+            Review your saved quiz results and retake the exact same question set whenever you want.
+          </p>
+        </div>
+      </section>
+
+      <section class="card quiz-section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Saved attempts</p>
+            <h2>Test History</h2>
+            <p class="section-subtitle">Each completed quiz is stored per user with its score and percentage.</p>
+          </div>
+        </div>
+
+        {% if attempts %}
+          <div class="history-list">
+            {% for attempt in attempts %}
+              <article class="history-card">
+                <div class="history-card-main">
+                  <p class="history-title">{{ attempt.title }}</p>
+                  <p class="history-meta">
+                    {{ attempt.created_at.strftime('%d %b %Y %H:%M') }} •
+                    {{ attempt.score }}/{{ attempt.total_questions }} •
+                    {{ attempt.percent }}%
+                  </p>
+                </div>
+                <div class="history-card-actions">
+                  <a href="{{ url_for('retake_previous_test', attempt_id=attempt.id) }}" class="primary-btn">Retake This Test</a>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="tip-box">You have not completed any tests yet.</div>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

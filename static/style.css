@@ -189,6 +189,12 @@ body {
   background: linear-gradient(135deg, #ffffff, #eef4ff);
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .hero h1 {
   margin: 0 0 12px;
   font-size: 2.2rem;
@@ -249,6 +255,14 @@ body {
 .section-header h2 {
   margin: 0 0 8px;
   font-size: 1.8rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .section-subtitle {
@@ -324,6 +338,73 @@ body {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   color: #475569;
+}
+
+.quiz-setup-card {
+  max-width: 720px;
+}
+
+.quiz-setup-form {
+  margin-top: 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.quiz-count-label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.quiz-count-input {
+  width: 100%;
+  max-width: 220px;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.quiz-setup-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.history-list {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.history-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.history-title {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.history-meta {
+  margin: 0;
+  color: #64748b;
+}
+
+.history-card-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Quiz page */

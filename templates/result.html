@@ -54,6 +54,10 @@
 
         <div class="result-summary-actions">
           <a href="{{ back_url }}" class="primary-btn">New Quiz</a>
+          <a href="{{ url_for('previous_tests') }}" class="secondary-btn">My Previous Tests</a>
+          {% if attempt_id %}
+            <a href="{{ url_for('retake_previous_test', attempt_id=attempt_id) }}" class="secondary-btn">Retake This Test</a>
+          {% endif %}
         </div>
       </section>
 

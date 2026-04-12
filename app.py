@@ -1,7 +1,8 @@
 import os
 import random
 import re
-from datetime import timedelta
+import json
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 from flask import Flask, abort, jsonify, render_template, request, session, redirect, url_for
@@ -15,7 +16,7 @@ from flask_login import (
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
 
-from models import db, Question, User
+from models import QuizAttempt, db, Question, User
 from questions_data import questions
 
 
@@ -72,6 +73,7 @@ ANATOMY_SUBGROUPS = {
         "description": "Randomized from all anatomy groups",
     },
 }
+MAX_QUIZ_QUESTIONS = 50
 
 
 # -------------------------
@@ -362,6 +364,189 @@ def get_anatomy_subgroup_cards() -> list[dict]:
     return cards
 
 
+def get_question_limit(requested_count: str | int | None, available_count: int) -> int:
+    try:
+        count = int(requested_count or 0)
+    except (TypeError, ValueError):
+        count = 0
+
+    if available_count <= 0:
+        return 0
+
+    if count <= 0:
+        count = min(MAX_QUIZ_QUESTIONS, available_count)
+
+    return max(1, min(count, MAX_QUIZ_QUESTIONS, available_count))
+
+
+def get_all_questions() -> list[dict]:
+    db_questions = [db_question_to_dict(q) for q in Question.query.all()]
+    static_questions = list(questions)
+    runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
+    return merge_question_lists(db_questions, static_questions, runtime_image_questions)
+
+
+def get_questions_by_ids(question_ids: list[str]) -> list[dict]:
+    questions_by_id = {q["ID"]: q for q in get_all_questions()}
+    selected = []
+
+    for qid in question_ids:
+        question = questions_by_id.get(qid)
+        if question:
+            selected.append(question)
+
+    return selected
+
+
+def serialize_question_ids(question_ids: list[str]) -> str:
+    return json.dumps(question_ids)
+
+
+def parse_question_ids(raw_value: str | None) -> list[str]:
+    try:
+        parsed = json.loads(raw_value or "[]")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return []
+
+    if not isinstance(parsed, list):
+        return []
+
+    return [str(item).strip() for item in parsed if str(item).strip()]
+
+
+def save_quiz_attempt(
+    *,
+    user_id: int,
+    category: str,
+    subgroup: str | None,
+    title: str,
+    score: int,
+    total_questions: int,
+    question_ids: list[str],
+) -> QuizAttempt:
+    attempt = QuizAttempt(
+        user_id=user_id,
+        category=category,
+        subgroup=subgroup,
+        title=title,
+        score=score,
+        total_questions=total_questions,
+        question_ids_json=serialize_question_ids(question_ids),
+    )
+    db.session.add(attempt)
+    db.session.commit()
+    return attempt
+
+
+def get_user_quiz_stats(user_id: int) -> tuple[int, int | None, int]:
+    attempts = (
+        QuizAttempt.query
+        .filter_by(user_id=user_id)
+        .order_by(QuizAttempt.created_at.desc())
+        .all()
+    )
+
+    total_quizzes = len(attempts)
+    if not attempts:
+        return 0, None, 0
+
+    total_answered = sum(attempt.total_questions for attempt in attempts)
+    total_correct = sum(attempt.score for attempt in attempts)
+    accuracy = round((total_correct / total_answered) * 100) if total_answered else None
+
+    attempt_days = sorted({attempt.created_at.date() for attempt in attempts}, reverse=True)
+    streak_days = 0
+    current_day = datetime.utcnow().date()
+
+    for day in attempt_days:
+        if day == current_day:
+            streak_days += 1
+            current_day -= timedelta(days=1)
+        elif streak_days == 0 and day == current_day - timedelta(days=1):
+            streak_days += 1
+            current_day = day - timedelta(days=1)
+        else:
+            break
+
+    return total_quizzes, accuracy, streak_days
+
+
+def build_attempt_summary(attempt: QuizAttempt) -> dict:
+    percent = round((attempt.score / attempt.total_questions) * 100) if attempt.total_questions else 0
+    return {
+        "id": attempt.id,
+        "title": attempt.title,
+        "score": attempt.score,
+        "total_questions": attempt.total_questions,
+        "percent": percent,
+        "created_at": attempt.created_at,
+    }
+
+
+def grade_quiz_submission(order: list[str], selected_by_id: dict[str, dict], form_data) -> tuple[list[dict], int]:
+    results = []
+    score = 0
+
+    for qid in order:
+        q = selected_by_id.get(qid)
+        if not q:
+            continue
+
+        correct = normalize_correct(q)
+        correct_texts = get_correct_answer_texts(q)
+        user_text = (form_data.get(f"ans_{qid}") or "").strip()
+        user_answers = [user_text] if user_text else []
+
+        normalized_user = normalize_text_answer(user_text)
+        normalized_correct_texts = {normalize_text_answer(text) for text in correct_texts if text}
+        normalized_correct_keys = {normalize_text_answer(value) for value in correct}
+
+        is_correct = bool(
+            normalized_user and (
+                normalized_user in normalized_correct_texts
+                or normalized_user in normalized_correct_keys
+            )
+        )
+
+        if is_correct:
+            score += 1
+
+        results.append({
+            "ID": q["ID"],
+            "Vraag": q["Vraag"],
+            "user": user_answers,
+            "correct": correct,
+            "correct_texts": correct_texts,
+            "is_correct": is_correct,
+            "options": {
+                "A": q["A"],
+                "B": q["B"],
+                "C": q["C"],
+                "D": q["D"],
+            },
+        })
+
+    return results, score
+
+
+def render_quiz_page(
+    *,
+    display_title: str,
+    selected: list[dict],
+    order: list[str],
+    back_url: str,
+    form_action: str | None = None,
+):
+    return render_template(
+        "quiz.html",
+        category=display_title,
+        questions_by_id={q["ID"]: q for q in selected},
+        order=order,
+        back_url=back_url,
+        form_action=form_action,
+    )
+
+
 def extract_qid_number(qid: str) -> int:
     match = re.search(r"(\d+)$", qid or "")
     return int(match.group(1)) if match else 0
@@ -579,11 +764,7 @@ def home():
         return redirect(url_for("login"))
 
     categories = get_categories()
-
-    # ✅ FIXED: no fake stats anymore
-    total_quizzes = 0
-    accuracy = None
-    streak_days = 0
+    total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
 
     if request.method == "POST":
         category = (request.form.get("category") or "").strip()
@@ -620,6 +801,96 @@ def anatomy_sections():
     return render_template("anatomy_sections.html", subgroup_cards=subgroup_cards)
 
 
+@app.route("/previous-tests")
+@login_required
+def previous_tests():
+    attempts = (
+        QuizAttempt.query
+        .filter_by(user_id=current_user.id)
+        .order_by(QuizAttempt.created_at.desc())
+        .all()
+    )
+    attempt_summaries = [build_attempt_summary(attempt) for attempt in attempts]
+    return render_template("previous_tests.html", attempts=attempt_summaries)
+
+
+@app.route("/anatomy/<subgroup>")
+@login_required
+def anatomy_subgroup_setup(subgroup):
+    subgroup_key = normalize_anatomy_subgroup(subgroup)
+    subgroup_meta = ANATOMY_SUBGROUPS.get(subgroup_key)
+    if not subgroup_meta:
+        return redirect(url_for("anatomy_sections"))
+
+    selected = get_questions_for_anatomy_subgroup(subgroup_key)
+    available_count = len(selected)
+    suggested_count = get_question_limit(request.args.get("count"), available_count)
+
+    return render_template(
+        "anatomy_quiz_setup.html",
+        subgroup_key=subgroup_key,
+        subgroup_label=subgroup_meta["label"],
+        subgroup_description=subgroup_meta["description"],
+        available_count=available_count,
+        max_quiz_questions=MAX_QUIZ_QUESTIONS,
+        suggested_count=suggested_count,
+    )
+
+
+@app.route("/previous-tests/<int:attempt_id>/retake", methods=["GET", "POST"])
+@login_required
+def retake_previous_test(attempt_id):
+    attempt = QuizAttempt.query.filter_by(id=attempt_id, user_id=current_user.id).first()
+    if not attempt:
+        abort(404)
+
+    order = parse_question_ids(attempt.question_ids_json)
+    if not order:
+        return redirect(url_for("previous_tests"))
+
+    selected = get_questions_by_ids(order)
+    selected_by_id = {q["ID"]: q for q in selected}
+    available_ids = set(selected_by_id)
+    order = [qid for qid in order if qid in available_ids]
+
+    if not order:
+        return redirect(url_for("previous_tests"))
+
+    if request.method == "POST":
+        results, score = grade_quiz_submission(order, selected_by_id, request.form)
+        new_attempt = save_quiz_attempt(
+            user_id=current_user.id,
+            category=attempt.category,
+            subgroup=attempt.subgroup,
+            title=attempt.title,
+            score=score,
+            total_questions=len(order),
+            question_ids=order,
+        )
+        return render_template(
+            "result.html",
+            category=attempt.title,
+            score=score,
+            total=len(order),
+            results=results,
+            back_url=url_for("previous_tests"),
+            attempt_id=new_attempt.id,
+        )
+
+    session["order"] = order
+    session["category"] = attempt.category
+    session["subgroup"] = attempt.subgroup
+    session["question_limit"] = len(order)
+
+    return render_quiz_page(
+        display_title=attempt.title,
+        selected=selected,
+        order=order,
+        back_url=url_for("previous_tests"),
+        form_action=url_for("retake_previous_test", attempt_id=attempt.id),
+    )
+
+
 @app.route("/quiz/<category>", methods=["GET", "POST"])
 @login_required
 def quiz(category):
@@ -629,6 +900,7 @@ def quiz(category):
         return redirect(url_for("home"))
 
     subgroup = None
+    question_limit = None
     if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
         subgroup = normalize_anatomy_subgroup(request.args.get("subgroup"))
         if subgroup not in ANATOMY_SUBGROUPS:
@@ -639,6 +911,7 @@ def quiz(category):
     back_url = url_for("anatomy_sections") if subgroup else url_for("home")
 
     if not selected:
+        total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
         template_name = "anatomy_sections.html" if subgroup else "home.html"
         template_kwargs = {
             "error": "No questions found.",
@@ -648,72 +921,49 @@ def quiz(category):
         else:
             template_kwargs.update({
                 "categories": categories,
-                "total_quizzes": 0,
-                "accuracy": None,
-                "streak_days": 0,
+                "total_quizzes": total_quizzes,
+                "accuracy": accuracy,
+                "streak_days": streak_days,
             })
         return render_template(template_name, **template_kwargs)
 
     if request.method == "GET":
+        if subgroup:
+            question_limit = get_question_limit(request.args.get("count"), len(selected))
+            if not question_limit:
+                return redirect(url_for("anatomy_subgroup_setup", subgroup=subgroup))
+        else:
+            question_limit = len(selected)
+
         order = [q["ID"] for q in selected]
         random.shuffle(order)
+        order = order[:question_limit]
 
         session["order"] = order
         session["category"] = category
         session["subgroup"] = subgroup
+        session["question_limit"] = question_limit
 
-        return render_template(
-            "quiz.html",
-            category=display_title,
-            questions_by_id={q["ID"]: q for q in selected},
+        return render_quiz_page(
+            display_title=display_title,
+            selected=selected,
             order=order,
             back_url=back_url,
         )
 
     order = session.get("order", [])
     selected_by_id = {q["ID"]: q for q in selected}
+    results, score = grade_quiz_submission(order, selected_by_id, request.form)
 
-    results = []
-    score = 0
-
-    for qid in order:
-        q = selected_by_id.get(qid)
-        if not q:
-            continue
-
-        correct = normalize_correct(q)
-        correct_texts = get_correct_answer_texts(q)
-        user_text = (request.form.get(f"ans_{qid}") or "").strip()
-        user_answers = [user_text] if user_text else []
-
-        normalized_user = normalize_text_answer(user_text)
-        normalized_correct_texts = {normalize_text_answer(text) for text in correct_texts if text}
-        normalized_correct_keys = {normalize_text_answer(value) for value in correct}
-
-        is_correct = bool(
-            normalized_user and (
-                normalized_user in normalized_correct_texts
-                or normalized_user in normalized_correct_keys
-            )
-        )
-
-        if is_correct:
-            score += 1
-
-        results.append({
-            "ID": q["ID"],
-            "Vraag": q["Vraag"],
-            "user": user_answers,
-            "correct": correct,
-            "correct_texts": correct_texts,
-            "is_correct": is_correct,
-            "options": {
-                "A": q["A"],
-                "B": q["B"],
-                "C": q["C"],
-                "D": q["D"],
-            },
-        })
+    attempt = save_quiz_attempt(
+        user_id=current_user.id,
+        category=category,
+        subgroup=subgroup,
+        title=display_title,
+        score=score,
+        total_questions=len(order),
+        question_ids=order,
+    )
 
     return render_template(
         "result.html",
@@ -722,6 +972,7 @@ def quiz(category):
         total=len(order),
         results=results,
         back_url=back_url,
+        attempt_id=attempt.id,
     )
 
 

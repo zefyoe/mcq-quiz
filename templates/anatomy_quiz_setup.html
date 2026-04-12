@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ subgroup_label }} Quiz Setup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Rady</div>
+        <div class="topbar-actions">
+          <div class="topbar-badge">Quiz Setup</div>
+          {% if current_user.is_authenticated and current_user.is_admin %}
+            <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
+          {% endif %}
+          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero card">
+        <div class="hero-text">
+          <p class="eyebrow">Quiz setup</p>
+          <h1>{{ subgroup_label }}</h1>
+          <p class="hero-subtitle">
+            {{ subgroup_description }}. Choose how many questions to include in this quiz.
+          </p>
+        </div>
+      </section>
+
+      <section class="card quiz-section quiz-setup-card">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Question count</p>
+            <h2>How many questions do you want?</h2>
+            <p class="section-subtitle">
+              Available now: {{ available_count }} question{{ '' if available_count == 1 else 's' }}.
+              Maximum per quiz: {{ max_quiz_questions }}.
+            </p>
+          </div>
+        </div>
+
+        {% if available_count > 0 %}
+          <form method="get" action="{{ url_for('quiz', category='Anatomy') }}" class="quiz-setup-form">
+            <input type="hidden" name="subgroup" value="{{ subgroup_key }}">
+            <label class="quiz-count-label" for="count">Number of questions</label>
+            <input
+              id="count"
+              name="count"
+              type="number"
+              min="1"
+              max="{{ [available_count, max_quiz_questions]|min }}"
+              value="{{ suggested_count }}"
+              class="quiz-count-input"
+              required
+            >
+            <div class="quiz-setup-actions">
+              <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">Back</a>
+              <button type="submit" class="primary-btn">Start Quiz</button>
+            </div>
+          </form>
+        {% else %}
+          <div class="alert alert-error">No questions found in this subgroup yet.</div>
+          <div class="quiz-setup-actions">
+            <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">Back</a>
+          </div>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>
