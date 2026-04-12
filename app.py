@@ -223,6 +223,26 @@ def ensure_quiz_attempt_schema():
     db.session.commit()
 
 
+def ensure_user_profile_schema():
+    inspector = inspect(db.engine)
+    if "user" not in inspector.get_table_names():
+        return
+
+    column_names = {column["name"] for column in inspector.get_columns("user")}
+    statements = []
+
+    if "name" not in column_names:
+        statements.append("ALTER TABLE user ADD COLUMN name VARCHAR(255)")
+    if "university" not in column_names:
+        statements.append("ALTER TABLE user ADD COLUMN university VARCHAR(255)")
+
+    for statement in statements:
+        db.session.execute(text(statement))
+
+    if statements:
+        db.session.commit()
+
+
 def is_placeholder_option(value: str) -> bool:
     return (value or "").strip().upper() in {"A", "B", "C", "D", "OPTION A", "OPTION B", "OPTION C", "OPTION D"}
 
@@ -440,6 +460,22 @@ def get_questions_by_ids(question_ids: list[str]) -> list[dict]:
             selected.append(question)
 
     return selected
+
+
+def get_runtime_image_database_rows() -> list[dict]:
+    rows = []
+
+    for question in build_runtime_image_questions(ANATOMY_CATEGORY):
+        image_url = question.get("image_url") or ""
+        relative_path = image_url.removeprefix("/static/") if image_url.startswith("/static/") else image_url
+        rows.append({
+            "qid": question.get("ID", ""),
+            "filename": os.path.basename(relative_path),
+            "relative_path": relative_path,
+            "category": question.get("Category", ""),
+        })
+
+    return rows
 
 
 def serialize_question_ids(question_ids: list[str]) -> str:
@@ -1076,6 +1112,16 @@ def admin_home():
     return render_template("admin_home.html", question_count=question_count)
 
 
+@app.route("/admin/database")
+def admin_database():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    rows = get_runtime_image_database_rows()
+    return render_template("admin_database.html", rows=rows, filename_count=len(rows))
+
+
 @app.route("/admin/questions/save-answer", methods=["POST"])
 @login_required
 def admin_save_question_answer():
@@ -1351,13 +1397,29 @@ def register():
         return redirect(url_for("home"))
 
     error = None
+    form_data = {
+        "name": "",
+        "university": "",
+        "email": "",
+    }
 
     if request.method == "POST":
+        form_data = {
+            "name": (request.form.get("name") or "").strip(),
+            "university": (request.form.get("university") or "").strip(),
+            "email": (request.form.get("email") or "").strip().lower(),
+        }
+        name = form_data["name"]
+        university = form_data["university"]
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
         confirm_password = request.form.get("confirm_password") or ""
 
-        if not email:
+        if not name:
+            error = "Name is required."
+        elif not university:
+            error = "University is required."
+        elif not email:
             error = "Email is required."
         elif len(password) < 8:
             error = "Password must be at least 8 characters."
@@ -1366,14 +1428,19 @@ def register():
         elif User.query.filter_by(email=email).first():
             error = "An account with that email already exists."
         else:
-            user = User(email=email, is_admin=is_admin_email(email))
+            user = User(
+                name=name,
+                university=university,
+                email=email,
+                is_admin=is_admin_email(email),
+            )
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
             login_user(user)
             return redirect(url_for("home"))
 
-    return render_template("register.html", error=error)
+    return render_template("register.html", error=error, form_data=form_data)
 
 
 @app.route("/logout")
@@ -1391,6 +1458,7 @@ def logout():
 with app.app_context():
     db.create_all()
     ensure_quiz_attempt_schema()
+    ensure_user_profile_schema()
     enforce_single_admin_account()
 
 if __name__ == "__main__":

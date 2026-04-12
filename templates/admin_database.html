@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Database</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
+  </head>
+  <body>
+    <header class="admin-topbar">
+      <div class="admin-topbar-inner">
+        <div class="admin-brand">Rady</div>
+        <div class="admin-topbar-actions">
+          <div class="admin-topbar-badge">Database</div>
+          {% if current_user.is_authenticated and current_user.is_admin %}
+            <div class="admin-topbar-badge admin-role-badge">ADMIN ROLE</div>
+          {% endif %}
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('admin_home') }}">Admin</a>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('home') }}">Home</a>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('logout') }}">Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-container">
+      <h1>Database</h1>
+      <p>{{ filename_count }} image filename(s) detected automatically.</p>
+
+      <div class="card" style="background: white; border-radius: 18px; padding: 0; overflow: hidden; border: 1px solid #e5e7eb;">
+        <div style="display: grid; grid-template-columns: 160px 1fr; gap: 0; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px;">
+          <div>Question ID</div>
+          <div>Filename</div>
+        </div>
+
+        {% for row in rows %}
+          <div style="display: grid; grid-template-columns: 160px 1fr; gap: 0; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start;">
+            <div><strong>{{ row.qid }}</strong></div>
+            <div>
+              <div>{{ row.filename }}</div>
+              <div style="color: #64748b; font-size: 0.9rem;">{{ row.relative_path }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </main>
+  </body>
+</html>
