@@ -14,6 +14,8 @@
           <div class="topbar-badge">Medical Training Dashboard</div>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
+            <a href="{{ url_for('admin_home') }}" class="topbar-link">Admin</a>
+            <a href="{{ url_for('admin_database') }}" class="topbar-link">Database</a>
           {% endif %}
           <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
           <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
@@ -33,6 +35,9 @@
         </div>
         <div class="hero-actions">
           <a href="{{ url_for('previous_tests') }}" class="primary-btn">My Previous Tests</a>
+          {% if current_user.is_authenticated and current_user.is_admin %}
+            <a href="{{ url_for('admin_database') }}" class="secondary-btn">Open Database</a>
+          {% endif %}
         </div>
       </section>
 
@@ -77,7 +82,13 @@
               Pick one topic below and begin immediately.
             </p>
           </div>
-          <a href="{{ url_for('previous_tests') }}" class="secondary-btn">View Previous Tests</a>
+          <div class="section-header-actions">
+            <a href="{{ url_for('previous_tests') }}" class="secondary-btn">View Previous Tests</a>
+            {% if current_user.is_authenticated and current_user.is_admin %}
+              <a href="{{ url_for('admin_home') }}" class="secondary-btn">Admin</a>
+              <a href="{{ url_for('admin_database') }}" class="secondary-btn">Database</a>
+            {% endif %}
+          </div>
         </div>
 
         {% if error %}

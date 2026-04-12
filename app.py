@@ -480,6 +480,82 @@ def get_runtime_image_database_rows() -> list[dict]:
     return rows
 
 
+def get_question_overview_rows() -> list[dict]:
+    rows = []
+
+    for question in get_all_questions():
+        image_url = question.get("image_url") or ""
+        rows.append({
+            "qid": question.get("ID", ""),
+            "category": question.get("Category", ""),
+            "text": question.get("Vraag", ""),
+            "filename": os.path.basename(image_url) if image_url else "",
+            "image_url": image_url,
+        })
+
+    return sorted(rows, key=lambda row: extract_qid_number(row["qid"]) if row["qid"] else 0)
+
+
+def get_admin_question_form_data(qid: str | None = None, image_url: str | None = None, category: str | None = None) -> dict:
+    form_data = {
+        "qid": "",
+        "category": "",
+        "text": STANDARD_IMAGE_PROMPT,
+        "a": "",
+        "b": "",
+        "c": "",
+        "d": "",
+        "image_url": "",
+        "existing_image_url": "",
+    }
+
+    db_question = None
+    if qid:
+        db_question = Question.query.filter_by(qid=qid).first()
+
+    if db_question is None and image_url and category:
+        db_question = Question.query.filter_by(image_url=image_url, category=category).first()
+
+    if db_question:
+        form_data.update({
+            "qid": db_question.qid,
+            "category": db_question.category,
+            "text": db_question.text,
+            "a": db_question.a,
+            "b": db_question.b,
+            "c": db_question.c,
+            "d": db_question.d,
+            "image_url": db_question.image_url or "",
+            "existing_image_url": db_question.image_url or "",
+        })
+        return form_data
+
+    if qid or image_url:
+        for question in get_all_questions():
+            question_image_url = question.get("image_url") or ""
+            if qid and question.get("ID") != qid:
+                continue
+            if image_url and question_image_url != image_url:
+                continue
+            if category and (question.get("Category") or "") != category:
+                continue
+
+            form_data.update({
+                "qid": question.get("ID", ""),
+                "category": question.get("Category", ""),
+                "text": question.get("Vraag", STANDARD_IMAGE_PROMPT),
+                "a": question.get("A", ""),
+                "b": question.get("B", ""),
+                "c": question.get("C", ""),
+                "d": question.get("D", ""),
+                "image_url": question_image_url,
+                "existing_image_url": question_image_url,
+            })
+            break
+
+    return form_data
+
+
 def serialize_question_ids(question_ids: list[str]) -> str:
     return json.dumps(question_ids)
 
@@ -1120,8 +1196,8 @@ def admin_database():
     if admin_redirect:
         return admin_redirect
 
-    rows = get_runtime_image_database_rows()
-    return render_template("admin_database.html", rows=rows, filename_count=len(rows))
+    rows = get_question_overview_rows()
+    return render_template("admin_database.html", rows=rows, question_count=len(rows))
 
 
 @app.route("/admin/questions/save-answer", methods=["POST"])
@@ -1180,17 +1256,11 @@ def admin_new_question():
     error = None
     success = None
     image_choices = list_existing_image_choices()
-    form_data = {
-        "qid": "",
-        "category": "",
-        "text": STANDARD_IMAGE_PROMPT,
-        "a": "",
-        "b": "",
-        "c": "",
-        "d": "",
-        "image_url": "",
-        "existing_image_url": "",
-    }
+    form_data = get_admin_question_form_data(
+        qid=(request.args.get("qid") or "").strip() or None,
+        image_url=(request.args.get("image_url") or "").strip() or None,
+        category=(request.args.get("category") or "").strip() or None,
+    )
 
     if request.method == "POST":
         form_data = {
@@ -1214,8 +1284,14 @@ def admin_new_question():
             "d": form_data["d"],
         }
 
-        qid = form_data["qid"] or get_next_qid()
+        submitted_qid = form_data["qid"]
         image_url = form_data["image_url"] or form_data["existing_image_url"] or None
+        existing_question = None
+
+        if submitted_qid and not submitted_qid.startswith("IMG"):
+            existing_question = Question.query.filter_by(qid=submitted_qid).first()
+        if existing_question is None and image_url:
+            existing_question = Question.query.filter_by(category=category, image_url=image_url).first()
 
         if not text and image_url:
             text = STANDARD_IMAGE_PROMPT
@@ -1225,34 +1301,32 @@ def admin_new_question():
             error = "Category and question text are required."
         elif not option_map["a"]:
             error = "Please provide the correct answer."
-        elif Question.query.filter_by(qid=qid).first():
-            error = "That QID already exists."
         else:
-            question = Question(
-                qid=qid,
-                category=category,
-                text=text,
-                a=option_map["a"],
-                b=option_map["b"],
-                c=option_map["c"],
-                d=option_map["d"],
-                correct="T",
-                image_url=image_url,
-            )
-            db.session.add(question)
+            if existing_question is None:
+                existing_question = Question(
+                    qid=get_next_qid(),
+                    category=category,
+                    text=text,
+                    a=option_map["a"],
+                    b=option_map["b"],
+                    c=option_map["c"],
+                    d=option_map["d"],
+                    correct="T",
+                    image_url=image_url,
+                )
+                db.session.add(existing_question)
+            else:
+                existing_question.category = category
+                existing_question.text = text
+                existing_question.a = option_map["a"]
+                existing_question.b = option_map["b"]
+                existing_question.c = option_map["c"]
+                existing_question.d = option_map["d"]
+                existing_question.image_url = image_url
+
             db.session.commit()
-            success = f"Question {qid} saved."
-            form_data = {
-                "qid": "",
-                "category": category,
-                "text": STANDARD_IMAGE_PROMPT,
-                "a": "",
-                "b": "",
-                "c": "",
-                "d": "",
-                "image_url": "",
-                "existing_image_url": "",
-            }
+            success = f"Question {existing_question.qid} saved."
+            form_data = get_admin_question_form_data(qid=existing_question.qid)
 
     return render_template(
         "admin_new_question.html",
