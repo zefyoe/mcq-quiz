@@ -225,16 +225,18 @@ def ensure_quiz_attempt_schema():
 
 def ensure_user_profile_schema():
     inspector = inspect(db.engine)
-    if "user" not in inspector.get_table_names():
+    user_table_name = User.__table__.name
+
+    if user_table_name not in inspector.get_table_names():
         return
 
-    column_names = {column["name"] for column in inspector.get_columns("user")}
+    column_names = {column["name"] for column in inspector.get_columns(user_table_name)}
     statements = []
 
     if "name" not in column_names:
-        statements.append("ALTER TABLE user ADD COLUMN name VARCHAR(255)")
+        statements.append('ALTER TABLE "user" ADD COLUMN name VARCHAR(255)')
     if "university" not in column_names:
-        statements.append("ALTER TABLE user ADD COLUMN university VARCHAR(255)")
+        statements.append('ALTER TABLE "user" ADD COLUMN university VARCHAR(255)')
 
     for statement in statements:
         db.session.execute(text(statement))
