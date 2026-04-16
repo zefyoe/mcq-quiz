@@ -26,21 +26,29 @@
       <h1>Database</h1>
       <p>{{ question_count }} question(s) available.</p>
 
-      <div class="card" style="background: white; border-radius: 18px; padding: 0; overflow: hidden; border: 1px solid #e5e7eb;">
-        <div style="display: grid; grid-template-columns: 130px 170px 1.4fr 1fr 120px 110px; gap: 16px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px;">
+      <div class="card" style="background: white; border-radius: 18px; padding: 0; overflow-x: auto; border: 1px solid #e5e7eb;">
+        <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px; min-width: 1800px;">
           <div>Question ID</div>
           <div>Category</div>
           <div>Question</div>
+          <div>Answer A</div>
+          <div>Answer B</div>
+          <div>Answer C</div>
+          <div>Answer D</div>
           <div>Filename</div>
           <div>Correct</div>
           <div></div>
         </div>
 
         {% for row in rows %}
-          <div style="display: grid; grid-template-columns: 130px 170px 1.4fr 1fr 120px 110px; gap: 16px; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start;">
+          <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start; min-width: 1800px;">
             <div><strong>{{ row.qid }}</strong></div>
             <div>{{ row.category }}</div>
             <div>{{ row.text }}</div>
+            <div>{{ row.answer_a or "—" }}</div>
+            <div>{{ row.answer_b or "—" }}</div>
+            <div>{{ row.answer_c or "—" }}</div>
+            <div>{{ row.answer_d or "—" }}</div>
             <div>
               <div>{{ row.filename or "—" }}</div>
             </div>

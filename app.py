@@ -503,6 +503,10 @@ def get_question_overview_rows() -> list[dict]:
             "text": question.get("Vraag", ""),
             "filename": os.path.basename(image_url) if image_url else "",
             "image_url": image_url,
+            "answer_a": question.get("A", ""),
+            "answer_b": question.get("B", ""),
+            "answer_c": question.get("C", ""),
+            "answer_d": question.get("D", ""),
             "correct_choice": correct_choice,
         })
 
