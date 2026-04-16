@@ -19,6 +19,12 @@ from werkzeug.utils import secure_filename
 from models import QuizAttempt, db, Question, User
 from questions_data import questions
 
+try:
+    from anatomy_answer_bank import IMAGE_QUESTION_OVERRIDES, STATIC_QUESTION_OVERRIDES
+except ImportError:
+    IMAGE_QUESTION_OVERRIDES = {}
+    STATIC_QUESTION_OVERRIDES = {}
+
 
 # -------------------------
 # App + DB config
@@ -377,6 +383,17 @@ def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
     return merged
 
 
+def apply_static_question_override(question: dict) -> dict:
+    qid = (question.get("ID") or "").strip()
+    override = STATIC_QUESTION_OVERRIDES.get(qid)
+    if not override:
+        return dict(question)
+
+    merged = dict(question)
+    merged.update(override)
+    return merged
+
+
 def get_categories() -> list[str]:
     cats = set()
     has_anatomy = False
@@ -389,7 +406,7 @@ def get_categories() -> list[str]:
                 cats.add(c.strip())
 
     for q in questions:
-        category = (q.get("Category") or "").strip()
+        category = (apply_static_question_override(q).get("Category") or "").strip()
         if not category:
             continue
         if is_anatomy_category_name(category):
@@ -420,7 +437,11 @@ def get_questions_for_category(category: str, subgroup: str | None = None) -> li
 
     db_questions = [db_question_to_dict(q) for q in db_qs]
     runtime_image_questions = build_runtime_image_questions(category)
-    static_questions = [q for q in questions if normalize_category(q.get("Category")) == cat_norm]
+    static_questions = [
+        apply_static_question_override(q)
+        for q in questions
+        if normalize_category(apply_static_question_override(q).get("Category")) == cat_norm
+    ]
 
     return merge_question_lists(db_questions, runtime_image_questions, static_questions)
 
@@ -433,8 +454,9 @@ def get_all_anatomy_questions() -> list[dict]:
         if is_anatomy_category_name(q.category)
     ]
     static_questions = [
-        q for q in questions
-        if is_anatomy_category_name(q.get("Category"))
+        apply_static_question_override(q)
+        for q in questions
+        if is_anatomy_category_name(apply_static_question_override(q).get("Category"))
     ]
     runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
 
@@ -891,18 +913,26 @@ def build_runtime_image_questions(category: str) -> list[dict]:
     for index, path in enumerate(image_paths, start=1):
         filename = os.path.basename(path)
         relative_path = os.path.relpath(path, app.static_folder).replace(os.sep, "/")
+        override = IMAGE_QUESTION_OVERRIDES.get(filename, {})
+        answer_a = (override.get("A") or "").strip() or build_structure_title(filename)
+        answer_b = (override.get("B") or "").strip()
+        answer_c = (override.get("C") or "").strip()
+        answer_d = (override.get("D") or "").strip()
+        correct_choice = (override.get("Correct") or "").strip().upper()
+        if correct_choice not in {"A", "B", "C", "D"}:
+            correct_choice = "A"
         generated_questions.append({
             "ID": f"IMG{index:03d}",
-            "Category": get_runtime_image_category_for_path(path),
-            "Vraag": STANDARD_IMAGE_PROMPT,
+            "Category": (override.get("Category") or get_runtime_image_category_for_path(path)).strip() or get_runtime_image_category_for_path(path),
+            "Vraag": (override.get("Vraag") or STANDARD_IMAGE_PROMPT).strip() or STANDARD_IMAGE_PROMPT,
             "structure_title": build_structure_title(filename),
-            "A": "A",
-            "B": "B",
-            "C": "C",
-            "D": "D",
-            "Correct": "A",
+            "A": answer_a,
+            "B": answer_b,
+            "C": answer_c,
+            "D": answer_d,
+            "Correct": correct_choice,
             "image_url": f"/static/{relative_path}",
-            "compact_options": True,
+            "compact_options": False,
         })
 
     return generated_questions
@@ -1261,7 +1291,14 @@ def admin_database():
         return admin_redirect
 
     rows = get_question_overview_rows()
-    return render_template("admin_database.html", rows=rows, question_count=len(rows))
+    anatomy_rows = [row for row in rows if is_anatomy_category_name(row.get("category"))]
+    physics_rows = [row for row in rows if normalize_category(row.get("category")) == "physics"]
+    return render_template(
+        "admin_database.html",
+        anatomy_rows=anatomy_rows,
+        physics_rows=physics_rows,
+        question_count=len(rows),
+    )
 
 
 @app.route("/admin/questions/save-answer", methods=["POST"])

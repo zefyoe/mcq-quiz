@@ -26,44 +26,56 @@
       <h1>Database</h1>
       <p>{{ question_count }} question(s) available.</p>
 
-      <div class="card" style="background: white; border-radius: 18px; padding: 0; overflow-x: auto; border: 1px solid #e5e7eb;">
-        <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px; min-width: 1800px;">
-          <div>Question ID</div>
-          <div>Category</div>
-          <div>Question</div>
-          <div>Answer A</div>
-          <div>Answer B</div>
-          <div>Answer C</div>
-          <div>Answer D</div>
-          <div>Filename</div>
-          <div>Correct</div>
-          <div></div>
-        </div>
+      {% macro render_question_table(title, rows) %}
+        <section style="margin-top: 28px;">
+          <h2 style="margin: 0 0 14px;">{{ title }}</h2>
+          <p style="margin: 0 0 14px; color: #475569;">{{ rows|length }} question(s)</p>
 
-        {% for row in rows %}
-          <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start; min-width: 1800px;">
-            <div><strong>{{ row.qid }}</strong></div>
-            <div>{{ row.category }}</div>
-            <div>{{ row.text }}</div>
-            <div>{{ row.answer_a or "—" }}</div>
-            <div>{{ row.answer_b or "—" }}</div>
-            <div>{{ row.answer_c or "—" }}</div>
-            <div>{{ row.answer_d or "—" }}</div>
-            <div>
-              <div>{{ row.filename or "—" }}</div>
+          <div class="card" style="background: white; border-radius: 18px; padding: 0; overflow-x: auto; border: 1px solid #e5e7eb;">
+            <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px; min-width: 1800px;">
+              <div>Question ID</div>
+              <div>Category</div>
+              <div>Question</div>
+              <div>Answer A</div>
+              <div>Answer B</div>
+              <div>Answer C</div>
+              <div>Answer D</div>
+              <div>Filename</div>
+              <div>Correct</div>
+              <div></div>
             </div>
-            <div><strong>{{ row.correct_choice }}</strong></div>
-            <div>
-              <a
-                class="admin-link-button"
-                href="{{ url_for('admin_new_question', qid=row.qid, image_url=row.image_url, category=row.category) }}"
-              >
-                Edit
-              </a>
-            </div>
+
+            {% if rows %}
+              {% for row in rows %}
+                <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start; min-width: 1800px;">
+                  <div><strong>{{ row.qid }}</strong></div>
+                  <div>{{ row.category }}</div>
+                  <div>{{ row.text }}</div>
+                  <div>{{ row.answer_a or "—" }}</div>
+                  <div>{{ row.answer_b or "—" }}</div>
+                  <div>{{ row.answer_c or "—" }}</div>
+                  <div>{{ row.answer_d or "—" }}</div>
+                  <div>{{ row.filename or "—" }}</div>
+                  <div><strong>{{ row.correct_choice }}</strong></div>
+                  <div>
+                    <a
+                      class="admin-link-button"
+                      href="{{ url_for('admin_new_question', qid=row.qid, image_url=row.image_url, category=row.category) }}"
+                    >
+                      Edit
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div style="padding: 18px; color: #64748b;">No questions in this table.</div>
+            {% endif %}
           </div>
-        {% endfor %}
-      </div>
+        </section>
+      {% endmacro %}
+
+      {{ render_question_table("Anatomy Questions", anatomy_rows) }}
+      {{ render_question_table("Physics Questions", physics_rows) }}
     </main>
   </body>
 </html>
