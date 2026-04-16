@@ -509,6 +509,68 @@ def get_question_limit(requested_count: str | int | None, available_count: int) 
     return max(1, min(count, MAX_QUIZ_QUESTIONS, available_count))
 
 
+def get_category_question_count(category: str) -> int:
+    if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
+        return len(get_all_anatomy_questions())
+    return len(get_questions_for_category(category))
+
+
+def get_category_icon(category: str) -> str:
+    icon_map = {
+        "anatomy": "🧠",
+        "cardiology": "❤️",
+        "respiratory": "🫁",
+        "pathology": "🧬",
+        "pharmacology": "💊",
+        "physiology": "🫀",
+        "microbiology": "🔬",
+        "biochemistry": "🧪",
+    }
+    return icon_map.get(normalize_category(category), "📘")
+
+
+def build_home_category_cards(categories: list[str]) -> list[dict]:
+    difficulty_by_category = {
+        "anatomy": "Mixed Difficulty",
+        "physiology": "Intermediate",
+        "pharmacology": "Intermediate",
+        "pathology": "Intermediate",
+        "microbiology": "Beginner",
+        "biochemistry": "Beginner",
+    }
+
+    cards = []
+    for category in categories:
+        cards.append({
+            "name": category,
+            "icon": get_category_icon(category),
+            "count": get_category_question_count(category),
+            "difficulty": difficulty_by_category.get(normalize_category(category), "Mixed Difficulty"),
+            "description": f"Practice MCQs in {category}",
+            "available": True,
+        })
+
+    placeholder_cards = [
+        {"name": "Cardiology", "icon": "❤️", "count": 0, "difficulty": "Intermediate", "description": "Focused cardiovascular practice is coming soon.", "available": False},
+        {"name": "Respiratory", "icon": "🫁", "count": 0, "difficulty": "Beginner", "description": "Pulmonary question sets will be added soon.", "available": False},
+        {"name": "Pathology", "icon": "🧬", "count": 0, "difficulty": "Intermediate", "description": "Structured pathology review will appear here soon.", "available": False},
+        {"name": "Pharmacology", "icon": "💊", "count": 0, "difficulty": "Intermediate", "description": "Drug-focused training modules are on the roadmap.", "available": False},
+    ]
+
+    present_names = {card["name"] for card in cards}
+    cards.extend(card for card in placeholder_cards if card["name"] not in present_names)
+    return cards
+
+
+def get_last_quiz_attempt(user_id: int) -> QuizAttempt | None:
+    return (
+        QuizAttempt.query
+        .filter_by(user_id=user_id)
+        .order_by(QuizAttempt.created_at.desc())
+        .first()
+    )
+
+
 def normalize_quiz_mode(mode: str | None) -> str:
     mode_key = normalize_category(mode)
     return mode_key if mode_key in QUIZ_MODES else "test"
@@ -1046,7 +1108,9 @@ def home():
         return redirect(url_for("login"))
 
     categories = get_categories()
+    category_cards = build_home_category_cards(categories)
     total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
+    last_attempt = get_last_quiz_attempt(current_user.id)
 
     if request.method == "POST":
         category = (request.form.get("category") or "").strip()
@@ -1055,10 +1119,12 @@ def home():
             return render_template(
                 "home.html",
                 categories=categories,
+                category_cards=category_cards,
                 error="Invalid category.",
                 total_quizzes=total_quizzes,
                 accuracy=accuracy,
                 streak_days=streak_days,
+                last_attempt=last_attempt,
             )
 
         if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
@@ -1069,10 +1135,12 @@ def home():
     return render_template(
         "home.html",
         categories=categories,
+        category_cards=category_cards,
         error=None,
         total_quizzes=total_quizzes,
         accuracy=accuracy,
         streak_days=streak_days,
+        last_attempt=last_attempt,
     )
 
 

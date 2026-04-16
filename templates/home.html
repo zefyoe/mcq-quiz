@@ -7,79 +7,150 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <header class="topbar">
+    <header class="topbar topbar-compact">
       <div class="topbar-inner">
-        <div class="brand">Rady</div>
+        <div class="brand-block">
+          <div class="brand">Rady</div>
+          <div class="brand-subtitle">Clinical quiz dashboard</div>
+        </div>
         <div class="topbar-actions">
-          <div class="topbar-badge">Medical Training Dashboard</div>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
             <a href="{{ url_for('admin_home') }}" class="topbar-link">Admin</a>
             <a href="{{ url_for('admin_database') }}" class="topbar-link">Database</a>
           {% endif %}
-          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
+          <a href="{{ url_for('home') }}" class="topbar-link">Dashboard</a>
+          <a href="{{ url_for('previous_tests') }}" class="topbar-link">History</a>
           <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
         </div>
       </div>
     </header>
 
     <main class="page">
-      <section class="hero card">
-        <div class="hero-text">
-          <p class="eyebrow">Welcome back</p>
-          <h1>Ready to test your medical knowledge?</h1>
+      <section class="hero hero-home card">
+        <div class="hero-copy">
+          <p class="eyebrow">Structured Medical Practice</p>
+          <h1>Sharpen Your Clinical Knowledge with Targeted Practice</h1>
           <p class="hero-subtitle">
-            Choose a category and start a focused quiz session. Build speed,
-            accuracy, and confidence with every attempt.
+            Build speed, accuracy, and exam confidence through structured medical quizzes aligned with real-world study goals.
           </p>
+          <div class="hero-trust">
+            <span class="hero-trust-pill">Aligned with medical exam standards</span>
+            <span class="hero-trust-pill">Designed for consistent daily practice</span>
+          </div>
         </div>
-        <div class="hero-actions">
-          <a href="{{ url_for('previous_tests') }}" class="primary-btn">My Previous Tests</a>
-          {% if current_user.is_authenticated and current_user.is_admin %}
-            <a href="{{ url_for('admin_database') }}" class="secondary-btn">Open Database</a>
-          {% endif %}
+        <div class="hero-actions hero-actions-stacked">
+          <form method="post" class="hero-cta-form">
+            <button type="submit" name="category" value="Anatomy" class="primary-btn">Start New Quiz</button>
+          </form>
+          <a href="{{ url_for('previous_tests') }}" class="secondary-btn">My Previous Tests</a>
         </div>
       </section>
 
-      <section class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">📝</div>
+      <section class="stats-grid stats-grid-home">
+        <div class="stat-card stat-card-blue">
+          <div class="stat-icon stat-icon-blue">📝</div>
           <div>
             <p class="stat-label">Quizzes Taken</p>
             <h3>{{ total_quizzes }}</h3>
+            <p class="stat-note">
+              {% if total_quizzes %}
+                Your practice history is being tracked automatically.
+              {% else %}
+                Start your first quiz to track progress.
+              {% endif %}
+            </p>
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon">🎯</div>
+        <div class="stat-card stat-card-green">
+          <div class="stat-icon stat-icon-green">🎯</div>
           <div>
             <p class="stat-label">Accuracy</p>
             <h3>
               {% if accuracy is not none %}
                 {{ accuracy }}%
               {% else %}
-                -
+                —
               {% endif %}
             </h3>
+            <p class="stat-note">
+              {% if accuracy is not none %}
+                Keep practicing to improve your precision.
+              {% else %}
+                Complete a quiz to see performance.
+              {% endif %}
+            </p>
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon">🔥</div>
+        <div class="stat-card stat-card-amber">
+          <div class="stat-icon stat-icon-amber">🔥</div>
           <div>
             <p class="stat-label">Current Streak</p>
-            <h3>{{ streak_days }} Days</h3>
+            <h3>{{ streak_days }} day{{ '' if streak_days == 1 else 's' }}</h3>
+            <p class="stat-note">
+              {% if streak_days %}
+                Keep the momentum going with another session today.
+              {% else %}
+                Stay consistent to build your streak.
+              {% endif %}
+            </p>
           </div>
         </div>
+      </section>
+
+      <section class="card continue-card">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Continue Learning</p>
+            <h2>Continue Where You Left Off</h2>
+            <p class="section-subtitle">
+              {% if last_attempt %}
+                Pick up from your most recent practice session or review your history.
+              {% else %}
+                You haven’t started a quiz yet.
+              {% endif %}
+            </p>
+          </div>
+          {% if last_attempt %}
+            <a href="{{ url_for('retake_previous_test', attempt_id=last_attempt.id) }}" class="primary-btn">Resume Last Quiz</a>
+          {% endif %}
+        </div>
+
+        {% if last_attempt %}
+          <div class="continue-panel">
+            <div class="continue-metric">
+              <span class="continue-label">Last Quiz</span>
+              <strong>{{ last_attempt.title }}</strong>
+            </div>
+            <div class="continue-metric">
+              <span class="continue-label">Score</span>
+              <strong>{{ last_attempt.score }}/{{ last_attempt.total_questions }}</strong>
+            </div>
+            <div class="continue-metric">
+              <span class="continue-label">Completed</span>
+              <strong>{{ last_attempt.created_at.strftime('%d %b %Y') }}</strong>
+            </div>
+          </div>
+        {% else %}
+          <div class="continue-empty">
+            <div class="continue-empty-icon">📚</div>
+            <div>
+              <p class="continue-empty-title">Your learning journey starts here.</p>
+              <p class="continue-empty-text">Take a first quiz to unlock performance tracking, streaks, and quick resume.</p>
+            </div>
+          </div>
+        {% endif %}
       </section>
 
       <section class="card quiz-section" id="quiz-categories">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Start a new quiz</p>
-            <h2>Select a category</h2>
+            <p class="eyebrow">Start a New Quiz</p>
+            <h2>Select a Category</h2>
             <p class="section-subtitle">
-              Pick one topic below and begin immediately.
+              Choose a focused topic and train with structured MCQs.
             </p>
           </div>
           <div class="section-header-actions">
@@ -96,37 +167,53 @@
         {% endif %}
 
         <form method="post">
-          <div class="category-grid">
-            {% for c in categories %}
-              <button type="submit" name="category" value="{{ c }}" class="category-card">
-                <span class="category-icon">
-                  {% if c|lower == 'anatomy' %}
-                    🧠
-                  {% elif c|lower == 'physiology' %}
-                    🫀
-                  {% elif c|lower == 'pharmacology' %}
-                    💊
-                  {% elif c|lower == 'pathology' %}
-                    🦠
-                  {% elif c|lower == 'microbiology' %}
-                    🔬
-                  {% elif c|lower == 'biochemistry' %}
-                    🧪
-                  {% else %}
-                    📘
-                  {% endif %}
-                </span>
-                <span class="category-name">{{ c }}</span>
-                <span class="category-desc">Practice MCQs in {{ c }}</span>
-              </button>
+          <div class="category-grid category-grid-rich">
+            {% for card in category_cards %}
+              {% if card.available %}
+                <button type="submit" name="category" value="{{ card.name }}" class="category-card category-card-rich">
+                  <span class="category-card-top">
+                    <span class="category-icon">{{ card.icon }}</span>
+                    <span class="category-badges">
+                      <span class="category-count">{{ card.count }} Questions</span>
+                      <span class="category-difficulty">{{ card.difficulty }}</span>
+                    </span>
+                  </span>
+                  <span class="category-name">{{ card.name }}</span>
+                  <span class="category-desc">{{ card.description }}</span>
+                </button>
+              {% else %}
+                <div class="category-card category-card-rich category-card-disabled">
+                  <span class="category-card-top">
+                    <span class="category-icon">{{ card.icon }}</span>
+                    <span class="category-badges">
+                      <span class="category-count">{{ card.count }} Questions</span>
+                      <span class="category-difficulty">{{ card.difficulty }}</span>
+                    </span>
+                  </span>
+                  <span class="category-name">{{ card.name }}</span>
+                  <span class="category-desc">{{ card.description }}</span>
+                  <span class="category-coming-soon">Coming soon</span>
+                </div>
+              {% endif %}
             {% endfor %}
           </div>
         </form>
 
-        <div class="tip-box">
+        <div class="tip-box tip-box-home">
           <strong>Tip:</strong> The free server may sometimes sleep, so the first load can take a little longer.
         </div>
       </section>
     </main>
+
+    <footer class="footer-bar">
+      <div class="footer-bar-inner">
+        <div class="footer-copy">Rady helps you train with structured MCQs and consistent review.</div>
+        <div class="footer-links">
+          <span>About</span>
+          <span>Contact</span>
+          <span>Terms</span>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
