@@ -325,6 +325,43 @@ def get_correct_answer_texts(q: dict) -> list[str]:
     return answers
 
 
+def get_display_answer_option(q: dict, key: str) -> str:
+    option_text = (q.get(key) or "").strip()
+
+    if key == "A" and q.get("structure_title") and use_compact_answer_buttons(q):
+        return q["structure_title"]
+
+    return option_text
+
+
+def get_effective_correct_choice(q: dict) -> str:
+    normalized_correct = normalize_correct(q)
+    if normalized_correct and normalized_correct[0] in {"A", "B", "C", "D"}:
+        if q.get("structure_title") and use_compact_answer_buttons(q):
+            return get_default_correct_choice(q.get("ID") or q.get("image_url"))
+        return normalized_correct[0]
+
+    return get_default_correct_choice(q.get("ID") or q.get("image_url"))
+
+
+def get_effective_answer_options(q: dict) -> dict[str, str]:
+    if q.get("structure_title") and use_compact_answer_buttons(q):
+        correct_choice = get_effective_correct_choice(q)
+        return {
+            "A": q["structure_title"] if correct_choice == "A" else "",
+            "B": q["structure_title"] if correct_choice == "B" else "",
+            "C": q["structure_title"] if correct_choice == "C" else "",
+            "D": q["structure_title"] if correct_choice == "D" else "",
+        }
+
+    return {
+        "A": get_display_answer_option(q, "A"),
+        "B": get_display_answer_option(q, "B"),
+        "C": get_display_answer_option(q, "C"),
+        "D": get_display_answer_option(q, "D"),
+    }
+
+
 def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
     merged = []
     seen_keys = set()
@@ -495,18 +532,18 @@ def get_question_overview_rows() -> list[dict]:
 
     for question in get_all_questions():
         image_url = question.get("image_url") or ""
-        normalized_correct = normalize_correct(question)
-        correct_choice = normalized_correct[0] if normalized_correct and normalized_correct[0] in {"A", "B", "C", "D"} else get_default_correct_choice(question.get("ID") or image_url)
+        correct_choice = get_effective_correct_choice(question)
+        effective_answers = get_effective_answer_options(question)
         rows.append({
             "qid": question.get("ID", ""),
             "category": question.get("Category", ""),
             "text": question.get("Vraag", ""),
             "filename": os.path.basename(image_url) if image_url else "",
             "image_url": image_url,
-            "answer_a": question.get("A", ""),
-            "answer_b": question.get("B", ""),
-            "answer_c": question.get("C", ""),
-            "answer_d": question.get("D", ""),
+            "answer_a": effective_answers["A"],
+            "answer_b": effective_answers["B"],
+            "answer_c": effective_answers["C"],
+            "answer_d": effective_answers["D"],
             "correct_choice": correct_choice,
         })
 
@@ -559,21 +596,18 @@ def get_admin_question_form_data(qid: str | None = None, image_url: str | None =
             if category and (question.get("Category") or "") != category:
                 continue
 
+            effective_answers = get_effective_answer_options(question)
             form_data.update({
                 "qid": question.get("ID", ""),
                 "category": question.get("Category", ""),
                 "text": question.get("Vraag", STANDARD_IMAGE_PROMPT),
-                "a": question.get("A", ""),
-                "b": question.get("B", ""),
-                "c": question.get("C", ""),
-                "d": question.get("D", ""),
+                "a": effective_answers["A"],
+                "b": effective_answers["B"],
+                "c": effective_answers["C"],
+                "d": effective_answers["D"],
                 "image_url": question_image_url,
                 "existing_image_url": question_image_url,
-                "correct_choice": (
-                    normalize_correct(question)[0]
-                    if normalize_correct(question) and normalize_correct(question)[0] in {"A", "B", "C", "D"}
-                    else get_default_correct_choice(question.get("ID") or question_image_url)
-                ),
+                "correct_choice": get_effective_correct_choice(question),
             })
             break
 
