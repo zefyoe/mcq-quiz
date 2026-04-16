@@ -517,16 +517,16 @@ def get_category_question_count(category: str) -> int:
 
 def get_category_icon(category: str) -> str:
     icon_map = {
-        "anatomy": "🧠",
-        "cardiology": "❤️",
-        "respiratory": "🫁",
-        "pathology": "🧬",
-        "pharmacology": "💊",
-        "physiology": "🫀",
-        "microbiology": "🔬",
-        "biochemistry": "🧪",
+        "anatomy": "AN",
+        "cardiology": "CD",
+        "respiratory": "RS",
+        "pathology": "PT",
+        "pharmacology": "PH",
+        "physiology": "FY",
+        "microbiology": "MB",
+        "biochemistry": "BC",
     }
-    return icon_map.get(normalize_category(category), "📘")
+    return icon_map.get(normalize_category(category), "MC")
 
 
 def build_home_category_cards(categories: list[str]) -> list[dict]:
@@ -551,10 +551,10 @@ def build_home_category_cards(categories: list[str]) -> list[dict]:
         })
 
     placeholder_cards = [
-        {"name": "Cardiology", "icon": "❤️", "count": 0, "difficulty": "Intermediate", "description": "Focused cardiovascular practice is coming soon.", "available": False},
-        {"name": "Respiratory", "icon": "🫁", "count": 0, "difficulty": "Beginner", "description": "Pulmonary question sets will be added soon.", "available": False},
-        {"name": "Pathology", "icon": "🧬", "count": 0, "difficulty": "Intermediate", "description": "Structured pathology review will appear here soon.", "available": False},
-        {"name": "Pharmacology", "icon": "💊", "count": 0, "difficulty": "Intermediate", "description": "Drug-focused training modules are on the roadmap.", "available": False},
+        {"name": "Cardiology", "icon": "CD", "count": 0, "difficulty": "Intermediate", "description": "Focused cardiovascular practice is coming soon.", "available": False},
+        {"name": "Respiratory", "icon": "RS", "count": 0, "difficulty": "Beginner", "description": "Pulmonary question sets will be added soon.", "available": False},
+        {"name": "Pathology", "icon": "PT", "count": 0, "difficulty": "Intermediate", "description": "Structured pathology review will appear here soon.", "available": False},
+        {"name": "Pharmacology", "icon": "PH", "count": 0, "difficulty": "Intermediate", "description": "Drug-focused training modules are on the roadmap.", "available": False},
     ]
 
     present_names = {card["name"] for card in cards}
