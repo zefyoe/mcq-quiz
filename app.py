@@ -1008,6 +1008,12 @@ def previous_tests():
     return render_template("previous_tests.html", attempts=attempt_summaries)
 
 
+@app.route("/stocks")
+@login_required
+def stocks():
+    return render_template("stocks.html")
+
+
 @app.route("/anatomy/<subgroup>")
 @login_required
 def anatomy_subgroup_setup(subgroup):

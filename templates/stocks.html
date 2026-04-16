@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stocks</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    :root {
+      --stocks-bg: #f8fafc;
+      --stocks-card: #ffffff;
+      --stocks-text: #0f172a;
+      --stocks-muted: #475569;
+      --stocks-border: #e2e8f0;
+      --stocks-green: #16a34a;
+      --stocks-red: #dc2626;
+      --stocks-slate: #334155;
+      --stocks-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --stocks-radius: 18px;
+      --stocks-amber: #d97706;
+    }
+
+    .stocks-page {
+      background: var(--stocks-bg);
+      min-height: calc(100vh - 76px);
+    }
+
+    .stocks-shell {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .stocks-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+
+    .stocks-card {
+      background: var(--stocks-card);
+      border: 1px solid var(--stocks-border);
+      border-radius: var(--stocks-radius);
+      box-shadow: var(--stocks-shadow);
+      overflow: hidden;
+    }
+
+    .stocks-card-header {
+      padding: 20px 22px 0;
+    }
+
+    .stocks-card-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .stocks-card-content {
+      padding: 20px 22px 22px;
+    }
+
+    .stocks-title {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.1;
+    }
+
+    .stocks-sub {
+      margin: 0 0 22px;
+      color: var(--stocks-muted);
+      max-width: 860px;
+      line-height: 1.55;
+    }
+
+    .stocks-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .stocks-field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stocks-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 15px;
+      background: white;
+    }
+
+    .stocks-hint {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .stocks-decision-box {
+      padding: 22px;
+      color: white;
+    }
+
+    .stocks-decision-go { background: var(--stocks-green); }
+    .stocks-decision-trap { background: var(--stocks-red); }
+    .stocks-decision-wait { background: var(--stocks-slate); }
+
+    .stocks-eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .stocks-decision-title {
+      font-size: 30px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .stocks-decision-text {
+      margin: 14px 0 0;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .stocks-stats {
+      display: grid;
+      gap: 12px;
+    }
+
+    .stocks-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .stocks-badge {
+      border: 1px solid var(--stocks-border);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      background: #f8fafc;
+    }
+
+    .stocks-divider {
+      height: 1px;
+      background: var(--stocks-border);
+      margin: 2px 0;
+    }
+
+    .stocks-score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stocks-score-box {
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid transparent;
+    }
+
+    .stocks-score-good {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .stocks-score-mid {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    .stocks-score-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .stocks-score-value {
+      font-size: 30px;
+      font-weight: 800;
+    }
+
+    .stocks-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: #334155;
+      line-height: 1.55;
+    }
+
+    .stocks-section-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .stocks-small-note {
+      margin: 10px 0 0;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .stocks-layout { grid-template-columns: 1fr; }
+      .stocks-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .stocks-shell { padding: 16px; }
+      .stocks-grid { grid-template-columns: 1fr; }
+      .stocks-title { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Rady</div>
+      <div class="topbar-actions">
+        <div class="topbar-badge">Stocks</div>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+          <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
+          <a href="{{ url_for('admin_home') }}" class="topbar-link">Admin</a>
+          <a href="{{ url_for('admin_database') }}" class="topbar-link">Database</a>
+        {% endif %}
+        <a href="{{ url_for('stocks') }}" class="topbar-link">Stocks</a>
+        <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
+        <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="stocks-page">
+    <div class="stocks-shell">
+      <div class="stocks-layout">
+        <div>
+          <h1 class="stocks-title">Small Gap Long App</h1>
+          <p class="stocks-sub">
+            Enter your numbers and the app will act like a disciplined gap-long trader. It only looks for <strong>long</strong> trades,
+            checks for <strong>trap risk</strong>, and gives you a structural <strong>stop loss</strong> so you know where the trade is wrong.
+          </p>
+
+          <div class="stocks-card">
+            <div class="stocks-card-header">
+              <h2 class="stocks-card-title">Market Inputs</h2>
+            </div>
+            <div class="stocks-card-content">
+              <div class="stocks-grid">
+                <div class="stocks-field">
+                  <label for="prevClose">Previous Close</label>
+                  <input id="prevClose" type="number" step="0.01" value="100" />
+                  <div class="stocks-hint">Previous session close.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="openPrice">Open Price</label>
+                  <input id="openPrice" type="number" step="0.01" value="100.40" />
+                  <div class="stocks-hint">Current session open.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="price">Current Price</label>
+                  <input id="price" type="number" step="0.01" value="100.90" />
+                  <div class="stocks-hint">Latest traded price.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="vwap">VWAP</label>
+                  <input id="vwap" type="number" step="0.01" value="100.35" />
+                  <div class="stocks-hint">Intraday fair-value support.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="orLow">Opening Range Low</label>
+                  <input id="orLow" type="number" step="0.01" value="100.10" />
+                  <div class="stocks-hint">Key intraday invalidation area.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="ema20">EMA 20</label>
+                  <input id="ema20" type="number" step="0.01" value="100.50" />
+                  <div class="stocks-hint">Short-term trend support.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="ema50">EMA 50</label>
+                  <input id="ema50" type="number" step="0.01" value="99.90" />
+                  <div class="stocks-hint">Intermediate trend.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="ema200">EMA 200</label>
+                  <input id="ema200" type="number" step="0.01" value="98.80" />
+                  <div class="stocks-hint">Higher-timeframe bias.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="rsi">RSI (14)</label>
+                  <input id="rsi" type="number" step="0.1" value="58" />
+                  <div class="stocks-hint">Momentum without being too stretched.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="macdHist">MACD Histogram</label>
+                  <input id="macdHist" type="number" step="0.01" value="0.80" />
+                  <div class="stocks-hint">Positive supports continuation.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="adx">ADX</label>
+                  <input id="adx" type="number" step="0.1" value="24" />
+                  <div class="stocks-hint">Trend strength. 18+ is healthier.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="volumeRatio">Volume Ratio</label>
+                  <input id="volumeRatio" type="number" step="0.01" value="1.30" />
+                  <div class="stocks-hint">Current volume divided by average volume.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="distResistance">Distance to Resistance %</label>
+                  <input id="distResistance" type="number" step="0.01" value="3.60" />
+                  <div class="stocks-hint">Upside room before resistance.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="takeProfitPct">Take Profit %</label>
+                  <input id="takeProfitPct" type="number" step="0.01" value="2.80" />
+                  <div class="stocks-hint">Your planned target distance.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="stopLossPct">Fallback Stop %</label>
+                  <input id="stopLossPct" type="number" step="0.01" value="1.20" />
+                  <div class="stocks-hint">Backup stop if structure is wider.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="stopBufferPct">Stop Buffer %</label>
+                  <input id="stopBufferPct" type="number" step="0.01" value="0.15" />
+                  <div class="stocks-hint">Extra room under structure.</div>
+                </div>
+                <div class="stocks-field">
+                  <label for="riskPct">Risk Per Trade %</label>
+                  <input id="riskPct" type="number" step="0.01" value="1.00" />
+                  <div class="stocks-hint">Professional sizing is usually modest.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="stocks-card">
+            <div id="decisionBox" class="stocks-decision-box stocks-decision-wait">
+              <div class="stocks-eyebrow">Decision</div>
+              <h2 id="decisionText" class="stocks-decision-title">NO TRADE</h2>
+              <p id="decisionReason" class="stocks-decision-text">Setup not clean enough yet.</p>
+            </div>
+            <div class="stocks-card-content stocks-stats">
+              <div class="stocks-stat-row"><span>Gap %</span><span id="gapPct" class="stocks-badge">0.40%</span></div>
+              <div class="stocks-stat-row"><span>Conviction</span><span id="conviction" class="stocks-badge">50%</span></div>
+              <div class="stocks-stat-row"><span>Risk / Reward</span><span id="rr" class="stocks-badge">2.33R</span></div>
+              <div class="stocks-stat-row"><span>Stop Loss</span><span id="stopLoss" class="stocks-badge">99.95</span></div>
+              <div class="stocks-stat-row"><span>Risk to Stop</span><span id="riskToStop" class="stocks-badge">0.94%</span></div>
+              <div class="stocks-stat-row"><span>Structural Stop Ref</span><span id="structuralStop" class="stocks-badge">100.10</span></div>
+              <div class="stocks-divider"></div>
+              <div class="stocks-score-grid">
+                <div id="scoreBox" class="stocks-score-box stocks-score-mid">
+                  <div class="stocks-score-label">Setup Quality</div>
+                  <div id="longScore" class="stocks-score-value">0</div>
+                </div>
+                <div class="stocks-score-box stocks-score-mid">
+                  <div class="stocks-score-label">Bias</div>
+                  <div id="biasLabel" class="stocks-score-value" style="font-size:22px;">WAIT</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stocks-card" style="margin-top:24px;">
+            <div class="stocks-card-header">
+              <h2 class="stocks-card-title">What your setup checks</h2>
+            </div>
+            <div class="stocks-card-content" style="color:#334155; line-height:1.6; font-size:14px;">
+              <div>1. Is the gap small enough to be attractive, but not too big to chase?</div>
+              <div>2. Is the higher-timeframe trend still up?</div>
+              <div>3. Is momentum supportive without being overheated?</div>
+              <div>4. Is volume healthy and not signaling exhaustion?</div>
+              <div>5. Is price still holding above open, VWAP, and opening range low?</div>
+              <div>6. Is there enough upside room before resistance?</div>
+              <div>7. Is the stop placed under real structure?</div>
+            </div>
+          </div>
+
+          <div class="stocks-card" style="margin-top:24px;">
+            <div class="stocks-card-header">
+              <h2 class="stocks-card-title">Reasons</h2>
+            </div>
+            <div class="stocks-card-content">
+              <h3 class="stocks-section-title" style="color:#15803d;">Bullish case</h3>
+              <ul id="reasonsList" class="stocks-list"></ul>
+              <h3 class="stocks-section-title" style="color:#b45309; margin-top:20px;">Blockers</h3>
+              <div id="stopReference" class="stocks-small-note"></div>
+              <ul id="blockersList" class="stocks-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ids = [
+      'prevClose', 'openPrice', 'price', 'vwap', 'orLow', 'ema20', 'ema50', 'ema200',
+      'rsi', 'macdHist', 'adx', 'volumeRatio', 'distResistance', 'takeProfitPct',
+      'stopLossPct', 'stopBufferPct', 'riskPct'
+    ];
+
+    function val(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function setList(id, items, emptyText) {
+      const el = document.getElementById(id);
+      el.innerHTML = '';
+      const arr = items.length ? items : [emptyText];
+      arr.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        el.appendChild(li);
+      });
+    }
+
+    function analyze() {
+      const prevClose = val('prevClose');
+      const openPrice = val('openPrice');
+      const price = val('price');
+      const vwap = val('vwap');
+      const orLow = val('orLow');
+      const ema20 = val('ema20');
+      const ema50 = val('ema50');
+      const ema200 = val('ema200');
+      const rsi = val('rsi');
+      const macdHist = val('macdHist');
+      const adx = val('adx');
+      const volumeRatio = val('volumeRatio');
+      const distResistance = val('distResistance');
+      const takeProfitPct = val('takeProfitPct');
+      const stopLossPct = val('stopLossPct');
+      const stopBufferPct = val('stopBufferPct');
+      const riskPct = val('riskPct');
+
+      let longScore = 0;
+      const reasons = [];
+      const blockers = [];
+
+      const gapPct = prevClose > 0 ? ((openPrice - prevClose) / prevClose) * 100 : 0;
+      const uptrend = price > ema20 && ema20 > ema50 && ema50 > ema200;
+      const belowOpen = price < openPrice;
+      const belowVwap = price < vwap;
+      const brokeORLow = price < orLow;
+
+      if (uptrend) {
+        longScore += 3;
+        reasons.push('Trend is aligned up: price > EMA20 > EMA50 > EMA200.');
+      } else {
+        blockers.push('Trend is not fully aligned up.');
+      }
+
+      if (gapPct >= 0.2 && gapPct <= 1.0) {
+        longScore += 3;
+        reasons.push('Gap size is small and attractive for a continuation long.');
+      } else if (gapPct < 0.2) {
+        blockers.push('Gap is too small and may not have enough urgency.');
+      } else {
+        blockers.push('Gap is too large and may already be overextended.');
+      }
+
+      if (belowOpen) blockers.push('Price is below the open, so continuation is weaker.');
+      if (belowVwap) blockers.push('Price is below VWAP, which weakens the long case.');
+      if (brokeORLow) blockers.push('Price broke the opening range low.');
+
+      if (rsi >= 52 && rsi <= 67) {
+        longScore += 2;
+        reasons.push('RSI is supportive without looking too stretched.');
+      } else if (rsi > 70) {
+        blockers.push('RSI is too hot for a clean small-gap long.');
+      } else {
+        blockers.push('RSI is not in your preferred continuation range.');
+      }
+
+      if (macdHist > 0) {
+        longScore += 1;
+        reasons.push('MACD histogram is positive, supporting continuation.');
+      } else {
+        blockers.push('Momentum is not confirming the long idea.');
+      }
+
+      if (adx >= 18) {
+        longScore += 1;
+        reasons.push('Trend strength is acceptable.');
+      } else {
+        blockers.push('ADX is low, so follow-through may be weak.');
+      }
+
+      if (volumeRatio >= 1.1 && volumeRatio <= 2.5) {
+        longScore += 1;
+        reasons.push('Volume is supportive without looking panic-driven.');
+      } else if (volumeRatio < 1.1) {
+        blockers.push('Volume is too light for a convincing continuation.');
+      } else {
+        blockers.push('Volume spike is too aggressive and may be exhaustion.');
+      }
+
+      if (distResistance >= takeProfitPct * 0.9) {
+        longScore += 1;
+        reasons.push('There is enough room to resistance for the trade to work.');
+      } else {
+        blockers.push('Resistance is too close above price.');
+      }
+
+      const rr = stopLossPct > 0 ? takeProfitPct / stopLossPct : 0;
+      if (rr < 1.5) {
+        blockers.push('Risk/reward is below 1.5, which is weak for this setup.');
+      } else {
+        longScore += 1;
+      }
+
+      if (riskPct > 1.0) {
+        blockers.push('Risk per trade is above 1%, which is aggressive.');
+      }
+
+      longScore = clamp(longScore, -10, 10);
+
+      let decision = 'NO TRADE';
+      let rationale = 'The gap-long setup is not clean enough.';
+
+      if ((belowOpen && belowVwap) || brokeORLow || (price < ema20 && volumeRatio > 1.5)) {
+        decision = 'TRAP RISK';
+        rationale = 'Gap is failing: price is losing key intraday structure.';
+      } else if (longScore >= 8 && blockers.length <= 2) {
+        decision = 'GO LONG NOW';
+        rationale = 'Small gap, bullish alignment, acceptable momentum, and controlled risk are all present.';
+      } else if (longScore >= 6) {
+        rationale = 'There is some strength, but the setup is not clean enough yet.';
+      }
+
+      const structuralStop = Math.min(orLow, vwap, ema20);
+      const bufferedStop = structuralStop * (1 - stopBufferPct / 100);
+      const fallbackStop = price * (1 - stopLossPct / 100);
+      const stopLoss = decision === 'GO LONG NOW' ? Math.min(bufferedStop, fallbackStop) : bufferedStop;
+      const riskToStop = price > 0 ? ((price - stopLoss) / price) * 100 : 0;
+      const conviction = clamp(Math.round(((longScore + 10) / 20) * 100), 0, 100);
+
+      const decisionBox = document.getElementById('decisionBox');
+      decisionBox.className = 'stocks-decision-box ' + (decision === 'GO LONG NOW' ? 'stocks-decision-go' : decision === 'TRAP RISK' ? 'stocks-decision-trap' : 'stocks-decision-wait');
+
+      document.getElementById('decisionText').textContent = decision;
+      document.getElementById('decisionReason').textContent = rationale;
+      document.getElementById('gapPct').textContent = gapPct.toFixed(2) + '%';
+      document.getElementById('conviction').textContent = conviction + '%';
+      document.getElementById('rr').textContent = rr.toFixed(2) + 'R';
+      document.getElementById('stopLoss').textContent = stopLoss.toFixed(2);
+      document.getElementById('riskToStop').textContent = riskToStop.toFixed(2) + '%';
+      document.getElementById('structuralStop').textContent = structuralStop.toFixed(2);
+      document.getElementById('longScore').textContent = longScore;
+      document.getElementById('biasLabel').textContent = decision === 'GO LONG NOW' ? 'LONG' : decision === 'TRAP RISK' ? 'TRAP' : 'WAIT';
+      document.getElementById('scoreBox').className = 'stocks-score-box ' + (longScore >= 8 ? 'stocks-score-good' : 'stocks-score-mid');
+      document.getElementById('stopReference').textContent = 'Structural stop reference is the lowest of Opening Range Low, VWAP, and EMA20.';
+
+      setList('reasonsList', reasons, 'No strong bullish confirmations.');
+      setList('blockersList', blockers, 'No major blockers detected.');
+    }
+
+    ids.forEach(id => {
+      document.getElementById(id).addEventListener('input', analyze);
+    });
+
+    analyze();
+  </script>
+</body>
+</html>
