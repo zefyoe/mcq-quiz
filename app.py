@@ -88,6 +88,7 @@ QUIZ_MODES = {
         "description": "Auto-move to the next question after saving and show a timer.",
     },
 }
+DISABLED_CATEGORIES = {"physics"}
 
 
 # -------------------------
@@ -114,6 +115,15 @@ def load_user(user_id):
 def normalize_correct(q: dict) -> list[str]:
     correct = q["Correct"] if isinstance(q["Correct"], list) else [q["Correct"]]
     return sorted([(c or "").strip().upper() for c in correct if c])
+
+
+def get_default_correct_choice(seed: str | None) -> str:
+    letters = ["A", "B", "C", "D"]
+    normalized_seed = (seed or "").strip()
+    if not normalized_seed:
+        return "A"
+    index = sum(ord(char) for char in normalized_seed) % len(letters)
+    return letters[index]
 
 
 def normalize_text_answer(value: str) -> str:
@@ -356,7 +366,7 @@ def get_categories() -> list[str]:
     if has_anatomy:
         cats.add(ANATOMY_CATEGORY)
 
-    return sorted(cats)
+    return sorted(category for category in cats if normalize_category(category) not in DISABLED_CATEGORIES)
 
 
 def get_questions_for_category(category: str, subgroup: str | None = None) -> list[dict]:
@@ -485,12 +495,15 @@ def get_question_overview_rows() -> list[dict]:
 
     for question in get_all_questions():
         image_url = question.get("image_url") or ""
+        normalized_correct = normalize_correct(question)
+        correct_choice = normalized_correct[0] if normalized_correct and normalized_correct[0] in {"A", "B", "C", "D"} else get_default_correct_choice(question.get("ID") or image_url)
         rows.append({
             "qid": question.get("ID", ""),
             "category": question.get("Category", ""),
             "text": question.get("Vraag", ""),
             "filename": os.path.basename(image_url) if image_url else "",
             "image_url": image_url,
+            "correct_choice": correct_choice,
         })
 
     return sorted(rows, key=lambda row: extract_qid_number(row["qid"]) if row["qid"] else 0)
@@ -507,6 +520,7 @@ def get_admin_question_form_data(qid: str | None = None, image_url: str | None =
         "d": "",
         "image_url": "",
         "existing_image_url": "",
+        "correct_choice": "A",
     }
 
     db_question = None
@@ -527,6 +541,7 @@ def get_admin_question_form_data(qid: str | None = None, image_url: str | None =
             "d": db_question.d,
             "image_url": db_question.image_url or "",
             "existing_image_url": db_question.image_url or "",
+            "correct_choice": db_question.correct if db_question.correct in {"A", "B", "C", "D"} else get_default_correct_choice(db_question.qid or db_question.image_url),
         })
         return form_data
 
@@ -550,6 +565,11 @@ def get_admin_question_form_data(qid: str | None = None, image_url: str | None =
                 "d": question.get("D", ""),
                 "image_url": question_image_url,
                 "existing_image_url": question_image_url,
+                "correct_choice": (
+                    normalize_correct(question)[0]
+                    if normalize_correct(question) and normalize_correct(question)[0] in {"A", "B", "C", "D"}
+                    else get_default_correct_choice(question.get("ID") or question_image_url)
+                ),
             })
             break
 
@@ -1279,9 +1299,11 @@ def admin_new_question():
             "d": (request.form.get("d") or "").strip(),
             "image_url": (request.form.get("image_url") or "").strip(),
             "existing_image_url": (request.form.get("existing_image_url") or "").strip(),
+            "correct_choice": (request.form.get("correct_choice") or "").strip().upper(),
         }
         category = form_data["category"]
         text = form_data["text"]
+        correct_choice = form_data["correct_choice"]
 
         option_map = {
             "a": form_data["a"],
@@ -1289,6 +1311,7 @@ def admin_new_question():
             "c": form_data["c"],
             "d": form_data["d"],
         }
+        option_map_upper = {key.upper(): value for key, value in option_map.items()}
 
         submitted_qid = form_data["qid"]
         image_url = form_data["image_url"] or form_data["existing_image_url"] or None
@@ -1307,6 +1330,10 @@ def admin_new_question():
             error = "Category and question text are required."
         elif not option_map["a"]:
             error = "Please provide the correct answer."
+        elif correct_choice not in {"A", "B", "C", "D"}:
+            error = "Please choose the correct answer option."
+        elif not option_map_upper.get(correct_choice):
+            error = "The selected correct answer must have text."
         else:
             if existing_question is None:
                 existing_question = Question(
@@ -1317,7 +1344,7 @@ def admin_new_question():
                     b=option_map["b"],
                     c=option_map["c"],
                     d=option_map["d"],
-                    correct="T",
+                    correct=correct_choice,
                     image_url=image_url,
                 )
                 db.session.add(existing_question)
@@ -1328,6 +1355,7 @@ def admin_new_question():
                 existing_question.b = option_map["b"]
                 existing_question.c = option_map["c"]
                 existing_question.d = option_map["d"]
+                existing_question.correct = correct_choice
                 existing_question.image_url = image_url
 
             db.session.commit()

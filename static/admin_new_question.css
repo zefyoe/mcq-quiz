@@ -93,6 +93,29 @@ textarea {
   font-size: 18px;
 }
 
+.answer-choice-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid #dbe5ff;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.correct-choice-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.correct-choice-radio input {
+  width: auto;
+  margin: 0;
+}
+
 button {
   margin-top: 20px;
   padding: 14px;

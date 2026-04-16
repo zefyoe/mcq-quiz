@@ -27,22 +27,24 @@
       <p>{{ question_count }} question(s) available.</p>
 
       <div class="card" style="background: white; border-radius: 18px; padding: 0; overflow: hidden; border: 1px solid #e5e7eb;">
-        <div style="display: grid; grid-template-columns: 130px 180px 1.4fr 1fr 110px; gap: 16px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px;">
+        <div style="display: grid; grid-template-columns: 130px 170px 1.4fr 1fr 120px 110px; gap: 16px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px;">
           <div>Question ID</div>
           <div>Category</div>
           <div>Question</div>
           <div>Filename</div>
+          <div>Correct</div>
           <div></div>
         </div>
 
         {% for row in rows %}
-          <div style="display: grid; grid-template-columns: 130px 180px 1.4fr 1fr 110px; gap: 16px; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start;">
+          <div style="display: grid; grid-template-columns: 130px 170px 1.4fr 1fr 120px 110px; gap: 16px; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start;">
             <div><strong>{{ row.qid }}</strong></div>
             <div>{{ row.category }}</div>
             <div>{{ row.text }}</div>
             <div>
               <div>{{ row.filename or "—" }}</div>
             </div>
+            <div><strong>{{ row.correct_choice }}</strong></div>
             <div>
               <a
                 class="admin-link-button"

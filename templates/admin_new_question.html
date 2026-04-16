@@ -21,7 +21,7 @@
       </div>
     </header>
     <main class="admin-container">
-      <h1>Nieuwe vraag</h1>
+      <h1>Question Editor</h1>
 
       {% if error %}
         <p class="error">{{ error }}</p>
@@ -34,7 +34,7 @@
       <form method="POST">
         <p>QID (leave blank to auto-generate)<br><input name="qid" value="{{ form_data.qid }}"></p>
 
-        <p>Categorie<br><input name="category" value="{{ form_data.category }}" required></p>
+        <p>Category<br><input name="category" value="{{ form_data.category }}" required></p>
 
         <p>
           Existing image from static/images<br>
@@ -52,18 +52,31 @@
           </select>
         </p>
 
-        <p>Vraag<br><textarea name="text" id="question_text" required>{{ form_data.text }}</textarea></p>
+        <p>Question<br><textarea name="text" id="question_text" required>{{ form_data.text }}</textarea></p>
 
         <div class="option-box">
-          <p class="option-box-full">Correct answer<br><textarea name="a" id="correct_answer" class="answer-textarea" required>{{ form_data.a }}</textarea></p>
-          <p>Accepted alternative 2<br><input name="b" value="{{ form_data.b }}"></p>
-          <p>Accepted alternative 3<br><input name="c" value="{{ form_data.c }}"></p>
-          <p>Accepted alternative 4<br><input name="d" value="{{ form_data.d }}"></p>
+          {% for letter, field_name in [('A', 'a'), ('B', 'b'), ('C', 'c'), ('D', 'd')] %}
+            <div class="answer-choice-row">
+              <label class="correct-choice-radio">
+                <input
+                  type="radio"
+                  name="correct_choice"
+                  value="{{ letter }}"
+                  {% if form_data.correct_choice == letter %}checked{% endif %}
+                  required
+                >
+                <span>Correct {{ letter }}</span>
+              </label>
+              <div>
+                <p>{{ letter }}<br><input name="{{ field_name }}" value="{{ form_data[field_name] }}"></p>
+              </div>
+            </div>
+          {% endfor %}
         </div>
 
-        <p>Image URL (optioneel)<br><input name="image_url" id="image_url" value="{{ form_data.image_url }}"></p>
+        <p>Image URL (optional)<br><input name="image_url" id="image_url" value="{{ form_data.image_url }}"></p>
 
-        <button type="submit">Opslaan</button>
+        <button type="submit">Save</button>
       </form>
     </main>
 
@@ -71,8 +84,8 @@
       const existingImageSelect = document.getElementById("existing_image_url");
       const imageUrlInput = document.getElementById("image_url");
       const questionText = document.getElementById("question_text");
-      const correctAnswerInput = document.getElementById("correct_answer");
       const standardPrompt = {{ standard_image_prompt|tojson }};
+      const answerInputA = document.querySelector('input[name="a"]');
 
       function syncSelectedImageDefaults() {
         const selectedOption = existingImageSelect.options[existingImageSelect.selectedIndex];
@@ -88,17 +101,19 @@
           questionText.value = standardPrompt;
         }
 
-        if (!correctAnswerInput.value || correctAnswerInput.dataset.autofilled === "true") {
-          correctAnswerInput.value = selectedLabel;
-          correctAnswerInput.dataset.autofilled = "true";
+        if (answerInputA && (!answerInputA.value || answerInputA.dataset.autofilled === "true")) {
+          answerInputA.value = selectedLabel;
+          answerInputA.dataset.autofilled = "true";
         }
       }
 
       existingImageSelect.addEventListener("change", syncSelectedImageDefaults);
 
-      correctAnswerInput.addEventListener("input", () => {
-        correctAnswerInput.dataset.autofilled = "false";
-      });
+      if (answerInputA) {
+        answerInputA.addEventListener("input", () => {
+          answerInputA.dataset.autofilled = "false";
+        });
+      }
 
       syncSelectedImageDefaults();
     </script>
