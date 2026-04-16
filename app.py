@@ -541,6 +541,8 @@ def build_home_category_cards(categories: list[str]) -> list[dict]:
 
     cards = []
     for category in categories:
+        if normalize_category(category) != normalize_category(ANATOMY_CATEGORY):
+            continue
         cards.append({
             "name": category,
             "icon": get_category_icon(category),
@@ -549,16 +551,6 @@ def build_home_category_cards(categories: list[str]) -> list[dict]:
             "description": f"Practice MCQs in {category}",
             "available": True,
         })
-
-    placeholder_cards = [
-        {"name": "Cardiology", "icon": "CD", "count": 0, "difficulty": "Intermediate", "description": "Focused cardiovascular practice is coming soon.", "available": False},
-        {"name": "Respiratory", "icon": "RS", "count": 0, "difficulty": "Beginner", "description": "Pulmonary question sets will be added soon.", "available": False},
-        {"name": "Pathology", "icon": "PT", "count": 0, "difficulty": "Intermediate", "description": "Structured pathology review will appear here soon.", "available": False},
-        {"name": "Pharmacology", "icon": "PH", "count": 0, "difficulty": "Intermediate", "description": "Drug-focused training modules are on the roadmap.", "available": False},
-    ]
-
-    present_names = {card["name"] for card in cards}
-    cards.extend(card for card in placeholder_cards if card["name"] not in present_names)
     return cards
 
 
