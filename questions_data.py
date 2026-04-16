@@ -1,25 +1,5 @@
 questions = [
     {
-        "ID": "Q001",
-        "Category": "Anatomy",
-        "Vraag": "Wat is 2 + 2?",
-        "A": "3",
-        "B": "4",
-        "C": "5",
-        "D": "6",
-        "Correct": "B"
-    },
-    {
-        "ID": "Q002",
-        "Category": "Anatomy",
-        "Vraag": "Wat is de hoofdstad van Frankrijk?",
-        "A": "Berlijn",
-        "B": "Londen",
-        "C": "Parijs",
-        "D": "Rome",
-        "Correct": "C"
-    },
-    {
         "ID": "Q003",
         "Category": "Anatomy",
         "Vraag": "Welke kleur krijg je bij rood + geel?",
