@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ language }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Previous Tests</title>
+    <title>{{ tr("Previous Tests") }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
@@ -11,12 +11,13 @@
       <div class="topbar-inner">
         <div class="brand">Rady</div>
         <div class="topbar-actions">
-          <div class="topbar-badge">Previous Tests</div>
+          <div class="topbar-badge">{{ tr("Previous Tests") }}</div>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
-          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
-          <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
+          {% include "_language_switcher.html" %}
         </div>
       </div>
     </header>
@@ -24,10 +25,10 @@
     <main class="page">
       <section class="hero card">
         <div class="hero-text">
-          <p class="eyebrow">Your history</p>
-          <h1>My Previous Tests</h1>
+          <p class="eyebrow">{{ tr("Your history") }}</p>
+          <h1>{{ tr("My Previous Tests") }}</h1>
           <p class="hero-subtitle">
-            Review your saved quiz results and retake the exact same question set whenever you want.
+            {{ "Bekijk je opgeslagen resultaten en maak exact dezelfde reeks vragen opnieuw wanneer je wilt." if language == "nl" else "Review your saved quiz results and retake the exact same question set whenever you want." }}
           </p>
         </div>
       </section>
@@ -35,9 +36,9 @@
       <section class="card quiz-section">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Saved attempts</p>
-            <h2>Test History</h2>
-            <p class="section-subtitle">Each completed quiz is stored per user with its score and percentage.</p>
+            <p class="eyebrow">{{ "Opgeslagen pogingen" if language == "nl" else "Saved attempts" }}</p>
+            <h2>{{ tr("Test History") }}</h2>
+            <p class="section-subtitle">{{ "Elke voltooide quiz wordt per gebruiker opgeslagen met score en percentage." if language == "nl" else "Each completed quiz is stored per user with its score and percentage." }}</p>
           </div>
         </div>
 
@@ -54,13 +55,13 @@
                   </p>
                 </div>
                 <div class="history-card-actions">
-                  <a href="{{ url_for('retake_previous_test', attempt_id=attempt.id) }}" class="primary-btn">Retake This Test</a>
+                  <a href="{{ url_for('retake_previous_test', attempt_id=attempt.id) }}" class="primary-btn">{{ tr("Retake This Test") }}</a>
                 </div>
               </article>
             {% endfor %}
           </div>
         {% else %}
-          <div class="tip-box">You have not completed any tests yet.</div>
+          <div class="tip-box">{{ "Je hebt nog geen toetsen voltooid." if language == "nl" else "You have not completed any tests yet." }}</div>
         {% endif %}
       </section>
     </main>

@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ language }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Results - {{ category }}</title>
+    <title>{{ "Resultaten" if language == "nl" else "Results" }} - {{ category }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
 
@@ -12,12 +12,14 @@
       <div class="topbar-inner">
         <div class="brand">Rady</div>
         <div class="topbar-actions">
-          <div class="topbar-badge">Results</div>
+          <div class="topbar-badge">{{ "Resultaten" if language == "nl" else "Results" }}</div>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
-          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
-          <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
+          {% set language_switch_target = back_url %}
+          {% include "_language_switcher.html" %}
         </div>
       </div>
     </header>
@@ -27,7 +29,7 @@
       <!-- Score Summary -->
       <section class="card result-summary">
         <div class="result-summary-left">
-          <p class="eyebrow">Quiz completed</p>
+          <p class="eyebrow">{{ tr("Quiz completed") }}</p>
           <h1>{{ category }}</h1>
 
           <div class="score-row">
@@ -43,20 +45,20 @@
 
           <p class="result-feedback">
             {% if percent >= 80 %}
-              🔥 Excellent performance
+              {{ "Uitstekende prestatie" if language == "nl" else "Excellent performance" }}
             {% elif percent >= 60 %}
-              👍 Good job — keep practicing
+              {{ tr("Good job — keep practicing") }}
             {% else %}
-              📚 Needs improvement — review carefully
+              {{ tr("Needs improvement — review carefully") }}
             {% endif %}
           </p>
         </div>
 
         <div class="result-summary-actions">
-          <a href="{{ back_url }}" class="primary-btn">New Quiz</a>
-          <a href="{{ url_for('previous_tests') }}" class="secondary-btn">My Previous Tests</a>
+          <a href="{{ back_url }}" class="primary-btn">{{ tr("New Quiz") }}</a>
+          <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("My Previous Tests") }}</a>
           {% if attempt_id %}
-            <a href="{{ url_for('retake_previous_test', attempt_id=attempt_id) }}" class="secondary-btn">Retake This Test</a>
+            <a href="{{ url_for('retake_previous_test', attempt_id=attempt_id) }}" class="secondary-btn">{{ tr("Retake This Test") }}</a>
           {% endif %}
         </div>
       </section>
@@ -64,8 +66,8 @@
       <!-- Questions Review -->
       <section class="card review-section">
         <div class="section-header">
-          <h2>Review Questions</h2>
-          <p class="section-subtitle">See what you got right and wrong</p>
+          <h2>{{ tr("Review Questions") }}</h2>
+          <p class="section-subtitle">{{ "Bekijk welke antwoorden juist en onjuist waren." if language == "nl" else "See what you got right and wrong" }}</p>
         </div>
 
         {% for r in results %}
@@ -75,18 +77,18 @@
               <h3>{{ loop.index }}. {{ r["Vraag"] }}</h3>
 
               {% if r["is_correct"] %}
-                <span class="badge correct">Correct</span>
+                <span class="badge correct">{{ tr("Correct") }}</span>
               {% else %}
-                <span class="badge wrong">Incorrect</span>
+                <span class="badge wrong">{{ tr("Incorrect") }}</span>
               {% endif %}
             </div>
 
             <div class="review-meta">
-              <span><b>Your answer:</b>
+              <span><b>{{ tr("Your answer:") }}</b>
                 {{ r["user"]|join(", ") if r["user"] else "—" }}
               </span>
 
-              <span><b>Correct answer:</b>
+              <span><b>{{ tr("Correct answer:") }}</b>
                 {{ r["correct_texts"]|join(", ") if r["correct_texts"] else r["correct"]|join(", ") }}
               </span>
             </div>

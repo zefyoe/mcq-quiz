@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ language }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ subgroup_label }} Quiz Setup</title>
+    <title>{{ tr(subgroup_label) }} - {{ tr("Quiz setup") }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
@@ -11,12 +11,13 @@
       <div class="topbar-inner">
         <div class="brand">Rady</div>
         <div class="topbar-actions">
-          <div class="topbar-badge">Quiz Setup</div>
+          <div class="topbar-badge">{{ tr("Quiz setup") }}</div>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
-          <a href="{{ url_for('home') }}" class="topbar-link">Home</a>
-          <a href="{{ url_for('logout') }}" class="topbar-logout">Log out</a>
+          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
+          {% include "_language_switcher.html" %}
         </div>
       </div>
     </header>
@@ -24,10 +25,10 @@
     <main class="page">
       <section class="hero card">
         <div class="hero-text">
-          <p class="eyebrow">Quiz setup</p>
-          <h1>{{ subgroup_label }}</h1>
+          <p class="eyebrow">{{ tr("Quiz setup") }}</p>
+          <h1>{{ tr(subgroup_label) }}</h1>
           <p class="hero-subtitle">
-            {{ subgroup_description }}. Choose how many questions to include in this quiz.
+            {{ tr(subgroup_description) }}. {{ tr("Choose how many questions to include in this quiz.") }}
           </p>
         </div>
       </section>
@@ -35,11 +36,15 @@
       <section class="card quiz-section quiz-setup-card">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Question count</p>
-            <h2>How many questions do you want?</h2>
+            <p class="eyebrow">{{ tr("Question count") }}</p>
+            <h2>{{ tr("How many questions do you want?") }}</h2>
             <p class="section-subtitle">
-              Available now: {{ available_count }} question{{ '' if available_count == 1 else 's' }}.
-              Maximum per quiz: {{ max_quiz_questions }}.
+              {% if language == "nl" %}
+                Nu beschikbaar: {{ available_count }} vragen. Maximaal {{ max_quiz_questions }} per quiz.
+              {% else %}
+                Available now: {{ available_count }} question{{ '' if available_count == 1 else 's' }}.
+                Maximum per quiz: {{ max_quiz_questions }}.
+              {% endif %}
             </p>
           </div>
         </div>
@@ -47,7 +52,7 @@
         {% if available_count > 0 %}
           <form method="get" action="{{ url_for('quiz', category='Anatomy') }}" class="quiz-setup-form">
             <input type="hidden" name="subgroup" value="{{ subgroup_key }}">
-            <label class="quiz-count-label" for="count">Number of questions</label>
+            <label class="quiz-count-label" for="count">{{ tr("Number of questions") }}</label>
             <input
               id="count"
               name="count"
@@ -59,7 +64,7 @@
               required
             >
             <div class="quiz-mode-group">
-              <p class="quiz-count-label">Quiz phase</p>
+              <p class="quiz-count-label">{{ tr("Quiz phase") }}</p>
               {% for mode_key, mode in quiz_modes.items() %}
                 <label class="quiz-mode-card">
                   <input
@@ -68,20 +73,26 @@
                     value="{{ mode_key }}"
                     {% if selected_mode == mode_key %}checked{% endif %}
                   >
-                  <span class="quiz-mode-title">{{ mode.label }}</span>
-                  <span class="quiz-mode-description">{{ mode.description }}</span>
+                  <span class="quiz-mode-title">{{ tr(mode.label) }}</span>
+                  <span class="quiz-mode-description">
+                    {% if language == "nl" %}
+                      {{ "Toon na elk opgeslagen antwoord meteen het juiste antwoord." if mode_key == "test" else "Ga na het opslaan automatisch door en toon een timer." }}
+                    {% else %}
+                      {{ mode.description }}
+                    {% endif %}
+                  </span>
                 </label>
               {% endfor %}
             </div>
             <div class="quiz-setup-actions">
-              <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">Back</a>
-              <button type="submit" class="primary-btn">Start Quiz</button>
+              <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">{{ tr("Back") }}</a>
+              <button type="submit" class="primary-btn">{{ tr("Start Quiz") }}</button>
             </div>
           </form>
         {% else %}
-          <div class="alert alert-error">No questions found in this subgroup yet.</div>
+          <div class="alert alert-error">{{ tr("No questions found in this subgroup yet.") }}</div>
           <div class="quiz-setup-actions">
-            <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">Back</a>
+            <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">{{ tr("Back") }}</a>
           </div>
         {% endif %}
       </section>

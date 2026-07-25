@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ language }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,8 +9,8 @@
   <body>
     <div class="dashboard-strip">
       <div class="dashboard-strip-inner">
-        <span>Structured anatomy practice designed for focused daily review</span>
-        <a href="{{ url_for('anatomy_sections') }}" class="dashboard-strip-action">Start Now</a>
+        <span>{{ "Gestructureerde anatomie-oefening voor gerichte dagelijkse herhaling" if language == "nl" else "Structured anatomy practice designed for focused daily review" }}</span>
+        <a href="{{ url_for('anatomy_sections') }}" class="dashboard-strip-action">{{ tr("Start Now") }}</a>
       </div>
     </div>
 
@@ -20,12 +20,12 @@
           <div class="dashboard-brand-mark">R</div>
           <div>
             <div class="dashboard-brand-title">Rady</div>
-            <div class="dashboard-brand-subtitle">Anatomy QBank</div>
+            <div class="dashboard-brand-subtitle">{{ tr("Anatomy QBank") }}</div>
           </div>
         </div>
 
         <div class="dashboard-user">
-          <div class="dashboard-user-label">Signed in</div>
+          <div class="dashboard-user-label">{{ tr("Signed in") }}</div>
           <div class="dashboard-user-name">{{ current_user.name or current_user.email }}</div>
           {% if current_user.university %}
             <div class="dashboard-user-school">{{ current_user.university }}</div>
@@ -33,27 +33,28 @@
         </div>
 
         <nav class="dashboard-nav">
-          <a href="{{ url_for('home') }}" class="dashboard-nav-link active">Dashboard</a>
-          <a href="{{ url_for('previous_tests') }}" class="dashboard-nav-link">Previous Tests</a>
-          <a href="{{ url_for('anatomy_sections') }}" class="dashboard-nav-link">New Anatomy Quiz</a>
+          <a href="{{ url_for('home') }}" class="dashboard-nav-link active">{{ tr("Dashboard") }}</a>
+          <a href="{{ url_for('previous_tests') }}" class="dashboard-nav-link">{{ tr("Previous Tests") }}</a>
+          <a href="{{ url_for('anatomy_sections') }}" class="dashboard-nav-link">{{ tr("New Anatomy Quiz") }}</a>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <a href="{{ url_for('admin_home') }}" class="dashboard-nav-link">Admin</a>
             <a href="{{ url_for('admin_database') }}" class="dashboard-nav-link">Database</a>
           {% endif %}
-          <a href="{{ url_for('logout') }}" class="dashboard-nav-link dashboard-nav-link-muted">Log out</a>
+          <a href="{{ url_for('logout') }}" class="dashboard-nav-link dashboard-nav-link-muted">{{ tr("Log out") }}</a>
         </nav>
+        {% include "_language_switcher.html" %}
       </aside>
 
       <main class="dashboard-main">
         <header class="dashboard-header card">
           <div>
-            <p class="dashboard-kicker">Dashboard</p>
-            <h1>Welcome, {{ current_user.name or "Student" }}</h1>
+            <p class="dashboard-kicker">{{ tr("Dashboard") }}</p>
+            <h1>{{ tr("Welcome") }}, {{ current_user.name or ("Student" if language == "en" else "student") }}</h1>
           </div>
           <div class="dashboard-header-actions">
-            <a href="{{ url_for('previous_tests') }}" class="secondary-btn">Review History</a>
+            <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("Review History") }}</a>
             <form method="post">
-              <button type="submit" name="category" value="Anatomy" class="primary-btn">Start Anatomy Quiz</button>
+              <button type="submit" name="category" value="Anatomy" class="primary-btn">{{ tr("Start Anatomy Quiz") }}</button>
             </form>
           </div>
         </header>
@@ -62,19 +63,19 @@
           <div class="stat-card dashboard-stat-card">
             <div class="stat-icon stat-icon-blue">SC</div>
             <div>
-              <p class="stat-label">Question Score</p>
+              <p class="stat-label">{{ tr("Question Score") }}</p>
               <h3>
                 {% if accuracy is not none %}
-                  {{ accuracy }}% Correct
+                  {{ accuracy }}% {{ tr("Correct") }}
                 {% else %}
-                  No score yet
+                  {{ tr("No score yet") }}
                 {% endif %}
               </h3>
               <p class="stat-note">
                 {% if accuracy is not none %}
-                  Based on your completed anatomy sessions.
+                  {{ "Gebaseerd op je voltooide anatomiesessies." if language == "nl" else "Based on your completed anatomy sessions." }}
                 {% else %}
-                  Start your first anatomy quiz to generate performance data.
+                  {{ "Start je eerste anatomiequiz om je prestaties te meten." if language == "nl" else "Start your first anatomy quiz to generate performance data." }}
                 {% endif %}
               </p>
             </div>
@@ -84,21 +85,21 @@
             <div class="stat-icon stat-icon-green">QB</div>
             <div>
               <p class="stat-label">QBank Usage</p>
-              <h3>{{ category_cards[0].count if category_cards else 0 }} Questions</h3>
-              <p class="stat-note">Anatomy is the active bank available for study right now.</p>
+              <h3>{{ category_cards[0].count if category_cards else 0 }} {{ "vragen" if language == "nl" else "Questions" }}</h3>
+              <p class="stat-note">{{ "Anatomie is momenteel de actieve vragenbank." if language == "nl" else "Anatomy is the active bank available for study right now." }}</p>
             </div>
           </div>
 
           <div class="stat-card dashboard-stat-card">
             <div class="stat-icon stat-icon-amber">TS</div>
             <div>
-              <p class="stat-label">Test Count</p>
-              <h3>{{ total_quizzes }} Completed</h3>
+              <p class="stat-label">{{ tr("Test Count") }}</p>
+              <h3>{{ total_quizzes }} {{ tr("Completed") }}</h3>
               <p class="stat-note">
                 {% if streak_days %}
-                  {{ streak_days }} day streak currently active.
+                  {{ streak_days }} {{ "dagen op rij actief." if language == "nl" else "day streak currently active." }}
                 {% else %}
-                  Complete quizzes consistently to build a streak.
+                  {{ tr("Complete quizzes consistently to build a streak.") }}
                 {% endif %}
               </p>
             </div>
@@ -109,10 +110,10 @@
           <section class="card dashboard-panel dashboard-panel-wide">
             <div class="dashboard-panel-header">
               <div>
-                <p class="eyebrow">Study Planner</p>
-                <h2>Anatomy Dashboard</h2>
+                <p class="eyebrow">{{ tr("Study Planner") }}</p>
+                <h2>{{ tr("Anatomy Dashboard") }}</h2>
               </div>
-              <div class="dashboard-panel-meta">Focused review</div>
+              <div class="dashboard-panel-meta">{{ tr("Focused review") }}</div>
             </div>
 
             {% if error %}
@@ -121,14 +122,14 @@
 
             <div class="dashboard-anatomy-hero">
               <div class="dashboard-anatomy-copy">
-                <p class="dashboard-anatomy-title">Practice anatomy by subgroup or use a mixed review session.</p>
+                <p class="dashboard-anatomy-title">{{ "Oefen anatomie per subgroep of kies een gemengde herhalingssessie." if language == "nl" else "Practice anatomy by subgroup or use a mixed review session." }}</p>
                 <p class="dashboard-anatomy-text">
-                  Start from musculoskeletal, genito-urinary, head and neck, or use the mixed option for broader recall. You can choose the number of questions, switch between test and exam mode, and revisit older attempts at any time.
+                  {{ "Kies bewegingsapparaat, urogenitaal, hoofd en hals, of gebruik Gemengd voor bredere herhaling. Bepaal zelf het aantal vragen, kies oefen- of examenmodus en bekijk eerdere pogingen wanneer je wilt." if language == "nl" else "Start from musculoskeletal, genito-urinary, head and neck, or use the mixed option for broader recall. You can choose the number of questions, switch between test and exam mode, and revisit older attempts at any time." }}
                 </p>
                 <div class="dashboard-anatomy-tags">
-                  <span class="dashboard-tag">{{ category_cards[0].count if category_cards else 0 }} Questions</span>
-                  <span class="dashboard-tag">Timed Exam Mode</span>
-                  <span class="dashboard-tag">Review Retakes</span>
+                  <span class="dashboard-tag">{{ category_cards[0].count if category_cards else 0 }} {{ "vragen" if language == "nl" else "Questions" }}</span>
+                  <span class="dashboard-tag">{{ tr("Timed Exam Mode") }}</span>
+                  <span class="dashboard-tag">{{ tr("Review Retakes") }}</span>
                 </div>
               </div>
 
@@ -136,57 +137,57 @@
                 <button type="submit" name="category" value="Anatomy" class="dashboard-category-card">
                   <span class="dashboard-category-top">
                     <span class="category-icon">AN</span>
-                    <span class="category-count">{{ category_cards[0].count if category_cards else 0 }} Questions</span>
+                    <span class="category-count">{{ category_cards[0].count if category_cards else 0 }} {{ "vragen" if language == "nl" else "Questions" }}</span>
                   </span>
-                  <span class="category-name">Anatomy</span>
-                  <span class="category-desc">Open the anatomy subgroups and begin a new session.</span>
-                  <span class="dashboard-category-cta">Open Anatomy</span>
+                  <span class="category-name">{{ tr("Anatomy") }}</span>
+                  <span class="category-desc">{{ tr("Open the anatomy subgroups and begin a new session.") }}</span>
+                  <span class="dashboard-category-cta">{{ tr("Open Anatomy") }}</span>
                 </button>
               </form>
             </div>
 
             <div class="tip-box tip-box-home">
-              <strong>Tip:</strong> The free server may sometimes sleep, so the first load can take a little longer.
+              <strong>Tip:</strong> {{ "De gratis server kan soms in slaapstand staan, waardoor de eerste keer laden iets langer duurt." if language == "nl" else "The free server may sometimes sleep, so the first load can take a little longer." }}
             </div>
           </section>
 
           <aside class="card dashboard-panel dashboard-panel-side">
             <div class="dashboard-panel-header">
               <div>
-                <p class="eyebrow">Continue Learning</p>
-                <h2>Last Activity</h2>
+                <p class="eyebrow">{{ tr("Continue Learning") }}</p>
+                <h2>{{ tr("Last Activity") }}</h2>
               </div>
             </div>
 
             {% if last_attempt %}
               <div class="continue-panel continue-panel-vertical">
                 <div class="continue-metric">
-                  <span class="continue-label">Last Quiz</span>
-                  <strong>{{ last_attempt.title }}</strong>
+                  <span class="continue-label">{{ tr("Last Quiz") }}</span>
+                  <strong>{{ localize_quiz_title(last_attempt.title) }}</strong>
                 </div>
                 <div class="continue-metric">
-                  <span class="continue-label">Score</span>
+                  <span class="continue-label">{{ tr("Score") }}</span>
                   <strong>{{ last_attempt.score }}/{{ last_attempt.total_questions }}</strong>
                 </div>
                 <div class="continue-metric">
-                  <span class="continue-label">Completed</span>
+                  <span class="continue-label">{{ tr("Completed") }}</span>
                   <strong>{{ last_attempt.created_at.strftime('%d %b %Y') }}</strong>
                 </div>
               </div>
               <div class="dashboard-side-actions">
-                <a href="{{ url_for('retake_previous_test', attempt_id=last_attempt.id) }}" class="primary-btn">Retake Last Test</a>
-                <a href="{{ url_for('previous_tests') }}" class="secondary-btn">View All Tests</a>
+                <a href="{{ url_for('retake_previous_test', attempt_id=last_attempt.id) }}" class="primary-btn">{{ tr("Retake Last Test") }}</a>
+                <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("View All Tests") }}</a>
               </div>
             {% else %}
               <div class="continue-empty continue-empty-vertical">
                 <div class="continue-empty-icon">AN</div>
                 <div>
-                  <p class="continue-empty-title">No previous anatomy tests yet.</p>
-                  <p class="continue-empty-text">Start a new anatomy quiz to build your performance history and resume from recent sessions.</p>
+                  <p class="continue-empty-title">{{ tr("No previous anatomy tests yet.") }}</p>
+                  <p class="continue-empty-text">{{ "Start een nieuwe anatomiequiz om je prestatiegeschiedenis op te bouwen." if language == "nl" else "Start a new anatomy quiz to build your performance history and resume from recent sessions." }}</p>
                 </div>
               </div>
               <div class="dashboard-side-actions">
-                <a href="{{ url_for('anatomy_sections') }}" class="primary-btn">Start First Quiz</a>
+                <a href="{{ url_for('anatomy_sections') }}" class="primary-btn">{{ tr("Start First Quiz") }}</a>
               </div>
             {% endif %}
           </aside>

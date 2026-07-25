@@ -16,6 +16,12 @@ from flask_login import (
 from sqlalchemy import func, inspect, text
 from werkzeug.utils import secure_filename
 
+from localization import (
+    DEFAULT_LANGUAGE,
+    SUPPORTED_LANGUAGES,
+    latinize_anatomy_term,
+    translate_ui,
+)
 from models import QuizAttempt, db, Question, User
 from questions_data import questions
 
@@ -138,6 +144,76 @@ def normalize_text_answer(value: str) -> str:
 
 def normalize_category(s: str) -> str:
     return (s or "").strip().lower()
+
+
+def get_current_language() -> str:
+    language = (session.get("language") or DEFAULT_LANGUAGE).strip().lower()
+    return language if language in SUPPORTED_LANGUAGES else DEFAULT_LANGUAGE
+
+
+def tr(text: str) -> str:
+    return translate_ui(text, get_current_language())
+
+
+def localize_quiz_title(title: str) -> str:
+    if get_current_language() != "nl":
+        return title
+
+    replacements = {
+        "Anatomy - MSK": "Anatomie - MSK",
+        "Anatomy - Genito-Urinary": "Anatomie - Urogenitaal",
+        "Anatomy - Head and Neck": "Anatomie - Hoofd en hals",
+        "Anatomy - Mixed": "Anatomie - Gemengd",
+        "Anatomy": "Anatomie",
+    }
+    return replacements.get(title, translate_ui(title, "nl"))
+
+
+def localize_question_for_display(question: dict) -> dict:
+    localized = dict(question)
+    if (
+        get_current_language() != "nl"
+        or not is_anatomy_category_name(question.get("Category"))
+        or (current_user.is_authenticated and current_user.is_admin)
+    ):
+        return localized
+
+    prompt = question.get("Vraag") or ""
+    localized["Vraag"] = translate_ui(prompt, "nl")
+    for key in ("A", "B", "C", "D"):
+        localized[key] = latinize_anatomy_term(question.get(key) or "")
+    if question.get("structure_title"):
+        localized["structure_title"] = latinize_anatomy_term(question["structure_title"])
+    return localized
+
+
+def localize_quiz_results(results: list[dict]) -> list[dict]:
+    if get_current_language() != "nl":
+        return results
+
+    localized_results = []
+    for result in results:
+        localized = dict(result)
+        localized["Vraag"] = translate_ui(result.get("Vraag") or "", "nl")
+        if is_anatomy_category_name(result.get("Category")):
+            localized["correct_texts"] = [
+                latinize_anatomy_term(answer) for answer in result.get("correct_texts", [])
+            ]
+            localized["options"] = {
+                key: latinize_anatomy_term(value)
+                for key, value in result.get("options", {}).items()
+            }
+        localized_results.append(localized)
+    return localized_results
+
+
+@app.context_processor
+def inject_language_helpers():
+    return {
+        "language": get_current_language(),
+        "tr": tr,
+        "localize_quiz_title": localize_quiz_title,
+    }
 
 
 def normalize_anatomy_subgroup(subgroup: str | None) -> str:
@@ -769,7 +845,7 @@ def build_attempt_summary(attempt: QuizAttempt) -> dict:
     percent = round((attempt.score / attempt.total_questions) * 100) if attempt.total_questions else 0
     return {
         "id": attempt.id,
-        "title": attempt.title,
+        "title": localize_quiz_title(attempt.title),
         "quiz_mode": normalize_quiz_mode(getattr(attempt, "quiz_mode", "test")),
         "score": attempt.score,
         "total_questions": attempt.total_questions,
@@ -808,6 +884,7 @@ def grade_quiz_submission(order: list[str], selected_by_id: dict[str, dict], for
 
         results.append({
             "ID": q["ID"],
+            "Category": q.get("Category", ""),
             "Vraag": q["Vraag"],
             "user": user_answers,
             "correct": correct,
@@ -833,7 +910,8 @@ def render_quiz_page(
     quiz_mode: str,
     form_action: str | None = None,
 ):
-    questions_by_id = {q["ID"]: q for q in selected}
+    display_questions = [localize_question_for_display(q) for q in selected]
+    questions_by_id = {q["ID"]: q for q in display_questions}
     correct_feedback_by_id = {
         qid: {
             "texts": get_correct_answer_texts(question),
@@ -843,7 +921,7 @@ def render_quiz_page(
     }
     return render_template(
         "quiz.html",
-        category=display_title,
+        category=localize_quiz_title(display_title),
         questions_by_id=questions_by_id,
         correct_feedback_by_id=correct_feedback_by_id,
         order=order,
@@ -1094,6 +1172,18 @@ def safe_redirect_target(target: str, fallback_endpoint: str = "home") -> str:
 # Routes
 # -------------------------
 
+@app.route("/language/<language_code>")
+def set_language(language_code):
+    language_code = (language_code or "").strip().lower()
+    if language_code in SUPPORTED_LANGUAGES:
+        session["language"] = language_code
+
+    target = safe_redirect_target(request.args.get("next"), "home").rstrip("?")
+    separator = "&" if "?" in target else "?"
+    target = f"{target}{separator}_lang=1"
+    return redirect(target)
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     if not current_user.is_authenticated:
@@ -1221,10 +1311,10 @@ def retake_previous_test(attempt_id):
         )
         return render_template(
             "result.html",
-            category=attempt.title,
+            category=localize_quiz_title(attempt.title),
             score=score,
             total=len(order),
-            results=results,
+            results=localize_quiz_results(results),
             back_url=url_for("previous_tests"),
             attempt_id=new_attempt.id,
         )
@@ -1282,6 +1372,24 @@ def quiz(category):
         return render_template(template_name, **template_kwargs)
 
     if request.method == "GET":
+        preserve_current_quiz = (
+            request.args.get("_lang") == "1"
+            and session.get("category") == category
+            and session.get("subgroup") == subgroup
+            and bool(session.get("order"))
+        )
+        if preserve_current_quiz:
+            available_ids = {question["ID"] for question in selected}
+            order = [qid for qid in session["order"] if qid in available_ids]
+            if order:
+                return render_quiz_page(
+                    display_title=display_title,
+                    selected=selected,
+                    order=order,
+                    back_url=back_url,
+                    quiz_mode=normalize_quiz_mode(session.get("quiz_mode")),
+                )
+
         if subgroup:
             question_limit = get_question_limit(request.args.get("count"), len(selected))
             if not question_limit:
@@ -1325,10 +1433,10 @@ def quiz(category):
 
     return render_template(
         "result.html",
-        category=display_title,
+        category=localize_quiz_title(display_title),
         score=score,
         total=len(order),
-        results=results,
+        results=localize_quiz_results(results),
         back_url=back_url,
         attempt_id=attempt.id,
     )
@@ -1691,8 +1799,10 @@ def register():
 @app.route("/logout")
 @login_required
 def logout():
+    language = get_current_language()
     logout_user()
     session.clear()
+    session["language"] = language
     return redirect(url_for("login"))
 
 
