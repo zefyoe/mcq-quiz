@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     quiz_attempts = db.relationship("QuizAttempt", backref="user", lazy=True, cascade="all, delete-orphan")
+    question_progress = db.relationship("QuestionProgress", backref="user", lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, pw: str):
         self.password_hash = generate_password_hash(pw)
@@ -47,3 +48,22 @@ class QuizAttempt(db.Model):
     total_questions = db.Column(db.Integer, nullable=False)
     question_ids_json = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class QuestionProgress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    question_key = db.Column(db.String(500), nullable=False)
+    subgroup = db.Column(db.String(80), nullable=True, index=True)
+    times_seen = db.Column(db.Integer, nullable=False, default=0)
+    times_correct = db.Column(db.Integer, nullable=False, default=0)
+    correct_streak = db.Column(db.Integer, nullable=False, default=0)
+    last_was_correct = db.Column(db.Boolean, nullable=True)
+    is_marked = db.Column(db.Boolean, nullable=False, default=False, index=True)
+    last_answered_at = db.Column(db.DateTime, nullable=True)
+    next_review_at = db.Column(db.DateTime, nullable=True, index=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "question_key", name="uq_question_progress_user_key"),
+    )

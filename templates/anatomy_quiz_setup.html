@@ -40,27 +40,79 @@
             <p class="eyebrow">{{ tr("Question count") }}</p>
             <h2>{{ tr("How many questions do you want?") }}</h2>
             <p class="section-subtitle">
-              {% if language == "nl" %}
-                Nu beschikbaar: {{ available_count }} vragen. Maximaal {{ max_quiz_questions }} per quiz.
-              {% else %}
-                Available now: {{ available_count }} question{{ '' if available_count == 1 else 's' }}.
-                Maximum per quiz: {{ max_quiz_questions }}.
-              {% endif %}
+              <span id="availableCountText">
+                {% if language == "nl" %}
+                  Nu beschikbaar: {{ available_count }} vragen.
+                {% else %}
+                  Available now: {{ available_count }} question{{ '' if available_count == 1 else 's' }}.
+                {% endif %}
+              </span>
+              {{ "Maximaal" if language == "nl" else "Maximum per quiz:" }} {{ max_quiz_questions }}.
             </p>
           </div>
         </div>
 
-        {% if available_count > 0 %}
+        {% if pool_counts["all"] > 0 %}
           <form method="get" action="{{ url_for('quiz', category='Anatomy') }}" class="quiz-setup-form">
             <input type="hidden" name="subgroup" value="{{ subgroup_key }}">
+            <div class="quiz-pool-group">
+              <div class="quiz-setup-group-heading">
+                <p class="quiz-count-label">{{ "Studiedoel" if language == "nl" else "Study focus" }}</p>
+                <span>{{ "Kies welke vragen je nu wilt oefenen." if language == "nl" else "Choose which questions you want to practise now." }}</span>
+              </div>
+              <div class="quiz-pool-grid">
+                {% for pool_key, pool in quiz_pools.items() %}
+                  {% set pool_count = pool_counts[pool_key] %}
+                  <label class="quiz-pool-card {% if pool_count == 0 %}is-empty{% endif %}">
+                    <input
+                      type="radio"
+                      name="pool"
+                      value="{{ pool_key }}"
+                      data-pool-count="{{ pool_count }}"
+                      {% if selected_pool == pool_key %}checked{% endif %}
+                      {% if pool_count == 0 %}disabled{% endif %}
+                    >
+                    <span class="quiz-pool-card-top">
+                      <span class="quiz-pool-title">
+                        {% if language == "nl" %}
+                          {{ {
+                            "all": "Alle vragen",
+                            "due": "Slimme herhaling",
+                            "incorrect": "Eerder fout",
+                            "unseen": "Ongeziene vragen",
+                            "marked": "Gemarkeerd"
+                          }[pool_key] }}
+                        {% else %}
+                          {{ pool.label }}
+                        {% endif %}
+                      </span>
+                      <span class="quiz-pool-count">{{ pool_count }}</span>
+                    </span>
+                    <span class="quiz-pool-description">
+                      {% if language == "nl" %}
+                        {{ {
+                          "all": "Een willekeurige selectie uit deze sectie.",
+                          "due": "Vragen die klaarstaan voor een nieuwe herhaling.",
+                          "incorrect": "Vragen die je eerder minstens één keer fout had.",
+                          "unseen": "Alleen vragen die je nog niet hebt beantwoord.",
+                          "marked": "Vragen die je zelf hebt bewaard voor later."
+                        }[pool_key] }}
+                      {% else %}
+                        {{ pool.description }}
+                      {% endif %}
+                    </span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
             <label class="quiz-count-label" for="count">{{ tr("Number of questions") }}</label>
             <input
               id="count"
               name="count"
               type="number"
               min="1"
-              max="{{ [available_count, max_quiz_questions]|min }}"
-              value="{{ suggested_count }}"
+              max="{{ [[available_count, max_quiz_questions]|min, 1]|max }}"
+              value="{{ suggested_count or 1 }}"
               class="quiz-count-input"
               required
             >
@@ -87,7 +139,7 @@
             </div>
             <div class="quiz-setup-actions">
               <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">{{ tr("Back") }}</a>
-              <button type="submit" class="primary-btn">{{ tr("Start Quiz") }}</button>
+              <button type="submit" class="primary-btn" id="startQuizButton">{{ tr("Start Quiz") }}</button>
             </div>
           </form>
         {% else %}
@@ -98,5 +150,31 @@
         {% endif %}
       </section>
     </main>
+    <script>
+      const poolInputs = document.querySelectorAll('input[name="pool"]');
+      const countInput = document.getElementById("count");
+      const countText = document.getElementById("availableCountText");
+      const startButton = document.getElementById("startQuizButton");
+      const maxPerQuiz = {{ max_quiz_questions }};
+      const isDutch = {{ (language == "nl")|tojson }};
+
+      function updatePoolAvailability() {
+        const selected = document.querySelector('input[name="pool"]:checked');
+        if (!selected || !countInput || !startButton) return;
+        const available = Number(selected.dataset.poolCount || 0);
+        countInput.max = String(Math.max(1, Math.min(available, maxPerQuiz)));
+        countInput.value = String(Math.max(1, Math.min(Number(countInput.value || 1), available, maxPerQuiz)));
+        countInput.disabled = available === 0;
+        startButton.disabled = available === 0;
+        if (countText) {
+          countText.textContent = isDutch
+            ? `Nu beschikbaar: ${available} vragen.`
+            : `Available now: ${available} question${available === 1 ? "" : "s"}.`;
+        }
+      }
+
+      poolInputs.forEach((input) => input.addEventListener("change", updatePoolAvailability));
+      updatePoolAvailability();
+    </script>
   </body>
 </html>

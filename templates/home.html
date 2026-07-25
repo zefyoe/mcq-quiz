@@ -107,6 +107,76 @@
           </div>
         </section>
 
+        <section class="learning-overview-grid">
+          <article class="card smart-review-card">
+            <div class="smart-review-copy">
+              <p class="eyebrow">{{ "SLIMME HERHALING" if language == "nl" else "SMART REVIEW" }}</p>
+              <h2>
+                {% if learning_dashboard.due %}
+                  {{ learning_dashboard.due }} {{ "vragen zijn klaar voor herhaling" if language == "nl" else "questions are ready for review" }}
+                {% else %}
+                  {{ "Je herhaalplanning is bijgewerkt" if language == "nl" else "Your review plan is up to date" }}
+                {% endif %}
+              </h2>
+              <p>
+                {% if learning_dashboard.due %}
+                  {{ "Werk eerst deze vragen af om zwakke structuren gericht te versterken." if language == "nl" else "Prioritise these questions to strengthen structures that need more recall." }}
+                {% else %}
+                  {{ "Nieuwe resultaten worden automatisch ingepland op basis van je prestaties." if language == "nl" else "New results are scheduled automatically based on your performance." }}
+                {% endif %}
+              </p>
+            </div>
+            <div class="smart-review-metrics">
+              <div><strong>{{ learning_dashboard.coverage }}%</strong><span>{{ "Dekking" if language == "nl" else "Coverage" }}</span></div>
+              <div><strong>{{ learning_dashboard.mastered }}</strong><span>{{ "Beheerst" if language == "nl" else "Mastered" }}</span></div>
+              <div><strong>{{ learning_dashboard.marked }}</strong><span>{{ "Gemarkeerd" if language == "nl" else "Marked" }}</span></div>
+            </div>
+            <div class="smart-review-actions">
+              {% if learning_dashboard.due %}
+                <a href="{{ url_for('anatomy_subgroup_setup', subgroup='mixed', pool='due') }}" class="primary-btn">{{ "Start herhaling" if language == "nl" else "Start review" }}</a>
+              {% else %}
+                <a href="{{ url_for('anatomy_subgroup_setup', subgroup='mixed', pool='unseen') }}" class="primary-btn">{{ "Oefen ongeziene vragen" if language == "nl" else "Practise unseen questions" }}</a>
+              {% endif %}
+              {% if learning_dashboard.marked %}
+                <a href="{{ url_for('anatomy_subgroup_setup', subgroup='mixed', pool='marked') }}" class="secondary-btn">{{ "Bekijk gemarkeerde vragen" if language == "nl" else "Review marked questions" }}</a>
+              {% endif %}
+            </div>
+          </article>
+
+          <article class="card section-performance-card">
+            <div class="dashboard-panel-header">
+              <div>
+                <p class="eyebrow">{{ "VOORTGANG" if language == "nl" else "PROGRESS" }}</p>
+                <h2>{{ "Prestaties per sectie" if language == "nl" else "Performance by section" }}</h2>
+              </div>
+              <span class="dashboard-panel-meta">{{ learning_dashboard.seen }}/{{ learning_dashboard.total }} {{ "gezien" if language == "nl" else "seen" }}</span>
+            </div>
+            <div class="section-performance-list">
+              {% for section in learning_dashboard.subgroups %}
+                <a href="{{ url_for('anatomy_subgroup_setup', subgroup=section.key) }}" class="section-performance-row">
+                  <div class="section-performance-heading">
+                    <strong>{{ tr(section.label) }}</strong>
+                    <span>
+                      {% if section.accuracy is not none %}
+                        {{ section.accuracy }}% {{ "juist" if language == "nl" else "correct" }}
+                      {% else %}
+                        {{ "Nog niet getest" if language == "nl" else "Not tested yet" }}
+                      {% endif %}
+                    </span>
+                  </div>
+                  <div class="section-progress-track">
+                    <span style="width: {{ section.coverage }}%"></span>
+                  </div>
+                  <div class="section-performance-meta">
+                    <span>{{ section.seen }}/{{ section.total }} {{ "vragen gezien" if language == "nl" else "questions seen" }}</span>
+                    <span>{{ section.coverage }}% {{ "dekking" if language == "nl" else "coverage" }}</span>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          </article>
+        </section>
+
         <section class="dashboard-content-grid">
           <section class="card dashboard-panel dashboard-panel-wide">
             <div class="dashboard-panel-header">
@@ -157,7 +227,30 @@
               </div>
             </div>
 
-            {% if last_attempt %}
+            {% if active_quiz %}
+              <div class="continue-panel continue-panel-vertical active-quiz-panel">
+                <div class="continue-status-line">
+                  <span class="live-status-dot"></span>
+                  {{ "Lopende sessie" if language == "nl" else "Session in progress" }}
+                </div>
+                <div class="continue-metric">
+                  <span class="continue-label">{{ "Quiz" if language == "nl" else "Quiz" }}</span>
+                  <strong>{{ localize_quiz_title(active_quiz.title) }}</strong>
+                </div>
+                <div class="continue-metric">
+                  <span class="continue-label">{{ "Omvang" if language == "nl" else "Session size" }}</span>
+                  <strong>{{ active_quiz.count }} {{ "vragen" if language == "nl" else "questions" }}</strong>
+                </div>
+                <div class="continue-metric">
+                  <span class="continue-label">{{ "Modus" if language == "nl" else "Mode" }}</span>
+                  <strong>{{ tr("Exam Phase") if active_quiz.mode == "exam" else tr("Test Phase") }}</strong>
+                </div>
+              </div>
+              <div class="dashboard-side-actions">
+                <a href="{{ active_quiz.resume_url }}" class="primary-btn">{{ "Toets hervatten" if language == "nl" else "Resume quiz" }}</a>
+                <a href="{{ url_for('anatomy_sections') }}" class="secondary-btn">{{ "Nieuwe toets" if language == "nl" else "New quiz" }}</a>
+              </div>
+            {% elif last_attempt %}
               <div class="continue-panel continue-panel-vertical">
                 <div class="continue-metric">
                   <span class="continue-label">{{ tr("Last Quiz") }}</span>
@@ -165,7 +258,10 @@
                 </div>
                 <div class="continue-metric">
                   <span class="continue-label">{{ tr("Score") }}</span>
-                  <strong>{{ last_attempt.score }}/{{ last_attempt.total_questions }}</strong>
+                  <strong>
+                    {{ last_attempt.score }}/{{ last_attempt.total_questions }}
+                    · {{ ((last_attempt.score / last_attempt.total_questions) * 100)|round|int if last_attempt.total_questions else 0 }}%
+                  </strong>
                 </div>
                 <div class="continue-metric">
                   <span class="continue-label">{{ tr("Completed") }}</span>

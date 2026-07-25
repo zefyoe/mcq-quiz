@@ -22,7 +22,7 @@ from localization import (
     latinize_anatomy_term,
     translate_ui,
 )
-from models import QuizAttempt, db, Question, User
+from models import QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -98,6 +98,28 @@ QUIZ_MODES = {
     "exam": {
         "label": "Exam Phase",
         "description": "Auto-move to the next question after saving and show a timer.",
+    },
+}
+QUIZ_POOLS = {
+    "all": {
+        "label": "All questions",
+        "description": "A balanced random selection from this anatomy section.",
+    },
+    "due": {
+        "label": "Smart review",
+        "description": "Questions that are ready for another repetition.",
+    },
+    "incorrect": {
+        "label": "Previously incorrect",
+        "description": "Focus on questions you answered incorrectly before.",
+    },
+    "unseen": {
+        "label": "Unseen questions",
+        "description": "Only questions you have not answered yet.",
+    },
+    "marked": {
+        "label": "Marked questions",
+        "description": "Build a quiz from questions you saved for later.",
     },
 }
 DISABLED_CATEGORIES = {"physics"}
@@ -570,6 +592,144 @@ def get_anatomy_subgroup_cards() -> list[dict]:
     return cards
 
 
+def get_question_key(question: dict) -> str:
+    return (question.get("image_url") or question.get("ID") or "").strip()
+
+
+def normalize_quiz_pool(pool: str | None) -> str:
+    pool_key = normalize_category(pool)
+    return pool_key if pool_key in QUIZ_POOLS else "all"
+
+
+def get_user_progress_by_key(user_id: int) -> dict[str, QuestionProgress]:
+    return {
+        progress.question_key: progress
+        for progress in QuestionProgress.query.filter_by(user_id=user_id).all()
+    }
+
+
+def filter_questions_for_pool(
+    question_list: list[dict],
+    user_id: int,
+    pool: str | None,
+) -> list[dict]:
+    pool_key = normalize_quiz_pool(pool)
+    if pool_key == "all":
+        return list(question_list)
+
+    progress_by_key = get_user_progress_by_key(user_id)
+    now = datetime.utcnow()
+    filtered = []
+
+    for question in question_list:
+        progress = progress_by_key.get(get_question_key(question))
+        if pool_key == "unseen" and (progress is None or progress.times_seen == 0):
+            filtered.append(question)
+        elif pool_key == "incorrect" and progress and progress.times_seen > progress.times_correct:
+            filtered.append(question)
+        elif pool_key == "marked" and progress and progress.is_marked:
+            filtered.append(question)
+        elif (
+            pool_key == "due"
+            and progress
+            and progress.times_seen > 0
+            and progress.next_review_at
+            and progress.next_review_at <= now
+        ):
+            filtered.append(question)
+
+    return filtered
+
+
+def get_quiz_pool_counts(question_list: list[dict], user_id: int) -> dict[str, int]:
+    return {
+        pool_key: len(filter_questions_for_pool(question_list, user_id, pool_key))
+        for pool_key in QUIZ_POOLS
+    }
+
+
+def get_learning_dashboard(user_id: int) -> dict:
+    all_questions = get_all_anatomy_questions()
+    progress_by_key = get_user_progress_by_key(user_id)
+    current_question_keys = {get_question_key(question) for question in all_questions}
+    now = datetime.utcnow()
+    seen = [
+        progress for key, progress in progress_by_key.items()
+        if key in current_question_keys and progress.times_seen > 0
+    ]
+    due = [
+        progress for progress in seen
+        if progress.next_review_at and progress.next_review_at <= now
+    ]
+    mastered = [
+        progress for progress in seen
+        if progress.correct_streak >= 3
+        and progress.times_correct / progress.times_seen >= 0.8
+    ]
+
+    subgroup_stats = []
+    for subgroup_key in ("msk", "genito-urinary", "head-and-neck"):
+        questions_in_subgroup = [
+            question for question in all_questions
+            if get_anatomy_subgroup_for_category(question.get("Category")) == subgroup_key
+        ]
+        progress_rows = [
+            progress_by_key[get_question_key(question)]
+            for question in questions_in_subgroup
+            if get_question_key(question) in progress_by_key
+            and progress_by_key[get_question_key(question)].times_seen > 0
+        ]
+        answered = sum(progress.times_seen for progress in progress_rows)
+        correct = sum(progress.times_correct for progress in progress_rows)
+        subgroup_stats.append({
+            "key": subgroup_key,
+            "label": ANATOMY_SUBGROUPS[subgroup_key]["label"],
+            "total": len(questions_in_subgroup),
+            "seen": len(progress_rows),
+            "accuracy": round(correct / answered * 100) if answered else None,
+            "coverage": round(len(progress_rows) / len(questions_in_subgroup) * 100)
+            if questions_in_subgroup else 0,
+        })
+
+    return {
+        "total": len(all_questions),
+        "seen": len(seen),
+        "unseen": max(0, len(all_questions) - len(seen)),
+        "due": len(due),
+        "marked": sum(
+            1 for key, progress in progress_by_key.items()
+            if key in current_question_keys and progress.is_marked
+        ),
+        "mastered": len(mastered),
+        "coverage": round(len(seen) / len(all_questions) * 100) if all_questions else 0,
+        "subgroups": subgroup_stats,
+    }
+
+
+def get_active_quiz_summary() -> dict | None:
+    order = session.get("order") or []
+    category = session.get("category")
+    subgroup = session.get("subgroup")
+    if not order or normalize_category(category) != normalize_category(ANATOMY_CATEGORY):
+        return None
+
+    subgroup_meta = ANATOMY_SUBGROUPS.get(normalize_anatomy_subgroup(subgroup))
+    title = get_quiz_display_title(category, subgroup)
+    return {
+        "title": title,
+        "count": len(order),
+        "mode": normalize_quiz_mode(session.get("quiz_mode")),
+        "pool": normalize_quiz_pool(session.get("quiz_pool")),
+        "subgroup_label": subgroup_meta["label"] if subgroup_meta else ANATOMY_CATEGORY,
+        "resume_url": url_for(
+            "quiz",
+            category=category,
+            subgroup=subgroup,
+            resume="1",
+        ),
+    }
+
+
 def get_question_limit(requested_count: str | int | None, available_count: int) -> int:
     try:
         count = int(requested_count or 0)
@@ -884,6 +1044,7 @@ def grade_quiz_submission(order: list[str], selected_by_id: dict[str, dict], for
 
         results.append({
             "ID": q["ID"],
+            "question_key": get_question_key(q),
             "Category": q.get("Category", ""),
             "Vraag": q["Vraag"],
             "user": user_answers,
@@ -899,6 +1060,55 @@ def grade_quiz_submission(order: list[str], selected_by_id: dict[str, dict], for
         })
 
     return results, score
+
+
+def record_question_results(user_id: int, results: list[dict], subgroup: str | None) -> None:
+    now = datetime.utcnow()
+    keys = [result["question_key"] for result in results if result.get("question_key")]
+    existing = {
+        progress.question_key: progress
+        for progress in QuestionProgress.query.filter(
+            QuestionProgress.user_id == user_id,
+            QuestionProgress.question_key.in_(keys),
+        ).all()
+    } if keys else {}
+
+    for result in results:
+        question_key = result.get("question_key")
+        if not question_key:
+            continue
+
+        progress = existing.get(question_key)
+        if progress is None:
+            progress = QuestionProgress(user_id=user_id, question_key=question_key)
+            db.session.add(progress)
+            existing[question_key] = progress
+
+        progress.subgroup = (
+            normalize_anatomy_subgroup(subgroup)
+            if subgroup
+            else get_anatomy_subgroup_for_category(result.get("Category"))
+        )
+        progress.times_seen = (progress.times_seen or 0) + 1
+        progress.last_answered_at = now
+        progress.last_was_correct = bool(result["is_correct"])
+
+        if result["is_correct"]:
+            progress.times_correct = (progress.times_correct or 0) + 1
+            progress.correct_streak = (progress.correct_streak or 0) + 1
+            review_days = 2 if progress.correct_streak == 1 else 7 if progress.correct_streak == 2 else 21 if progress.correct_streak == 3 else 45
+        else:
+            progress.correct_streak = 0
+            review_days = 1
+
+        progress.next_review_at = now + timedelta(days=review_days)
+
+    db.session.commit()
+
+
+def clear_active_quiz_session() -> None:
+    for key in ("order", "category", "subgroup", "question_limit", "quiz_mode", "quiz_pool", "quiz_run_id"):
+        session.pop(key, None)
 
 
 def render_quiz_page(
@@ -919,14 +1129,24 @@ def render_quiz_page(
         }
         for qid, question in questions_by_id.items()
     }
+    progress_by_key = get_user_progress_by_key(current_user.id)
+    marked_by_id = {
+        qid: bool(
+            progress_by_key.get(get_question_key(question))
+            and progress_by_key[get_question_key(question)].is_marked
+        )
+        for qid, question in questions_by_id.items()
+    }
     return render_template(
         "quiz.html",
         category=localize_quiz_title(display_title),
         questions_by_id=questions_by_id,
         correct_feedback_by_id=correct_feedback_by_id,
+        marked_by_id=marked_by_id,
         order=order,
         back_url=back_url,
         quiz_mode=normalize_quiz_mode(quiz_mode),
+        quiz_run_id=session.get("quiz_run_id") or "quiz",
         form_action=form_action,
     )
 
@@ -1193,6 +1413,8 @@ def home():
     category_cards = build_home_category_cards(categories)
     total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
     last_attempt = get_last_quiz_attempt(current_user.id)
+    learning_dashboard = get_learning_dashboard(current_user.id)
+    active_quiz = get_active_quiz_summary()
 
     if request.method == "POST":
         category = (request.form.get("category") or "").strip()
@@ -1207,6 +1429,8 @@ def home():
                 accuracy=accuracy,
                 streak_days=streak_days,
                 last_attempt=last_attempt,
+                learning_dashboard=learning_dashboard,
+                active_quiz=active_quiz,
             )
 
         if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
@@ -1223,6 +1447,8 @@ def home():
         accuracy=accuracy,
         streak_days=streak_days,
         last_attempt=last_attempt,
+        learning_dashboard=learning_dashboard,
+        active_quiz=active_quiz,
     )
 
 
@@ -1261,7 +1487,9 @@ def anatomy_subgroup_setup(subgroup):
         return redirect(url_for("anatomy_sections"))
 
     selected = get_questions_for_anatomy_subgroup(subgroup_key)
-    available_count = len(selected)
+    pool_counts = get_quiz_pool_counts(selected, current_user.id)
+    selected_pool = normalize_quiz_pool(request.args.get("pool"))
+    available_count = pool_counts[selected_pool]
     suggested_count = get_question_limit(request.args.get("count"), available_count)
 
     return render_template(
@@ -1274,7 +1502,37 @@ def anatomy_subgroup_setup(subgroup):
         suggested_count=suggested_count,
         quiz_modes=QUIZ_MODES,
         selected_mode=normalize_quiz_mode(request.args.get("mode")),
+        quiz_pools=QUIZ_POOLS,
+        pool_counts=pool_counts,
+        selected_pool=selected_pool,
     )
+
+
+@app.route("/questions/mark", methods=["POST"])
+@login_required
+def toggle_question_mark():
+    payload = request.get_json(silent=True) or {}
+    question_key = (payload.get("question_key") or "").strip()
+    valid_keys = {get_question_key(question) for question in get_all_anatomy_questions()}
+    if not question_key or question_key not in valid_keys:
+        return jsonify({"error": "Invalid question."}), 400
+
+    progress = QuestionProgress.query.filter_by(
+        user_id=current_user.id,
+        question_key=question_key,
+    ).first()
+    if progress is None:
+        progress = QuestionProgress(
+            user_id=current_user.id,
+            question_key=question_key,
+            is_marked=True,
+        )
+        db.session.add(progress)
+    else:
+        progress.is_marked = not progress.is_marked
+
+    db.session.commit()
+    return jsonify({"marked": progress.is_marked})
 
 
 @app.route("/previous-tests/<int:attempt_id>/retake", methods=["GET", "POST"])
@@ -1309,6 +1567,8 @@ def retake_previous_test(attempt_id):
             total_questions=len(order),
             question_ids=order,
         )
+        record_question_results(current_user.id, results, attempt.subgroup)
+        clear_active_quiz_session()
         return render_template(
             "result.html",
             category=localize_quiz_title(attempt.title),
@@ -1323,6 +1583,9 @@ def retake_previous_test(attempt_id):
     session["category"] = attempt.category
     session["subgroup"] = attempt.subgroup
     session["question_limit"] = len(order)
+    session["quiz_mode"] = normalize_quiz_mode(getattr(attempt, "quiz_mode", "test"))
+    session["quiz_pool"] = "all"
+    session["quiz_run_id"] = os.urandom(8).hex()
 
     return render_quiz_page(
         display_title=attempt.title,
@@ -1345,12 +1608,18 @@ def quiz(category):
     subgroup = None
     question_limit = None
     quiz_mode = normalize_quiz_mode(request.args.get("mode"))
+    quiz_pool = normalize_quiz_pool(request.args.get("pool"))
     if normalize_category(category) == normalize_category(ANATOMY_CATEGORY):
         subgroup = normalize_anatomy_subgroup(request.args.get("subgroup"))
         if subgroup not in ANATOMY_SUBGROUPS:
             return redirect(url_for("anatomy_sections"))
 
-    selected = get_questions_for_category(category, subgroup)
+    all_selected = get_questions_for_category(category, subgroup)
+    selected = (
+        filter_questions_for_pool(all_selected, current_user.id, quiz_pool)
+        if request.method == "GET" and subgroup
+        else all_selected
+    )
     display_title = get_quiz_display_title(category, subgroup)
     back_url = url_for("anatomy_sections") if subgroup else url_for("home")
 
@@ -1373,8 +1642,9 @@ def quiz(category):
 
     if request.method == "GET":
         preserve_current_quiz = (
-            request.args.get("_lang") == "1"
-            and session.get("category") == category
+            request.args.get("_lang") == "1" or request.args.get("resume") == "1"
+        ) and (
+            session.get("category") == category
             and session.get("subgroup") == subgroup
             and bool(session.get("order"))
         )
@@ -1406,6 +1676,8 @@ def quiz(category):
         session["subgroup"] = subgroup
         session["question_limit"] = question_limit
         session["quiz_mode"] = quiz_mode
+        session["quiz_pool"] = quiz_pool
+        session["quiz_run_id"] = os.urandom(8).hex()
 
         return render_quiz_page(
             display_title=display_title,
@@ -1430,6 +1702,8 @@ def quiz(category):
         total_questions=len(order),
         question_ids=order,
     )
+    record_question_results(current_user.id, results, subgroup)
+    clear_active_quiz_session()
 
     return render_template(
         "result.html",

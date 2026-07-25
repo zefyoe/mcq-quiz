@@ -1,35 +1,5 @@
 questions = [
     {
-        "ID": "Q003",
-        "Category": "Anatomy",
-        "Vraag": "Welke kleur krijg je bij rood + geel?",
-        "A": "Groen",
-        "B": "Paars",
-        "C": "Oranje",
-        "D": "Blauw",
-        "Correct": "C"
-    },
-    {
-        "ID": "Q004",
-        "Category": "Anatomy",
-        "Vraag": "Wie schreef 'Harry Potter'?",
-        "A": "J.R.R. Tolkien",
-        "B": "J.K. Rowling",
-        "C": "George R.R. Martin",
-        "D": "Suzanne Collins",
-        "Correct": "B"
-    },
-    {
-        "ID": "Q005",
-        "Category": "Anatomy",
-        "Vraag": "Wat is de grootste planeet in ons zonnestelsel?",
-        "A": "Aarde",
-        "B": "Mars",
-        "C": "Jupiter",
-        "D": "Saturnus",
-        "Correct": "C"
-    },
-    {
         "ID": "Q006",
         "Category": "Physics",
         "Vraag": "La fréquence d'une sonde échographique influence principalement :",

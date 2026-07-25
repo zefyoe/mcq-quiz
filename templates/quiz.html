@@ -97,6 +97,7 @@
               class="question-panel {% if loop.first %}active{% endif %}"
               data-question-index="{{ loop.index0 }}"
               data-qid="{{ qid }}"
+              data-question-key="{{ q.get('image_url') or qid }}"
               data-category="{{ q['Category'] }}"
               data-text="{{ q['Vraag'] }}"
               data-image-url="{{ q.get('image_url', '') }}"
@@ -104,7 +105,19 @@
             >
               <div class="question-top">
                 <div class="question-number-badge">{{ tr("Question") }} {{ loop.index }}</div>
-                <div class="question-status" id="status-{{ loop.index0 }}">{{ tr("Not saved") }}</div>
+                <div class="question-top-actions">
+                  {% if not current_user.is_admin %}
+                    <button
+                      type="button"
+                      class="question-mark-button {% if marked_by_id[qid] %}is-marked{% endif %}"
+                      data-mark-question
+                      aria-pressed="{{ 'true' if marked_by_id[qid] else 'false' }}"
+                    >
+                      {{ "Gemarkeerd" if language == "nl" and marked_by_id[qid] else "Markeren" if language == "nl" else "Marked" if marked_by_id[qid] else "Mark for review" }}
+                    </button>
+                  {% endif %}
+                  <div class="question-status" id="status-{{ loop.index0 }}">{{ tr("Not saved") }}</div>
+                </div>
               </div>
 
               <h3 class="question-title">{{ q["Vraag"] }}</h3>
@@ -201,6 +214,7 @@
       const isAdmin = {{ (current_user.is_authenticated and current_user.is_admin)|tojson }};
       const currentUserId = {{ current_user.id|tojson }};
       const saveAnswerUrl = {{ url_for('admin_save_question_answer')|tojson }};
+      const markQuestionUrl = {{ url_for('toggle_question_mark')|tojson }};
       const quizMode = {{ quiz_mode|tojson }};
       const panels = document.querySelectorAll(".question-panel");
       const navButtons = document.querySelectorAll(".question-nav-item");
@@ -211,7 +225,8 @@
       const progressBarFill = document.getElementById("progressBarFill");
       const quizTimer = document.getElementById("quizTimer");
       const savedAnswers = new Set();
-      const storageKey = `quizAnswers:${currentUserId}:${isAdmin ? "admin" : "student"}:${{ category|tojson }}`;
+      const quizRunId = {{ quiz_run_id|tojson }};
+      const storageKey = `quizAnswers:${currentUserId}:${isAdmin ? "admin" : "student"}:${quizRunId}`;
       let currentIndex = 0;
       const correctFeedbackByQid = {{ correct_feedback_by_id|tojson }};
       const quizText = {
@@ -229,7 +244,10 @@
         typeAnswer: {{ ("Vul minimaal één antwoord in voordat je opslaat." if language == "nl" else "Please type at least one answer before saving.")|tojson }},
         chooseCorrect: {{ ("Selecteer welk antwoord juist is." if language == "nl" else "Please choose which answer is correct.")|tojson }},
         saving: {{ ("Opslaan..." if language == "nl" else "Saving...")|tojson }},
-        saveFailed: {{ ("Het antwoord kon niet worden opgeslagen." if language == "nl" else "Could not save answer.")|tojson }}
+        saveFailed: {{ ("Het antwoord kon niet worden opgeslagen." if language == "nl" else "Could not save answer.")|tojson }},
+        mark: {{ ("Markeren" if language == "nl" else "Mark for review")|tojson }},
+        marked: {{ ("Gemarkeerd" if language == "nl" else "Marked")|tojson }},
+        markFailed: {{ ("De markering kon niet worden opgeslagen." if language == "nl" else "Could not save this marker.")|tojson }}
       };
 
       function formatElapsedTime(totalSeconds) {
@@ -559,6 +577,7 @@
         const answerInputs = isAdmin
           ? ["a", "b", "c", "d"].map((key) => panel.querySelector(`[data-answer-input="${key}"]`))
           : Array.from(panel.querySelectorAll("[data-student-choice]"));
+        const markButton = panel.querySelector("[data-mark-question]");
 
         saveButton.addEventListener("click", async () => {
           currentIndex = index;
@@ -569,6 +588,28 @@
           editButton.addEventListener("click", () => {
             panel.dataset.saved = "false";
             updateSavedState(index);
+          });
+        }
+
+        if (markButton) {
+          markButton.addEventListener("click", async () => {
+            markButton.disabled = true;
+            try {
+              const response = await fetch(markQuestionUrl, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({question_key: panel.dataset.questionKey}),
+              });
+              const payload = await response.json();
+              if (!response.ok) throw new Error(payload.error || quizText.markFailed);
+              markButton.classList.toggle("is-marked", payload.marked);
+              markButton.setAttribute("aria-pressed", String(payload.marked));
+              markButton.textContent = payload.marked ? quizText.marked : quizText.mark;
+            } catch (error) {
+              alert(error.message || quizText.markFailed);
+            } finally {
+              markButton.disabled = false;
+            }
           });
         }
 
