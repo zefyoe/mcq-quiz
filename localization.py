@@ -1,5 +1,11 @@
 import re
 
+try:
+    from sourced_latin_terms import SOURCED_LATIN_SOURCES, SOURCED_LATIN_TERMS
+except ImportError:
+    SOURCED_LATIN_SOURCES = {}
+    SOURCED_LATIN_TERMS = {}
+
 
 SUPPORTED_LANGUAGES = {"en", "nl"}
 DEFAULT_LANGUAGE = "en"
@@ -191,48 +197,6 @@ LATIN_EXACT = {
 }
 
 
-LATIN_HEADS = {
-    "artery": "Arteria",
-    "vein": "Vena",
-    "nerve": "Nervus",
-    "muscle": "Musculus",
-    "ligament": "Ligamentum",
-    "joint": "Articulatio",
-    "gland": "Glandula",
-    "duct": "Ductus",
-    "canal": "Canalis",
-    "fissure": "Fissura",
-    "foramen": "Foramen",
-    "process": "Processus",
-    "lobe": "Lobus",
-    "sinus": "Sinus",
-    "cortex": "Cortex",
-    "nucleus": "Nucleus",
-    "fascia": "Fascia",
-    "tendon": "Tendo",
-    "cartilage": "Cartilago",
-    "membrane": "Membrana",
-    "sphincter": "Musculus sphincter",
-}
-
-
-LATIN_ADJECTIVES = {
-    "anterior": "anterior",
-    "posterior": "posterior",
-    "superior": "superior",
-    "inferior": "inferior",
-    "internal": "internus",
-    "external": "externus",
-    "medial": "medialis",
-    "lateral": "lateralis",
-    "central": "centralis",
-    "superficial": "superficialis",
-    "deep": "profundus",
-    "proximal": "proximalis",
-    "distal": "distalis",
-}
-
-
 ALREADY_LATIN = {
     "acetabulum", "acromion", "calcaneus", "capitate", "capitellum", "coccyx",
     "cuboid", "deltoid", "epiglottis", "hamate", "ilium", "ischium", "lunate",
@@ -273,6 +237,8 @@ def latinize_anatomy_term(text: str) -> str:
     normalized = cleaned.casefold()
     if normalized in LATIN_EXACT:
         return LATIN_EXACT[normalized]
+    if normalized in SOURCED_LATIN_TERMS:
+        return SOURCED_LATIN_TERMS[normalized]
     if normalized in ALREADY_LATIN:
         return cleaned[:1].upper() + cleaned[1:]
 
@@ -287,23 +253,13 @@ def latinize_anatomy_term(text: str) -> str:
 
     if normalized in LATIN_EXACT:
         translated = LATIN_EXACT[normalized]
+    elif normalized in SOURCED_LATIN_TERMS:
+        translated = SOURCED_LATIN_TERMS[normalized]
     else:
-        translated = cleaned
-        for english, latin in sorted(LATIN_HEADS.items(), key=lambda item: len(item[0]), reverse=True):
-            translated = re.sub(rf"\b{re.escape(english)}\b", latin, translated, flags=re.IGNORECASE)
-        for english, latin in LATIN_ADJECTIVES.items():
-            translated = re.sub(rf"\b{english}\b", latin, translated, flags=re.IGNORECASE)
-
-        translated = re.sub(r"\bof uterus\b", "uteri", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof kidney\b", "renis", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof urinary bladder\b", "vesicae urinariae", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof mandible\b", "mandibulae", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof ulna\b", "ulnae", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof radius\b", "radii", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof fibula\b", "fibulae", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof femur\b", "femoris", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof scapula\b", "scapulae", translated, flags=re.IGNORECASE)
-        translated = re.sub(r"\bof prostate gland\b", "glandulae prostaticae", translated, flags=re.IGNORECASE)
-        translated = translated[:1].upper() + translated[1:]
+        return cleaned
 
     return _side_suffix(side, translated) if side else translated
+
+
+def get_latin_term_source(text: str) -> str | None:
+    return SOURCED_LATIN_SOURCES.get(_clean_term(text).casefold())
