@@ -59,6 +59,7 @@
           <a href="{{ back_url }}" class="primary-btn">{{ tr("New Quiz") }}</a>
           <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("My Previous Tests") }}</a>
           {% if attempt_id %}
+            <a href="{{ url_for('attempt_report', attempt_id=attempt_id) }}" class="secondary-btn">{{ "Rapport / PDF" if language == "nl" else "Report / PDF" }}</a>
             <a href="{{ url_for('retake_previous_test', attempt_id=attempt_id) }}" class="secondary-btn">{{ tr("Retake This Test") }}</a>
           {% endif %}
         </div>

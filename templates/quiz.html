@@ -46,13 +46,19 @@
           {% for qid in order %}
             <button
               type="button"
-              class="question-nav-item {% if loop.first %}active{% endif %}"
+              class="question-nav-item {% if loop.first %}active{% endif %} {% if marked_by_id[qid] %}marked{% endif %}"
               data-question-index="{{ loop.index0 }}"
               id="nav-{{ loop.index0 }}"
             >
               {{ loop.index }}
             </button>
           {% endfor %}
+        </div>
+
+        <div class="question-nav-legend">
+          <span><i class="legend-current"></i>{{ "Huidig" if language == "nl" else "Current" }}</span>
+          <span><i class="legend-answered"></i>{{ "Beantwoord" if language == "nl" else "Answered" }}</span>
+          <span><i class="legend-marked"></i>{{ "Gemarkeerd" if language == "nl" else "Marked" }}</span>
         </div>
 
         <div class="sidebar-actions">
@@ -81,15 +87,23 @@
               {% endif %}
             </p>
           </div>
-          {% if quiz_mode == 'exam' and not current_user.is_admin %}
-            <div class="quiz-timer-box">
-              <span class="quiz-timer-label">{{ tr("Timer") }}</span>
-              <span class="quiz-timer-value" id="quizTimer">00:00</span>
+          {% if not current_user.is_admin %}
+            <div class="quiz-header-tools">
+              {% if quiz_mode == 'exam' %}
+                <div class="quiz-timer-box">
+                  <span class="quiz-timer-label">{{ tr("Timer") }}</span>
+                  <span class="quiz-timer-value" id="quizTimer">00:00</span>
+                </div>
+              {% endif %}
+              <button type="button" class="focus-mode-button" id="focusModeButton" aria-pressed="false">
+                {{ "Focusmodus" if language == "nl" else "Focus mode" }}
+              </button>
             </div>
           {% endif %}
         </div>
 
         <form method="post" id="quizForm" action="{{ form_action or '' }}">
+          <input type="hidden" name="duration_seconds" id="durationSeconds" value="0">
           {% for qid in order %}
             {% set q = questions_by_id[qid] %}
 
@@ -224,9 +238,17 @@
       const progressText = document.getElementById("progressText");
       const progressBarFill = document.getElementById("progressBarFill");
       const quizTimer = document.getElementById("quizTimer");
+      const durationSeconds = document.getElementById("durationSeconds");
+      const focusModeButton = document.getElementById("focusModeButton");
       const savedAnswers = new Set();
       const quizRunId = {{ quiz_run_id|tojson }};
       const storageKey = `quizAnswers:${currentUserId}:${isAdmin ? "admin" : "student"}:${quizRunId}`;
+      const attemptStartedAtKey = `${storageKey}:attemptStartedAt`;
+      let attemptStartedAt = Number(localStorage.getItem(attemptStartedAtKey));
+      if (!attemptStartedAt) {
+        attemptStartedAt = Date.now();
+        localStorage.setItem(attemptStartedAtKey, String(attemptStartedAt));
+      }
       let currentIndex = 0;
       const correctFeedbackByQid = {{ correct_feedback_by_id|tojson }};
       const quizText = {
@@ -457,6 +479,7 @@
 
         if (activePanel) activePanel.classList.add("active");
         if (activeNav) activeNav.classList.add("active");
+        if (activeNav) activeNav.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
 
         currentIndex = index;
         prevBtn.disabled = currentIndex === 0;
@@ -603,6 +626,7 @@
               const payload = await response.json();
               if (!response.ok) throw new Error(payload.error || quizText.markFailed);
               markButton.classList.toggle("is-marked", payload.marked);
+              document.getElementById(`nav-${index}`)?.classList.toggle("marked", payload.marked);
               markButton.setAttribute("aria-pressed", String(payload.marked));
               markButton.textContent = payload.marked ? quizText.marked : quizText.mark;
             } catch (error) {
@@ -627,10 +651,29 @@
 
       quizForm.addEventListener("submit", () => {
         persistSavedAnswers();
+        durationSeconds.value = String(Math.max(0, Math.floor((Date.now() - attemptStartedAt) / 1000)));
+        localStorage.removeItem(attemptStartedAtKey);
         if (quizMode === "exam" && quizTimer && !isAdmin) {
           localStorage.removeItem(`${storageKey}:timerStartedAt`);
         }
       });
+
+      if (focusModeButton) {
+        const focusStorageKey = `quizFocusMode:${currentUserId}`;
+        const setFocusMode = (enabled) => {
+          document.body.classList.toggle("quiz-focus-mode", enabled);
+          focusModeButton.classList.toggle("is-active", enabled);
+          focusModeButton.setAttribute("aria-pressed", String(enabled));
+          focusModeButton.textContent = enabled
+            ? {{ ("Focus verlaten" if language == "nl" else "Exit focus")|tojson }}
+            : {{ ("Focusmodus" if language == "nl" else "Focus mode")|tojson }};
+          localStorage.setItem(focusStorageKey, enabled ? "1" : "0");
+        };
+        setFocusMode(localStorage.getItem(focusStorageKey) === "1");
+        focusModeButton.addEventListener("click", () => {
+          setFocusMode(!document.body.classList.contains("quiz-focus-mode"));
+        });
+      }
 
       hydrateSavedAnswers();
       panels.forEach((_, index) => updateSavedState(index));

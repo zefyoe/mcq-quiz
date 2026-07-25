@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ "Toetsrapport" if language == "nl" else "Test report" }} | Rady</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body class="report-body">
+    <header class="report-toolbar">
+      <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ "Terug" if language == "nl" else "Back" }}</a>
+      <button type="button" class="primary-btn" onclick="window.print()">{{ "Opslaan als PDF" if language == "nl" else "Save as PDF" }}</button>
+    </header>
+
+    <main class="report-sheet">
+      <header class="report-header">
+        <div>
+          <div class="report-brand">RADY</div>
+          <p>{{ "Persoonlijk anatomierapport" if language == "nl" else "Personal anatomy report" }}</p>
+        </div>
+        <div class="report-identity">
+          <strong>{{ current_user.name or current_user.email }}</strong>
+          <span>{{ current_user.university or current_user.email }}</span>
+        </div>
+      </header>
+
+      <section class="report-title">
+        <p class="eyebrow">{{ "TOETSRESULTAAT" if language == "nl" else "TEST RESULT" }}</p>
+        <h1>{{ summary.title }}</h1>
+        <p>{{ attempt.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+      </section>
+
+      <section class="report-metrics">
+        <div><span>{{ "Score" if language == "nl" else "Score" }}</span><strong>{{ summary.score }}/{{ summary.total_questions }}</strong></div>
+        <div><span>{{ "Percentage" if language == "nl" else "Percentage" }}</span><strong>{{ summary.percent }}%</strong></div>
+        <div><span>{{ "Modus" if language == "nl" else "Mode" }}</span><strong>{{ tr("Exam Phase") if summary.quiz_mode == "exam" else tr("Test Phase") }}</strong></div>
+        <div>
+          <span>{{ "Duur" if language == "nl" else "Duration" }}</span>
+          <strong>
+            {% if summary.duration_seconds %}
+              {{ (summary.duration_seconds // 60) }}m {{ (summary.duration_seconds % 60) }}s
+            {% else %}—{% endif %}
+          </strong>
+        </div>
+      </section>
+
+      <section class="report-review">
+        <h2>{{ "Vragenoverzicht" if language == "nl" else "Question review" }}</h2>
+        {% if results %}
+          {% for result in results %}
+            <article class="report-question">
+              <div class="report-question-number">{{ "%02d"|format(loop.index) }}</div>
+              <div>
+                <h3>{{ result["Vraag"] }}</h3>
+                <p><b>{{ tr("Your answer:") }}</b> {{ result["user"]|join(", ") if result["user"] else "—" }}</p>
+                <p><b>{{ tr("Correct answer:") }}</b> {{ result["correct_texts"]|join(", ") if result["correct_texts"] else result["correct"]|join(", ") }}</p>
+              </div>
+              <span class="badge {{ 'correct' if result['is_correct'] else 'wrong' }}">{{ tr("Correct") if result["is_correct"] else tr("Incorrect") }}</span>
+            </article>
+          {% endfor %}
+        {% else %}
+          <p class="report-legacy-note">{{ "Voor oudere toetsen is alleen de totaalscore beschikbaar." if language == "nl" else "Only the total score is available for older tests." }}</p>
+        {% endif %}
+      </section>
+
+      <footer class="report-footer">
+        <span>Rady Anatomy QBank</span>
+        <span>{{ "Gegenereerd op" if language == "nl" else "Generated on" }} {{ attempt.created_at.strftime('%d/%m/%Y') }}</span>
+      </footer>
+    </main>
+  </body>
+</html>

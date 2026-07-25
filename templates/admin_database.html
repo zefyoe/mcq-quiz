@@ -23,17 +23,60 @@
       </div>
     </header>
 
-    <main class="admin-container">
-      <h1>Database</h1>
-      <p>{{ question_count }} question(s) available.</p>
+    <main class="admin-container admin-database-container">
+      <div class="admin-page-heading">
+        <div>
+          <p class="admin-eyebrow">QUESTION MANAGEMENT</p>
+          <h1>Database</h1>
+          <p>{{ question_count }} matching question(s).</p>
+        </div>
+        <a class="admin-link-button" href="{{ url_for('admin_new_question') }}">Add question</a>
+      </div>
+
+      <form method="get" class="admin-filter-bar">
+        <label class="admin-filter-search">
+          <span>Search</span>
+          <input name="q" type="search" value="{{ filters.q }}" placeholder="Question ID, filename, question or answer">
+        </label>
+        <label>
+          <span>Table</span>
+          <select name="table">
+            <option value="all" {% if filters.table == "all" %}selected{% endif %}>All tables</option>
+            <option value="anatomy" {% if filters.table == "anatomy" %}selected{% endif %}>Anatomy</option>
+            <option value="physics" {% if filters.table == "physics" %}selected{% endif %}>Physics</option>
+          </select>
+        </label>
+        <label>
+          <span>Category</span>
+          <select name="category">
+            <option value="">All categories</option>
+            {% for category in available_categories %}
+              <option value="{{ category }}" {% if filters.category == category %}selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          <span>Correct answer</span>
+          <select name="correct">
+            <option value="">A–D</option>
+            {% for letter in ["A", "B", "C", "D"] %}
+              <option value="{{ letter }}" {% if filters.correct == letter %}selected{% endif %}>{{ letter }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button type="submit" class="admin-filter-submit">Apply filters</button>
+        <a href="{{ url_for('admin_database') }}" class="admin-filter-reset">Reset</a>
+      </form>
 
       {% macro render_question_table(title, rows) %}
-        <section style="margin-top: 28px;">
-          <h2 style="margin: 0 0 14px;">{{ title }}</h2>
-          <p style="margin: 0 0 14px; color: #475569;">{{ rows|length }} question(s)</p>
+        <section class="admin-table-section">
+          <div class="admin-table-heading">
+            <h2>{{ title }}</h2>
+            <span>{{ rows|length }} question(s)</span>
+          </div>
 
-          <div class="card" style="background: white; border-radius: 18px; padding: 0; overflow-x: auto; border: 1px solid #e5e7eb;">
-            <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 14px 18px; min-width: 1800px;">
+          <div class="admin-question-table">
+            <div class="admin-question-row admin-question-header">
               <div>Question ID</div>
               <div>Category</div>
               <div>Question</div>
@@ -48,7 +91,7 @@
 
             {% if rows %}
               {% for row in rows %}
-                <div style="display: grid; grid-template-columns: 130px 170px minmax(260px, 1.2fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) 120px 110px; gap: 16px; padding: 14px 18px; border-top: 1px solid #e5e7eb; align-items: start; min-width: 1800px;">
+                <div class="admin-question-row">
                   <div><strong>{{ row.qid }}</strong></div>
                   <div>{{ row.category }}</div>
                   <div>{{ row.text }}</div>
@@ -69,14 +112,18 @@
                 </div>
               {% endfor %}
             {% else %}
-              <div style="padding: 18px; color: #64748b;">No questions in this table.</div>
+              <div class="admin-table-empty">No questions match these filters.</div>
             {% endif %}
           </div>
         </section>
       {% endmacro %}
 
-      {{ render_question_table("Anatomy Questions", anatomy_rows) }}
-      {{ render_question_table("Physics Questions", physics_rows) }}
+      {% if filters.table != "physics" %}
+        {{ render_question_table("Anatomy Questions", anatomy_rows) }}
+      {% endif %}
+      {% if filters.table != "anatomy" %}
+        {{ render_question_table("Physics Questions", physics_rows) }}
+      {% endif %}
     </main>
   </body>
 </html>

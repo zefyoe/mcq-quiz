@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    daily_question_goal = db.Column(db.Integer, nullable=False, default=20)
     quiz_attempts = db.relationship("QuizAttempt", backref="user", lazy=True, cascade="all, delete-orphan")
     question_progress = db.relationship("QuestionProgress", backref="user", lazy=True, cascade="all, delete-orphan")
 
@@ -47,6 +48,8 @@ class QuizAttempt(db.Model):
     score = db.Column(db.Integer, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
     question_ids_json = db.Column(db.Text, nullable=False)
+    results_json = db.Column(db.Text, nullable=True)
+    duration_seconds = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 

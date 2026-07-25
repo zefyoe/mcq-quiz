@@ -330,11 +330,19 @@ def ensure_quiz_attempt_schema():
         return
 
     column_names = {column["name"] for column in inspector.get_columns("quiz_attempt")}
-    if "quiz_mode" in column_names:
-        return
+    statements = []
+    if "quiz_mode" not in column_names:
+        statements.append("ALTER TABLE quiz_attempt ADD COLUMN quiz_mode VARCHAR(20) NOT NULL DEFAULT 'test'")
+    if "results_json" not in column_names:
+        statements.append("ALTER TABLE quiz_attempt ADD COLUMN results_json TEXT")
+    if "duration_seconds" not in column_names:
+        statements.append("ALTER TABLE quiz_attempt ADD COLUMN duration_seconds INTEGER")
 
-    db.session.execute(text("ALTER TABLE quiz_attempt ADD COLUMN quiz_mode VARCHAR(20) NOT NULL DEFAULT 'test'"))
-    db.session.commit()
+    for statement in statements:
+        db.session.execute(text(statement))
+
+    if statements:
+        db.session.commit()
 
 
 def ensure_user_profile_schema():
@@ -351,6 +359,8 @@ def ensure_user_profile_schema():
         statements.append('ALTER TABLE "user" ADD COLUMN name VARCHAR(255)')
     if "university" not in column_names:
         statements.append('ALTER TABLE "user" ADD COLUMN university VARCHAR(255)')
+    if "daily_question_goal" not in column_names:
+        statements.append('ALTER TABLE "user" ADD COLUMN daily_question_goal INTEGER NOT NULL DEFAULT 20')
 
     for statement in statements:
         db.session.execute(text(statement))
@@ -952,6 +962,8 @@ def save_quiz_attempt(
     score: int,
     total_questions: int,
     question_ids: list[str],
+    results: list[dict] | None = None,
+    duration_seconds: int | None = None,
 ) -> QuizAttempt:
     attempt = QuizAttempt(
         user_id=user_id,
@@ -962,6 +974,8 @@ def save_quiz_attempt(
         score=score,
         total_questions=total_questions,
         question_ids_json=serialize_question_ids(question_ids),
+        results_json=json.dumps(results, ensure_ascii=True) if results else None,
+        duration_seconds=duration_seconds,
     )
     db.session.add(attempt)
     db.session.commit()
@@ -1010,7 +1024,59 @@ def build_attempt_summary(attempt: QuizAttempt) -> dict:
         "score": attempt.score,
         "total_questions": attempt.total_questions,
         "percent": percent,
+        "duration_seconds": getattr(attempt, "duration_seconds", None),
         "created_at": attempt.created_at,
+    }
+
+
+def get_attempt_results(attempt: QuizAttempt) -> list[dict]:
+    try:
+        parsed = json.loads(getattr(attempt, "results_json", None) or "[]")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return []
+    return parsed if isinstance(parsed, list) else []
+
+
+def get_submission_duration(form_data) -> int | None:
+    try:
+        duration = int(form_data.get("duration_seconds") or 0)
+    except (TypeError, ValueError):
+        return None
+    return min(max(duration, 0), 24 * 60 * 60) or None
+
+
+def get_dashboard_activity(user_id: int) -> dict:
+    attempts = (
+        QuizAttempt.query
+        .filter_by(user_id=user_id)
+        .order_by(QuizAttempt.created_at.desc())
+        .limit(8)
+        .all()
+    )
+    trend = [
+        {
+            "percent": round(attempt.score / attempt.total_questions * 100)
+            if attempt.total_questions else 0,
+            "label": attempt.created_at.strftime("%d/%m"),
+        }
+        for attempt in reversed(attempts)
+    ]
+    today_start = datetime.combine(datetime.utcnow().date(), datetime.min.time())
+    completed_today = (
+        db.session.query(func.coalesce(func.sum(QuizAttempt.total_questions), 0))
+        .filter(
+            QuizAttempt.user_id == user_id,
+            QuizAttempt.created_at >= today_start,
+        )
+        .scalar()
+        or 0
+    )
+    goal = max(5, min(int(current_user.daily_question_goal or 20), 100))
+    return {
+        "trend": trend,
+        "completed_today": completed_today,
+        "daily_goal": goal,
+        "goal_percent": min(round(completed_today / goal * 100), 100),
     }
 
 
@@ -1414,6 +1480,7 @@ def home():
     total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
     last_attempt = get_last_quiz_attempt(current_user.id)
     learning_dashboard = get_learning_dashboard(current_user.id)
+    dashboard_activity = get_dashboard_activity(current_user.id)
     active_quiz = get_active_quiz_summary()
 
     if request.method == "POST":
@@ -1430,6 +1497,7 @@ def home():
                 streak_days=streak_days,
                 last_attempt=last_attempt,
                 learning_dashboard=learning_dashboard,
+                dashboard_activity=dashboard_activity,
                 active_quiz=active_quiz,
             )
 
@@ -1448,6 +1516,7 @@ def home():
         streak_days=streak_days,
         last_attempt=last_attempt,
         learning_dashboard=learning_dashboard,
+        dashboard_activity=dashboard_activity,
         active_quiz=active_quiz,
     )
 
@@ -1470,6 +1539,75 @@ def previous_tests():
     )
     attempt_summaries = [build_attempt_summary(attempt) for attempt in attempts]
     return render_template("previous_tests.html", attempts=attempt_summaries)
+
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    message = None
+    error = None
+
+    if request.method == "POST":
+        action = (request.form.get("action") or "profile").strip()
+        if action == "password":
+            current_password = request.form.get("current_password") or ""
+            new_password = request.form.get("new_password") or ""
+            confirm_password = request.form.get("confirm_password") or ""
+            if not current_user.check_password(current_password):
+                error = "Het huidige wachtwoord is niet correct." if get_current_language() == "nl" else "The current password is incorrect."
+            elif len(new_password) < 8:
+                error = "Het nieuwe wachtwoord moet minimaal 8 tekens bevatten." if get_current_language() == "nl" else "The new password must contain at least 8 characters."
+            elif new_password != confirm_password:
+                error = "De nieuwe wachtwoorden komen niet overeen." if get_current_language() == "nl" else "The new passwords do not match."
+            else:
+                current_user.set_password(new_password)
+                db.session.commit()
+                message = "Wachtwoord veilig bijgewerkt." if get_current_language() == "nl" else "Password updated securely."
+        else:
+            name = (request.form.get("name") or "").strip()
+            university = (request.form.get("university") or "").strip()
+            try:
+                daily_goal = int(request.form.get("daily_question_goal") or 20)
+            except ValueError:
+                daily_goal = 20
+
+            if not name or not university:
+                error = "Naam en universiteit zijn verplicht." if get_current_language() == "nl" else "Name and university are required."
+            elif len(name) > 255 or len(university) > 255:
+                error = "Naam en universiteit mogen maximaal 255 tekens bevatten." if get_current_language() == "nl" else "Name and university may contain at most 255 characters."
+            elif not 5 <= daily_goal <= 100:
+                error = "Kies een dagelijks doel tussen 5 en 100 vragen." if get_current_language() == "nl" else "Choose a daily goal between 5 and 100 questions."
+            else:
+                current_user.name = name
+                current_user.university = university
+                current_user.daily_question_goal = daily_goal
+                db.session.commit()
+                message = "Profiel bijgewerkt." if get_current_language() == "nl" else "Profile updated."
+
+    total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
+    return render_template(
+        "profile.html",
+        message=message,
+        error=error,
+        total_quizzes=total_quizzes,
+        accuracy=accuracy,
+        streak_days=streak_days,
+    )
+
+
+@app.route("/previous-tests/<int:attempt_id>/report")
+@login_required
+def attempt_report(attempt_id):
+    attempt = QuizAttempt.query.filter_by(id=attempt_id, user_id=current_user.id).first()
+    if not attempt:
+        abort(404)
+    summary = build_attempt_summary(attempt)
+    return render_template(
+        "attempt_report.html",
+        attempt=attempt,
+        summary=summary,
+        results=localize_quiz_results(get_attempt_results(attempt)),
+    )
 
 
 @app.route("/stocks")
@@ -1566,6 +1704,8 @@ def retake_previous_test(attempt_id):
             score=score,
             total_questions=len(order),
             question_ids=order,
+            results=results,
+            duration_seconds=get_submission_duration(request.form),
         )
         record_question_results(current_user.id, results, attempt.subgroup)
         clear_active_quiz_session()
@@ -1701,6 +1841,8 @@ def quiz(category):
         score=score,
         total_questions=len(order),
         question_ids=order,
+        results=results,
+        duration_seconds=get_submission_duration(request.form),
     )
     record_question_results(current_user.id, results, subgroup)
     clear_active_quiz_session()
@@ -1733,13 +1875,58 @@ def admin_database():
         return admin_redirect
 
     rows = get_question_overview_rows()
+    search_query = (request.args.get("q") or "").strip()
+    category_filter = (request.args.get("category") or "").strip()
+    correct_filter = (request.args.get("correct") or "").strip().upper()
+    table_filter = (request.args.get("table") or "all").strip().lower()
+    available_categories = sorted({
+        row.get("category", "")
+        for row in rows
+        if row.get("category")
+    })
+
+    if search_query:
+        needle = normalize_text_answer(search_query)
+        rows = [
+            row for row in rows
+            if needle in normalize_text_answer(" ".join(
+                str(row.get(field) or "")
+                for field in (
+                    "qid", "category", "text", "answer_a", "answer_b",
+                    "answer_c", "answer_d", "filename",
+                )
+            ))
+        ]
+    if category_filter:
+        rows = [
+            row for row in rows
+            if normalize_category(row.get("category")) == normalize_category(category_filter)
+        ]
+    if correct_filter in {"A", "B", "C", "D"}:
+        rows = [
+            row for row in rows
+            if (row.get("correct_choice") or "").upper() == correct_filter
+        ]
+
     anatomy_rows = [row for row in rows if is_anatomy_category_name(row.get("category"))]
     physics_rows = [row for row in rows if normalize_category(row.get("category")) == "physics"]
+    if table_filter == "anatomy":
+        physics_rows = []
+    elif table_filter == "physics":
+        anatomy_rows = []
+
     return render_template(
         "admin_database.html",
         anatomy_rows=anatomy_rows,
         physics_rows=physics_rows,
-        question_count=len(rows),
+        question_count=len(anatomy_rows) + len(physics_rows),
+        available_categories=available_categories,
+        filters={
+            "q": search_query,
+            "category": category_filter,
+            "correct": correct_filter,
+            "table": table_filter,
+        },
     )
 
 

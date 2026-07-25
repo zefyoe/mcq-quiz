@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ "Profiel" if language == "nl" else "Profile" }} | Rady</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand brand-link" href="{{ url_for('home') }}">Rady</a>
+        <div class="topbar-actions">
+          <div class="topbar-badge">{{ "Profiel" if language == "nl" else "Profile" }}</div>
+          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
+          {% include "_language_switcher.html" %}
+        </div>
+      </div>
+    </header>
+
+    <main class="page profile-page">
+      <section class="profile-heading">
+        <div>
+          <p class="eyebrow">{{ "PERSOONLIJKE INSTELLINGEN" if language == "nl" else "PERSONAL SETTINGS" }}</p>
+          <h1>{{ "Profiel en leerdoel" if language == "nl" else "Profile and study goal" }}</h1>
+          <p>{{ "Beheer je studiegegevens en accountbeveiliging op één plaats." if language == "nl" else "Manage your study details and account security in one place." }}</p>
+        </div>
+        <a href="{{ url_for('home') }}" class="secondary-btn">{{ "Terug naar dashboard" if language == "nl" else "Back to dashboard" }}</a>
+      </section>
+
+      {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+      {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+      <section class="profile-stat-grid">
+        <article class="card profile-stat"><span>{{ "Toetsen" if language == "nl" else "Tests" }}</span><strong>{{ total_quizzes }}</strong></article>
+        <article class="card profile-stat"><span>{{ "Nauwkeurigheid" if language == "nl" else "Accuracy" }}</span><strong>{{ accuracy ~ '%' if accuracy is not none else '—' }}</strong></article>
+        <article class="card profile-stat"><span>{{ "Huidige reeks" if language == "nl" else "Current streak" }}</span><strong>{{ streak_days }} {{ "dagen" if language == "nl" else "days" }}</strong></article>
+      </section>
+
+      <section class="profile-grid">
+        <form method="post" class="card profile-card">
+          <input type="hidden" name="action" value="profile">
+          <div class="profile-card-heading">
+            <span class="profile-card-index">01</span>
+            <div>
+              <h2>{{ "Studieprofiel" if language == "nl" else "Study profile" }}</h2>
+              <p>{{ "Deze gegevens personaliseren je dashboard." if language == "nl" else "These details personalise your dashboard." }}</p>
+            </div>
+          </div>
+
+          <label for="name">{{ tr("Name") }}</label>
+          <input id="name" name="name" type="text" value="{{ current_user.name or '' }}" required>
+
+          <label for="university">{{ tr("University") }}</label>
+          <input id="university" name="university" type="text" value="{{ current_user.university or '' }}" required>
+
+          <label for="daily_question_goal">{{ "Dagelijks vragendoel" if language == "nl" else "Daily question goal" }}</label>
+          <input id="daily_question_goal" name="daily_question_goal" type="number" min="5" max="100" value="{{ current_user.daily_question_goal or 20 }}" required>
+          <p class="form-help">{{ "Kies tussen 5 en 100 vragen per dag." if language == "nl" else "Choose between 5 and 100 questions per day." }}</p>
+
+          <button type="submit" class="primary-btn profile-submit">{{ "Profiel opslaan" if language == "nl" else "Save profile" }}</button>
+        </form>
+
+        <form method="post" class="card profile-card">
+          <input type="hidden" name="action" value="password">
+          <div class="profile-card-heading">
+            <span class="profile-card-index">02</span>
+            <div>
+              <h2>{{ "Accountbeveiliging" if language == "nl" else "Account security" }}</h2>
+              <p>{{ "Wijzig je wachtwoord met controle van je huidige wachtwoord." if language == "nl" else "Change your password after confirming your current password." }}</p>
+            </div>
+          </div>
+
+          <label for="current_password">{{ "Huidig wachtwoord" if language == "nl" else "Current password" }}</label>
+          <input id="current_password" name="current_password" type="password" autocomplete="current-password" required>
+
+          <label for="new_password">{{ "Nieuw wachtwoord" if language == "nl" else "New password" }}</label>
+          <input id="new_password" name="new_password" type="password" minlength="8" autocomplete="new-password" required>
+
+          <label for="confirm_password">{{ "Nieuw wachtwoord bevestigen" if language == "nl" else "Confirm new password" }}</label>
+          <input id="confirm_password" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
+
+          <button type="submit" class="secondary-btn profile-submit">{{ "Wachtwoord wijzigen" if language == "nl" else "Change password" }}</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

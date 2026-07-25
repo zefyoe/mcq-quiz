@@ -37,6 +37,7 @@
           <a href="{{ url_for('home') }}" class="dashboard-nav-link active">{{ tr("Dashboard") }}</a>
           <a href="{{ url_for('previous_tests') }}" class="dashboard-nav-link">{{ tr("Previous Tests") }}</a>
           <a href="{{ url_for('anatomy_sections') }}" class="dashboard-nav-link">{{ tr("New Anatomy Quiz") }}</a>
+          <a href="{{ url_for('profile') }}" class="dashboard-nav-link">{{ "Profiel" if language == "nl" else "Profile" }}</a>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <a href="{{ url_for('admin_home') }}" class="dashboard-nav-link">Admin</a>
             <a href="{{ url_for('admin_database') }}" class="dashboard-nav-link">Database</a>
@@ -105,6 +106,54 @@
               </p>
             </div>
           </div>
+        </section>
+
+        <section class="progress-insights-grid">
+          <article class="card daily-goal-card">
+            <div class="daily-goal-header">
+              <div>
+                <p class="eyebrow">{{ "DAGELIJKS DOEL" if language == "nl" else "DAILY GOAL" }}</p>
+                <h2>{{ dashboard_activity.completed_today }}/{{ dashboard_activity.daily_goal }} {{ "vragen" if language == "nl" else "questions" }}</h2>
+              </div>
+              <strong>{{ dashboard_activity.goal_percent }}%</strong>
+            </div>
+            <div class="daily-goal-track"><span style="width: {{ dashboard_activity.goal_percent }}%"></span></div>
+            <div class="daily-goal-footer">
+              <span>
+                {% if dashboard_activity.goal_percent >= 100 %}
+                  {{ "Dagdoel behaald. Sterk werk." if language == "nl" else "Daily goal completed. Strong work." }}
+                {% else %}
+                  {{ "Nog" if language == "nl" else "Complete" }}
+                  {{ [dashboard_activity.daily_goal - dashboard_activity.completed_today, 0]|max }}
+                  {{ "vragen te gaan vandaag." if language == "nl" else "more questions today." }}
+                {% endif %}
+              </span>
+              <a href="{{ url_for('profile') }}">{{ "Doel aanpassen" if language == "nl" else "Adjust goal" }}</a>
+            </div>
+          </article>
+
+          <article class="card score-trend-card">
+            <div class="score-trend-header">
+              <div>
+                <p class="eyebrow">{{ "PRESTATIETREND" if language == "nl" else "PERFORMANCE TREND" }}</p>
+                <h2>{{ "Laatste toetsen" if language == "nl" else "Recent tests" }}</h2>
+              </div>
+              <span>{{ dashboard_activity.trend|length }}/8</span>
+            </div>
+            {% if dashboard_activity.trend %}
+              <div class="score-trend-chart" aria-label="{{ 'Scoretrend' if language == 'nl' else 'Score trend' }}">
+                {% for point in dashboard_activity.trend %}
+                  <div class="score-trend-column">
+                    <span class="score-trend-value">{{ point.percent }}%</span>
+                    <div class="score-trend-bar"><span style="height: {{ point.percent }}%"></span></div>
+                    <small>{{ point.label }}</small>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="score-trend-empty">{{ "Voltooi een toets om je scoreontwikkeling te volgen." if language == "nl" else "Complete a test to start tracking your score development." }}</p>
+            {% endif %}
+          </article>
         </section>
 
         <section class="learning-overview-grid">
