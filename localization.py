@@ -1,6 +1,11 @@
 import re
 
 try:
+    from filled_latin_terms import FILLED_LATIN_TERMS
+except ImportError:
+    FILLED_LATIN_TERMS = {}
+
+try:
     from sourced_latin_terms import SOURCED_LATIN_SOURCES, SOURCED_LATIN_TERMS
 except ImportError:
     SOURCED_LATIN_SOURCES = {}
@@ -236,6 +241,8 @@ def latinize_anatomy_term(text: str) -> str:
         return cleaned
 
     normalized = cleaned.casefold()
+    if normalized in FILLED_LATIN_TERMS:
+        return FILLED_LATIN_TERMS[normalized]
     if normalized in LATIN_EXACT:
         return LATIN_EXACT[normalized]
     if normalized in SOURCED_LATIN_TERMS:
@@ -252,7 +259,9 @@ def latinize_anatomy_term(text: str) -> str:
             normalized = cleaned.casefold()
             break
 
-    if normalized in LATIN_EXACT:
+    if normalized in FILLED_LATIN_TERMS:
+        translated = FILLED_LATIN_TERMS[normalized]
+    elif normalized in LATIN_EXACT:
         translated = LATIN_EXACT[normalized]
     elif normalized in SOURCED_LATIN_TERMS:
         translated = SOURCED_LATIN_TERMS[normalized]
