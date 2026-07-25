@@ -1328,6 +1328,12 @@ body {
   font-weight: 800;
 }
 
+.dashboard-brand-mark img {
+  display: block;
+  width: 34px;
+  height: auto;
+}
+
 .dashboard-brand-title {
   font-size: 1.85rem;
   font-weight: 700;

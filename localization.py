@@ -74,6 +74,7 @@ DUTCH_TRANSLATIONS = {
     "Question": "Vraag",
     "Question count": "Aantal vragen",
     "Question Score": "Vragenscore",
+    "QBank Usage": "Aantal beschikbare Qbank elementen",
     "Quiz completed": "Quiz voltooid",
     "Quiz Mode": "Quizmodus",
     "Quiz phase": "Quizmodus",
