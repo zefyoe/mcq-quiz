@@ -205,6 +205,7 @@
       let startedAt = Number(localStorage.getItem(startedAtKey));
       let currentIndex = 0;
       let sessionRatings = {};
+      let preloadTimer = null;
 
       if (!startedAt) {
         startedAt = Date.now();
@@ -252,11 +253,29 @@
         image.src = source;
       }
 
+      function cancelDeferredImage(image) {
+        if (!image || image.dataset.loaded === "true" || image.dataset.loading !== "true") return;
+        image.onload = null;
+        image.onerror = null;
+        image.removeAttribute("src");
+        image.dataset.loading = "false";
+        image.closest("[data-image-frame]")?.classList.remove("is-loading", "has-error");
+      }
+
       function loadQuestionImage(index) {
         loadDeferredImage(flashcardPanels[index]?.querySelector("[data-question-image]"));
       }
 
       function showCard(index) {
+        window.clearTimeout(preloadTimer);
+        flashcardPanels.forEach((panel, panelIndex) => {
+          if (panelIndex !== index && panelIndex !== index + 1) {
+            cancelDeferredImage(panel.querySelector("[data-question-image]"));
+          }
+          if (panelIndex !== index) {
+            cancelDeferredImage(panel.querySelector("[data-answer-image]"));
+          }
+        });
         flashcardPanels.forEach((panel) => panel.classList.remove("active"));
         flashcardNavButtons.forEach((button) => button.classList.remove("active"));
         flashcardPanels[index]?.classList.add("active");
@@ -266,7 +285,7 @@
         previousButton.disabled = index === 0;
         nextButton.disabled = index === flashcardPanels.length - 1;
         loadQuestionImage(index);
-        window.setTimeout(() => loadQuestionImage(index + 1), 250);
+        preloadTimer = window.setTimeout(() => loadQuestionImage(index + 1), 350);
       }
 
       function moveQuestionId(qid, rating) {
