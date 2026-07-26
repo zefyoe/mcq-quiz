@@ -1054,7 +1054,9 @@ body {
 }
 
 .question-image-wrapper {
+  position: relative;
   width: 100%;
+  min-height: 260px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1063,6 +1065,14 @@ body {
   background: #0f172a;
   border-radius: 18px;
   overflow: hidden;
+}
+
+.question-image-wrapper .flashcard-image-status {
+  color: #e2e8f0;
+}
+
+.question-image-wrapper [data-retry-image] {
+  color: #0f172a;
 }
 
 .question-image {

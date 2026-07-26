@@ -3,6 +3,7 @@ import random
 import re
 import json
 from datetime import datetime, timedelta
+from functools import lru_cache
 from urllib.parse import urlparse
 
 from flask import Flask, abort, jsonify, render_template, request, session, redirect, url_for
@@ -14,6 +15,7 @@ from flask_login import (
     logout_user,
 )
 from sqlalchemy import func, inspect, text
+from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
 
 from core_radiology import get_core_section, get_core_sections, load_core_section
@@ -60,16 +62,30 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me")
 app.config["UPLOAD_FOLDER"] = os.path.join(app.static_folder, "uploads", "questions")
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(days=7)
+app.config["STATIC_ASSET_VERSION"] = str(
+    int(os.path.getmtime(os.path.join(app.static_folder, "style.css")))
+)
 
 if database_uri.startswith("postgresql+psycopg://"):
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
+        "pool_size": 3,
+        "max_overflow": 2,
+        "pool_timeout": 10,
         "connect_args": {"connect_timeout": 10},
     }
 
 if os.environ.get("RENDER") or os.environ.get("FLASK_ENV") == "production":
     app.config["SESSION_COOKIE_SECURE"] = True
+
+app.wsgi_app = WhiteNoise(
+    app.wsgi_app,
+    root=app.static_folder,
+    prefix="static/",
+    max_age=7 * 24 * 60 * 60,
+    autorefresh=not bool(os.environ.get("RENDER")),
+)
 
 db.init_app(app)
 
@@ -285,6 +301,7 @@ def inject_language_helpers():
         "language": get_current_language(),
         "tr": tr,
         "localize_quiz_title": localize_quiz_title,
+        "asset_version": app.config["STATIC_ASSET_VERSION"],
     }
 
 
@@ -362,15 +379,24 @@ def sync_user_admin_flag(user: User | None) -> bool:
 
 
 def enforce_single_admin_account():
-    changed = False
+    promoted = (
+        User.query
+        .filter(
+            func.lower(func.trim(User.email)) == ADMIN_EMAIL,
+            User.is_admin.is_not(True),
+        )
+        .update({User.is_admin: True}, synchronize_session=False)
+    )
+    demoted = (
+        User.query
+        .filter(
+            func.lower(func.trim(User.email)) != ADMIN_EMAIL,
+            User.is_admin.is_(True),
+        )
+        .update({User.is_admin: False}, synchronize_session=False)
+    )
 
-    for user in User.query.all():
-        should_be_admin = is_admin_email(user.email)
-        if user.is_admin != should_be_admin:
-            user.is_admin = should_be_admin
-            changed = True
-
-    if changed:
+    if promoted or demoted:
         db.session.commit()
 
 
@@ -440,6 +466,21 @@ def ensure_question_progress_schema():
 
     if statements:
         db.session.commit()
+
+
+def ensure_performance_indexes():
+    statements = (
+        "CREATE INDEX IF NOT EXISTS ix_question_category ON question (category)",
+        "CREATE INDEX IF NOT EXISTS ix_quiz_attempt_user_created "
+        "ON quiz_attempt (user_id, created_at DESC)",
+        "CREATE INDEX IF NOT EXISTS ix_quiz_attempt_user_format_created "
+        "ON quiz_attempt (user_id, study_format, created_at DESC)",
+        "CREATE INDEX IF NOT EXISTS ix_quiz_attempt_user_category_format_created "
+        "ON quiz_attempt (user_id, category, study_format, created_at DESC)",
+    )
+    for statement in statements:
+        db.session.execute(text(statement))
+    db.session.commit()
 
 
 def is_placeholder_option(value: str) -> bool:
@@ -662,9 +703,17 @@ def get_questions_for_anatomy_subgroup(subgroup: str | None) -> list[dict]:
 
 def get_anatomy_subgroup_cards() -> list[dict]:
     cards = []
+    anatomy_questions = get_all_anatomy_questions()
 
     for key, meta in ANATOMY_SUBGROUPS.items():
-        count = len(get_questions_for_anatomy_subgroup(key))
+        count = (
+            len(anatomy_questions)
+            if key == "mixed"
+            else sum(
+                1 for question in anatomy_questions
+                if get_anatomy_subgroup_for_category(question.get("Category")) == key
+            )
+        )
         cards.append({
             "key": key,
             "label": meta["label"],
@@ -710,12 +759,14 @@ def filter_questions_for_pool(
     question_list: list[dict],
     user_id: int,
     pool: str | None,
+    progress_by_key: dict[str, QuestionProgress] | None = None,
 ) -> list[dict]:
     pool_key = normalize_quiz_pool(pool)
     if pool_key == "all":
         return list(question_list)
 
-    progress_by_key = get_user_progress_by_key(user_id)
+    if progress_by_key is None:
+        progress_by_key = get_user_progress_by_key(user_id)
     now = datetime.utcnow()
     filtered = []
 
@@ -747,11 +798,13 @@ def filter_questions_for_flashcard_rating(
     question_list: list[dict],
     user_id: int,
     rating: str | None,
+    progress_by_key: dict[str, QuestionProgress] | None = None,
 ) -> list[dict]:
     rating_key = normalize_flashcard_rating(rating)
     if not rating_key:
         return list(question_list)
-    progress_by_key = get_user_progress_by_key(user_id)
+    if progress_by_key is None:
+        progress_by_key = get_user_progress_by_key(user_id)
     return [
         question for question in question_list
         if progress_by_key.get(get_question_key(question))
@@ -762,8 +815,10 @@ def filter_questions_for_flashcard_rating(
 def get_flashcard_rating_counts(
     question_list: list[dict],
     user_id: int,
+    progress_by_key: dict[str, QuestionProgress] | None = None,
 ) -> dict[str, int]:
-    progress_by_key = get_user_progress_by_key(user_id)
+    if progress_by_key is None:
+        progress_by_key = get_user_progress_by_key(user_id)
     counts = {rating: 0 for rating in FLASHCARD_RATINGS}
     for question in question_list:
         progress = progress_by_key.get(get_question_key(question))
@@ -772,16 +827,49 @@ def get_flashcard_rating_counts(
     return counts
 
 
-def get_quiz_pool_counts(question_list: list[dict], user_id: int) -> dict[str, int]:
-    return {
-        pool_key: len(filter_questions_for_pool(question_list, user_id, pool_key))
-        for pool_key in QUIZ_POOLS
-    }
+def get_quiz_pool_counts(
+    question_list: list[dict],
+    user_id: int,
+    progress_by_key: dict[str, QuestionProgress] | None = None,
+) -> dict[str, int]:
+    if progress_by_key is None:
+        progress_by_key = get_user_progress_by_key(user_id)
+    counts = {pool_key: 0 for pool_key in QUIZ_POOLS}
+    counts["all"] = len(question_list)
+    now = datetime.utcnow()
+
+    for question in question_list:
+        progress = progress_by_key.get(get_question_key(question))
+        total_seen = (
+            (progress.times_seen or 0) + (progress.flashcard_times_seen or 0)
+            if progress else 0
+        )
+        if total_seen == 0:
+            counts["unseen"] += 1
+        if progress and progress.times_seen > progress.times_correct:
+            counts["incorrect"] += 1
+        if progress and progress.is_marked:
+            counts["marked"] += 1
+        if (
+            progress
+            and total_seen > 0
+            and progress.next_review_at
+            and progress.next_review_at <= now
+        ):
+            counts["due"] += 1
+
+    return counts
 
 
-def get_learning_dashboard(user_id: int) -> dict:
-    all_questions = get_all_anatomy_questions()
-    progress_by_key = get_user_progress_by_key(user_id)
+def get_learning_dashboard(
+    user_id: int,
+    all_questions: list[dict] | None = None,
+    progress_by_key: dict[str, QuestionProgress] | None = None,
+) -> dict:
+    if all_questions is None:
+        all_questions = get_all_anatomy_questions()
+    if progress_by_key is None:
+        progress_by_key = get_user_progress_by_key(user_id)
     current_question_keys = {get_question_key(question) for question in all_questions}
     now = datetime.utcnow()
     seen = [
@@ -931,7 +1019,10 @@ def get_category_icon(category: str) -> str:
     return icon_map.get(normalize_category(category), "MC")
 
 
-def build_home_category_cards(categories: list[str]) -> list[dict]:
+def build_home_category_cards(
+    categories: list[str],
+    anatomy_questions: list[dict] | None = None,
+) -> list[dict]:
     difficulty_by_category = {
         "anatomy": "Mixed Difficulty",
         "physiology": "Intermediate",
@@ -948,21 +1039,16 @@ def build_home_category_cards(categories: list[str]) -> list[dict]:
         cards.append({
             "name": category,
             "icon": get_category_icon(category),
-            "count": get_category_question_count(category),
+            "count": (
+                len(anatomy_questions)
+                if anatomy_questions is not None
+                else get_category_question_count(category)
+            ),
             "difficulty": difficulty_by_category.get(normalize_category(category), "Mixed Difficulty"),
             "description": f"Practice MCQs in {category}",
             "available": True,
         })
     return cards
-
-
-def get_last_quiz_attempt(user_id: int) -> QuizAttempt | None:
-    return (
-        QuizAttempt.query
-        .filter_by(user_id=user_id)
-        .order_by(QuizAttempt.created_at.desc())
-        .first()
-    )
 
 
 def normalize_quiz_mode(mode: str | None) -> str:
@@ -1140,14 +1226,23 @@ def save_quiz_attempt(
     return attempt
 
 
-def get_user_quiz_stats(user_id: int) -> tuple[int, int | None, int]:
-    attempts = (
-        QuizAttempt.query
-        .filter_by(user_id=user_id)
+def get_attempt_stat_rows(user_id: int):
+    return (
+        db.session.query(
+            QuizAttempt.id,
+            QuizAttempt.title,
+            QuizAttempt.created_at,
+            QuizAttempt.study_format,
+            QuizAttempt.score,
+            QuizAttempt.total_questions,
+        )
+        .filter(QuizAttempt.user_id == user_id)
         .order_by(QuizAttempt.created_at.desc())
         .all()
     )
 
+
+def calculate_quiz_stats(attempts) -> tuple[int, int | None, int]:
     total_quizzes = len(attempts)
     if not attempts:
         return 0, None, 0
@@ -1175,6 +1270,47 @@ def get_user_quiz_stats(user_id: int) -> tuple[int, int | None, int]:
             break
 
     return total_quizzes, accuracy, streak_days
+
+
+def get_user_quiz_stats(user_id: int) -> tuple[int, int | None, int]:
+    return calculate_quiz_stats(get_attempt_stat_rows(user_id))
+
+
+def get_home_attempt_data(user_id: int) -> tuple[int, int | None, int, object | None, dict]:
+    attempts = get_attempt_stat_rows(user_id)
+    total_quizzes, accuracy, streak_days = calculate_quiz_stats(attempts)
+    mcq_attempts = [
+        attempt for attempt in attempts
+        if normalize_study_format(attempt.study_format) == "mcq"
+    ]
+    trend = [
+        {
+            "percent": round(attempt.score / attempt.total_questions * 100)
+            if attempt.total_questions else 0,
+            "label": attempt.created_at.strftime("%d/%m"),
+        }
+        for attempt in reversed(mcq_attempts[:8])
+    ]
+    today = datetime.utcnow().date()
+    completed_today = sum(
+        attempt.total_questions
+        for attempt in attempts
+        if attempt.created_at.date() == today
+    )
+    goal = max(5, min(int(current_user.daily_question_goal or 20), 100))
+    activity = {
+        "trend": trend,
+        "completed_today": completed_today,
+        "daily_goal": goal,
+        "goal_percent": min(round(completed_today / goal * 100), 100),
+    }
+    return (
+        total_quizzes,
+        accuracy,
+        streak_days,
+        attempts[0] if attempts else None,
+        activity,
+    )
 
 
 def build_attempt_summary(attempt: QuizAttempt) -> dict:
@@ -1288,12 +1424,17 @@ def get_core_dashboard(user_id: int) -> dict:
         progress for progress in relevant_progress
         if (progress.flashcard_times_seen or 0) > 0
     ]
-    attempts = (
-        QuizAttempt.query
+    latest_attempt_row = (
+        db.session.query(
+            QuizAttempt,
+            func.count(QuizAttempt.id).over().label("session_count"),
+        )
         .filter_by(user_id=user_id, category="CORE Radiology", study_format="flashcard")
         .order_by(QuizAttempt.created_at.desc())
-        .all()
+        .first()
     )
+    last_attempt = latest_attempt_row[0] if latest_attempt_row else None
+    session_count = latest_attempt_row.session_count if latest_attempt_row else 0
     rating_counts = {rating: 0 for rating in FLASHCARD_RATINGS}
     for progress in relevant_progress:
         if progress.flashcard_rating in rating_counts:
@@ -1313,18 +1454,28 @@ def get_core_dashboard(user_id: int) -> dict:
             if progress.next_review_at and progress.next_review_at <= now
         ),
         "rating_counts": rating_counts,
-        "session_count": len(attempts),
-        "last_attempt": build_attempt_summary(attempts[0]) if attempts else None,
+        "session_count": session_count,
+        "last_attempt": build_attempt_summary(last_attempt) if last_attempt else None,
     }
 
 
-def get_core_pool_counts(question_list: list[dict], user_id: int) -> dict[str, int]:
+def get_core_pool_counts(
+    question_list: list[dict],
+    user_id: int,
+    progress_by_key: dict[str, QuestionProgress] | None = None,
+) -> dict[str, int]:
+    if progress_by_key is None:
+        progress_by_key = get_user_progress_by_key(user_id)
     counts = {
         "all": len(question_list),
-        "unseen": len(filter_questions_for_pool(question_list, user_id, "unseen")),
-        "due": len(filter_questions_for_pool(question_list, user_id, "due")),
+        "unseen": len(filter_questions_for_pool(
+            question_list, user_id, "unseen", progress_by_key
+        )),
+        "due": len(filter_questions_for_pool(
+            question_list, user_id, "due", progress_by_key
+        )),
     }
-    counts.update(get_flashcard_rating_counts(question_list, user_id))
+    counts.update(get_flashcard_rating_counts(question_list, user_id, progress_by_key))
     return counts
 
 
@@ -1599,6 +1750,7 @@ def save_question_image(file_storage, category: str) -> str:
         counter += 1
 
     file_storage.save(os.path.join(target_dir, candidate))
+    clear_runtime_question_caches()
     return f"/static/uploads/questions/{subdir}/{candidate}"
 
 
@@ -1639,6 +1791,7 @@ def list_existing_image_choices(folder_path: str = "static/images") -> list[dict
     return choices
 
 
+@lru_cache(maxsize=4)
 def list_runtime_image_files(folder_path: str = "static/images") -> list[str]:
     if not folder_path:
         return []
@@ -1661,6 +1814,7 @@ def list_runtime_image_files(folder_path: str = "static/images") -> list[str]:
     return sorted(image_paths)
 
 
+@lru_cache(maxsize=4)
 def build_runtime_image_questions(category: str) -> list[dict]:
     if normalize_category(category) != normalize_category(AUTO_IMAGE_CATEGORY):
         return []
@@ -1694,6 +1848,11 @@ def build_runtime_image_questions(category: str) -> list[dict]:
         })
 
     return generated_questions
+
+
+def clear_runtime_question_caches() -> None:
+    list_runtime_image_files.cache_clear()
+    build_runtime_image_questions.cache_clear()
 
 
 def parse_answer_key(raw_value: str) -> dict[str, str]:
@@ -1815,12 +1974,22 @@ def home():
     if not current_user.is_authenticated:
         return redirect(url_for("login"))
 
+    anatomy_questions = get_all_anatomy_questions()
+    progress_by_key = get_user_progress_by_key(current_user.id)
     categories = get_categories()
-    category_cards = build_home_category_cards(categories)
-    total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
-    last_attempt = get_last_quiz_attempt(current_user.id)
-    learning_dashboard = get_learning_dashboard(current_user.id)
-    dashboard_activity = get_dashboard_activity(current_user.id)
+    category_cards = build_home_category_cards(categories, anatomy_questions)
+    (
+        total_quizzes,
+        accuracy,
+        streak_days,
+        last_attempt,
+        dashboard_activity,
+    ) = get_home_attempt_data(current_user.id)
+    learning_dashboard = get_learning_dashboard(
+        current_user.id,
+        anatomy_questions,
+        progress_by_key,
+    )
     active_quiz = get_active_quiz_summary()
 
     if request.method == "POST":
@@ -1910,7 +2079,8 @@ def core_section_setup(section_key):
     if not questions:
         return render_template("core_empty_section.html", section=section)
 
-    pool_counts = get_core_pool_counts(questions, current_user.id)
+    progress_by_key = get_user_progress_by_key(current_user.id)
+    pool_counts = get_core_pool_counts(questions, current_user.id, progress_by_key)
     requested_pool = (
         normalize_flashcard_rating(request.args.get("pool"))
         or normalize_category(request.args.get("pool"))
@@ -2030,14 +2200,21 @@ def core_study(section_key):
         normalize_flashcard_rating(request.args.get("pool"))
         or normalize_category(request.args.get("pool"))
     )
+    progress_by_key = get_user_progress_by_key(current_user.id)
     if pool in FLASHCARD_RATINGS:
         selected = filter_questions_for_flashcard_rating(
             all_questions,
             current_user.id,
             pool,
+            progress_by_key,
         )
     elif pool in {"due", "unseen"}:
-        selected = filter_questions_for_pool(all_questions, current_user.id, pool)
+        selected = filter_questions_for_pool(
+            all_questions,
+            current_user.id,
+            pool,
+            progress_by_key,
+        )
     else:
         pool = "all"
         selected = list(all_questions)
@@ -2070,7 +2247,6 @@ def core_study(section_key):
 
     session["study_format"] = "flashcard"
     questions_by_id = {question["ID"]: question for question in all_questions}
-    progress_by_key = get_user_progress_by_key(current_user.id)
     current_ratings = {
         qid: (
             progress_by_key[get_question_key(questions_by_id[qid])].flashcard_rating
@@ -2091,7 +2267,11 @@ def core_study(section_key):
         order=order,
         current_ratings=current_ratings,
         ratings=FLASHCARD_RATINGS,
-        rating_counts=get_flashcard_rating_counts(all_questions, current_user.id),
+        rating_counts=get_flashcard_rating_counts(
+            all_questions,
+            current_user.id,
+            progress_by_key,
+        ),
         back_url=url_for("core_section_setup", section_key=section_key),
         quiz_run_id=session.get("quiz_run_id") or "core-flashcards",
         switch_to_mcq_url=None,
@@ -2200,8 +2380,13 @@ def anatomy_subgroup_setup(subgroup):
         return redirect(url_for("anatomy_sections"))
 
     selected = get_questions_for_anatomy_subgroup(subgroup_key)
-    pool_counts = get_quiz_pool_counts(selected, current_user.id)
-    flashcard_rating_counts = get_flashcard_rating_counts(selected, current_user.id)
+    progress_by_key = get_user_progress_by_key(current_user.id)
+    pool_counts = get_quiz_pool_counts(selected, current_user.id, progress_by_key)
+    flashcard_rating_counts = get_flashcard_rating_counts(
+        selected,
+        current_user.id,
+        progress_by_key,
+    )
     selected_pool = normalize_quiz_pool(request.args.get("pool"))
     available_count = pool_counts[selected_pool]
     suggested_count = get_question_limit(request.args.get("count"), available_count)
@@ -2360,10 +2545,21 @@ def flashcards(category):
 
     rating_filter = normalize_flashcard_rating(request.args.get("rating"))
     quiz_pool = normalize_quiz_pool(request.args.get("pool"))
+    progress_by_key = get_user_progress_by_key(current_user.id)
     selected = (
-        filter_questions_for_flashcard_rating(all_selected, current_user.id, rating_filter)
+        filter_questions_for_flashcard_rating(
+            all_selected,
+            current_user.id,
+            rating_filter,
+            progress_by_key,
+        )
         if rating_filter
-        else filter_questions_for_pool(all_selected, current_user.id, quiz_pool)
+        else filter_questions_for_pool(
+            all_selected,
+            current_user.id,
+            quiz_pool,
+            progress_by_key,
+        )
     )
     if not selected:
         return redirect(url_for(
@@ -2404,7 +2600,6 @@ def flashcards(category):
     session["flashcard_rating_filter"] = rating_filter
     display_questions = [localize_question_for_display(question) for question in all_selected]
     questions_by_id = {question["ID"]: question for question in display_questions}
-    progress_by_key = get_user_progress_by_key(current_user.id)
     current_ratings = {
         qid: (
             progress_by_key.get(get_question_key(questions_by_id[qid])).flashcard_rating
@@ -2428,7 +2623,11 @@ def flashcards(category):
         order=order,
         current_ratings=current_ratings,
         ratings=FLASHCARD_RATINGS,
-        rating_counts=get_flashcard_rating_counts(all_selected, current_user.id),
+        rating_counts=get_flashcard_rating_counts(
+            all_selected,
+            current_user.id,
+            progress_by_key,
+        ),
         back_url=back_url,
         quiz_run_id=session.get("quiz_run_id") or "flashcards",
         switch_to_mcq_url=url_for(
@@ -3076,7 +3275,9 @@ with app.app_context():
     ensure_quiz_attempt_schema()
     ensure_user_profile_schema()
     ensure_question_progress_schema()
+    ensure_performance_indexes()
     enforce_single_admin_account()
+    db.engine.dispose()
 
 if __name__ == "__main__":
     app.run(debug=True)

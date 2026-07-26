@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quiz - {{ category }}</title>
     {% include "_favicon.html" %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
 
   <body>
@@ -140,12 +140,19 @@
 
               <h3 class="question-title">{{ q["Vraag"] }}</h3>
               {% if q.get("image_url") %}
-                <div class="question-image-wrapper">
+                <div class="question-image-wrapper is-loading" data-image-frame>
                   <img
-                    src="{{ q['image_url'] }}"
+                    data-src="{{ q['image_url'] }}"
+                    data-question-image
                     alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}"
                     class="question-image"
                   >
+                  <div class="flashcard-image-status" aria-live="polite">
+                    <span>{{ "Afbeelding laden..." if language == "nl" else "Loading image..." }}</span>
+                    <button type="button" data-retry-image hidden>
+                      {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                    </button>
+                  </div>
                 </div>
               {% endif %}
 
@@ -254,6 +261,7 @@
         localStorage.setItem(attemptStartedAtKey, String(attemptStartedAt));
       }
       let currentIndex = 0;
+      let imagePreloadTimer = null;
       const correctFeedbackByQid = {{ correct_feedback_by_id|tojson }};
       const quizText = {
         noCorrectAnswer: {{ tr("No correct answer available.")|tojson }},
@@ -410,6 +418,43 @@
         return document.querySelector(`.question-panel[data-question-index="${index}"]`);
       }
 
+      function loadQuestionImage(index) {
+        const image = getPanel(index)?.querySelector("[data-question-image]");
+        if (!image || image.dataset.loaded === "true" || image.dataset.loading === "true") return;
+        const source = image.dataset.src;
+        if (!source) return;
+
+        const frame = image.closest("[data-image-frame]");
+        const retryButton = frame?.querySelector("[data-retry-image]");
+        frame?.classList.remove("has-error");
+        frame?.classList.add("is-loading");
+        if (retryButton) retryButton.hidden = true;
+        image.dataset.loading = "true";
+        image.onload = () => {
+          image.dataset.loaded = "true";
+          image.dataset.loading = "false";
+          frame?.classList.remove("is-loading", "has-error");
+        };
+        image.onerror = () => {
+          image.dataset.loading = "false";
+          image.removeAttribute("src");
+          frame?.classList.remove("is-loading");
+          frame?.classList.add("has-error");
+          if (retryButton) retryButton.hidden = false;
+        };
+        image.src = source;
+      }
+
+      function cancelQuestionImage(index) {
+        const image = getPanel(index)?.querySelector("[data-question-image]");
+        if (!image || image.dataset.loaded === "true" || image.dataset.loading !== "true") return;
+        image.onload = null;
+        image.onerror = null;
+        image.removeAttribute("src");
+        image.dataset.loading = "false";
+        image.closest("[data-image-frame]")?.classList.remove("is-loading", "has-error");
+      }
+
       function updateSavedState(index) {
         const panel = getPanel(index);
         const statusEl = document.getElementById(`status-${index}`);
@@ -475,6 +520,12 @@
       }
 
       function showQuestion(index) {
+        window.clearTimeout(imagePreloadTimer);
+        panels.forEach((_, panelIndex) => {
+          if (panelIndex !== index && panelIndex !== index + 1) {
+            cancelQuestionImage(panelIndex);
+          }
+        });
         panels.forEach((panel) => panel.classList.remove("active"));
         navButtons.forEach((btn) => btn.classList.remove("active"));
 
@@ -488,6 +539,8 @@
         currentIndex = index;
         prevBtn.disabled = currentIndex === 0;
         nextBtn.disabled = currentIndex === panels.length - 1;
+        loadQuestionImage(index);
+        imagePreloadTimer = window.setTimeout(() => loadQuestionImage(index + 1), 350);
       }
 
       async function saveCurrentAnswer() {
@@ -605,6 +658,9 @@
           ? ["a", "b", "c", "d"].map((key) => panel.querySelector(`[data-answer-input="${key}"]`))
           : Array.from(panel.querySelectorAll("[data-student-choice]"));
         const markButton = panel.querySelector("[data-mark-question]");
+        const retryImageButton = panel.querySelector("[data-retry-image]");
+
+        retryImageButton?.addEventListener("click", () => loadQuestionImage(index));
 
         saveButton.addEventListener("click", async () => {
           currentIndex = index;

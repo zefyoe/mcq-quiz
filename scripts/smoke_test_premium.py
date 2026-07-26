@@ -92,6 +92,8 @@ assert b"30" in response.data
 
 response = client.get("/quiz/Anatomy?subgroup=mixed&count=2&mode=exam")
 assert_ok(response, "quiz")
+assert b' src="/static/images/' not in response.data
+assert b"style.css?v=" in response.data
 with client.session_transaction() as quiz_session:
     order = list(quiz_session["order"])
 
@@ -267,6 +269,9 @@ response = client.get(
 assert_ok(response, "CORE history retake")
 assert b"Show answer" in response.data
 assert_ok(client.get("/static/core/gastrointestinal/c1_q_0.png"), "CORE media")
+style_response = client.get("/static/style.css")
+assert_ok(style_response, "static stylesheet")
+assert "max-age=604800" in style_response.headers.get("Cache-Control", "")
 
 anonymous_client = app.test_client()
 response = anonymous_client.get("/", base_url="https://core.bymed.be")

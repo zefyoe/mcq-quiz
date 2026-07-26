@@ -5,7 +5,7 @@ services:
     plan: free
     autoDeploy: true
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --worker-class gthread --threads 4 --timeout 120 --access-logfile - app:app
+    startCommand: gunicorn --preload --workers 2 --worker-class gthread --threads 4 --timeout 120 --keep-alive 5 --access-logfile - app:app
     healthCheckPath: /health
     envVars:
       - key: SECRET_KEY

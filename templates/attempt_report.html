@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ "Toetsrapport" if language == "nl" else "Test report" }} | Rady</title>
     {% include "_favicon.html" %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
   <body class="report-body">
     <header class="report-toolbar">
@@ -66,12 +66,12 @@
               <div>
                 <h3>{{ result["Vraag"] }}</h3>
                 {% if result.get("image_url") %}
-                  <img class="report-case-image" src="{{ result['image_url'] }}" alt="{{ 'Casebeeld' if language == 'nl' else 'Case image' }}">
+                  <img class="report-case-image" src="{{ result['image_url'] }}" loading="lazy" decoding="async" alt="{{ 'Casebeeld' if language == 'nl' else 'Case image' }}">
                 {% endif %}
                 <p><b>{{ tr("Your answer:") }}</b> {{ result["user"]|join(", ") if result["user"] else "—" }}</p>
                 <p><b>{{ tr("Correct answer:") }}</b> {{ result["correct_texts"]|join(", ") if result["correct_texts"] else result["correct"]|join(", ") }}</p>
                 {% if result.get("answer_image_url") %}
-                  <img class="report-case-image report-answer-image" src="{{ result['answer_image_url'] }}" alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}">
+                  <img class="report-case-image report-answer-image" src="{{ result['answer_image_url'] }}" loading="lazy" decoding="async" alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}">
                 {% endif %}
               </div>
               {% if summary.study_format == "flashcard" %}
