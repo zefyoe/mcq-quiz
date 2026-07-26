@@ -108,12 +108,20 @@
             <div class="flashcard-question-meta">
               <span>{{ tr("Question") }} {{ loop.index }} / {{ order|length }}</span>
               {% if product == "core" %}
-                <strong>{{ question.get("case_label") or qid }} · {{ qid }}</strong>
+                <strong>
+                  {{ (question.get("case_label") or qid)|replace("Case", "Casus") if language == "nl" else (question.get("case_label") or qid) }}
+                  · {{ qid }}
+                </strong>
               {% else %}
                 <strong>{{ "Vraag-ID" if language == "nl" else "Question ID" }}: {{ qid[3:] if qid.startswith("IMG") else qid }}</strong>
               {% endif %}
             </div>
-            <h2>{{ question["Vraag"] }}</h2>
+            <h2>{{ question.get("Vraag_nl", question["Vraag"]) if product == "core" and language == "nl" else question["Vraag"] }}</h2>
+
+            <button type="button" class="flashcard-reveal-button" data-reveal-answer>
+              {{ "Toon antwoord" if language == "nl" else "Show answer" }}
+            </button>
+
             {% if question.get("image_url") %}
               <div class="flashcard-image-frame is-loading" data-image-frame>
                 <img
@@ -132,30 +140,29 @@
               </div>
             {% endif %}
 
-            <button type="button" class="flashcard-reveal-button" data-reveal-answer>
-              {{ "Toon antwoord" if language == "nl" else "Show answer" }}
-            </button>
-
             <div class="flashcard-answer" data-flashcard-answer hidden>
               <p>{{ "JUISTE ANTWOORD" if language == "nl" else "CORRECT ANSWER" }}</p>
               <h3>{{ correct_answers_by_id[qid]|join(", ") }}</h3>
-              {% if question.get("answer_image_url") %}
-                <div class="core-answer-image" data-image-frame>
-                  <img
-                    data-src="{{ question['answer_image_url'] }}"
-                    fetchpriority="low"
-                    decoding="async"
-                    data-answer-image
-                    alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}"
-                  >
-                  <div class="flashcard-image-status" aria-live="polite">
-                    <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
-                    <button type="button" data-retry-image hidden>
-                      {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
-                    </button>
-                  </div>
-                </div>
-              {% endif %}
+              <div class="flashcard-rating-prompt">
+                {{ "Hoe goed kende je dit antwoord?" if language == "nl" else "How well did you know this answer?" }}
+              </div>
+              <div class="flashcard-rating-grid flashcard-rating-grid-top">
+                {% for rating_key, rating in ratings.items() %}
+                  <button type="button" class="flashcard-rating-button rating-{{ rating_key }}" data-rate="{{ rating_key }}">
+                    <span>{{ loop.index }}</span>
+                    {% if language == "nl" %}
+                      {{ {
+                        "very_difficult": "Zeer moeilijk",
+                        "difficult": "Moeilijk",
+                        "easy": "Gemakkelijk",
+                        "very_easy": "Zeer gemakkelijk"
+                      }[rating_key] }}
+                    {% else %}
+                      {{ rating.label }}
+                    {% endif %}
+                  </button>
+                {% endfor %}
+              </div>
               {% if question.get("answer_sections") %}
                 <section class="core-learning-notes" aria-label="{{ 'Casebespreking' if language == 'nl' else 'Case review' }}">
                   <header class="core-learning-header">
@@ -219,26 +226,23 @@
                   </div>
                 </section>
               {% endif %}
-              <div class="flashcard-rating-prompt">
-                {{ "Hoe moeilijk was dit antwoord voor jou?" if language == "nl" else "How difficult was this answer for you?" }}
-              </div>
-              <div class="flashcard-rating-grid">
-                {% for rating_key, rating in ratings.items() %}
-                  <button type="button" class="flashcard-rating-button rating-{{ rating_key }}" data-rate="{{ rating_key }}">
-                    <span>{{ loop.index }}</span>
-                    {% if language == "nl" %}
-                      {{ {
-                        "very_difficult": "Zeer moeilijk",
-                        "difficult": "Moeilijk",
-                        "easy": "Gemakkelijk",
-                        "very_easy": "Zeer gemakkelijk"
-                      }[rating_key] }}
-                    {% else %}
-                      {{ rating.label }}
-                    {% endif %}
-                  </button>
-                {% endfor %}
-              </div>
+              {% if question.get("answer_image_url") %}
+                <div class="core-answer-image" data-image-frame>
+                  <img
+                    data-src="{{ question['answer_image_url'] }}"
+                    fetchpriority="low"
+                    decoding="async"
+                    data-answer-image
+                    alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}"
+                  >
+                  <div class="flashcard-image-status" aria-live="polite">
+                    <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
+                    <button type="button" data-retry-image hidden>
+                      {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                    </button>
+                  </div>
+                </div>
+              {% endif %}
             </div>
           </article>
         {% endfor %}
@@ -257,6 +261,7 @@
         </form>
       </section>
     </main>
+    {% include "_site_footer.html" %}
 
     <script>
       const flashcardPanels = Array.from(document.querySelectorAll("[data-flashcard-panel]"));
@@ -474,6 +479,7 @@
       }
 
       function showCard(index) {
+        const questionChanged = index !== currentIndex;
         window.clearTimeout(preloadTimer);
         window.clearTimeout(answerPreloadTimer);
         flashcardPanels.forEach((panel, panelIndex) => {
@@ -497,6 +503,11 @@
         answerPreloadTimer = window.setTimeout(() => {
           loadDeferredImage(flashcardPanels[index]?.querySelector("[data-answer-image]"));
         }, 250);
+        if (questionChanged) {
+          window.requestAnimationFrame(() => {
+            flashcardPanels[index]?.scrollIntoView({behavior: "smooth", block: "start"});
+          });
+        }
       }
 
       function moveQuestionId(qid, rating) {
@@ -556,6 +567,9 @@
           revealButton.hidden = true;
           panel.classList.add("answer-visible");
           loadDeferredImage(panel.querySelector("[data-answer-image]"));
+          window.requestAnimationFrame(() => {
+            answer.scrollIntoView({behavior: "smooth", block: "start"});
+          });
         });
         panel.querySelectorAll("[data-retry-image]").forEach((button) => {
           button.addEventListener("click", () => {

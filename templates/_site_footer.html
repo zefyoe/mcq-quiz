@@ -1,0 +1,15 @@
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div>
+      <strong>Bymed BV</strong>
+      <span>© 2026 Bymed BV. {{ "Alle rechten voorbehouden." if language == "nl" else "All rights reserved." }}</span>
+    </div>
+    <p>
+      {% if language == "nl" %}
+        Dit platform is uitsluitend bedoeld voor medisch onderwijs en vervangt geen professioneel medisch advies, diagnose of behandeling. Ongeoorloofde reproductie, verspreiding of commercieel gebruik is verboden.
+      {% else %}
+        This platform is intended solely for medical education and does not replace professional medical advice, diagnosis, or treatment. Unauthorized reproduction, distribution, or commercial use is prohibited.
+      {% endif %}
+    </p>
+  </div>
+</footer>

@@ -35,7 +35,7 @@ os.environ["SECRET_KEY"] = "premium-smoke-test"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import app, db, get_questions_by_ids  # noqa: E402
-from core_radiology import parse_answer_details  # noqa: E402
+from core_radiology import load_core_section, parse_answer_details  # noqa: E402
 from models import QuizAttempt, User  # noqa: E402
 from sqlalchemy import inspect  # noqa: E402
 
@@ -63,6 +63,12 @@ assert "definite fistula" in parsed_notes[0]["items"][0]["text"]
 assert parsed_notes[1]["items"][0]["lead"] == "Abscess"
 assert parsed_notes[1]["items"][0]["radiopaedia_url"].endswith("q=Abscess")
 assert parsed_notes[-1]["items"][0]["text"] == "Example reference."
+
+core_cards = load_core_section("gastrointestinal")
+assert len(core_cards) == 171
+assert all(card["Vraag_nl"] for card in core_cards)
+assert sum(card["Vraag_nl"] != card["Vraag"] for card in core_cards) == 171
+assert core_cards[0]["Vraag_nl"] == "68-jarige man met dysfagie."
 
 
 with app.app_context():
@@ -155,6 +161,7 @@ assert b"1m 31s" in response.data
 assert_ok(client.get("/previous-tests"), "history")
 response = client.get("/")
 assert_ok(response, "dashboard")
+assert b"Bymed BV" in response.data
 assert response.data.count(b'class="product-category-row"') == 4
 assert b'href="/anatomy/msk"' in response.data
 assert b'href="/anatomy/genito-urinary"' in response.data
@@ -250,6 +257,7 @@ with client.session_transaction() as language_session:
 
 response = client.get("/core")
 assert_ok(response, "CORE dashboard")
+assert b"Bymed BV" in response.data
 assert b'class="product-switcher"' in response.data
 assert b'product-option active' in response.data
 assert b"171" in response.data
@@ -274,6 +282,9 @@ assert b"note-differential" in response.data
 assert b"core-differential-link" in response.data
 assert b"What the images show" not in response.data
 assert b"core-note-index" not in response.data
+assert response.data.index(b"data-reveal-answer") < response.data.index(b"data-question-image")
+assert response.data.index(b"flashcard-rating-grid-top") < response.data.index(b"core-learning-notes")
+assert b"Bymed BV" in response.data
 assert response.data.count(b'data-src="/static/core/') == 4
 assert response.data.count(b' src="/static/core/') == 1
 assert b'rel="preload" as="image"' in response.data
@@ -281,6 +292,18 @@ with client.session_transaction() as core_session:
     core_order = list(core_session["order"])
 assert len(core_order) == 2
 assert all(qid.startswith("CORE-GI-") for qid in core_order)
+
+with client.session_transaction() as core_language_session:
+    core_language_session["language"] = "nl"
+response = client.get("/core/gastrointestinal/study?resume=1")
+assert_ok(response, "Dutch CORE GI study")
+core_cards_by_id = {card["ID"]: card for card in core_cards}
+for qid in core_order:
+    assert core_cards_by_id[qid]["Vraag_nl"].encode("utf-8") in response.data
+assert b"Toon antwoord" in response.data
+assert b"Alle rechten voorbehouden." in response.data
+with client.session_transaction() as core_language_session:
+    core_language_session["language"] = "en"
 
 core_ratings = {
     core_order[0]: "difficult",
@@ -332,6 +355,8 @@ assert b"width: 60%" in style_response.data
 assert b".core-learning-header" in style_response.data
 assert b".core-note-section.note-teaching" in style_response.data
 assert b".core-differential-link" in style_response.data
+assert b".site-footer" in style_response.data
+assert b".flashcard-panel > .flashcard-reveal-button" in style_response.data
 assert b"grid-template-columns: repeat(2, minmax(0, 1fr))" in style_response.data
 assert b"object-view-box: none" in style_response.data
 

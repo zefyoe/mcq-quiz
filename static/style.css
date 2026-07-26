@@ -3490,7 +3490,7 @@ body {
 
 .flashcard-reveal-button {
   min-width: 220px;
-  margin-top: auto;
+  margin: 0 auto 18px;
   padding: 14px 22px;
   border: 0;
   border-radius: 10px;
@@ -3504,7 +3504,7 @@ body {
 
 .flashcard-answer {
   width: min(100%, 820px);
-  margin-top: auto;
+  margin: 0 auto 18px;
   padding: 24px;
   border: 1px solid #c7d6e5;
   border-radius: 14px;
@@ -3513,6 +3513,18 @@ body {
 
 .flashcard-answer[hidden] {
   display: none;
+}
+
+.flashcard-panel > .flashcard-reveal-button {
+  order: 1;
+}
+
+.flashcard-panel > .flashcard-answer {
+  order: 2;
+}
+
+.flashcard-panel > .flashcard-image-frame {
+  order: 3;
 }
 
 .flashcard-answer > p {
@@ -3693,6 +3705,63 @@ body {
   }
 }
 
+.flashcard-rating-grid-top {
+  margin-bottom: 4px;
+}
+
+.site-footer {
+  width: 100%;
+  margin-top: 34px;
+  border-top: 1px solid #d8e1e8;
+  background: rgba(247, 249, 251, 0.92);
+  color: #667684;
+}
+
+.site-footer-inner {
+  width: min(1180px, calc(100% - 40px));
+  min-height: 118px;
+  margin: 0 auto;
+  padding: 26px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.site-footer-inner > div {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 5px;
+}
+
+.site-footer strong {
+  color: #243b53;
+  font-size: 0.86rem;
+  letter-spacing: 0.03em;
+}
+
+.site-footer span,
+.site-footer p {
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.site-footer p {
+  max-width: 700px;
+  margin: 0;
+  text-align: right;
+}
+
+.core-product .site-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
+  background: #102b3f;
+  color: #a9c3ce;
+}
+
+.core-product .site-footer strong {
+  color: white;
+}
+
 @media (max-width: 700px) {
   .study-format-toggle,
   .flashcard-rating-grid {
@@ -3708,6 +3777,17 @@ body {
   .flashcard-result-page {
     width: calc(100% - 24px);
     margin: 14px auto;
+  }
+
+  .site-footer-inner {
+    width: calc(100% - 28px);
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .site-footer p {
+    text-align: left;
   }
 
   .flashcard-workspace-header {

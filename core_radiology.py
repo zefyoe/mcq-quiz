@@ -125,19 +125,31 @@ def parse_answer_details(value):
 
 
 @lru_cache(maxsize=None)
+def load_core_translations(section_key, language):
+    data_path = DATA_DIRECTORY / f"core_{section_key}_{language}.json"
+    if not data_path.exists():
+        return {}
+    payload = json.loads(data_path.read_text(encoding="utf-8"))
+    return payload.get("histories", {})
+
+
+@lru_cache(maxsize=None)
 def load_core_section(section_key):
     data_path = DATA_DIRECTORY / f"core_{section_key}.json"
     if not data_path.exists():
         return []
     payload = json.loads(data_path.read_text(encoding="utf-8"))
+    dutch_histories = load_core_translations(section_key, "nl")
     cards = []
     for card in payload.get("cards", []):
         diagnosis = card.get("diagnosis") or "Diagnosis unavailable"
         answer_details = card.get("answer_details") or ""
+        history = card.get("history") or "Review the imaging case and formulate the diagnosis."
         cards.append({
             "ID": card["id"],
             "Category": "CORE Radiology",
-            "Vraag": card.get("history") or "Review the imaging case and formulate the diagnosis.",
+            "Vraag": history,
+            "Vraag_nl": dutch_histories.get(card["id"], history),
             "Correct": [diagnosis],
             "A": "",
             "B": "",
