@@ -3276,14 +3276,21 @@ def logout():
 # Main
 # -------------------------
 
-with app.app_context():
-    db.create_all()
-    ensure_quiz_attempt_schema()
-    ensure_user_profile_schema()
-    ensure_question_progress_schema()
-    ensure_performance_indexes()
-    enforce_single_admin_account()
-    db.engine.dispose()
+def initialize_database_schema():
+    with app.app_context():
+        db.create_all()
+        ensure_quiz_attempt_schema()
+        ensure_user_profile_schema()
+        ensure_question_progress_schema()
+        ensure_performance_indexes()
+        enforce_single_admin_account()
+        db.engine.dispose()
+
+
+# Render already has the production schema. Avoid blocking every web deploy on
+# DDL locks before Gunicorn can serve its health check.
+if not os.environ.get("RENDER") or os.environ.get("RUN_STARTUP_MIGRATIONS") == "1":
+    initialize_database_schema()
 
 if __name__ == "__main__":
     app.run(debug=True)
