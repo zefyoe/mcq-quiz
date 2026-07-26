@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quiz - {{ category }}</title>
     {% include "_favicon.html" %}
+    {% if order %}
+      {% set first_question = questions_by_id.get(order[0]) %}
+      {% if first_question and first_question.get("image_url") %}
+        <link rel="preload" as="image" href="{{ first_question['image_url'] }}" fetchpriority="high">
+      {% endif %}
+    {% endif %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
 
@@ -143,12 +149,14 @@
                 <div class="question-image-wrapper is-loading" data-image-frame>
                   <img
                     data-src="{{ q['image_url'] }}"
+                    {% if loop.first %}src="{{ q['image_url'] }}" fetchpriority="high"{% else %}fetchpriority="low"{% endif %}
+                    decoding="async"
                     data-question-image
                     alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}"
                     class="question-image"
                   >
                   <div class="flashcard-image-status" aria-live="polite">
-                    <span>{{ "Afbeelding laden..." if language == "nl" else "Loading image..." }}</span>
+                    <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
                     <button type="button" data-retry-image hidden>
                       {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
                     </button>
@@ -426,23 +434,36 @@
 
         const frame = image.closest("[data-image-frame]");
         const retryButton = frame?.querySelector("[data-retry-image]");
-        frame?.classList.remove("has-error");
-        frame?.classList.add("is-loading");
-        if (retryButton) retryButton.hidden = true;
-        image.dataset.loading = "true";
-        image.onload = () => {
+        const markLoaded = () => {
           image.dataset.loaded = "true";
           image.dataset.loading = "false";
           frame?.classList.remove("is-loading", "has-error");
         };
-        image.onerror = () => {
+        const markFailed = () => {
           image.dataset.loading = "false";
           image.removeAttribute("src");
           frame?.classList.remove("is-loading");
           frame?.classList.add("has-error");
           if (retryButton) retryButton.hidden = false;
         };
-        image.src = source;
+
+        if (image.complete && image.naturalWidth > 0) {
+          markLoaded();
+          return;
+        }
+
+        frame?.classList.remove("has-error");
+        frame?.classList.add("is-loading");
+        if (retryButton) retryButton.hidden = true;
+        image.dataset.loading = "true";
+        image.onload = markLoaded;
+        image.onerror = markFailed;
+
+        if (image.complete && image.getAttribute("src") && image.naturalWidth === 0) {
+          markFailed();
+          return;
+        }
+        if (!image.getAttribute("src")) image.src = source;
       }
 
       function cancelQuestionImage(index) {
@@ -540,7 +561,7 @@
         prevBtn.disabled = currentIndex === 0;
         nextBtn.disabled = currentIndex === panels.length - 1;
         loadQuestionImage(index);
-        imagePreloadTimer = window.setTimeout(() => loadQuestionImage(index + 1), 350);
+        imagePreloadTimer = window.setTimeout(() => loadQuestionImage(index + 1), 120);
       }
 
       async function saveCurrentAnswer() {

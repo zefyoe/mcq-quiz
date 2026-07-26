@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ "Flashcards" if language == "nl" else "Flashcards" }} - {{ category }}</title>
     {% include "_favicon.html" %}
+    {% if order %}
+      {% set first_question = questions_by_id.get(order[0]) %}
+      {% if first_question and first_question.get("image_url") %}
+        <link rel="preload" as="image" href="{{ first_question['image_url'] }}" fetchpriority="high">
+      {% endif %}
+    {% endif %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
   <body class="{% if product == 'core' %}core-product{% endif %}">
@@ -106,11 +112,13 @@
               <div class="flashcard-image-frame is-loading" data-image-frame>
                 <img
                   data-src="{{ question['image_url'] }}"
+                  {% if loop.first %}src="{{ question['image_url'] }}" fetchpriority="high"{% else %}fetchpriority="low"{% endif %}
+                  decoding="async"
                   data-question-image
                   alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}"
                 >
                 <div class="flashcard-image-status" aria-live="polite">
-                  <span>{{ "Afbeelding laden..." if language == "nl" else "Loading image..." }}</span>
+                  <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
                   <button type="button" data-retry-image hidden>
                     {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
                   </button>
@@ -129,11 +137,13 @@
                 <div class="core-answer-image" data-image-frame>
                   <img
                     data-src="{{ question['answer_image_url'] }}"
+                    fetchpriority="low"
+                    decoding="async"
                     data-answer-image
                     alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}"
                   >
                   <div class="flashcard-image-status" aria-live="polite">
-                    <span>{{ "Afbeelding laden..." if language == "nl" else "Loading image..." }}</span>
+                    <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
                     <button type="button" data-retry-image hidden>
                       {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
                     </button>
@@ -206,6 +216,7 @@
       let currentIndex = 0;
       let sessionRatings = {};
       let preloadTimer = null;
+      let answerPreloadTimer = null;
 
       if (!startedAt) {
         startedAt = Date.now();
@@ -233,24 +244,36 @@
 
         const frame = image.closest("[data-image-frame]");
         const retryButton = frame?.querySelector("[data-retry-image]");
-        frame?.classList.remove("has-error");
-        frame?.classList.add("is-loading");
-        if (retryButton) retryButton.hidden = true;
-        image.dataset.loading = "true";
-
-        image.onload = () => {
+        const markLoaded = () => {
           image.dataset.loaded = "true";
           image.dataset.loading = "false";
           frame?.classList.remove("is-loading", "has-error");
         };
-        image.onerror = () => {
+        const markFailed = () => {
           image.dataset.loading = "false";
           image.removeAttribute("src");
           frame?.classList.remove("is-loading");
           frame?.classList.add("has-error");
           if (retryButton) retryButton.hidden = false;
         };
-        image.src = source;
+
+        if (image.complete && image.naturalWidth > 0) {
+          markLoaded();
+          return;
+        }
+
+        frame?.classList.remove("has-error");
+        frame?.classList.add("is-loading");
+        if (retryButton) retryButton.hidden = true;
+        image.dataset.loading = "true";
+        image.onload = markLoaded;
+        image.onerror = markFailed;
+
+        if (image.complete && image.getAttribute("src") && image.naturalWidth === 0) {
+          markFailed();
+          return;
+        }
+        if (!image.getAttribute("src")) image.src = source;
       }
 
       function cancelDeferredImage(image) {
@@ -268,6 +291,7 @@
 
       function showCard(index) {
         window.clearTimeout(preloadTimer);
+        window.clearTimeout(answerPreloadTimer);
         flashcardPanels.forEach((panel, panelIndex) => {
           if (panelIndex !== index && panelIndex !== index + 1) {
             cancelDeferredImage(panel.querySelector("[data-question-image]"));
@@ -285,7 +309,10 @@
         previousButton.disabled = index === 0;
         nextButton.disabled = index === flashcardPanels.length - 1;
         loadQuestionImage(index);
-        preloadTimer = window.setTimeout(() => loadQuestionImage(index + 1), 350);
+        preloadTimer = window.setTimeout(() => loadQuestionImage(index + 1), 120);
+        answerPreloadTimer = window.setTimeout(() => {
+          loadDeferredImage(flashcardPanels[index]?.querySelector("[data-answer-image]"));
+        }, 250);
       }
 
       function moveQuestionId(qid, rating) {
