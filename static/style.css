@@ -2089,47 +2089,62 @@ body {
 }
 
 .core-product .flashcard-answer {
-  width: min(100%, 1100px);
+  width: min(100%, 1400px);
   border-color: #bcd4d3;
   background: linear-gradient(145deg, #f5fbfa, #eaf4f3);
 }
 
 .core-product .flashcard-page {
-  width: min(1700px, calc(100% - 32px));
-  grid-template-columns: 260px minmax(0, 1fr);
+  width: min(1900px, calc(100% - 20px));
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
 }
 
 .core-product .flashcard-panel {
-  min-height: 740px;
-  padding: 26px clamp(18px, 3vw, 48px);
+  min-height: 1020px;
+  padding: 22px clamp(8px, 1.5vw, 22px);
 }
 
 .core-product .flashcard-panel > h2 {
-  max-width: 1050px;
-  margin: 20px auto 14px;
+  max-width: 1200px;
+  margin: 18px auto 12px;
 }
 
 .core-product .flashcard-image-frame {
-  width: min(100%, 1050px);
-  min-height: 360px;
-  max-height: 580px;
-  margin: 6px auto 22px;
-  padding: 12px;
-  border-color: #294553;
+  width: min(100%, 1400px);
+  min-height: 500px;
+  max-height: 850px;
+  margin: 4px auto 22px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
   background: #0b1822;
-  box-shadow: 0 16px 34px rgba(13, 35, 48, 0.16);
+  box-shadow: none;
 }
 
 .core-product .flashcard-image-frame img {
-  max-height: 540px;
+  width: 100%;
+  height: 810px;
+  max-height: 810px;
+  object-fit: contain;
+  object-view-box: inset(7px);
 }
 
 .core-product .core-answer-image {
-  width: min(100%, 1000px);
+  width: min(100%, 1300px);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
 }
 
 .core-product .core-answer-image img {
-  max-height: 640px;
+  width: 100%;
+  height: 960px;
+  max-height: 960px;
+  object-fit: contain;
+  object-view-box: inset(7px);
 }
 
 @media (max-width: 1150px) {
@@ -2202,22 +2217,23 @@ body {
   }
 
   .core-product .flashcard-panel {
-    min-height: 600px;
+    min-height: 820px;
     padding: 20px 8px;
   }
 
   .core-product .flashcard-image-frame {
-    min-height: 280px;
-    max-height: 520px;
-    padding: 7px;
+    min-height: 360px;
+    max-height: 740px;
   }
 
   .core-product .flashcard-image-frame img {
-    max-height: 500px;
+    height: 700px;
+    max-height: 700px;
   }
 
   .core-product .core-answer-image img {
-    max-height: 560px;
+    height: 780px;
+    max-height: 780px;
   }
 
   .core-metric-grid,
