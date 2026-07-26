@@ -61,6 +61,7 @@ assert [section["key"] for section in parsed_notes] == [
 assert "inflammatory" in parsed_notes[0]["items"][0]["text"]
 assert "definite fistula" in parsed_notes[0]["items"][0]["text"]
 assert parsed_notes[1]["items"][0]["lead"] == "Abscess"
+assert parsed_notes[1]["items"][0]["radiopaedia_url"].endswith("q=Abscess")
 assert parsed_notes[-1]["items"][0]["text"] == "Example reference."
 
 
@@ -259,7 +260,9 @@ assert b"MCQ" not in response.data
 assert b'class="core-learning-notes"' in response.data
 assert b"Explore on Radiopaedia" in response.data
 assert b"note-differential" in response.data
-assert b"core-note-count" in response.data
+assert b"core-differential-link" in response.data
+assert b"What the images show" not in response.data
+assert b"core-note-index" not in response.data
 assert response.data.count(b'data-src="/static/core/') == 4
 assert response.data.count(b' src="/static/core/') == 1
 assert b'rel="preload" as="image"' in response.data
@@ -317,6 +320,7 @@ assert b".core-image-grid.panel-count-1" in style_response.data
 assert b"width: 60%" in style_response.data
 assert b".core-learning-header" in style_response.data
 assert b".core-note-section.note-teaching" in style_response.data
+assert b".core-differential-link" in style_response.data
 assert b"grid-template-columns: repeat(2, minmax(0, 1fr))" in style_response.data
 assert b"object-view-box: none" in style_response.data
 

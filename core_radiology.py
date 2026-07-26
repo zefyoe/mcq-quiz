@@ -86,7 +86,12 @@ def _split_learning_points(section_key, lines):
             match = re.match(r"^([^:]{1,75}):\s*(.+)$", chunk)
             if match:
                 lead, body = match.groups()
-        items.append({"lead": lead, "text": body})
+        item = {"lead": lead, "text": body}
+        if section_key == "differential" and lead:
+            item["radiopaedia_url"] = (
+                f"https://radiopaedia.org/search?q={quote_plus(lead)}"
+            )
+        items.append(item)
     return items
 
 

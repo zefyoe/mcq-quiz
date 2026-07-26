@@ -2202,52 +2202,15 @@ body {
 }
 
 .core-note-section > header {
-  padding: 15px 18px;
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
+  padding: 16px 20px;
   border-bottom: 1px solid #e1e9ed;
   background: linear-gradient(90deg, var(--note-soft), white 72%);
-}
-
-.core-note-index {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--note-accent) 24%, white);
-  border-radius: 9px;
-  background: white;
-  color: var(--note-accent);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-}
-
-.core-note-section > header p {
-  margin: 0 0 2px;
-  color: #70818c;
-  font-size: 0.67rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .core-note-section > header h5 {
   margin: 0;
   color: #203849;
   font-size: 1rem;
-}
-
-.core-note-count {
-  padding: 5px 8px;
-  border-radius: 999px;
-  background: white;
-  color: #6b7d88;
-  font-size: 0.68rem;
-  font-weight: 800;
-  white-space: nowrap;
 }
 
 .core-note-section ul {
@@ -2286,6 +2249,33 @@ body {
   margin-bottom: 2px;
   color: var(--note-accent);
   font-size: 0.87rem;
+}
+
+.core-differential-link {
+  width: fit-content;
+  margin-bottom: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--note-accent);
+  text-decoration: none;
+  font-size: 0.87rem;
+  font-weight: 850;
+}
+
+.core-differential-link span {
+  font-size: 0.68rem;
+  opacity: 0.72;
+  transition: transform 0.16s ease;
+}
+
+.core-differential-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.core-differential-link:hover span {
+  transform: translate(2px, -2px);
 }
 
 .core-note-section.note-references li {
@@ -2482,13 +2472,7 @@ body {
   }
 
   .core-note-section > header {
-    grid-template-columns: 38px minmax(0, 1fr);
-    padding: 13px;
-  }
-
-  .core-note-count {
-    grid-column: 2;
-    justify-self: start;
+    padding: 14px 15px;
   }
 
   .core-note-section ul {

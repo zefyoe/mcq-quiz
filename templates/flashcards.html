@@ -186,39 +186,27 @@
                         "management": "Beleid",
                         "references": "Referenties"
                       } %}
-                      {% set section_descriptions = {
-                        "findings": "Wat de beelden tonen",
-                        "differential": "Wat je nog moet overwegen",
-                        "teaching": "Hoogrenderende leerpunten",
-                        "management": "Volgende klinische stap",
-                        "references": "Bronmateriaal"
-                      } %}
-                      {% set section_descriptions_en = {
-                        "findings": "What the images show",
-                        "differential": "What else to consider",
-                        "teaching": "High-yield learning points",
-                        "management": "Next clinical step",
-                        "references": "Source material"
-                      } %}
                       <article class="core-note-section note-{{ section['key'] }}">
                         <header>
-                          <span class="core-note-index">{{ "%02d"|format(loop.index) }}</span>
-                          <div>
-                            <p>
-                              {{ section_descriptions[section["key"]] if language == "nl" else section_descriptions_en[section["key"]] }}
-                            </p>
-                            <h5>{{ section_labels[section["key"]] if language == "nl" else section["label"] }}</h5>
-                          </div>
-                          <span class="core-note-count">
-                            {{ section["items"]|length }}
-                            {{ "punten" if language == "nl" else ("point" if section["items"]|length == 1 else "points") }}
-                          </span>
+                          <h5>{{ section_labels[section["key"]] if language == "nl" else section["label"] }}</h5>
                         </header>
                         <ul>
                           {% for item in section["items"] %}
                             <li>
                               {% if item["lead"] %}
-                                <strong>{{ item["lead"] }}</strong>
+                                {% if item.get("radiopaedia_url") %}
+                                  <a
+                                    class="core-differential-link"
+                                    href="{{ item['radiopaedia_url'] }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {{ item["lead"] }}
+                                    <span aria-hidden="true">↗</span>
+                                  </a>
+                                {% else %}
+                                  <strong>{{ item["lead"] }}</strong>
+                                {% endif %}
                               {% endif %}
                               <span>{{ item["text"] }}</span>
                             </li>
