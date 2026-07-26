@@ -2088,6 +2088,216 @@ body {
   font-size: 0.86rem;
 }
 
+.core-learning-notes {
+  width: min(100%, 1200px);
+  margin: 28px auto 8px;
+  text-align: left;
+}
+
+.core-learning-header {
+  padding: 24px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-radius: 14px 14px 0 0;
+  background:
+    linear-gradient(135deg, rgba(45, 166, 161, 0.16), transparent 45%),
+    #17334a;
+  color: white;
+}
+
+.core-learning-header .eyebrow {
+  margin: 0 0 7px;
+  color: #8ed4cf;
+}
+
+.core-learning-header h4 {
+  margin: 0;
+  color: white;
+  font-size: clamp(1.2rem, 2vw, 1.65rem);
+  letter-spacing: -0.02em;
+}
+
+.core-learning-header > div > span {
+  display: block;
+  margin-top: 7px;
+  color: #c8d8e2;
+  font-size: 0.88rem;
+}
+
+.core-radiopaedia-link {
+  flex: 0 0 auto;
+  padding: 10px 13px 10px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.09);
+  color: white;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 800;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.core-radiopaedia-link span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: #2da6a1;
+  color: white;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+.core-radiopaedia-link:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.core-note-stack {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #cbdce4;
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  background: #edf4f6;
+}
+
+.core-note-section {
+  --note-accent: #3477a8;
+  --note-soft: #eaf3fb;
+  overflow: hidden;
+  border: 1px solid #d6e2e8;
+  border-left: 4px solid var(--note-accent);
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 5px 18px rgba(23, 51, 74, 0.055);
+}
+
+.core-note-section.note-differential {
+  --note-accent: #b8792a;
+  --note-soft: #fff5e7;
+}
+
+.core-note-section.note-teaching {
+  --note-accent: #218c87;
+  --note-soft: #e8f6f4;
+}
+
+.core-note-section.note-management {
+  --note-accent: #3d7f5d;
+  --note-soft: #edf7f1;
+}
+
+.core-note-section.note-references {
+  --note-accent: #6d7785;
+  --note-soft: #f1f3f6;
+}
+
+.core-note-section > header {
+  padding: 15px 18px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e1e9ed;
+  background: linear-gradient(90deg, var(--note-soft), white 72%);
+}
+
+.core-note-index {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--note-accent) 24%, white);
+  border-radius: 9px;
+  background: white;
+  color: var(--note-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.core-note-section > header p {
+  margin: 0 0 2px;
+  color: #70818c;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.core-note-section > header h5 {
+  margin: 0;
+  color: #203849;
+  font-size: 1rem;
+}
+
+.core-note-count {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: white;
+  color: #6b7d88;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.core-note-section ul {
+  margin: 0;
+  padding: 8px 20px 13px;
+  display: grid;
+  list-style: none;
+}
+
+.core-note-section li {
+  position: relative;
+  padding: 11px 8px 11px 20px;
+  color: #405461;
+  font-size: 0.88rem;
+  line-height: 1.58;
+}
+
+.core-note-section li + li {
+  border-top: 1px solid #edf1f3;
+}
+
+.core-note-section li::before {
+  position: absolute;
+  top: 18px;
+  left: 2px;
+  width: 7px;
+  height: 7px;
+  border: 2px solid color-mix(in srgb, var(--note-accent) 36%, white);
+  border-radius: 50%;
+  background: var(--note-accent);
+  content: "";
+}
+
+.core-note-section li strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--note-accent);
+  font-size: 0.87rem;
+}
+
+.core-note-section.note-references li {
+  color: #687984;
+  font-size: 0.78rem;
+}
+
+.core-note-section.note-references li strong {
+  display: inline;
+  margin-right: 5px;
+}
+
 .core-product .flashcard-answer {
   width: min(100%, 1400px);
   border-color: #bcd4d3;
@@ -2254,6 +2464,35 @@ body {
   .core-product .flashcard-panel {
     min-height: 820px;
     padding: 20px 8px;
+  }
+
+  .core-learning-header {
+    padding: 20px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .core-radiopaedia-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .core-note-stack {
+    padding: 9px;
+  }
+
+  .core-note-section > header {
+    grid-template-columns: 38px minmax(0, 1fr);
+    padding: 13px;
+  }
+
+  .core-note-count {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .core-note-section ul {
+    padding: 6px 13px 10px;
   }
 
   .core-product .flashcard-image-frame {

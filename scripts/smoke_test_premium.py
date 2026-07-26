@@ -35,12 +35,33 @@ os.environ["SECRET_KEY"] = "premium-smoke-test"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import app, db, get_questions_by_ids  # noqa: E402
+from core_radiology import parse_answer_details  # noqa: E402
 from models import QuizAttempt, User  # noqa: E402
 from sqlalchemy import inspect  # noqa: E402
 
 
 def assert_ok(response, label):
     assert response.status_code == 200, f"{label}: HTTP {response.status_code}"
+
+
+parsed_notes = parse_answer_details(
+    "Findings\nThere is infl ammatory change and a defi nite fi stula.\n"
+    "Differential Diagnosis\nAbscess: a fl uid collection.\n"
+    "Teaching Points\nThis is oft en visible on CT.\n"
+    "Management\nDrainage may be necessary.\n"
+    "Further Reading\n1. Example reference.\nCase 1 Example"
+)
+assert [section["key"] for section in parsed_notes] == [
+    "findings",
+    "differential",
+    "teaching",
+    "management",
+    "references",
+]
+assert "inflammatory" in parsed_notes[0]["items"][0]["text"]
+assert "definite fistula" in parsed_notes[0]["items"][0]["text"]
+assert parsed_notes[1]["items"][0]["lead"] == "Abscess"
+assert parsed_notes[-1]["items"][0]["text"] == "Example reference."
 
 
 with app.app_context():
@@ -235,6 +256,10 @@ response = client.get("/core/gastrointestinal/study?pool=all&count=2")
 assert_ok(response, "CORE GI study")
 assert b"Show answer" in response.data
 assert b"MCQ" not in response.data
+assert b'class="core-learning-notes"' in response.data
+assert b"Explore on Radiopaedia" in response.data
+assert b"note-differential" in response.data
+assert b"core-note-count" in response.data
 assert response.data.count(b'data-src="/static/core/') == 4
 assert response.data.count(b' src="/static/core/') == 1
 assert b'rel="preload" as="image"' in response.data
@@ -290,6 +315,8 @@ assert "max-age=604800" in style_response.headers.get("Cache-Control", "")
 assert b".core-product .flashcard-image-frame" in style_response.data
 assert b".core-image-grid.panel-count-1" in style_response.data
 assert b"width: 60%" in style_response.data
+assert b".core-learning-header" in style_response.data
+assert b".core-note-section.note-teaching" in style_response.data
 assert b"grid-template-columns: repeat(2, minmax(0, 1fr))" in style_response.data
 assert b"object-view-box: none" in style_response.data
 
