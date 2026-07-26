@@ -241,6 +241,126 @@
         finishButton.disabled = completed !== flashcardPanels.length;
       }
 
+      function findContentRuns(length, hasContent, minimumSize) {
+        const runs = [];
+        let start = null;
+
+        for (let position = 0; position < length; position += 1) {
+          if (hasContent(position)) {
+            if (start === null) start = position;
+          } else if (start !== null) {
+            if (position - start >= minimumSize) runs.push([start, position]);
+            start = null;
+          }
+        }
+        if (start !== null && length - start >= minimumSize) runs.push([start, length]);
+        return runs;
+      }
+
+      function detectCoreImagePanels(image) {
+        const width = image.naturalWidth;
+        const height = image.naturalHeight;
+        if (!width || !height) return [];
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d", {willReadFrequently: true});
+        if (!context) return [{x: 0, y: 0, width, height}];
+
+        try {
+          context.drawImage(image, 0, 0);
+          const pixels = context.getImageData(0, 0, width, height).data;
+          const xStep = Math.max(1, Math.floor(width / 240));
+          const yStep = Math.max(1, Math.floor(height / 320));
+          const isWhite = (offset) =>
+            pixels[offset + 3] < 16 ||
+            (pixels[offset] >= 244 && pixels[offset + 1] >= 244 && pixels[offset + 2] >= 244);
+          const rowHasContent = (y) => {
+            let samples = 0;
+            let content = 0;
+            for (let x = 0; x < width; x += xStep) {
+              samples += 1;
+              if (!isWhite((y * width + x) * 4)) content += 1;
+            }
+            return content / samples > 0.035;
+          };
+          const rowRuns = findContentRuns(height, rowHasContent, Math.max(18, height * 0.09));
+          const bands = rowRuns.length >= 1 && rowRuns.length <= 4
+            ? rowRuns
+            : [[0, height]];
+          const panels = [];
+
+          bands.forEach(([top, bottom]) => {
+            const columnHasContent = (x) => {
+              let samples = 0;
+              let content = 0;
+              for (let y = top; y < bottom; y += yStep) {
+                samples += 1;
+                if (!isWhite((y * width + x) * 4)) content += 1;
+              }
+              return content / Math.max(1, samples) > 0.035;
+            };
+            const columnRuns = findContentRuns(width, columnHasContent, Math.max(18, width * 0.16));
+            const columns = columnRuns.length === 2 && bands.length * 2 <= 4
+              ? columnRuns
+              : [[0, width]];
+
+            columns.forEach(([left, right]) => {
+              panels.push({
+                x: left,
+                y: top,
+                width: right - left,
+                height: bottom - top,
+              });
+            });
+          });
+
+          return panels.length >= 1 && panels.length <= 4
+            ? panels
+            : [{x: 0, y: 0, width, height}];
+        } catch {
+          return [{x: 0, y: 0, width, height}];
+        }
+      }
+
+      function arrangeCoreImage(image) {
+        if (!document.body.classList.contains("core-product") || image.dataset.panelsReady === "true") return;
+        const frame = image.closest("[data-image-frame]");
+        if (!frame) return;
+
+        const panels = detectCoreImagePanels(image);
+        const source = image.currentSrc || image.src;
+        const sourceWidth = image.naturalWidth;
+        const grid = document.createElement("div");
+        grid.className = `core-image-grid panel-count-${panels.length}`;
+
+        panels.forEach((panel, index) => {
+          const tile = document.createElement("div");
+          tile.className = "core-image-tile";
+          tile.style.aspectRatio = `${panel.width} / ${panel.height}`;
+
+          const panelImage = index === 0 ? image : image.cloneNode(false);
+          if (index > 0) {
+            panelImage.removeAttribute("data-question-image");
+            panelImage.removeAttribute("data-answer-image");
+            panelImage.removeAttribute("data-src");
+            panelImage.removeAttribute("fetchpriority");
+            panelImage.alt = "";
+            panelImage.src = source;
+          }
+          panelImage.style.width = `${(sourceWidth / panel.width) * 100}%`;
+          panelImage.style.left = `${(-panel.x / panel.width) * 100}%`;
+          panelImage.style.top = `${(-panel.y / panel.height) * 100}%`;
+          tile.appendChild(panelImage);
+          grid.appendChild(tile);
+        });
+
+        image.dataset.panelsReady = "true";
+        frame.insertBefore(grid, frame.querySelector(".flashcard-image-status"));
+        frame.dataset.panelCount = String(panels.length);
+      }
+
       function loadDeferredImage(image) {
         if (!image || image.dataset.loaded === "true" || image.dataset.loading === "true") return;
         const source = image.dataset.src;
@@ -252,6 +372,7 @@
           image.dataset.loaded = "true";
           image.dataset.loading = "false";
           frame?.classList.remove("is-loading", "has-error");
+          arrangeCoreImage(image);
         };
         const markFailed = () => {
           image.dataset.loading = "false";

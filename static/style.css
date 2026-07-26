@@ -2113,38 +2113,71 @@ body {
 .core-product .flashcard-image-frame {
   width: min(100%, 1400px);
   min-height: 500px;
-  max-height: 850px;
   margin: 4px auto 22px;
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-radius: 10px;
+  border-radius: 0;
   background: #0b1822;
   box-shadow: none;
 }
 
-.core-product .flashcard-image-frame img {
+.core-product .flashcard-image-frame:not(.is-loading) {
+  min-height: 0;
+  max-height: none;
+  background: transparent;
+}
+
+.core-image-grid {
   width: 100%;
-  height: 810px;
-  max-height: 810px;
-  object-fit: contain;
-  object-view-box: inset(7px);
+  display: grid;
+  gap: 0;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #0b1822;
+}
+
+.core-image-grid.panel-count-1 {
+  width: 80%;
+}
+
+.core-image-grid.panel-count-2,
+.core-image-grid.panel-count-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.core-image-grid.panel-count-3 {
+  grid-template-columns: 1fr;
+}
+
+.core-image-tile {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: #0b1822;
+}
+
+.core-product .core-image-tile img {
+  position: absolute;
+  max-width: none;
+  max-height: none;
+  height: auto;
+  object-fit: initial;
+  object-view-box: none;
 }
 
 .core-product .core-answer-image {
   width: min(100%, 1300px);
+  margin-top: 18px;
   padding: 0;
   overflow: hidden;
   border: 0;
+  border-radius: 0;
   background: transparent;
 }
 
-.core-product .core-answer-image img {
-  width: 100%;
-  height: 960px;
-  max-height: 960px;
-  object-fit: contain;
-  object-view-box: inset(7px);
+.core-product .core-answer-image:not(.is-loading) {
+  min-height: 0;
 }
 
 @media (max-width: 1150px) {
@@ -2223,17 +2256,13 @@ body {
 
   .core-product .flashcard-image-frame {
     min-height: 360px;
-    max-height: 740px;
   }
 
-  .core-product .flashcard-image-frame img {
-    height: 700px;
-    max-height: 700px;
-  }
-
-  .core-product .core-answer-image img {
-    height: 780px;
-    max-height: 780px;
+  .core-image-grid.panel-count-2,
+  .core-image-grid.panel-count-3,
+  .core-image-grid.panel-count-4 {
+    width: 100%;
+    grid-template-columns: 1fr;
   }
 
   .core-metric-grid,
