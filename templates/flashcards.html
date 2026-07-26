@@ -143,6 +143,23 @@
             <div class="flashcard-answer" data-flashcard-answer hidden>
               <p>{{ "JUISTE ANTWOORD" if language == "nl" else "CORRECT ANSWER" }}</p>
               <h3>{{ correct_answers_by_id[qid]|join(", ") }}</h3>
+              {% if question.get("answer_image_url") %}
+                <div class="core-answer-image" data-image-frame>
+                  <img
+                    data-src="{{ question['answer_image_url'] }}"
+                    fetchpriority="high"
+                    decoding="async"
+                    data-answer-image
+                    alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}"
+                  >
+                  <div class="flashcard-image-status" aria-live="polite">
+                    <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
+                    <button type="button" data-retry-image hidden>
+                      {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                    </button>
+                  </div>
+                </div>
+              {% endif %}
               <div class="flashcard-rating-prompt">
                 {{ "Hoe goed kende je dit antwoord?" if language == "nl" else "How well did you know this answer?" }}
               </div>
@@ -225,23 +242,6 @@
                     {% endfor %}
                   </div>
                 </section>
-              {% endif %}
-              {% if question.get("answer_image_url") %}
-                <div class="core-answer-image" data-image-frame>
-                  <img
-                    data-src="{{ question['answer_image_url'] }}"
-                    fetchpriority="low"
-                    decoding="async"
-                    data-answer-image
-                    alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}"
-                  >
-                  <div class="flashcard-image-status" aria-live="polite">
-                    <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
-                    <button type="button" data-retry-image hidden>
-                      {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
-                    </button>
-                  </div>
-                </div>
               {% endif %}
             </div>
           </article>

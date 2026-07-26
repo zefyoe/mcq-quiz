@@ -283,6 +283,7 @@ assert b"core-differential-link" in response.data
 assert b"What the images show" not in response.data
 assert b"core-note-index" not in response.data
 assert response.data.index(b"data-reveal-answer") < response.data.index(b"data-question-image")
+assert response.data.index(b"data-answer-image") < response.data.index(b"flashcard-rating-grid-top")
 assert response.data.index(b"flashcard-rating-grid-top") < response.data.index(b"core-learning-notes")
 assert b"Bymed BV" in response.data
 assert response.data.count(b'data-src="/static/core/') == 4
