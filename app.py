@@ -16,6 +16,7 @@ from flask_login import (
 from sqlalchemy import func, inspect, text
 from werkzeug.utils import secure_filename
 
+from core_radiology import get_core_section, get_core_sections, load_core_section
 from localization import (
     DEFAULT_LANGUAGE,
     SUPPORTED_LANGUAGES,
@@ -151,6 +152,14 @@ DISABLED_CATEGORIES = {"physics"}
 login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
+
+
+@app.before_request
+def route_core_domain():
+    hostname = request.host.split(":", 1)[0].lower()
+    if hostname == "core.bymed.be" and request.path == "/":
+        return redirect(url_for("core_home"))
+    return None
 
 
 @login_manager.user_loader
@@ -653,7 +662,12 @@ def get_anatomy_subgroup_cards() -> list[dict]:
 
 
 def get_question_key(question: dict) -> str:
-    return (question.get("image_url") or question.get("ID") or "").strip()
+    return (
+        question.get("question_key")
+        or question.get("image_url")
+        or question.get("ID")
+        or ""
+    ).strip()
 
 
 def normalize_quiz_pool(pool: str | None) -> str:
@@ -841,6 +855,28 @@ def get_active_quiz_summary() -> dict | None:
             resume_endpoint,
             category=category,
             subgroup=subgroup,
+            resume="1",
+        ),
+    }
+
+
+def get_active_core_session() -> dict | None:
+    order = session.get("order") or []
+    if (
+        not order
+        or normalize_category(session.get("category")) != "core radiology"
+        or normalize_study_format(session.get("study_format")) != "flashcard"
+    ):
+        return None
+    section = get_core_section(session.get("subgroup"))
+    if not section:
+        return None
+    return {
+        "count": len(order),
+        "section": section,
+        "resume_url": url_for(
+            "core_study",
+            section_key=section["key"],
             resume="1",
         ),
     }
@@ -1137,6 +1173,7 @@ def build_attempt_summary(attempt: QuizAttempt) -> dict:
     return {
         "id": attempt.id,
         "title": localize_quiz_title(attempt.title),
+        "category": attempt.category,
         "quiz_mode": normalize_quiz_mode(getattr(attempt, "quiz_mode", "test")),
         "study_format": normalize_study_format(getattr(attempt, "study_format", "mcq")),
         "score": attempt.score,
@@ -1197,6 +1234,84 @@ def get_dashboard_activity(user_id: int) -> dict:
         "daily_goal": goal,
         "goal_percent": min(round(completed_today / goal * 100), 100),
     }
+
+
+def get_core_dashboard(user_id: int) -> dict:
+    sections = get_core_sections()
+    all_questions = [
+        question
+        for section in sections
+        for question in load_core_section(section["key"])
+    ]
+    progress_by_key = get_user_progress_by_key(user_id)
+    now = datetime.utcnow()
+    section_rows = []
+
+    for section in sections:
+        questions = load_core_section(section["key"])
+        progress_rows = [
+            progress_by_key[get_question_key(question)]
+            for question in questions
+            if get_question_key(question) in progress_by_key
+        ]
+        seen = [
+            progress for progress in progress_rows
+            if (progress.flashcard_times_seen or 0) > 0
+        ]
+        section_rows.append({
+            **section,
+            "seen": len(seen),
+            "coverage": round(len(seen) / len(questions) * 100) if questions else 0,
+            "mastered": sum(1 for progress in seen if progress.flashcard_rating == "very_easy"),
+        })
+
+    relevant_progress = [
+        progress_by_key[get_question_key(question)]
+        for question in all_questions
+        if get_question_key(question) in progress_by_key
+    ]
+    seen_progress = [
+        progress for progress in relevant_progress
+        if (progress.flashcard_times_seen or 0) > 0
+    ]
+    attempts = (
+        QuizAttempt.query
+        .filter_by(user_id=user_id, category="CORE Radiology", study_format="flashcard")
+        .order_by(QuizAttempt.created_at.desc())
+        .all()
+    )
+    rating_counts = {rating: 0 for rating in FLASHCARD_RATINGS}
+    for progress in relevant_progress:
+        if progress.flashcard_rating in rating_counts:
+            rating_counts[progress.flashcard_rating] += 1
+
+    return {
+        "sections": section_rows,
+        "total": len(all_questions),
+        "seen": len(seen_progress),
+        "coverage": round(len(seen_progress) / len(all_questions) * 100) if all_questions else 0,
+        "mastered": sum(
+            1 for progress in seen_progress
+            if progress.flashcard_rating == "very_easy"
+        ),
+        "due": sum(
+            1 for progress in seen_progress
+            if progress.next_review_at and progress.next_review_at <= now
+        ),
+        "rating_counts": rating_counts,
+        "session_count": len(attempts),
+        "last_attempt": build_attempt_summary(attempts[0]) if attempts else None,
+    }
+
+
+def get_core_pool_counts(question_list: list[dict], user_id: int) -> dict[str, int]:
+    counts = {
+        "all": len(question_list),
+        "unseen": len(filter_questions_for_pool(question_list, user_id, "unseen")),
+        "due": len(filter_questions_for_pool(question_list, user_id, "due")),
+    }
+    counts.update(get_flashcard_rating_counts(question_list, user_id))
+    return counts
 
 
 def grade_quiz_submission(order: list[str], selected_by_id: dict[str, dict], form_data) -> tuple[list[dict], int]:
@@ -1311,12 +1426,15 @@ def record_flashcard_rating(
         db.session.add(progress)
 
     now = datetime.utcnow()
-    actual_subgroup = get_anatomy_subgroup_for_category(question.get("Category"))
-    progress.subgroup = (
-        actual_subgroup
-        if normalize_anatomy_subgroup(subgroup) == "mixed"
-        else normalize_anatomy_subgroup(subgroup) if subgroup else actual_subgroup
-    )
+    if normalize_category(question.get("Category")) == "core radiology":
+        progress.subgroup = (subgroup or question.get("core_section") or "").strip()
+    else:
+        actual_subgroup = get_anatomy_subgroup_for_category(question.get("Category"))
+        progress.subgroup = (
+            actual_subgroup
+            if normalize_anatomy_subgroup(subgroup) == "mixed"
+            else normalize_anatomy_subgroup(subgroup) if subgroup else actual_subgroup
+        )
     progress.flashcard_rating = rating_key
     progress.flashcard_times_seen = (progress.flashcard_times_seen or 0) + 1
     progress.flashcard_rated_at = now
@@ -1358,6 +1476,9 @@ def build_flashcard_results(
             "correct_texts": get_correct_answer_texts(question),
             "is_correct": is_confident,
             "flashcard_rating": rating,
+            "image_url": question.get("image_url"),
+            "answer_image_url": question.get("answer_image_url"),
+            "case_label": question.get("case_label"),
             "options": {
                 "A": question["A"],
                 "B": question["B"],
@@ -1733,6 +1854,241 @@ def anatomy_sections():
     return render_template("anatomy_sections.html", subgroup_cards=subgroup_cards)
 
 
+@app.route("/core")
+@login_required
+def core_home():
+    return render_template(
+        "core_home.html",
+        core_dashboard=get_core_dashboard(current_user.id),
+        dashboard_activity=get_dashboard_activity(current_user.id),
+        active_core_session=get_active_core_session(),
+    )
+
+
+@app.route("/core/history")
+@login_required
+def core_history():
+    attempts = (
+        QuizAttempt.query
+        .filter_by(
+            user_id=current_user.id,
+            category="CORE Radiology",
+            study_format="flashcard",
+        )
+        .order_by(QuizAttempt.created_at.desc())
+        .all()
+    )
+    return render_template(
+        "previous_tests.html",
+        attempts=[build_attempt_summary(attempt) for attempt in attempts],
+        product="core",
+        home_url=url_for("core_home"),
+    )
+
+
+@app.route("/core/<section_key>")
+@login_required
+def core_section_setup(section_key):
+    section = get_core_section(section_key)
+    if not section:
+        return redirect(url_for("core_home"))
+    questions = load_core_section(section_key)
+    if not questions:
+        return render_template("core_empty_section.html", section=section)
+
+    pool_counts = get_core_pool_counts(questions, current_user.id)
+    requested_pool = (
+        normalize_flashcard_rating(request.args.get("pool"))
+        or normalize_category(request.args.get("pool"))
+    )
+    selected_pool = requested_pool if requested_pool in pool_counts else "all"
+    available_count = pool_counts[selected_pool]
+    return render_template(
+        "core_section_setup.html",
+        section=section,
+        pool_counts=pool_counts,
+        selected_pool=selected_pool,
+        available_count=available_count,
+        suggested_count=get_question_limit(request.args.get("count"), available_count),
+        max_questions=MAX_QUIZ_QUESTIONS,
+        ratings=FLASHCARD_RATINGS,
+    )
+
+
+@app.route("/core/rate", methods=["POST"])
+@login_required
+def rate_core_flashcard():
+    payload = request.get_json(silent=True) or {}
+    section_key = (payload.get("subgroup") or "").strip()
+    qid = (payload.get("qid") or "").strip()
+    rating = normalize_flashcard_rating(payload.get("rating"))
+    questions = load_core_section(section_key)
+    question = next((item for item in questions if item["ID"] == qid), None)
+    if not question or not rating:
+        return jsonify({"error": "Invalid CORE flashcard rating."}), 400
+
+    progress = record_flashcard_rating(
+        current_user.id,
+        question,
+        rating,
+        section_key,
+    )
+    return jsonify({
+        "ok": True,
+        "qid": qid,
+        "rating": progress.flashcard_rating,
+        "counts": get_flashcard_rating_counts(questions, current_user.id),
+    })
+
+
+@app.route("/core/<section_key>/study", methods=["GET", "POST"])
+@login_required
+def core_study(section_key):
+    section = get_core_section(section_key)
+    all_questions = load_core_section(section_key)
+    if not section or not all_questions:
+        return redirect(url_for("core_home"))
+
+    if request.method == "POST":
+        order = [qid for qid in session.get("order", []) if qid]
+        selected_by_id = {question["ID"]: question for question in all_questions}
+        try:
+            ratings_by_id = json.loads(request.form.get("ratings_json") or "{}")
+        except (TypeError, ValueError, json.JSONDecodeError):
+            ratings_by_id = {}
+        if not isinstance(ratings_by_id, dict):
+            ratings_by_id = {}
+
+        results, score, session_rating_counts = build_flashcard_results(
+            order,
+            selected_by_id,
+            ratings_by_id,
+        )
+        if not order or len(results) != len(order):
+            return redirect(url_for(
+                "core_study",
+                section_key=section_key,
+                resume="1",
+            ))
+
+        attempt = save_quiz_attempt(
+            user_id=current_user.id,
+            category="CORE Radiology",
+            subgroup=section_key,
+            quiz_mode="test",
+            study_format="flashcard",
+            title=f"CORE Radiology - {section['label']}",
+            score=score,
+            total_questions=len(order),
+            question_ids=order,
+            results=results,
+            duration_seconds=get_submission_duration(request.form),
+        )
+        bucket_counts = get_flashcard_rating_counts(all_questions, current_user.id)
+        retest_urls = {
+            rating: url_for(
+                "core_study",
+                section_key=section_key,
+                pool=rating,
+                count=min(count, MAX_QUIZ_QUESTIONS),
+            )
+            for rating, count in bucket_counts.items()
+            if count
+        }
+        clear_active_quiz_session()
+        return render_template(
+            "flashcard_result.html",
+            category=f"CORE Radiology - {section['label']}",
+            total=len(order),
+            rating_counts=bucket_counts,
+            session_rating_counts=session_rating_counts,
+            ratings=FLASHCARD_RATINGS,
+            attempt_id=attempt.id,
+            subgroup=section_key,
+            product="core",
+            home_url=url_for("core_home"),
+            new_session_url=url_for("core_section_setup", section_key=section_key),
+            history_url=url_for("core_history"),
+            retest_urls=retest_urls,
+        )
+
+    pool = (
+        normalize_flashcard_rating(request.args.get("pool"))
+        or normalize_category(request.args.get("pool"))
+    )
+    if pool in FLASHCARD_RATINGS:
+        selected = filter_questions_for_flashcard_rating(
+            all_questions,
+            current_user.id,
+            pool,
+        )
+    elif pool in {"due", "unseen"}:
+        selected = filter_questions_for_pool(all_questions, current_user.id, pool)
+    else:
+        pool = "all"
+        selected = list(all_questions)
+    if not selected:
+        return redirect(url_for("core_section_setup", section_key=section_key))
+
+    preserve_current = (
+        request.args.get("resume") == "1" or request.args.get("_lang") == "1"
+    ) and (
+        session.get("category") == "CORE Radiology"
+        and session.get("subgroup") == section_key
+        and bool(session.get("order"))
+    )
+    if preserve_current:
+        available_ids = {question["ID"] for question in all_questions}
+        order = [qid for qid in session["order"] if qid in available_ids]
+    else:
+        question_limit = get_question_limit(request.args.get("count"), len(selected))
+        if not question_limit:
+            return redirect(url_for("core_section_setup", section_key=section_key))
+        order = [question["ID"] for question in selected]
+        random.shuffle(order)
+        order = order[:question_limit]
+        session["order"] = order
+        session["category"] = "CORE Radiology"
+        session["subgroup"] = section_key
+        session["question_limit"] = question_limit
+        session["quiz_pool"] = pool
+        session["quiz_run_id"] = os.urandom(8).hex()
+
+    session["study_format"] = "flashcard"
+    questions_by_id = {question["ID"]: question for question in all_questions}
+    progress_by_key = get_user_progress_by_key(current_user.id)
+    current_ratings = {
+        qid: (
+            progress_by_key[get_question_key(questions_by_id[qid])].flashcard_rating
+            if get_question_key(questions_by_id[qid]) in progress_by_key
+            else None
+        )
+        for qid in order
+    }
+    return render_template(
+        "flashcards.html",
+        category=f"CORE Radiology - {section['label']}",
+        raw_category="CORE Radiology",
+        subgroup=section_key,
+        questions_by_id=questions_by_id,
+        correct_answers_by_id={
+            qid: get_correct_answer_texts(questions_by_id[qid]) for qid in order
+        },
+        order=order,
+        current_ratings=current_ratings,
+        ratings=FLASHCARD_RATINGS,
+        rating_counts=get_flashcard_rating_counts(all_questions, current_user.id),
+        back_url=url_for("core_section_setup", section_key=section_key),
+        quiz_run_id=session.get("quiz_run_id") or "core-flashcards",
+        switch_to_mcq_url=None,
+        rate_url=url_for("rate_core_flashcard"),
+        home_url=url_for("core_home"),
+        product="core",
+        product_name="CORE Radiology",
+        product_label=section["label"],
+    )
+
+
 @app.route("/previous-tests")
 @login_required
 def previous_tests():
@@ -1967,6 +2323,25 @@ def flashcards(category):
             ratings=FLASHCARD_RATINGS,
             attempt_id=attempt.id,
             subgroup=subgroup,
+            product="anatomy",
+            home_url=url_for("home"),
+            new_session_url=url_for(
+                "anatomy_subgroup_setup",
+                subgroup=subgroup,
+                format="flashcard",
+            ),
+            history_url=url_for("previous_tests"),
+            retest_urls={
+                rating: url_for(
+                    "flashcards",
+                    category="Anatomy",
+                    subgroup=subgroup,
+                    rating=rating,
+                    count=min(count, MAX_QUIZ_QUESTIONS),
+                )
+                for rating, count in bucket_counts.items()
+                if count
+            },
         )
 
     rating_filter = normalize_flashcard_rating(request.args.get("rating"))
@@ -2048,6 +2423,11 @@ def flashcards(category):
             subgroup=subgroup,
             resume="1",
         ),
+        rate_url=url_for("rate_flashcard"),
+        home_url=url_for("home"),
+        product="anatomy",
+        product_name="Rady",
+        product_label="Anki Flashcards",
     )
 
 
@@ -2070,6 +2450,12 @@ def retake_previous_test(attempt_id):
         session["quiz_pool"] = "all"
         session["study_format"] = "flashcard"
         session["quiz_run_id"] = os.urandom(8).hex()
+        if normalize_category(attempt.category) == "core radiology":
+            return redirect(url_for(
+                "core_study",
+                section_key=attempt.subgroup,
+                resume="1",
+            ))
         return redirect(url_for(
             "flashcards",
             category=attempt.category,

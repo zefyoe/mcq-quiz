@@ -9,15 +9,21 @@
   </head>
   <body class="report-body">
     <header class="report-toolbar">
-      <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ "Terug" if language == "nl" else "Back" }}</a>
+      <a href="{{ url_for('core_history') if summary.category == 'CORE Radiology' else url_for('previous_tests') }}" class="secondary-btn">{{ "Terug" if language == "nl" else "Back" }}</a>
       <button type="button" class="primary-btn" onclick="window.print()">{{ "Opslaan als PDF" if language == "nl" else "Save as PDF" }}</button>
     </header>
 
     <main class="report-sheet">
       <header class="report-header">
         <div>
-          <div class="report-brand">RADY</div>
-          <p>{{ "Persoonlijk anatomierapport" if language == "nl" else "Personal anatomy report" }}</p>
+          <div class="report-brand">{{ "CORE RADIOLOGY" if summary.category == "CORE Radiology" else "RADY" }}</div>
+          <p>
+            {% if summary.category == "CORE Radiology" %}
+              {{ "Persoonlijk radiologierapport" if language == "nl" else "Personal radiology report" }}
+            {% else %}
+              {{ "Persoonlijk anatomierapport" if language == "nl" else "Personal anatomy report" }}
+            {% endif %}
+          </p>
         </div>
         <div class="report-identity">
           <strong>{{ current_user.name or current_user.email }}</strong>
@@ -59,8 +65,14 @@
               <div class="report-question-number">{{ "%02d"|format(loop.index) }}</div>
               <div>
                 <h3>{{ result["Vraag"] }}</h3>
+                {% if result.get("image_url") %}
+                  <img class="report-case-image" src="{{ result['image_url'] }}" alt="{{ 'Casebeeld' if language == 'nl' else 'Case image' }}">
+                {% endif %}
                 <p><b>{{ tr("Your answer:") }}</b> {{ result["user"]|join(", ") if result["user"] else "—" }}</p>
                 <p><b>{{ tr("Correct answer:") }}</b> {{ result["correct_texts"]|join(", ") if result["correct_texts"] else result["correct"]|join(", ") }}</p>
+                {% if result.get("answer_image_url") %}
+                  <img class="report-case-image report-answer-image" src="{{ result['answer_image_url'] }}" alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}">
+                {% endif %}
               </div>
               {% if summary.study_format == "flashcard" %}
                 <span class="badge flashcard-report-rating">
@@ -82,7 +94,7 @@
       </section>
 
       <footer class="report-footer">
-        <span>Rady Anatomy QBank</span>
+        <span>{{ "CORE Radiology" if summary.category == "CORE Radiology" else "Rady Anatomy QBank" }}</span>
         <span>{{ "Gegenereerd op" if language == "nl" else "Generated on" }} {{ attempt.created_at.strftime('%d/%m/%Y') }}</span>
       </footer>
     </main>

@@ -203,6 +203,73 @@ with client.session_transaction() as language_session:
     language_session["language"] = "nl"
 assert b"Anki-flashcards" in client.get("/anatomy/mixed?format=flashcard").data
 assert b"Toon antwoord" in client.get("/flashcards/Anatomy?subgroup=mixed&resume=1").data
+with client.session_transaction() as language_session:
+    language_session["language"] = "en"
+
+response = client.get("/core")
+assert_ok(response, "CORE dashboard")
+assert b"171" in response.data
+assert b"Chest Imaging" in response.data
+assert_ok(client.get("/core/chest"), "empty CORE section")
+assert b"0/0" in client.get("/core/chest").data
+response = client.get("/core/gastrointestinal")
+assert_ok(response, "CORE GI setup")
+assert b"ANKI ONLY" in response.data
+
+response = client.get("/core/gastrointestinal/study?pool=all&count=2")
+assert_ok(response, "CORE GI study")
+assert b"Show answer" in response.data
+assert b"MCQ" not in response.data
+with client.session_transaction() as core_session:
+    core_order = list(core_session["order"])
+assert len(core_order) == 2
+assert all(qid.startswith("CORE-GI-") for qid in core_order)
+
+core_ratings = {
+    core_order[0]: "difficult",
+    core_order[1]: "very_easy",
+}
+for qid, rating in core_ratings.items():
+    response = client.post(
+        "/core/rate",
+        json={"qid": qid, "rating": rating, "subgroup": "gastrointestinal"},
+    )
+    assert response.status_code == 200
+
+response = client.post(
+    "/core/gastrointestinal/study",
+    data={
+        "subgroup": "gastrointestinal",
+        "ratings_json": json.dumps(core_ratings),
+        "duration_seconds": "73",
+    },
+)
+assert_ok(response, "CORE completion")
+assert b"CORE Radiology - Gastrointestinal Imaging" in response.data
+
+with app.app_context():
+    core_attempt = QuizAttempt.query.filter_by(
+        user_id=student_id,
+        category="CORE Radiology",
+        study_format="flashcard",
+    ).one()
+    assert core_attempt.duration_seconds == 73
+    core_attempt_id = core_attempt.id
+
+assert_ok(client.get("/core/history"), "CORE history")
+assert_ok(client.get(f"/previous-tests/{core_attempt_id}/report"), "CORE report")
+response = client.get(
+    f"/previous-tests/{core_attempt_id}/retake",
+    follow_redirects=True,
+)
+assert_ok(response, "CORE history retake")
+assert b"Show answer" in response.data
+assert_ok(client.get("/static/core/gastrointestinal/c1_q_0.png"), "CORE media")
+
+anonymous_client = app.test_client()
+response = anonymous_client.get("/", base_url="https://core.bymed.be")
+assert response.status_code == 302
+assert response.headers["Location"].endswith("/core")
 
 client.get("/logout")
 response = client.post(

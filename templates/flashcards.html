@@ -7,13 +7,13 @@
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
-  <body>
+  <body class="{% if product == 'core' %}core-product{% endif %}">
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand">Rady</div>
+        <div class="brand">{{ product_name or "Rady" }}</div>
         <div class="topbar-actions">
-          <div class="topbar-badge">Anki Flashcards</div>
-          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <div class="topbar-badge">{{ product_label or "Anki Flashcards" }}</div>
+          <a href="{{ home_url }}" class="topbar-link">{{ tr("Home") }}</a>
           <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
           {% include "_language_switcher.html" %}
         </div>
@@ -74,10 +74,14 @@
             <p class="eyebrow">{{ "OPEN HERHALING" if language == "nl" else "OPEN RECALL" }}</p>
             <h1>{{ "Denk eerst zelf aan het antwoord" if language == "nl" else "Recall the answer before revealing it" }}</h1>
           </div>
-          <div class="study-method-switch">
-            <a href="{{ switch_to_mcq_url }}">MCQ</a>
-            <span class="active">Anki</span>
-          </div>
+          {% if switch_to_mcq_url %}
+            <div class="study-method-switch">
+              <a href="{{ switch_to_mcq_url }}">MCQ</a>
+              <span class="active">Anki</span>
+            </div>
+          {% else %}
+            <span class="core-anki-only">ANKI ONLY</span>
+          {% endif %}
         </header>
 
         <div class="flashcard-question-nav" id="flashcardQuestionNav">
@@ -95,7 +99,7 @@
           >
             <div class="flashcard-question-meta">
               <span>{{ tr("Question") }} {{ loop.index }} / {{ order|length }}</span>
-              <strong>{{ qid }}</strong>
+              <strong>{{ question.get("case_label") or qid }} · {{ qid }}</strong>
             </div>
             <h2>{{ question["Vraag"] }}</h2>
             {% if question.get("image_url") %}
@@ -111,6 +115,17 @@
             <div class="flashcard-answer" data-flashcard-answer hidden>
               <p>{{ "JUISTE ANTWOORD" if language == "nl" else "CORRECT ANSWER" }}</p>
               <h3>{{ correct_answers_by_id[qid]|join(", ") }}</h3>
+              {% if question.get("answer_image_url") %}
+                <div class="core-answer-image">
+                  <img src="{{ question['answer_image_url'] }}" alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}">
+                </div>
+              {% endif %}
+              {% if question.get("answer_details") %}
+                <details class="core-answer-details">
+                  <summary>{{ "Bevindingen en teaching points" if language == "nl" else "Findings and teaching points" }}</summary>
+                  <div>{{ question["answer_details"] }}</div>
+                </details>
+              {% endif %}
               <div class="flashcard-rating-prompt">
                 {{ "Hoe moeilijk was dit antwoord voor jou?" if language == "nl" else "How difficult was this answer for you?" }}
               </div>
@@ -161,7 +176,7 @@
       const completionForm = document.getElementById("flashcardCompleteForm");
       const ratingsInput = document.getElementById("flashcardRatingsJson");
       const durationInput = document.getElementById("flashcardDurationSeconds");
-      const rateUrl = {{ url_for('rate_flashcard')|tojson }};
+      const rateUrl = {{ rate_url|tojson }};
       const subgroup = {{ subgroup|tojson }};
       const currentUserId = {{ current_user.id|tojson }};
       const quizRunId = {{ quiz_run_id|tojson }};

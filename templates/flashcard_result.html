@@ -7,13 +7,13 @@
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
-  <body>
+  <body class="{% if product == 'core' %}core-product{% endif %}">
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand">Rady</div>
+        <div class="brand">{{ "CORE Radiology" if product == "core" else "Rady" }}</div>
         <div class="topbar-actions">
           <div class="topbar-badge">Anki Flashcards</div>
-          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <a href="{{ home_url }}" class="topbar-link">{{ tr("Home") }}</a>
           {% include "_language_switcher.html" %}
         </div>
       </div>
@@ -27,9 +27,9 @@
           {{ total }} {{ "vragen zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken." if language == "nl" else "questions were rated and saved to your personal difficulty buckets." }}
         </p>
         <div class="flashcard-result-actions">
-          <a href="{{ url_for('anatomy_subgroup_setup', subgroup=subgroup, format='flashcard') }}" class="primary-btn">{{ "Nieuwe flashcardreeks" if language == "nl" else "New flashcard session" }}</a>
+          <a href="{{ new_session_url }}" class="primary-btn">{{ "Nieuwe flashcardreeks" if language == "nl" else "New flashcard session" }}</a>
           <a href="{{ url_for('attempt_report', attempt_id=attempt_id) }}" class="secondary-btn">{{ "Rapport" if language == "nl" else "Report" }}</a>
-          <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("My Previous Tests") }}</a>
+          <a href="{{ history_url }}" class="secondary-btn">{{ tr("My Previous Tests") }}</a>
         </div>
       </section>
 
@@ -58,7 +58,7 @@
             </p>
             {% if rating_counts[rating_key] %}
               <a
-                href="{{ url_for('flashcards', category='Anatomy', subgroup=subgroup, rating=rating_key, count=[rating_counts[rating_key], 50]|min) }}"
+                href="{{ retest_urls[rating_key] }}"
                 class="secondary-btn"
               >
                 {{ "Deze opnieuw oefenen" if language == "nl" else "Study these again" }}

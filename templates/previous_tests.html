@@ -16,7 +16,7 @@
           {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
-          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <a href="{{ home_url|default(url_for('home')) }}" class="topbar-link">{{ tr("Home") }}</a>
           <a href="{{ url_for('profile') }}" class="topbar-link">{{ "Profiel" if language == "nl" else "Profile" }}</a>
           <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
           {% include "_language_switcher.html" %}
@@ -28,7 +28,7 @@
       <section class="hero card">
         <div class="hero-text">
           <p class="eyebrow">{{ tr("Your history") }}</p>
-          <h1>{{ tr("My Previous Tests") }}</h1>
+          <h1>{{ "CORE Study History" if product == "core" else tr("My Previous Tests") }}</h1>
           <p class="hero-subtitle">
             {{ "Bekijk je opgeslagen resultaten en maak exact dezelfde reeks vragen opnieuw wanneer je wilt." if language == "nl" else "Review your saved quiz results and retake the exact same question set whenever you want." }}
           </p>

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CORE Radiology</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body class="core-product">
+    <div class="core-shell">
+      <aside class="core-sidebar">
+        <a href="{{ url_for('core_home') }}" class="core-brand">
+          <span class="core-brand-mark">C</span>
+          <span><strong>CORE</strong><small>Radiology</small></span>
+        </a>
+        <div class="core-user">
+          <span>{{ "INGELOGD" if language == "nl" else "SIGNED IN" }}</span>
+          <strong>{{ current_user.name or current_user.email }}</strong>
+          <small>{{ current_user.university or current_user.email }}</small>
+        </div>
+        <nav class="core-nav">
+          <a href="{{ url_for('core_home') }}" class="active">{{ "Overzicht" if language == "nl" else "Overview" }}</a>
+          <a href="{{ url_for('core_section_setup', section_key='gastrointestinal') }}">CORE Gastro-intestinal</a>
+          <a href="{{ url_for('core_history') }}">{{ "Eerdere sessies" if language == "nl" else "Study history" }}</a>
+          <a href="{{ url_for('profile') }}">{{ "Profiel en leerdoel" if language == "nl" else "Profile and study goal" }}</a>
+          <a href="{{ url_for('logout') }}" class="core-nav-muted">{{ tr("Log out") }}</a>
+        </nav>
+        {% include "_language_switcher.html" %}
+      </aside>
+
+      <main class="core-main">
+        <header class="core-header">
+          <div>
+            <p class="eyebrow">CORE RADIOLOGY</p>
+            <h1>{{ "Beeldvorming leren door actieve recall" if language == "nl" else "Build imaging expertise through active recall" }}</h1>
+            <p>{{ "Open radiologiecases, formuleer je diagnose en beoordeel daarna eerlijk je herkenning." if language == "nl" else "Review authentic imaging cases, formulate the diagnosis, then rate your recall honestly." }}</p>
+          </div>
+          {% if active_core_session %}
+            <div class="core-header-session">
+              <span>{{ active_core_session.count }} cases · {{ active_core_session.section.label }}</span>
+              <a href="{{ active_core_session.resume_url }}" class="core-primary-button">{{ "Sessie hervatten" if language == "nl" else "Resume session" }}</a>
+            </div>
+          {% else %}
+            <a href="{{ url_for('core_section_setup', section_key='gastrointestinal') }}" class="core-primary-button">{{ "Start GI cases" if language == "nl" else "Start GI cases" }}</a>
+          {% endif %}
+        </header>
+
+        <section class="core-metric-grid">
+          <article>
+            <span>{{ "Beschikbare cases" if language == "nl" else "Available cases" }}</span>
+            <strong>{{ core_dashboard.total }}</strong>
+            <small>{{ "Momenteel actief in Gastro-intestinal" if language == "nl" else "Currently active in Gastrointestinal" }}</small>
+          </article>
+          <article>
+            <span>{{ "Dekking" if language == "nl" else "Coverage" }}</span>
+            <strong>{{ core_dashboard.coverage }}%</strong>
+            <small>{{ core_dashboard.seen }}/{{ core_dashboard.total }} {{ "cases gezien" if language == "nl" else "cases reviewed" }}</small>
+          </article>
+          <article>
+            <span>{{ "Klaar voor herhaling" if language == "nl" else "Ready for review" }}</span>
+            <strong>{{ core_dashboard.due }}</strong>
+            <small>{{ "Automatisch gepland op moeilijkheid" if language == "nl" else "Scheduled from your difficulty ratings" }}</small>
+          </article>
+          <article>
+            <span>{{ "Studiesessies" if language == "nl" else "Study sessions" }}</span>
+            <strong>{{ core_dashboard.session_count }}</strong>
+            <small>{{ "Persoonlijk opgeslagen" if language == "nl" else "Saved to your personal history" }}</small>
+          </article>
+        </section>
+
+        <section class="core-dashboard-grid">
+          <article class="core-panel core-modules-panel">
+            <div class="core-panel-heading">
+              <div>
+                <p class="eyebrow">{{ "CASE LIBRARY" if language == "nl" else "CASE LIBRARY" }}</p>
+                <h2>{{ "CORE-subsecties" if language == "nl" else "CORE subspecialties" }}</h2>
+              </div>
+              <span>{{ core_dashboard.sections|length }} {{ "modules" if language == "nl" else "modules" }}</span>
+            </div>
+            <div class="core-module-grid">
+              {% for section in core_dashboard.sections %}
+                {% if section.count %}
+                  <a href="{{ url_for('core_section_setup', section_key=section.key) }}" class="core-module-card active">
+                {% else %}
+                  <div class="core-module-card empty">
+                {% endif %}
+                    <div class="core-module-top">
+                      <span class="core-module-code">{{ "%02d"|format(loop.index) }}</span>
+                      <span class="core-module-count">{{ section.seen }}/{{ section.count }}</span>
+                    </div>
+                    <strong>{{ section.label }}</strong>
+                    <div class="core-module-progress"><span style="width: {{ section.coverage }}%"></span></div>
+                    <small>
+                      {% if section.count %}
+                        {{ section.coverage }}% {{ "bekeken" if language == "nl" else "reviewed" }}
+                      {% else %}
+                        {{ "Binnenkort beschikbaar" if language == "nl" else "Coming soon" }}
+                      {% endif %}
+                    </small>
+                {% if section.count %}</a>{% else %}</div>{% endif %}
+              {% endfor %}
+            </div>
+          </article>
+
+          <aside class="core-side-column">
+            <article class="core-panel core-goal-panel">
+              <div class="core-panel-heading">
+                <div>
+                  <p class="eyebrow">{{ "VANDAAG" if language == "nl" else "TODAY" }}</p>
+                  <h2>{{ "Dagelijks leerdoel" if language == "nl" else "Daily study goal" }}</h2>
+                </div>
+                <strong>{{ dashboard_activity.goal_percent }}%</strong>
+              </div>
+              <div class="core-goal-track"><span style="width: {{ dashboard_activity.goal_percent }}%"></span></div>
+              <p>{{ dashboard_activity.completed_today }}/{{ dashboard_activity.daily_goal }} {{ "vragen voltooid" if language == "nl" else "questions completed" }}</p>
+              <a href="{{ url_for('profile') }}">{{ "Doel aanpassen" if language == "nl" else "Adjust goal" }}</a>
+            </article>
+
+            <article class="core-panel core-buckets-panel">
+              <p class="eyebrow">{{ "MOEILIJKHEID" if language == "nl" else "DIFFICULTY" }}</p>
+              <h2>{{ "Persoonlijke casebakken" if language == "nl" else "Personal case buckets" }}</h2>
+              <div class="core-bucket-list">
+                {% for key, count in core_dashboard.rating_counts.items() %}
+                  <div class="core-bucket-row bucket-{{ key }}">
+                    <span>
+                      {{ {
+                        "very_difficult": "Zeer moeilijk" if language == "nl" else "Very difficult",
+                        "difficult": "Moeilijk" if language == "nl" else "Difficult",
+                        "easy": "Gemakkelijk" if language == "nl" else "Easy",
+                        "very_easy": "Zeer gemakkelijk" if language == "nl" else "Very easy"
+                      }[key] }}
+                    </span>
+                    <strong>{{ count }}</strong>
+                  </div>
+                {% endfor %}
+              </div>
+            </article>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
