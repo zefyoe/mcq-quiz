@@ -701,9 +701,12 @@ def get_questions_for_anatomy_subgroup(subgroup: str | None) -> list[dict]:
     ]
 
 
-def get_anatomy_subgroup_cards() -> list[dict]:
+def get_anatomy_subgroup_cards(
+    anatomy_questions: list[dict] | None = None,
+) -> list[dict]:
     cards = []
-    anatomy_questions = get_all_anatomy_questions()
+    if anatomy_questions is None:
+        anatomy_questions = get_all_anatomy_questions()
 
     for key, meta in ANATOMY_SUBGROUPS.items():
         count = (
@@ -1975,6 +1978,7 @@ def home():
         return redirect(url_for("login"))
 
     anatomy_questions = get_all_anatomy_questions()
+    subgroup_cards = get_anatomy_subgroup_cards(anatomy_questions)
     progress_by_key = get_user_progress_by_key(current_user.id)
     categories = get_categories()
     category_cards = build_home_category_cards(categories, anatomy_questions)
@@ -2000,6 +2004,7 @@ def home():
                 "home.html",
                 categories=categories,
                 category_cards=category_cards,
+                subgroup_cards=subgroup_cards,
                 error="Invalid category.",
                 total_quizzes=total_quizzes,
                 accuracy=accuracy,
@@ -2019,6 +2024,7 @@ def home():
         "home.html",
         categories=categories,
         category_cards=category_cards,
+        subgroup_cards=subgroup_cards,
         error=None,
         total_quizzes=total_quizzes,
         accuracy=accuracy,

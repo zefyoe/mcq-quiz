@@ -21,9 +21,12 @@
         </div>
         <nav class="core-nav">
           <a href="{{ url_for('core_home') }}" class="active">{{ "Overzicht" if language == "nl" else "Overview" }}</a>
-          <a href="{{ url_for('core_section_setup', section_key='gastrointestinal') }}">CORE Gastro-intestinal</a>
           <a href="{{ url_for('core_history') }}">{{ "Eerdere sessies" if language == "nl" else "Study history" }}</a>
           <a href="{{ url_for('profile') }}">{{ "Profiel en leerdoel" if language == "nl" else "Profile and study goal" }}</a>
+          <a href="{{ url_for('home') }}" class="core-nav-product-link">
+            <span>{{ "Anatomievragenbank" if language == "nl" else "Anatomy QBank" }}</span>
+            <small>bymed.be</small>
+          </a>
           <a href="{{ url_for('logout') }}" class="core-nav-muted">{{ tr("Log out") }}</a>
         </nav>
         {% include "_language_switcher.html" %}
@@ -78,26 +81,26 @@
               </div>
               <span>{{ core_dashboard.sections|length }} {{ "modules" if language == "nl" else "modules" }}</span>
             </div>
-            <div class="core-module-grid">
+            <div class="product-category-list core-category-list">
               {% for section in core_dashboard.sections %}
                 {% if section.count %}
-                  <a href="{{ url_for('core_section_setup', section_key=section.key) }}" class="core-module-card active">
+                  <a href="{{ url_for('core_section_setup', section_key=section.key) }}" class="product-category-row">
                 {% else %}
-                  <div class="core-module-card empty">
+                  <div class="product-category-row is-empty">
                 {% endif %}
-                    <div class="core-module-top">
-                      <span class="core-module-code">{{ "%02d"|format(loop.index) }}</span>
-                      <span class="core-module-count">{{ section.seen }}/{{ section.count }}</span>
-                    </div>
-                    <strong>{{ section.label }}</strong>
-                    <div class="core-module-progress"><span style="width: {{ section.coverage }}%"></span></div>
-                    <small>
+                    <span class="product-category-code">{{ "%02d"|format(loop.index) }}</span>
+                    <span class="product-category-copy">
+                      <strong>{{ section.label }}</strong>
+                      <small>
                       {% if section.count %}
                         {{ section.coverage }}% {{ "bekeken" if language == "nl" else "reviewed" }}
                       {% else %}
                         {{ "Binnenkort beschikbaar" if language == "nl" else "Coming soon" }}
                       {% endif %}
-                    </small>
+                      </small>
+                    </span>
+                    <span class="product-category-count">{{ section.seen }}/{{ section.count }}</span>
+                    <span class="product-category-arrow" aria-hidden="true">{% if section.count %}→{% else %}—{% endif %}</span>
                 {% if section.count %}</a>{% else %}</div>{% endif %}
               {% endfor %}
             </div>

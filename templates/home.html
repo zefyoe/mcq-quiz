@@ -17,13 +17,13 @@
 
     <div class="dashboard-shell">
       <aside class="dashboard-sidebar">
-        <div class="dashboard-sidebar-brand">
+        <a href="{{ url_for('home') }}" class="dashboard-sidebar-brand">
           <div class="dashboard-brand-mark" aria-label="Rady">R</div>
           <div>
             <div class="dashboard-brand-title">Rady</div>
             <div class="dashboard-brand-subtitle">{{ tr("Anatomy QBank") }}</div>
           </div>
-        </div>
+        </a>
 
         <div class="dashboard-user">
           <div class="dashboard-user-label">{{ tr("Signed in") }}</div>
@@ -109,6 +109,34 @@
                 {% endif %}
               </p>
             </div>
+          </div>
+        </section>
+
+        <section class="card home-category-panel">
+          <div class="dashboard-panel-header">
+            <div>
+              <p class="eyebrow">{{ "VRAGENBANK" if language == "nl" else "QUESTION BANK" }}</p>
+              <h2>{{ "Anatomiesecties" if language == "nl" else "Anatomy sections" }}</h2>
+            </div>
+            <span class="dashboard-panel-meta">{{ subgroup_cards|length }} {{ "categorieën" if language == "nl" else "categories" }}</span>
+          </div>
+          {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+          {% endif %}
+          <div class="product-category-list">
+            {% for subgroup in subgroup_cards %}
+              <a href="{{ url_for('anatomy_subgroup_setup', subgroup=subgroup.key) }}" class="product-category-row">
+                <span class="product-category-code">
+                  {{ "MIX" if subgroup.key == "mixed" else "GU" if subgroup.key == "genito-urinary" else "HN" if subgroup.key == "head-and-neck" else "MSK" }}
+                </span>
+                <span class="product-category-copy">
+                  <strong>{{ tr(subgroup.label) }}</strong>
+                  <small>{{ tr(subgroup.description) }}</small>
+                </span>
+                <span class="product-category-count">{{ subgroup.count }} {{ "vragen" if language == "nl" else "questions" }}</span>
+                <span class="product-category-arrow" aria-hidden="true">→</span>
+              </a>
+            {% endfor %}
           </div>
         </section>
 
@@ -230,48 +258,7 @@
           </article>
         </section>
 
-        <section class="dashboard-content-grid">
-          <section class="card dashboard-panel dashboard-panel-wide">
-            <div class="dashboard-panel-header">
-              <div>
-                <p class="eyebrow">{{ tr("Study Planner") }}</p>
-                <h2>{{ tr("Anatomy Dashboard") }}</h2>
-              </div>
-              <div class="dashboard-panel-meta">{{ tr("Focused review") }}</div>
-            </div>
-
-            {% if error %}
-              <div class="alert alert-error">{{ error }}</div>
-            {% endif %}
-
-            <div class="dashboard-anatomy-hero">
-              <div class="dashboard-anatomy-copy">
-                <p class="dashboard-anatomy-title">{{ "Oefen anatomie per subgroep of kies een gemengde herhalingssessie." if language == "nl" else "Practice anatomy by subgroup or use a mixed review session." }}</p>
-                <p class="dashboard-anatomy-text">
-                  {{ "Kies bewegingsapparaat, urogenitaal, hoofd en hals, of gebruik Gemengd voor bredere herhaling. Bepaal zelf het aantal vragen, kies oefen- of examenmodus en bekijk eerdere pogingen wanneer je wilt." if language == "nl" else "Start from musculoskeletal, genito-urinary, head and neck, or use the mixed option for broader recall. You can choose the number of questions, switch between test and exam mode, and revisit older attempts at any time." }}
-                </p>
-                <div class="dashboard-anatomy-tags">
-                  <span class="dashboard-tag">{{ category_cards[0].count if category_cards else 0 }} {{ "vragen" if language == "nl" else "Questions" }}</span>
-                  <span class="dashboard-tag">{{ tr("Timed Exam Mode") }}</span>
-                  <span class="dashboard-tag">{{ tr("Review Retakes") }}</span>
-                </div>
-              </div>
-
-              <form method="post" class="dashboard-anatomy-action">
-                <button type="submit" name="category" value="Anatomy" class="dashboard-category-card">
-                  <span class="dashboard-category-top">
-                    <span class="category-icon">AN</span>
-                    <span class="category-count">{{ category_cards[0].count if category_cards else 0 }} {{ "vragen" if language == "nl" else "Questions" }}</span>
-                  </span>
-                  <span class="category-name">{{ tr("Anatomy") }}</span>
-                  <span class="category-desc">{{ tr("Open the anatomy subgroups and begin a new session.") }}</span>
-                  <span class="dashboard-category-cta">{{ tr("Open Anatomy") }}</span>
-                </button>
-              </form>
-            </div>
-
-          </section>
-
+        <section class="dashboard-content-grid dashboard-content-single">
           <aside class="card dashboard-panel dashboard-panel-side">
             <div class="dashboard-panel-header">
               <div>

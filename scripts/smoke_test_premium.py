@@ -123,7 +123,14 @@ response = client.get(f"/previous-tests/{attempt_id}/report")
 assert_ok(response, "attempt report")
 assert b"1m 31s" in response.data
 assert_ok(client.get("/previous-tests"), "history")
-assert_ok(client.get("/"), "dashboard")
+response = client.get("/")
+assert_ok(response, "dashboard")
+assert response.data.count(b'class="product-category-row"') == 4
+assert b'href="/anatomy/msk"' in response.data
+assert b'href="/anatomy/genito-urinary"' in response.data
+assert b'href="/anatomy/head-and-neck"' in response.data
+assert b'href="/anatomy/mixed"' in response.data
+assert b'href="/" class="dashboard-sidebar-brand"' in response.data
 
 response = client.get(
     "/quiz/Anatomy?subgroup=mixed&count=2&format=flashcard",
@@ -132,6 +139,8 @@ response = client.get(
 assert_ok(response, "flashcard session")
 assert b"Show answer" in response.data
 assert b"MCQ" in response.data
+assert b"Question ID:" in response.data
+assert b'<a href="/" class="brand brand-link">Rady</a>' in response.data
 with client.session_transaction() as flashcard_session:
     flashcard_order = list(flashcard_session["order"])
 response = client.get("/quiz/Anatomy?subgroup=mixed&resume=1")
@@ -213,6 +222,9 @@ response = client.get("/core")
 assert_ok(response, "CORE dashboard")
 assert b"171" in response.data
 assert b"Chest Imaging" in response.data
+assert response.data.count(b'class="product-category-row') == 11
+assert b"Anatomy QBank" in response.data
+assert b">CORE Gastro-intestinal</a>" not in response.data
 assert_ok(client.get("/core/chest"), "empty CORE section")
 assert b"0/0" in client.get("/core/chest").data
 response = client.get("/core/gastrointestinal")

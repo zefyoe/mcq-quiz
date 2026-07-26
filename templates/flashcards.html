@@ -16,7 +16,7 @@
   <body class="{% if product == 'core' %}core-product{% endif %}">
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand">{{ product_name or "Rady" }}</div>
+        <a href="{{ home_url }}" class="brand brand-link">{{ product_name or "Rady" }}</a>
         <div class="topbar-actions">
           <div class="topbar-badge">{{ product_label or "Anki Flashcards" }}</div>
           <a href="{{ home_url }}" class="topbar-link">{{ tr("Home") }}</a>
@@ -105,7 +105,11 @@
           >
             <div class="flashcard-question-meta">
               <span>{{ tr("Question") }} {{ loop.index }} / {{ order|length }}</span>
-              <strong>{{ question.get("case_label") or qid }} · {{ qid }}</strong>
+              {% if product == "core" %}
+                <strong>{{ question.get("case_label") or qid }} · {{ qid }}</strong>
+              {% else %}
+                <strong>{{ "Vraag-ID" if language == "nl" else "Question ID" }}: {{ qid[3:] if qid.startswith("IMG") else qid }}</strong>
+              {% endif %}
             </div>
             <h2>{{ question["Vraag"] }}</h2>
             {% if question.get("image_url") %}
