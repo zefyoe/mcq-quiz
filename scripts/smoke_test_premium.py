@@ -1,4 +1,5 @@
 import os
+import json
 import sqlite3
 import sys
 import tempfile
@@ -19,6 +20,14 @@ connection.execute(
     "subgroup VARCHAR(80), title VARCHAR(160) NOT NULL, score INTEGER NOT NULL, "
     "total_questions INTEGER NOT NULL, question_ids_json TEXT NOT NULL, created_at DATETIME NOT NULL)"
 )
+connection.execute(
+    "CREATE TABLE question_progress ("
+    "id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, question_key VARCHAR(500) NOT NULL, "
+    "subgroup VARCHAR(80), times_seen INTEGER NOT NULL DEFAULT 0, "
+    "times_correct INTEGER NOT NULL DEFAULT 0, correct_streak INTEGER NOT NULL DEFAULT 0, "
+    "last_was_correct BOOLEAN, is_marked BOOLEAN NOT NULL DEFAULT 0, "
+    "last_answered_at DATETIME, next_review_at DATETIME, updated_at DATETIME NOT NULL)"
+)
 connection.commit()
 connection.close()
 os.environ["DATABASE_URL"] = f"sqlite:///{database_file.name}"
@@ -37,8 +46,10 @@ def assert_ok(response, label):
 with app.app_context():
     user_columns = {column["name"] for column in inspect(db.engine).get_columns("user")}
     attempt_columns = {column["name"] for column in inspect(db.engine).get_columns("quiz_attempt")}
+    progress_columns = {column["name"] for column in inspect(db.engine).get_columns("question_progress")}
     assert {"name", "university", "daily_question_goal"} <= user_columns
-    assert {"quiz_mode", "results_json", "duration_seconds"} <= attempt_columns
+    assert {"quiz_mode", "study_format", "results_json", "duration_seconds"} <= attempt_columns
+    assert {"flashcard_rating", "flashcard_times_seen", "flashcard_rated_at"} <= progress_columns
     db.drop_all()
     db.create_all()
     student = User(
@@ -110,6 +121,88 @@ assert_ok(response, "attempt report")
 assert b"1m 31s" in response.data
 assert_ok(client.get("/previous-tests"), "history")
 assert_ok(client.get("/"), "dashboard")
+
+response = client.get(
+    "/quiz/Anatomy?subgroup=mixed&count=2&format=flashcard",
+    follow_redirects=True,
+)
+assert_ok(response, "flashcard session")
+assert b"Show answer" in response.data
+assert b"MCQ" in response.data
+with client.session_transaction() as flashcard_session:
+    flashcard_order = list(flashcard_session["order"])
+response = client.get("/quiz/Anatomy?subgroup=mixed&resume=1")
+assert_ok(response, "switch flashcard to MCQ")
+assert b"Anki" in response.data
+with client.session_transaction() as switched_session:
+    assert switched_session["order"] == flashcard_order
+response = client.get("/flashcards/Anatomy?subgroup=mixed&resume=1")
+assert_ok(response, "switch MCQ to flashcard")
+with client.session_transaction() as switched_session:
+    assert switched_session["order"] == flashcard_order
+ratings = {
+    flashcard_order[0]: "very_difficult",
+    flashcard_order[1]: "easy",
+}
+for qid, rating in ratings.items():
+    response = client.post(
+        "/flashcards/rate",
+        json={"qid": qid, "rating": rating, "subgroup": "mixed"},
+    )
+    assert response.status_code == 200
+    assert response.get_json()["rating"] == rating
+
+response = client.post(
+    "/flashcards/Anatomy",
+    data={
+        "subgroup": "mixed",
+        "ratings_json": json.dumps(ratings),
+        "duration_seconds": "45",
+    },
+)
+assert_ok(response, "flashcard completion")
+assert b"SESSION COMPLETE" in response.data
+assert b"Study these again" in response.data
+
+with app.app_context():
+    flashcard_attempt = QuizAttempt.query.filter_by(
+        user_id=student_id,
+        study_format="flashcard",
+    ).one()
+    assert flashcard_attempt.duration_seconds == 45
+    assert flashcard_attempt.score == 1
+    flashcard_attempt_id = flashcard_attempt.id
+
+response = client.get(
+    f"/previous-tests/{flashcard_attempt_id}/retake",
+    follow_redirects=True,
+)
+assert_ok(response, "flashcard history retake")
+assert b"Show answer" in response.data
+with client.session_transaction() as flashcard_session:
+    assert flashcard_session["order"] == flashcard_order
+
+response = client.get(
+    "/flashcards/Anatomy?subgroup=mixed&rating=very_difficult&count=10",
+)
+assert_ok(response, "very difficult retest")
+with client.session_transaction() as flashcard_session:
+    assert flashcard_session["order"] == [flashcard_order[0]]
+response = client.post(
+    "/flashcards/rate",
+    json={
+        "qid": flashcard_order[0],
+        "rating": "easy",
+        "subgroup": "mixed",
+    },
+)
+assert response.status_code == 200
+assert response.get_json()["counts"]["very_difficult"] == 0
+assert response.get_json()["counts"]["easy"] == 2
+with client.session_transaction() as language_session:
+    language_session["language"] = "nl"
+assert b"Anki-flashcards" in client.get("/anatomy/mixed?format=flashcard").data
+assert b"Toon antwoord" in client.get("/flashcards/Anatomy?subgroup=mixed&resume=1").data
 
 client.get("/logout")
 response = client.post(

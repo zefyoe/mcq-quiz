@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ "Flashcards voltooid" if language == "nl" else "Flashcards complete" }} | Rady</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Rady</div>
+        <div class="topbar-actions">
+          <div class="topbar-badge">Anki Flashcards</div>
+          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          {% include "_language_switcher.html" %}
+        </div>
+      </div>
+    </header>
+
+    <main class="flashcard-result-page">
+      <section class="card flashcard-result-hero">
+        <p class="eyebrow">{{ "SESSIE VOLTOOID" if language == "nl" else "SESSION COMPLETE" }}</p>
+        <h1>{{ category }}</h1>
+        <p>
+          {{ total }} {{ "vragen zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken." if language == "nl" else "questions were rated and saved to your personal difficulty buckets." }}
+        </p>
+        <div class="flashcard-result-actions">
+          <a href="{{ url_for('anatomy_subgroup_setup', subgroup=subgroup, format='flashcard') }}" class="primary-btn">{{ "Nieuwe flashcardreeks" if language == "nl" else "New flashcard session" }}</a>
+          <a href="{{ url_for('attempt_report', attempt_id=attempt_id) }}" class="secondary-btn">{{ "Rapport" if language == "nl" else "Report" }}</a>
+          <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("My Previous Tests") }}</a>
+        </div>
+      </section>
+
+      <section class="flashcard-result-grid">
+        {% for rating_key, rating in ratings.items() %}
+          <article class="card flashcard-result-bucket result-{{ rating_key }}">
+            <span class="flashcard-result-count">{{ session_rating_counts[rating_key] }}</span>
+            <h2>
+              {% if language == "nl" %}
+                {{ {
+                  "very_difficult": "Zeer moeilijk",
+                  "difficult": "Moeilijk",
+                  "easy": "Gemakkelijk",
+                  "very_easy": "Zeer gemakkelijk"
+                }[rating_key] }}
+              {% else %}
+                {{ rating.label }}
+              {% endif %}
+            </h2>
+            <p>
+              {% if rating_counts[rating_key] %}
+                {{ rating_counts[rating_key] }} {{ "vragen staan nu totaal in deze bak." if language == "nl" else "questions are now stored in this bucket." }}
+              {% else %}
+                {{ "Geen vragen in deze bak tijdens deze sessie." if language == "nl" else "No questions entered this bucket in this session." }}
+              {% endif %}
+            </p>
+            {% if rating_counts[rating_key] %}
+              <a
+                href="{{ url_for('flashcards', category='Anatomy', subgroup=subgroup, rating=rating_key, count=[rating_counts[rating_key], 50]|min) }}"
+                class="secondary-btn"
+              >
+                {{ "Deze opnieuw oefenen" if language == "nl" else "Study these again" }}
+              </a>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>

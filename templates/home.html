@@ -292,7 +292,13 @@
                 </div>
                 <div class="continue-metric">
                   <span class="continue-label">{{ "Modus" if language == "nl" else "Mode" }}</span>
-                  <strong>{{ tr("Exam Phase") if active_quiz.mode == "exam" else tr("Test Phase") }}</strong>
+                  <strong>
+                    {% if active_quiz.study_format == "flashcard" %}
+                      Anki Flashcards
+                    {% else %}
+                      {{ tr("Exam Phase") if active_quiz.mode == "exam" else tr("Test Phase") }}
+                    {% endif %}
+                  </strong>
                 </div>
               </div>
               <div class="dashboard-side-actions">

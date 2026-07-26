@@ -89,6 +89,10 @@
           </div>
           {% if not current_user.is_admin %}
             <div class="quiz-header-tools">
+              <div class="study-method-switch" aria-label="{{ 'Studiemethode' if language == 'nl' else 'Study method' }}">
+                <span class="active">MCQ</span>
+                <a href="{{ switch_to_flashcard_url }}">{{ "Anki" if language == "nl" else "Anki" }}</a>
+              </div>
               {% if quiz_mode == 'exam' %}
                 <div class="quiz-timer-box">
                   <span class="quiz-timer-label">{{ tr("Timer") }}</span>

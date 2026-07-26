@@ -52,8 +52,14 @@
                   <p class="history-title">{{ attempt.title }}</p>
                   <p class="history-meta">
                     {{ attempt.created_at.strftime('%d %b %Y %H:%M') }} •
-                    {{ attempt.score }}/{{ attempt.total_questions }} •
-                    {{ attempt.percent }}%
+                    {% if attempt.study_format == "flashcard" %}
+                      Anki •
+                      {{ attempt.rating_counts.very_difficult }} {{ "zeer moeilijk" if language == "nl" else "very difficult" }} •
+                      {{ attempt.rating_counts.easy + attempt.rating_counts.very_easy }} {{ "vlot" if language == "nl" else "comfortable" }}
+                    {% else %}
+                      {{ attempt.score }}/{{ attempt.total_questions }} •
+                      {{ attempt.percent }}%
+                    {% endif %}
                     {% if attempt.duration_seconds %}
                       • {{ attempt.duration_seconds // 60 }}m {{ attempt.duration_seconds % 60 }}s
                     {% endif %}
@@ -61,7 +67,9 @@
                 </div>
                 <div class="history-card-actions">
                   <a href="{{ url_for('attempt_report', attempt_id=attempt.id) }}" class="secondary-btn">{{ "Rapport" if language == "nl" else "Report" }}</a>
-                  <a href="{{ url_for('retake_previous_test', attempt_id=attempt.id) }}" class="primary-btn">{{ tr("Retake This Test") }}</a>
+                  <a href="{{ url_for('retake_previous_test', attempt_id=attempt.id) }}" class="primary-btn">
+                    {{ "Flashcards opnieuw" if language == "nl" and attempt.study_format == "flashcard" else "Study again" if attempt.study_format == "flashcard" else tr("Retake This Test") }}
+                  </a>
                 </div>
               </article>
             {% endfor %}

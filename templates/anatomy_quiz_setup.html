@@ -55,6 +55,45 @@
         {% if pool_counts["all"] > 0 %}
           <form method="get" action="{{ url_for('quiz', category='Anatomy') }}" class="quiz-setup-form">
             <input type="hidden" name="subgroup" value="{{ subgroup_key }}">
+            <div class="study-format-block">
+              <div class="quiz-setup-group-heading">
+                <p class="quiz-count-label">{{ "Studiemethode" if language == "nl" else "Study method" }}</p>
+                <span>{{ "Wissel later met één klik tussen beide methodes." if language == "nl" else "Switch between both methods later with one click." }}</span>
+              </div>
+              <div class="study-format-toggle">
+                <label class="study-format-option">
+                  <input type="radio" name="format" value="mcq" {% if selected_format == "mcq" %}checked{% endif %}>
+                  <span>
+                    <strong>MCQ</strong>
+                    <small>{{ "Meerkeuze met directe feedback of examenmodus" if language == "nl" else "Multiple choice with feedback or exam mode" }}</small>
+                  </span>
+                </label>
+                <label class="study-format-option">
+                  <input type="radio" name="format" value="flashcard" {% if selected_format == "flashcard" %}checked{% endif %}>
+                  <span>
+                    <strong>{{ "Anki-flashcards" if language == "nl" else "Anki flashcards" }}</strong>
+                    <small>{{ "Open vraag, toon antwoord en beoordeel jezelf" if language == "nl" else "Open recall, reveal the answer and rate yourself" }}</small>
+                  </span>
+                </label>
+              </div>
+              <div class="flashcard-bucket-preview" id="flashcardBucketPreview">
+                {% for rating_key, rating in flashcard_ratings.items() %}
+                  <span>
+                    <strong>{{ flashcard_rating_counts[rating_key] }}</strong>
+                    {% if language == "nl" %}
+                      {{ {
+                        "very_difficult": "Zeer moeilijk",
+                        "difficult": "Moeilijk",
+                        "easy": "Gemakkelijk",
+                        "very_easy": "Zeer gemakkelijk"
+                      }[rating_key] }}
+                    {% else %}
+                      {{ rating.label }}
+                    {% endif %}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
             <div class="quiz-pool-group">
               <div class="quiz-setup-group-heading">
                 <p class="quiz-count-label">{{ "Studiedoel" if language == "nl" else "Study focus" }}</p>
@@ -116,7 +155,7 @@
               class="quiz-count-input"
               required
             >
-            <div class="quiz-mode-group">
+            <div class="quiz-mode-group" id="mcqModeOptions">
               <p class="quiz-count-label">{{ tr("Quiz phase") }}</p>
               {% for mode_key, mode in quiz_modes.items() %}
                 <label class="quiz-mode-card">
@@ -155,6 +194,9 @@
       const countInput = document.getElementById("count");
       const countText = document.getElementById("availableCountText");
       const startButton = document.getElementById("startQuizButton");
+      const formatInputs = document.querySelectorAll('input[name="format"]');
+      const mcqModeOptions = document.getElementById("mcqModeOptions");
+      const flashcardBucketPreview = document.getElementById("flashcardBucketPreview");
       const maxPerQuiz = {{ max_quiz_questions }};
       const isDutch = {{ (language == "nl")|tojson }};
 
@@ -173,8 +215,22 @@
         }
       }
 
+      function updateStudyFormat() {
+        const selectedFormat = document.querySelector('input[name="format"]:checked')?.value || "mcq";
+        const isFlashcard = selectedFormat === "flashcard";
+        if (mcqModeOptions) mcqModeOptions.hidden = isFlashcard;
+        if (flashcardBucketPreview) flashcardBucketPreview.hidden = !isFlashcard;
+        if (startButton) {
+          startButton.textContent = isFlashcard
+            ? (isDutch ? "Start flashcards" : "Start flashcards")
+            : (isDutch ? "Start quiz" : "Start quiz");
+        }
+      }
+
       poolInputs.forEach((input) => input.addEventListener("change", updatePoolAvailability));
+      formatInputs.forEach((input) => input.addEventListener("change", updateStudyFormat));
       updatePoolAvailability();
+      updateStudyFormat();
     </script>
   </body>
 </html>

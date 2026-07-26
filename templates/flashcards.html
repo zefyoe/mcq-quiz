@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ "Flashcards" if language == "nl" else "Flashcards" }} - {{ category }}</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Rady</div>
+        <div class="topbar-actions">
+          <div class="topbar-badge">Anki Flashcards</div>
+          <a href="{{ url_for('home') }}" class="topbar-link">{{ tr("Home") }}</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
+          {% include "_language_switcher.html" %}
+        </div>
+      </div>
+    </header>
+
+    <main class="flashcard-page">
+      <aside class="flashcard-sidebar card">
+        <div>
+          <p class="eyebrow">{{ "ACTIEVE REEKS" if language == "nl" else "ACTIVE DECK" }}</p>
+          <h2>{{ category }}</h2>
+          <p class="small-muted">{{ order|length }} {{ "open vragen" if language == "nl" else "open-recall questions" }}</p>
+        </div>
+
+        <div class="progress-box">
+          <div class="progress-label-row">
+            <span>{{ tr("Progress") }}</span>
+            <span id="flashcardProgress">0 / {{ order|length }}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-bar-fill" id="flashcardProgressFill"></div></div>
+        </div>
+
+        <div class="flashcard-trays">
+          {% for rating_key, rating in ratings.items() %}
+            <section class="flashcard-tray tray-{{ rating_key }}" data-rating-tray="{{ rating_key }}">
+              <header>
+                <span>
+                  {% if language == "nl" %}
+                    {{ {
+                      "very_difficult": "Zeer moeilijk",
+                      "difficult": "Moeilijk",
+                      "easy": "Gemakkelijk",
+                      "very_easy": "Zeer gemakkelijk"
+                    }[rating_key] }}
+                  {% else %}
+                    {{ rating.label }}
+                  {% endif %}
+                </span>
+                <strong data-rating-count="{{ rating_key }}">{{ rating_counts[rating_key] }}</strong>
+              </header>
+              <div class="flashcard-id-list" data-rating-id-list="{{ rating_key }}">
+                {% for qid in order %}
+                  {% if current_ratings[qid] == rating_key %}
+                    <span class="flashcard-id-chip" data-qid="{{ qid }}">{{ qid }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </section>
+          {% endfor %}
+        </div>
+
+        <a class="back-link" href="{{ back_url }}">← {{ tr("Back") }}</a>
+      </aside>
+
+      <section class="flashcard-workspace card">
+        <header class="flashcard-workspace-header">
+          <div>
+            <p class="eyebrow">{{ "OPEN HERHALING" if language == "nl" else "OPEN RECALL" }}</p>
+            <h1>{{ "Denk eerst zelf aan het antwoord" if language == "nl" else "Recall the answer before revealing it" }}</h1>
+          </div>
+          <div class="study-method-switch">
+            <a href="{{ switch_to_mcq_url }}">MCQ</a>
+            <span class="active">Anki</span>
+          </div>
+        </header>
+
+        <div class="flashcard-question-nav" id="flashcardQuestionNav">
+          {% for qid in order %}
+            <button type="button" class="{% if loop.first %}active{% endif %}" data-flashcard-nav="{{ loop.index0 }}">{{ loop.index }}</button>
+          {% endfor %}
+        </div>
+
+        {% for qid in order %}
+          {% set question = questions_by_id[qid] %}
+          <article
+            class="flashcard-panel {% if loop.first %}active{% endif %}"
+            data-flashcard-panel="{{ loop.index0 }}"
+            data-qid="{{ qid }}"
+          >
+            <div class="flashcard-question-meta">
+              <span>{{ tr("Question") }} {{ loop.index }} / {{ order|length }}</span>
+              <strong>{{ qid }}</strong>
+            </div>
+            <h2>{{ question["Vraag"] }}</h2>
+            {% if question.get("image_url") %}
+              <div class="flashcard-image-frame">
+                <img src="{{ question['image_url'] }}" alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}">
+              </div>
+            {% endif %}
+
+            <button type="button" class="flashcard-reveal-button" data-reveal-answer>
+              {{ "Toon antwoord" if language == "nl" else "Show answer" }}
+            </button>
+
+            <div class="flashcard-answer" data-flashcard-answer hidden>
+              <p>{{ "JUISTE ANTWOORD" if language == "nl" else "CORRECT ANSWER" }}</p>
+              <h3>{{ correct_answers_by_id[qid]|join(", ") }}</h3>
+              <div class="flashcard-rating-prompt">
+                {{ "Hoe moeilijk was dit antwoord voor jou?" if language == "nl" else "How difficult was this answer for you?" }}
+              </div>
+              <div class="flashcard-rating-grid">
+                {% for rating_key, rating in ratings.items() %}
+                  <button type="button" class="flashcard-rating-button rating-{{ rating_key }}" data-rate="{{ rating_key }}">
+                    <span>{{ loop.index }}</span>
+                    {% if language == "nl" %}
+                      {{ {
+                        "very_difficult": "Zeer moeilijk",
+                        "difficult": "Moeilijk",
+                        "easy": "Gemakkelijk",
+                        "very_easy": "Zeer gemakkelijk"
+                      }[rating_key] }}
+                    {% else %}
+                      {{ rating.label }}
+                    {% endif %}
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+
+        <form method="post" id="flashcardCompleteForm">
+          <input type="hidden" name="subgroup" value="{{ subgroup }}">
+          <input type="hidden" name="ratings_json" id="flashcardRatingsJson">
+          <input type="hidden" name="duration_seconds" id="flashcardDurationSeconds">
+          <div class="flashcard-bottom-bar">
+            <button type="button" class="secondary-btn" id="flashcardPrevious">{{ tr("Previous") }}</button>
+            <button type="button" class="secondary-btn" id="flashcardNext">{{ tr("Next") }}</button>
+            <button type="button" class="primary-btn" id="finishFlashcards" disabled>
+              {{ "Sessie afronden" if language == "nl" else "Finish session" }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const flashcardPanels = Array.from(document.querySelectorAll("[data-flashcard-panel]"));
+      const flashcardNavButtons = Array.from(document.querySelectorAll("[data-flashcard-nav]"));
+      const previousButton = document.getElementById("flashcardPrevious");
+      const nextButton = document.getElementById("flashcardNext");
+      const finishButton = document.getElementById("finishFlashcards");
+      const progressText = document.getElementById("flashcardProgress");
+      const progressFill = document.getElementById("flashcardProgressFill");
+      const completionForm = document.getElementById("flashcardCompleteForm");
+      const ratingsInput = document.getElementById("flashcardRatingsJson");
+      const durationInput = document.getElementById("flashcardDurationSeconds");
+      const rateUrl = {{ url_for('rate_flashcard')|tojson }};
+      const subgroup = {{ subgroup|tojson }};
+      const currentUserId = {{ current_user.id|tojson }};
+      const quizRunId = {{ quiz_run_id|tojson }};
+      const storageKey = `flashcardSession:${currentUserId}:${quizRunId}`;
+      const startedAtKey = `${storageKey}:startedAt`;
+      let startedAt = Number(localStorage.getItem(startedAtKey));
+      let currentIndex = 0;
+      let sessionRatings = {};
+
+      if (!startedAt) {
+        startedAt = Date.now();
+        localStorage.setItem(startedAtKey, String(startedAt));
+      }
+      try {
+        sessionRatings = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      } catch {
+        sessionRatings = {};
+      }
+
+      function updateProgress() {
+        const completed = Object.keys(sessionRatings).filter((qid) =>
+          flashcardPanels.some((panel) => panel.dataset.qid === qid)
+        ).length;
+        progressText.textContent = `${completed} / ${flashcardPanels.length}`;
+        progressFill.style.width = `${(completed / flashcardPanels.length) * 100}%`;
+        finishButton.disabled = completed !== flashcardPanels.length;
+      }
+
+      function showCard(index) {
+        flashcardPanels.forEach((panel) => panel.classList.remove("active"));
+        flashcardNavButtons.forEach((button) => button.classList.remove("active"));
+        flashcardPanels[index]?.classList.add("active");
+        flashcardNavButtons[index]?.classList.add("active");
+        flashcardNavButtons[index]?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+        currentIndex = index;
+        previousButton.disabled = index === 0;
+        nextButton.disabled = index === flashcardPanels.length - 1;
+      }
+
+      function moveQuestionId(qid, rating) {
+        document.querySelectorAll(".flashcard-id-chip").forEach((chip) => {
+          if (chip.dataset.qid === qid) chip.remove();
+        });
+        const target = document.querySelector(`[data-rating-id-list="${rating}"]`);
+        if (target) {
+          const chip = document.createElement("span");
+          chip.className = "flashcard-id-chip";
+          chip.dataset.qid = qid;
+          chip.textContent = qid;
+          target.appendChild(chip);
+        }
+      }
+
+      async function rateCard(panel, rating) {
+        const qid = panel.dataset.qid;
+        panel.querySelectorAll("[data-rate]").forEach((button) => button.disabled = true);
+        try {
+          const response = await fetch(rateUrl, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({qid, rating, subgroup}),
+          });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.error || "Could not save rating.");
+          sessionRatings[qid] = rating;
+          localStorage.setItem(storageKey, JSON.stringify(sessionRatings));
+          moveQuestionId(qid, rating);
+          Object.entries(payload.counts || {}).forEach(([key, count]) => {
+            const countElement = document.querySelector(`[data-rating-count="${key}"]`);
+            if (countElement) countElement.textContent = count;
+          });
+          const nav = flashcardNavButtons[Number(panel.dataset.flashcardPanel)];
+          nav?.classList.add("rated");
+          nav?.setAttribute("data-rating", rating);
+          updateProgress();
+          const nextUnrated = flashcardPanels.findIndex((candidate, index) =>
+            index > currentIndex && !sessionRatings[candidate.dataset.qid]
+          );
+          if (nextUnrated >= 0) {
+            window.setTimeout(() => showCard(nextUnrated), 180);
+          }
+        } catch (error) {
+          alert(error.message);
+        } finally {
+          panel.querySelectorAll("[data-rate]").forEach((button) => button.disabled = false);
+        }
+      }
+
+      flashcardPanels.forEach((panel, index) => {
+        const revealButton = panel.querySelector("[data-reveal-answer]");
+        const answer = panel.querySelector("[data-flashcard-answer]");
+        revealButton.addEventListener("click", () => {
+          answer.hidden = false;
+          revealButton.hidden = true;
+          panel.classList.add("answer-visible");
+        });
+        panel.querySelectorAll("[data-rate]").forEach((button) => {
+          button.addEventListener("click", () => rateCard(panel, button.dataset.rate));
+        });
+        if (sessionRatings[panel.dataset.qid]) {
+          flashcardNavButtons[index].classList.add("rated");
+          flashcardNavButtons[index].dataset.rating = sessionRatings[panel.dataset.qid];
+        }
+      });
+
+      flashcardNavButtons.forEach((button) => {
+        button.addEventListener("click", () => showCard(Number(button.dataset.flashcardNav)));
+      });
+      previousButton.addEventListener("click", () => showCard(Math.max(0, currentIndex - 1)));
+      nextButton.addEventListener("click", () => showCard(Math.min(flashcardPanels.length - 1, currentIndex + 1)));
+      finishButton.addEventListener("click", () => {
+        ratingsInput.value = JSON.stringify(sessionRatings);
+        durationInput.value = String(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(startedAtKey);
+        completionForm.submit();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        const panel = flashcardPanels[currentIndex];
+        if (event.code === "Space" && panel.querySelector("[data-flashcard-answer]").hidden) {
+          event.preventDefault();
+          panel.querySelector("[data-reveal-answer]").click();
+        } else if (!panel.querySelector("[data-flashcard-answer]").hidden && ["1", "2", "3", "4"].includes(event.key)) {
+          panel.querySelectorAll("[data-rate]")[Number(event.key) - 1]?.click();
+        }
+      });
+
+      updateProgress();
+      showCard(0);
+    </script>
+  </body>
+</html>

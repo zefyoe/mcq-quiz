@@ -32,9 +32,15 @@
       </section>
 
       <section class="report-metrics">
-        <div><span>{{ "Score" if language == "nl" else "Score" }}</span><strong>{{ summary.score }}/{{ summary.total_questions }}</strong></div>
-        <div><span>{{ "Percentage" if language == "nl" else "Percentage" }}</span><strong>{{ summary.percent }}%</strong></div>
-        <div><span>{{ "Modus" if language == "nl" else "Mode" }}</span><strong>{{ tr("Exam Phase") if summary.quiz_mode == "exam" else tr("Test Phase") }}</strong></div>
+        <div>
+          <span>{{ "Vlot beheerst" if language == "nl" and summary.study_format == "flashcard" else "Comfortable" if summary.study_format == "flashcard" else "Score" }}</span>
+          <strong>{{ summary.score }}/{{ summary.total_questions }}</strong>
+        </div>
+        <div><span>{{ "Zelfvertrouwen" if language == "nl" and summary.study_format == "flashcard" else "Confidence" if summary.study_format == "flashcard" else "Percentage" }}</span><strong>{{ summary.percent }}%</strong></div>
+        <div>
+          <span>{{ "Methode" if language == "nl" else "Method" }}</span>
+          <strong>{{ "Anki Flashcards" if summary.study_format == "flashcard" else tr("Exam Phase") if summary.quiz_mode == "exam" else tr("Test Phase") }}</strong>
+        </div>
         <div>
           <span>{{ "Duur" if language == "nl" else "Duration" }}</span>
           <strong>
@@ -56,7 +62,18 @@
                 <p><b>{{ tr("Your answer:") }}</b> {{ result["user"]|join(", ") if result["user"] else "—" }}</p>
                 <p><b>{{ tr("Correct answer:") }}</b> {{ result["correct_texts"]|join(", ") if result["correct_texts"] else result["correct"]|join(", ") }}</p>
               </div>
-              <span class="badge {{ 'correct' if result['is_correct'] else 'wrong' }}">{{ tr("Correct") if result["is_correct"] else tr("Incorrect") }}</span>
+              {% if summary.study_format == "flashcard" %}
+                <span class="badge flashcard-report-rating">
+                  {{ {
+                    "very_difficult": "Zeer moeilijk" if language == "nl" else "Very difficult",
+                    "difficult": "Moeilijk" if language == "nl" else "Difficult",
+                    "easy": "Gemakkelijk" if language == "nl" else "Easy",
+                    "very_easy": "Zeer gemakkelijk" if language == "nl" else "Very easy"
+                  }.get(result.get("flashcard_rating"), "—") }}
+                </span>
+              {% else %}
+                <span class="badge {{ 'correct' if result['is_correct'] else 'wrong' }}">{{ tr("Correct") if result["is_correct"] else tr("Incorrect") }}</span>
+              {% endif %}
             </article>
           {% endfor %}
         {% else %}
