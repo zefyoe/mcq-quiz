@@ -286,6 +286,8 @@ assert_ok(client.get("/static/core/gastrointestinal/c1_q_0.png"), "CORE media")
 style_response = client.get("/static/style.css")
 assert_ok(style_response, "static stylesheet")
 assert "max-age=604800" in style_response.headers.get("Cache-Control", "")
+assert b".core-product .flashcard-image-frame" in style_response.data
+assert b"max-height: 540px" in style_response.data
 
 anonymous_client = app.test_client()
 response = anonymous_client.get("/", base_url="https://core.bymed.be")
