@@ -38,7 +38,7 @@
           <a href="{{ url_for('previous_tests') }}" class="dashboard-nav-link">{{ tr("Previous Tests") }}</a>
           <a href="{{ url_for('anatomy_sections') }}" class="dashboard-nav-link">{{ tr("New Anatomy Quiz") }}</a>
           <a href="{{ url_for('profile') }}" class="dashboard-nav-link">{{ "Profiel" if language == "nl" else "Profile" }}</a>
-          <a href="https://core.bymed.be" class="dashboard-nav-link dashboard-nav-link-core">
+          <a href="{{ url_for('core_home') }}" class="dashboard-nav-link dashboard-nav-link-core">
             <span>CORE Radiology</span>
             <small>core.bymed.be</small>
           </a>
