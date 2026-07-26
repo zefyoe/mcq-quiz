@@ -23,13 +23,13 @@
           <a href="{{ url_for('core_home') }}" class="active">{{ "Overzicht" if language == "nl" else "Overview" }}</a>
           <a href="{{ url_for('core_history') }}">{{ "Eerdere sessies" if language == "nl" else "Study history" }}</a>
           <a href="{{ url_for('profile') }}">{{ "Profiel en leerdoel" if language == "nl" else "Profile and study goal" }}</a>
-          <a href="{{ url_for('home') }}" class="core-nav-product-link">
-            <span>{{ "Anatomievragenbank" if language == "nl" else "Anatomy QBank" }}</span>
-            <small>bymed.be</small>
-          </a>
           <a href="{{ url_for('logout') }}" class="core-nav-muted">{{ tr("Log out") }}</a>
         </nav>
-        {% include "_language_switcher.html" %}
+        <div class="core-sidebar-switches">
+          {% set active_product = "core" %}
+          {% include "_product_switcher.html" %}
+          {% include "_language_switcher.html" %}
+        </div>
       </aside>
 
       <main class="core-main">
@@ -39,14 +39,18 @@
             <h1>{{ "Beeldvorming leren door actieve recall" if language == "nl" else "Build imaging expertise through active recall" }}</h1>
             <p>{{ "Open radiologiecases, formuleer je diagnose en beoordeel daarna eerlijk je herkenning." if language == "nl" else "Review authentic imaging cases, formulate the diagnosis, then rate your recall honestly." }}</p>
           </div>
-          {% if active_core_session %}
-            <div class="core-header-session">
-              <span>{{ active_core_session.count }} cases · {{ active_core_session.section.label }}</span>
-              <a href="{{ active_core_session.resume_url }}" class="core-primary-button">{{ "Sessie hervatten" if language == "nl" else "Resume session" }}</a>
-            </div>
-          {% else %}
-            <a href="{{ url_for('core_section_setup', section_key='gastrointestinal') }}" class="core-primary-button">{{ "Start GI cases" if language == "nl" else "Start GI cases" }}</a>
-          {% endif %}
+          <div class="core-header-actions">
+            {% set active_product = "core" %}
+            {% include "_product_switcher.html" %}
+            {% if active_core_session %}
+              <div class="core-header-session">
+                <span>{{ active_core_session.count }} cases · {{ active_core_session.section.label }}</span>
+                <a href="{{ active_core_session.resume_url }}" class="core-primary-button">{{ "Sessie hervatten" if language == "nl" else "Resume session" }}</a>
+              </div>
+            {% else %}
+              <a href="{{ url_for('core_section_setup', section_key='gastrointestinal') }}" class="core-primary-button">{{ "Start GI cases" if language == "nl" else "Start GI cases" }}</a>
+            {% endif %}
+          </div>
         </header>
 
         <section class="core-metric-grid">

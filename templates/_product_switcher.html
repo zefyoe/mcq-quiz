@@ -1,0 +1,17 @@
+{% set selected_product = active_product|default(product|default("anatomy")) %}
+<nav class="product-switcher" aria-label="{{ 'Product kiezen' if language == 'nl' else 'Choose product' }}">
+  <a
+    href="{{ url_for('switch_product', product_key='anatomy') }}"
+    class="product-option {% if selected_product != 'core' %}active{% endif %}"
+  >
+    <span>A</span>
+    Anatomy
+  </a>
+  <a
+    href="{{ url_for('switch_product', product_key='core') }}"
+    class="product-option {% if selected_product == 'core' %}active{% endif %}"
+  >
+    <span>C</span>
+    CORE
+  </a>
+</nav>

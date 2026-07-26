@@ -168,6 +168,8 @@ FLASHCARD_RATINGS = {
     },
 }
 DISABLED_CATEGORIES = {"physics"}
+ANATOMY_PUBLIC_URL = os.environ.get("ANATOMY_PUBLIC_URL", "https://bymed.be/")
+CORE_PUBLIC_URL = os.environ.get("CORE_PUBLIC_URL", "https://core.bymed.be/core")
 
 
 # -------------------------
@@ -190,6 +192,19 @@ def route_core_domain():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/switch-product/<product_key>")
+@login_required
+def switch_product(product_key):
+    destinations = {
+        "anatomy": ANATOMY_PUBLIC_URL,
+        "core": CORE_PUBLIC_URL,
+    }
+    destination = destinations.get(product_key)
+    if not destination:
+        abort(404)
+    return redirect(destination)
 
 
 @login_manager.user_loader

@@ -58,6 +58,8 @@
             <h1>{{ tr("Welcome") }}, {{ current_user.name or ("Student" if language == "en" else "student") }}</h1>
           </div>
           <div class="dashboard-header-actions">
+            {% set active_product = "anatomy" %}
+            {% include "_product_switcher.html" %}
             <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("Review History") }}</a>
             <form method="post">
               <button type="submit" name="category" value="Anatomy" class="primary-btn">{{ tr("Start Anatomy Quiz") }}</button>

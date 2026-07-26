@@ -21,6 +21,8 @@
           <div class="topbar-badge">{{ product_label or "Anki Flashcards" }}</div>
           <a href="{{ home_url }}" class="topbar-link">{{ tr("Home") }}</a>
           <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
+          {% set active_product = product|default("anatomy") %}
+          {% include "_product_switcher.html" %}
           {% include "_language_switcher.html" %}
         </div>
       </div>

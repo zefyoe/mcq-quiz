@@ -13,6 +13,8 @@
       <div>
         <a href="{{ url_for('core_home') }}">{{ "Overzicht" if language == "nl" else "Overview" }}</a>
         <a href="{{ url_for('core_history') }}">{{ "Geschiedenis" if language == "nl" else "History" }}</a>
+        {% set active_product = "core" %}
+        {% include "_product_switcher.html" %}
         {% include "_language_switcher.html" %}
       </div>
     </header>

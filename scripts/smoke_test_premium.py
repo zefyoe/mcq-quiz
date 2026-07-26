@@ -99,6 +99,14 @@ response = client.post(
     follow_redirects=True,
 )
 assert_ok(response, "student login")
+assert b'class="product-switcher"' in response.data
+assert b"/switch-product/core" in response.data
+response = client.get("/switch-product/core")
+assert response.status_code == 302
+assert response.headers["Location"] == "https://core.bymed.be/core"
+response = client.get("/switch-product/anatomy")
+assert response.status_code == 302
+assert response.headers["Location"] == "https://bymed.be/"
 assert_ok(client.get("/profile"), "profile")
 response = client.post(
     "/profile",
@@ -242,10 +250,13 @@ with client.session_transaction() as language_session:
 
 response = client.get("/core")
 assert_ok(response, "CORE dashboard")
+assert b'class="product-switcher"' in response.data
+assert b'product-option active' in response.data
 assert b"171" in response.data
 assert b"Chest Imaging" in response.data
 assert response.data.count(b'class="product-category-row') == 11
-assert b"Anatomy QBank" in response.data
+assert b"Anatomy" in response.data
+assert b"core-nav-product-link" not in response.data
 assert b">CORE Gastro-intestinal</a>" not in response.data
 assert_ok(client.get("/core/chest"), "empty CORE section")
 assert b"0/0" in client.get("/core/chest").data
