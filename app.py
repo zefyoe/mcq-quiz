@@ -50,7 +50,8 @@ def build_database_uri() -> str:
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = build_database_uri()
+database_uri = build_database_uri()
+app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -58,6 +59,14 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me")
 app.config["UPLOAD_FOLDER"] = os.path.join(app.static_folder, "uploads", "questions")
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(days=7)
+
+if database_uri.startswith("postgresql+psycopg://"):
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+        "connect_args": {"connect_timeout": 10},
+    }
 
 if os.environ.get("RENDER") or os.environ.get("FLASK_ENV") == "production":
     app.config["SESSION_COOKIE_SECURE"] = True
@@ -160,6 +169,11 @@ def route_core_domain():
     if hostname == "core.bymed.be" and request.path == "/":
         return redirect(url_for("core_home"))
     return None
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 @login_manager.user_loader
