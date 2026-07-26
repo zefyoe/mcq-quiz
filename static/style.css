@@ -2134,7 +2134,7 @@ body {
   gap: 0;
   margin: 0 auto;
   overflow: hidden;
-  background: #0b1822;
+  background: transparent;
 }
 
 .core-image-grid.panel-count-1 {
@@ -2152,6 +2152,8 @@ body {
 
 .core-image-tile {
   position: relative;
+  align-self: start;
+  width: 100%;
   min-width: 0;
   overflow: hidden;
   background: #0b1822;
