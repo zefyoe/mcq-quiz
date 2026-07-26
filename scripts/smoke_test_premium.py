@@ -220,6 +220,8 @@ response = client.get("/core/gastrointestinal/study?pool=all&count=2")
 assert_ok(response, "CORE GI study")
 assert b"Show answer" in response.data
 assert b"MCQ" not in response.data
+assert response.data.count(b'data-src="/static/core/') == 4
+assert b' src="/static/core/' not in response.data
 with client.session_transaction() as core_session:
     core_order = list(core_session["order"])
 assert len(core_order) == 2

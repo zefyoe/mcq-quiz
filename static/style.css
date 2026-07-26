@@ -3004,6 +3004,7 @@ body {
 }
 
 .flashcard-image-frame {
+  position: relative;
   width: min(100%, 700px);
   min-height: 260px;
   max-height: 400px;
@@ -3020,6 +3021,59 @@ body {
   max-width: 100%;
   max-height: 365px;
   object-fit: contain;
+}
+
+.flashcard-image-status {
+  display: none;
+  min-height: 84px;
+  place-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+[data-image-frame].is-loading .flashcard-image-status,
+[data-image-frame].has-error .flashcard-image-status {
+  display: grid;
+}
+
+[data-image-frame].is-loading img,
+[data-image-frame].has-error img {
+  display: none;
+}
+
+[data-image-frame].is-loading .flashcard-image-status span::before {
+  width: 18px;
+  height: 18px;
+  margin: 0 auto 10px;
+  display: block;
+  border: 2px solid #cbd5e1;
+  border-top-color: #183b72;
+  border-radius: 50%;
+  content: "";
+  animation: flashcard-image-spin 0.8s linear infinite;
+}
+
+[data-image-frame].has-error .flashcard-image-status span {
+  display: none;
+}
+
+.flashcard-image-status button {
+  padding: 9px 13px;
+  border: 1px solid #b9c8d8;
+  border-radius: 8px;
+  background: white;
+  color: #183b72;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@keyframes flashcard-image-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .flashcard-reveal-button {

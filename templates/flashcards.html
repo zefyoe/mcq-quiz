@@ -103,8 +103,18 @@
             </div>
             <h2>{{ question["Vraag"] }}</h2>
             {% if question.get("image_url") %}
-              <div class="flashcard-image-frame">
-                <img src="{{ question['image_url'] }}" alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}">
+              <div class="flashcard-image-frame is-loading" data-image-frame>
+                <img
+                  data-src="{{ question['image_url'] }}"
+                  data-question-image
+                  alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}"
+                >
+                <div class="flashcard-image-status" aria-live="polite">
+                  <span>{{ "Afbeelding laden..." if language == "nl" else "Loading image..." }}</span>
+                  <button type="button" data-retry-image hidden>
+                    {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                  </button>
+                </div>
               </div>
             {% endif %}
 
@@ -116,8 +126,18 @@
               <p>{{ "JUISTE ANTWOORD" if language == "nl" else "CORRECT ANSWER" }}</p>
               <h3>{{ correct_answers_by_id[qid]|join(", ") }}</h3>
               {% if question.get("answer_image_url") %}
-                <div class="core-answer-image">
-                  <img src="{{ question['answer_image_url'] }}" alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}">
+                <div class="core-answer-image" data-image-frame>
+                  <img
+                    data-src="{{ question['answer_image_url'] }}"
+                    data-answer-image
+                    alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}"
+                  >
+                  <div class="flashcard-image-status" aria-live="polite">
+                    <span>{{ "Afbeelding laden..." if language == "nl" else "Loading image..." }}</span>
+                    <button type="button" data-retry-image hidden>
+                      {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                    </button>
+                  </div>
                 </div>
               {% endif %}
               {% if question.get("answer_details") %}
@@ -205,6 +225,37 @@
         finishButton.disabled = completed !== flashcardPanels.length;
       }
 
+      function loadDeferredImage(image) {
+        if (!image || image.dataset.loaded === "true" || image.dataset.loading === "true") return;
+        const source = image.dataset.src;
+        if (!source) return;
+
+        const frame = image.closest("[data-image-frame]");
+        const retryButton = frame?.querySelector("[data-retry-image]");
+        frame?.classList.remove("has-error");
+        frame?.classList.add("is-loading");
+        if (retryButton) retryButton.hidden = true;
+        image.dataset.loading = "true";
+
+        image.onload = () => {
+          image.dataset.loaded = "true";
+          image.dataset.loading = "false";
+          frame?.classList.remove("is-loading", "has-error");
+        };
+        image.onerror = () => {
+          image.dataset.loading = "false";
+          image.removeAttribute("src");
+          frame?.classList.remove("is-loading");
+          frame?.classList.add("has-error");
+          if (retryButton) retryButton.hidden = false;
+        };
+        image.src = source;
+      }
+
+      function loadQuestionImage(index) {
+        loadDeferredImage(flashcardPanels[index]?.querySelector("[data-question-image]"));
+      }
+
       function showCard(index) {
         flashcardPanels.forEach((panel) => panel.classList.remove("active"));
         flashcardNavButtons.forEach((button) => button.classList.remove("active"));
@@ -214,6 +265,8 @@
         currentIndex = index;
         previousButton.disabled = index === 0;
         nextButton.disabled = index === flashcardPanels.length - 1;
+        loadQuestionImage(index);
+        window.setTimeout(() => loadQuestionImage(index + 1), 250);
       }
 
       function moveQuestionId(qid, rating) {
@@ -272,6 +325,12 @@
           answer.hidden = false;
           revealButton.hidden = true;
           panel.classList.add("answer-visible");
+          loadDeferredImage(panel.querySelector("[data-answer-image]"));
+        });
+        panel.querySelectorAll("[data-retry-image]").forEach((button) => {
+          button.addEventListener("click", () => {
+            loadDeferredImage(button.closest("[data-image-frame]")?.querySelector("img"));
+          });
         });
         panel.querySelectorAll("[data-rate]").forEach((button) => {
           button.addEventListener("click", () => rateCard(panel, button.dataset.rate));
