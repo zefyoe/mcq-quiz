@@ -70,6 +70,19 @@ assert all(card["Vraag_nl"] for card in core_cards)
 assert sum(card["Vraag_nl"] != card["Vraag"] for card in core_cards) == 171
 assert core_cards[0]["Vraag_nl"] == "68-jarige man met dysfagie."
 
+core_gu_cards = load_core_section("genitourinary")
+assert len(core_gu_cards) == 129
+assert all(card["Vraag_nl"] for card in core_gu_cards)
+assert all(card["Correct_nl"][0] for card in core_gu_cards)
+assert sum(card["Vraag_nl"] != card["Vraag"] for card in core_gu_cards) == 129
+assert sum(card["Correct_nl"] != card["Correct"] for card in core_gu_cards) == 126
+assert core_gu_cards[0]["Vraag_nl"] == "63-jarige man met gewichtsverlies."
+assert core_gu_cards[0]["Correct_nl"] == [
+    "Niercelcarcinoom: heldercellig subtype"
+]
+assert len(core_gu_cards[0]["image_urls"]) == 3
+assert len(core_gu_cards[0]["answer_image_urls"]) == 2
+
 
 with app.app_context():
     user_columns = {column["name"] for column in inspect(db.engine).get_columns("user")}
@@ -272,6 +285,26 @@ response = client.get("/core/gastrointestinal")
 assert_ok(response, "CORE GI setup")
 assert b"ANKI ONLY" in response.data
 
+response = client.get("/core/genitourinary")
+assert_ok(response, "CORE GU setup")
+assert b"129" in response.data
+response = client.get("/core/genitourinary/study?pool=all&count=2")
+assert_ok(response, "CORE GU study")
+assert b"/static/core/genitourinary/" in response.data
+assert b"core-media-collection" in response.data
+with client.session_transaction() as core_gu_language_session:
+    core_gu_language_session["language"] = "nl"
+response = client.get("/core/genitourinary/study?resume=1")
+assert_ok(response, "Dutch CORE GU study")
+with client.session_transaction() as core_gu_session:
+    core_gu_order = list(core_gu_session["order"])
+core_gu_by_id = {card["ID"]: card for card in core_gu_cards}
+for qid in core_gu_order:
+    assert core_gu_by_id[qid]["Vraag_nl"].encode("utf-8") in response.data
+    assert core_gu_by_id[qid]["Correct_nl"][0].encode("utf-8") in response.data
+with client.session_transaction() as core_gu_language_session:
+    core_gu_language_session["language"] = "en"
+
 response = client.get("/core/gastrointestinal/study?pool=all&count=2")
 assert_ok(response, "CORE GI study")
 assert b"Show answer" in response.data
@@ -352,7 +385,8 @@ assert_ok(style_response, "static stylesheet")
 assert "max-age=604800" in style_response.headers.get("Cache-Control", "")
 assert b".core-product .flashcard-image-frame" in style_response.data
 assert b".core-image-grid.panel-count-1" in style_response.data
-assert b"width: 60%" in style_response.data
+assert b"width: 48%" in style_response.data
+assert b".core-media-collection.media-count-2" in style_response.data
 assert b".core-learning-header" in style_response.data
 assert b".core-note-section.note-teaching" in style_response.data
 assert b".core-differential-link" in style_response.data

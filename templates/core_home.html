@@ -48,7 +48,7 @@
                 <a href="{{ active_core_session.resume_url }}" class="core-primary-button">{{ "Sessie hervatten" if language == "nl" else "Resume session" }}</a>
               </div>
             {% else %}
-              <a href="{{ url_for('core_section_setup', section_key='gastrointestinal') }}" class="core-primary-button">{{ "Start GI cases" if language == "nl" else "Start GI cases" }}</a>
+              <a href="#core-case-library" class="core-primary-button">{{ "Kies een module" if language == "nl" else "Choose a module" }}</a>
             {% endif %}
           </div>
         </header>
@@ -57,7 +57,7 @@
           <article>
             <span>{{ "Beschikbare cases" if language == "nl" else "Available cases" }}</span>
             <strong>{{ core_dashboard.total }}</strong>
-            <small>{{ "Momenteel actief in Gastro-intestinal" if language == "nl" else "Currently active in Gastrointestinal" }}</small>
+            <small>{{ "Actieve CORE-bibliotheek" if language == "nl" else "Active CORE case library" }}</small>
           </article>
           <article>
             <span>{{ "Dekking" if language == "nl" else "Coverage" }}</span>
@@ -77,7 +77,7 @@
         </section>
 
         <section class="core-dashboard-grid">
-          <article class="core-panel core-modules-panel">
+          <article class="core-panel core-modules-panel" id="core-case-library">
             <div class="core-panel-heading">
               <div>
                 <p class="eyebrow">{{ "CASE LIBRARY" if language == "nl" else "CASE LIBRARY" }}</p>

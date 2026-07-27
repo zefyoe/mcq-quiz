@@ -130,7 +130,7 @@ def load_core_translations(section_key, language):
     if not data_path.exists():
         return {}
     payload = json.loads(data_path.read_text(encoding="utf-8"))
-    return payload.get("histories", {})
+    return payload
 
 
 @lru_cache(maxsize=None)
@@ -139,30 +139,47 @@ def load_core_section(section_key):
     if not data_path.exists():
         return []
     payload = json.loads(data_path.read_text(encoding="utf-8"))
-    dutch_histories = load_core_translations(section_key, "nl")
+    dutch_translations = load_core_translations(section_key, "nl")
+    dutch_histories = dutch_translations.get("histories", {})
+    dutch_diagnoses = dutch_translations.get("diagnoses", {})
     cards = []
     for card in payload.get("cards", []):
         diagnosis = card.get("diagnosis") or "Diagnosis unavailable"
         answer_details = card.get("answer_details") or ""
         history = card.get("history") or "Review the imaging case and formulate the diagnosis."
+        question_images = card.get("question_images") or (
+            [card["question_image"]] if card.get("question_image") else []
+        )
+        answer_images = card.get("answer_images") or (
+            [card["answer_image"]] if card.get("answer_image") else []
+        )
         cards.append({
             "ID": card["id"],
             "Category": "CORE Radiology",
             "Vraag": history,
             "Vraag_nl": dutch_histories.get(card["id"], history),
             "Correct": [diagnosis],
+            "Correct_nl": [dutch_diagnoses.get(card["id"], diagnosis)],
             "A": "",
             "B": "",
             "C": "",
             "D": "",
             "image_url": (
-                f"/static/core/{section_key}/{card['question_image']}"
-                if card.get("question_image") else None
+                f"/static/core/{section_key}/{question_images[0]}"
+                if question_images else None
             ),
+            "image_urls": [
+                f"/static/core/{section_key}/{filename}"
+                for filename in question_images
+            ],
             "answer_image_url": (
-                f"/static/core/{section_key}/{card['answer_image']}"
-                if card.get("answer_image") else None
+                f"/static/core/{section_key}/{answer_images[0]}"
+                if answer_images else None
             ),
+            "answer_image_urls": [
+                f"/static/core/{section_key}/{filename}"
+                for filename in answer_images
+            ],
             "answer_details": answer_details,
             "answer_sections": parse_answer_details(answer_details),
             "radiopaedia_url": f"https://radiopaedia.org/search?q={quote_plus(diagnosis)}",
