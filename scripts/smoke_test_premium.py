@@ -306,6 +306,14 @@ for qid in core_gu_order:
 with client.session_transaction() as core_gu_language_session:
     core_gu_language_session["language"] = "en"
 
+response = client.get("/core/breast")
+assert_ok(response, "CORE breast setup")
+assert b"100" in response.data
+response = client.get("/core/breast/study?pool=all&count=2")
+assert_ok(response, "CORE breast study")
+assert b"/static/core/breast/" in response.data
+assert b"Diagnosis unavailable" not in response.data
+
 response = client.get("/core/gastrointestinal/study?pool=all&count=2")
 assert_ok(response, "CORE GI study")
 assert b"Show answer" in response.data

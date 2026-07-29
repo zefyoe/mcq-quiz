@@ -72,8 +72,34 @@ def answer_details(value):
         count=1,
         flags=re.IGNORECASE | re.DOTALL,
     )
+    cleaned = re.sub(
+        r"<b>\s*Diagnosis:\s*.*?</b>",
+        "",
+        cleaned,
+        count=1,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
     cleaned = re.sub(r"<img[^>]*>", "", cleaned, flags=re.IGNORECASE)
     return html_to_text(cleaned)
+
+
+def labeled_bold_value(value, label):
+    match = re.search(
+        rf"<b>\s*{re.escape(label)}:\s*(.*?)</b>",
+        value or "",
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    return html_to_text(match.group(1)) if match else ""
+
+
+def history_value(value):
+    text = html_to_text(value)
+    match = re.search(
+        r"(?:^|\n)History:\s*(.*?)(?:\n{2,}|What do the images show)",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    return match.group(1).strip() if match else ""
 
 
 def field_map(model, fields):
@@ -148,8 +174,14 @@ def import_apkg(source, output_json, media_output, section_key, section_label, i
                     "id": f"{id_prefix}-{index:03d}",
                     "source_note_id": str(note_id),
                     "label": class_content(question_html, "label") or f"Case {index}",
-                    "history": class_content(question_html, "hist"),
-                    "diagnosis": class_content(answer_html, "diag"),
+                    "history": (
+                        class_content(question_html, "hist")
+                        or history_value(question_html)
+                    ),
+                    "diagnosis": (
+                        class_content(answer_html, "diag")
+                        or labeled_bold_value(answer_html, "Diagnosis")
+                    ),
                     "question_images": question_images,
                     "answer_images": answer_images,
                     "answer_details": answer_details(answer_html),

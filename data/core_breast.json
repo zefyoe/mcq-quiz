@@ -1,0 +1,1409 @@
+{
+  "product": "CORE Radiology",
+  "section": "Breast Imaging",
+  "section_key": "breast",
+  "source": "Breast_Imaging_Cases_Full.apkg",
+  "card_count": 100,
+  "cards": [
+    {
+      "id": "CORE-BR-001",
+      "source_note_id": "1782291716134",
+      "label": "Case 1",
+      "history": "Screening mammogram.",
+      "diagnosis": "Benign Calcifications from Involuting Fibroadenomas",
+      "question_images": [
+        "case1.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\n\nBilateral coarse, \"popcorn\" calcifications\n\nDifferential Diagnosis\n\nNone \u2014 classic appearance for involuting/hyalinizing fibroadenomas\n\nTeaching Points\n\nHyalinizing fibroadenomas frequently shrink in size with development of dense, coarse \"popcorn\" calcifications\n\nCalcifications are typically large (>3 mm), dense, and coarse\n\nFrequently multiple and bilateral, but can occur in isolation\n\nMay have residual associated soft tissue density or mass\n\nManagement\n\nBI-RADS\u00ae Category 2: Benign finding\n\nAnnual screening mammography",
+      "question_image": "case1.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-002",
+      "source_note_id": "1782291716136",
+      "label": "Case 2",
+      "history": "50-year-old woman with a palpable mass in the left breast, 10 o'clock position.",
+      "diagnosis": "Invasive Ductal Carcinoma with Metastatic Axillary Lymph Node",
+      "question_images": [
+        "case2.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\n\nDense, lobular mass with indistinct margins and associated amorphous microcalcifications in the left breast, 10 o'clock position (correlating to the palpable area of concern)\n\nEnlarged axillary lymph node with thickened cortex\n\nDifferential Diagnosis\n\nPapillary carcinoma\n\nInvasive lobular carcinoma is less likely given the microcalcifications (not a typical feature of lobular carcinoma)\n\nTeaching Points\n\nMagnification views help delineate extent of disease, especially with microcalcifications associated with a suspicious mass\n\nUltrasound of the mass should be performed to plan percutaneous core needle biopsy\n\nUltrasound of the ipsilateral axilla should be performed for all highly suspicious breast masses (can detect non-palpable abnormal nodes)\n\nOnce confirmed, contrast-enhanced MRI should be considered to evaluate extent of disease and screen the contralateral breast\n\nManagement\n\nBI-RADS\u00ae Category 5: Highly suspicious for malignancy\n\nUltrasound-guided core needle biopsy of the mass and FNA of the suspicious axillary lymph node\n\nIf lymph node FNA shows metastatic disease, sentinel node sampling is skipped in favor of axillary lymph node dissection",
+      "question_image": "case2.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-003",
+      "source_note_id": "1782291716138",
+      "label": "Case 3",
+      "history": "Screening mammogram.",
+      "diagnosis": "Dermal Calcifications",
+      "question_images": [
+        "case3.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\n\nDiffusely scattered, benign skin calcifications\n\nDifferential Diagnosis\n\nNone \u2014 classic appearance demonstrated\n\nTeaching Points\n\nDermal calcifications are typically lucent-centered (\"eggshell\") in appearance, polygonal in shape, 1\u20132 mm in size\n\nArise from dermal sweat glands\n\nMost commonly found in the axilla, medial breast, or inframammary fold\n\nClassic findings need not be described in screening exam reports\n\nIf uncertain whether clustered microcalcifications are dermal, obtain magnification tangential views; if confirmed within the skin, no further workup is required\n\nManagement\n\nAnnual screening mammography",
+      "question_image": "case3.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-004",
+      "source_note_id": "1782291716140",
+      "label": "Case 4",
+      "history": "Screening mammogram (right breast images shown).",
+      "diagnosis": "Secretory Calcifications",
+      "question_images": [
+        "case_004.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nExtensive, dense, \u201crod-like\u201d calcifications in ductal distributions. Note the nipple retraction (long-standing per the patient\u2019s history)\nDifferential Diagnosis\nClassic appearance demonstrated\nTeaching Points\nBenign\n\nUsually women >60 years\n\nClassically solid or discontinuous smooth, linear, rod-like calcifications\n\nDeposited in distended debris-filled ducts\n\nUsually bilateral and symmetric\n\nMay appear lucent-centered\n\nDuctal distribution towards the nipple\n\nAlso known as plasma cell mastitis\n\nMay have associated nipple retraction\n\nAsymptomatic and inconsequential\n\nOccasionally, diagnostic evaluation with magnification views is needed to further define morphology and exclude \u201ccasting\u201d ductal carcinoma in situ (DCIS)\n\nWhen scant, unilateral, or with atypical features\n\nRarely, atypical appearance may warrant stereotactic core needle biopsy to exclude DCIS\nManagement\nBI-RADS\u00ae Category 2: Benign finding\n\nAnnual screening mammography",
+      "question_image": "case_004.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-005",
+      "source_note_id": "1782291716142",
+      "label": "Case 5",
+      "history": "48-year-old woman with a tender palpable mass in the right breast, upper outer quadrant.",
+      "diagnosis": "Simple Cyst",
+      "question_images": [
+        "case_005.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: The palpable mass is marked with a metallic BB and corresponds with a circumscribed, oval equal-density mass. There is a second (similar-appearing) mass noted incidentally in the upper inner quadrant\n\nUltrasound: The palpable mass corresponds with a circumscribed, anechoic, oval, parallel mass with imperceptible wall and marked posterior acoustic enhancement\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated given ultrasound findings\nTeaching Points\nMost common breast mass; often multiple and bilateral but can occur in isolation\n\nCircumscribed, low- or equal-density, round or oval masses on mammogram\n\nMay have obscured margins in dense glandular tissue\n\nUltrasound is the definitive imaging tool to confirm a simple cyst\n\nMammography cannot distinguish cysts from solid circumscribed masses\n\nSimple cysts are benign\n\nMust be anechoic to characterize as a simple cyst\n\nAspiration of simple cysts can be performed when painful, for symptomatic relief\n\nComplicated cysts have similar ultrasound features but contain low-level internal echoes\n\nConsider aspiration of complicated cysts when new, painful, or enlarging\nManagement\nBI-RADS\u00ae Category 2: Benign finding\n\nReassure patient\n\nAnnual screening mammography",
+      "question_image": "case_005.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-006",
+      "source_note_id": "1782291716144",
+      "label": "Case 6",
+      "history": "46-year-old male with a tender, left breast mass.",
+      "diagnosis": "Gynecomastia",
+      "question_images": [
+        "case_006.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nA metallic BB denotes the area of palpable concern in the left breast. There is asymmetric \u201cflame-shaped\u201d density, in the left subareolar breast consistent with glandular tissue. (There is minimal glandular tissue in the right subareolar breast, which went unnoticed by the patient.)\nDifferential Diagnosis\nNone\u2014classic appearance of benign gynecomastia demonstrated\n\nIn male patients, may consider\n\nMale breast cancer: typically presents as a mass, frequently with spiculated margins (similar appearance to invasive breast cancer in female patients)\n\nFar less common than gynecomastia\n\nPseudogynecomastia: fatty enlargement secondary to obesity\n\nFat density mammographically\nTeaching Points\nGynecomastia is the proliferation of ductal and stromal elements resulting in breast enlargement in males\n\nCommon causes include systemic disease (e.g., liver disease, HIV infection) and side effects from drugs (e.g., digitalis, spironolactone, marijuana, anabolic steroids)\n\nFrequently idiopathic and may spontaneously regress\n\nIf the precipitating cause is corrected, may be reversible in early stages\n\nClinical exam and correlation with risk factors may prove helpful\n\nCommon finding on clinical exam\n\nAccounts for 85% of masses in male patients\n\nMay occur at any age (tri-modal distribution described when hormonal in origin)\n\nNeonate (maternal estrogen stimulation)\n\nPubertal (estradiol surge)\n\nOlder men (decreasing testosterone)\n\nMammographic patterns include nodular, dendritic, and diffuse glandular\n\nUltrasound has a less specific appearance (hypoechoic subareolar tissue)\n\nIf the precipitating cause is corrected, may be reversible in early stages\nManagement\nClinical follow-up, with evaluation of any underlying condition that could precipitate gynecomastia. No further imaging is required",
+      "question_image": "case_006.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-007",
+      "source_note_id": "1782291716146",
+      "label": "Case 7",
+      "history": "46-year-old woman with a palpable mass in the right breast (a metallic BB marks the area of concern).",
+      "diagnosis": "Invasive Mucinous (Colloid) Carcinoma",
+      "question_images": [
+        "case_007.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Large, high-density, lobular, circumscribed mass in the deep central breast\n\nUltrasound: Heterogeneous predominantly hypoechoic mass with microlobulated borders (arrowheads) and associated posterior acoustic enhancement\nDifferential Diagnosis\nPhyllodes tumor\n\nFibroadenoma\n\nMedullary cancer\nTeaching Points\nFavorable prognosis\n\nAccounts for <5% of breast cancers, more common in older women\n\nMay appear low density, or iso-dense to surrounding glandular tissue\n\nTypically a slow-growing, round, circumscribed mass\n\nMagnification mammography may reveal an indistinct margin\n\nMay mimic a complicated or complex cyst at ultrasound\n\nCareful attention to all margins during ultrasound is crucial to avoid misdiagnosis\n\nAlthough posterior acoustic enhancement is a typical characteristic of cystic masses, it may also be a feature of certain solid breast masses including high-grade invasive ductal carcinoma and mucinous carcinoma\n\nAlthough breast malignancies often demonstrate irregular or spiculated margins, some will present with circumscribed margins including:\n\nHigh-grade invasive ductal carcinoma\n\nMucinous carcinoma\n\nPhyllodes tumor\n\nPrimary breast lymphoma\n\nMetastasis\nManagement\nUltrasound-guided core needle biopsy is recommended for diagnosis",
+      "question_image": "case_007.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-008",
+      "source_note_id": "1782291716148",
+      "label": "Case 8",
+      "history": "Annual diagnostic mammogram in a patient with a history of breast conservation therapy (BCT).",
+      "diagnosis": "Suture Calcifications",
+      "question_images": [
+        "case_008.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nRing-like, curvilinear and linear calcified suture material in the previous lumpectomy site (note the calcified knots, arrowheads)\n\nVascular calcifications are noted incidentally (arrows)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nUncommon\n\nMay see calcified knots, which confirms the diagnosis\n\nMost commonly seen in patients following lumpectomy and radiation therapy\n\nMay occur after reduction mammoplasty\nManagement\nBI-RADS\u00ae Category 2: Benign finding\n\nAnnual diagnostic mammography (given history of breast conservation therapy)",
+      "question_image": "case_008.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-009",
+      "source_note_id": "1782291716150",
+      "label": "Case 9",
+      "history": "47-year-old woman with a palpable mass in the left breast, upper inner quadrant.",
+      "diagnosis": "Invasive Ductal Carcinoma with Ductal Carcinoma In Situ (DCIS)",
+      "question_images": [
+        "case_009.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nThere are two adjacent, irregular masses with spiculated margins and associated intervening linear calcifications (arrow)\nDifferential Diagnosis\nClassic appearance of invasive ductal carcinoma with DCIS demonstrated\nTeaching Points\nInvasive ductal cancer is classically an irregular mass with spiculated margins\n\nMay be new or enlarging\n\nInvasive ductal cancers frequently have associated microcalcifications\n\nCalcifications usually represent the intraductal portion (DCIS)\n\nMagnified images should be performed to delineate full extent of microcalcifications\n\nCrucial for surgical planning\n\nIDC can present as a palpable mass, or be detected on screening mammogram\n\n\u201cMulti-focal\u201d breast cancer is used to describe two or more foci of cancer in the same quadrant\nManagement\nBI-RADS\u00ae Category 5: Highly suspicious for malignancy\n\nUltrasound-guided or stereotactic-guided core biopsy prior to definitive surgical treatment\n\nGiven the extent of disease, a two-needle bracket localization is recommended to reduce the risk of positive surgical margins",
+      "question_image": "case_009.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-010",
+      "source_note_id": "1782291716152",
+      "label": "Case 10",
+      "history": "Previous right breast conservation therapy (BCT).",
+      "diagnosis": "Fat Necrosis after Breast Conservation Therapy",
+      "question_images": [
+        "case_010.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nIn the upper outer quadrant, there is a large lobular mass containing fat centrally with associated peripheral rim calcification\nDifferential Diagnosis\nClassic appearance demonstrated\n\nHowever, early calcification of fat necrosis may mimic microcalcifications of malignancy\nTeaching Points\nVaried mammographic appearance\n\nMost commonly presents as a radiolucent or mixed-density (fat and soft tissue) circumscribed mass with associated rim calcifications (\u201coil cyst\u201d)\n\nMimics lipoma when non-calcified\n\nEvolving fat necrosis in the operative site is common\n\nCommonly occurs after trauma or surgery (breast conserving surgery, reduction mammoplasty)\n\nBut may occur without any history of surgery or trauma\n\nMay be detected incidentally, or present as a palpable mass\n\nClinical findings may be suspicious (firm, palpable mass)\n\nOccasionally appears as architectural distortion or mass-like\n\nAtypical imaging features may warrant diagnostic evaluation and possible biopsy\nManagement\nUltrasound often confusing and not helpful in most cases\n\nWith classic appearance biopsy can be avoided",
+      "question_image": "case_010.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-011",
+      "source_note_id": "1782291716154",
+      "label": "Case 11",
+      "history": "Screening mammogram.",
+      "diagnosis": "Fibroadenolipoma (Hamartoma)",
+      "question_images": [
+        "case_011.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nThere is a large encapsulated mass in the lower inner quadrant (arrowheads) containing both fat and glandular elements (\u201cbreast within a breast\u201d or \u201ccut-sausage\u201d appearance)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nTypically incidental finding, but rarely presents as a palpable mass\n\nWhen sparse fat components are present, fibroadenoma may be suspected\n\n\u201cDon\u2019t touch\u201d lesion when classic features are present\n\nUltrasound rarely required but can demonstrate heterogeneous glandular and fat components, with a thin echogenic pseudocapsule\n\nOther common fat-containing breast masses include:\n\nLipoma\n\nGalactocele\n\nIntramammary lymph node\n\nOil cyst\nManagement\nBI-RADS\u00ae Category 2: Benign finding\n\nAnnual screening mammography",
+      "question_image": "case_011.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-012",
+      "source_note_id": "1782291716156",
+      "label": "Case 12",
+      "history": "46-year-old asymptomatic woman undergoing annual screening mammogram.",
+      "diagnosis": "High-grade (Grade 3/3) Ductal Carcinoma In Situ (DCIS)",
+      "question_images": [
+        "case_012.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nThere are pleomorphic microcalcifications in a segmental distribution involving most of the right lower inner quadrant (greater than 5 cm)\n\nThere is associated soft tissue density in the lower inner quadrant, some of which appears tubular (ductal) in appearance\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated (the microcalcifications represent the ductal carcinoma growing within the ducts)\nTeaching Points\nDCIS is usually detected on screening mammography\n\nRarely can present as a palpable mass\n\nStage 0 (non-invasive) cancer\n\nStaging is determined at the time of definitive surgery\n\nEven if core biopsy reveals only DCIS, lumpectomy or mastectomy may reveal an invasive component of malignancy\n\nSegmentally distributed calcifications should be regarded with suspicion,\n\nMay be benign or malignant\n\nCareful analysis of morphology is required\n\nSuspicious microcalcifications can be sampled using stereotactic vacuum- assisted core needle biopsy\n\nWhen there is associated soft tissue density, or calcifications extend more than 25 mm, consider ultrasound to survey for an underlying mass (which may represent an underlying invasive component)\nManagement\nStereotactic biopsy is recommended to establish diagnosis\n\nGiven the extent of disease in this patient, mastectomy for definitive surgical treatment is recommended (however, most patients with less extensive DCIS will be candidates for breast conservation therapy)",
+      "question_image": "case_012.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-013",
+      "source_note_id": "1782291716158",
+      "label": "Case 13",
+      "history": "Screening mammogram (cropped images shown).",
+      "diagnosis": "Benign Intramammary Lymph Nodes",
+      "question_images": [
+        "case_013.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMultiple reniform circumscribed fat-containing masses (small circles) in the right breast parenchyma and axilla (large circle)\n\nNote the fatty hilum (arrowhead)\nDifferential Diagnosis\nClassic appearance demonstrated\n\nIf fatty hilum cannot be seen, may mimic solid benign or malignant mass\nTeaching Points\nVery common; typically occur in the lateral portion of the upper outer quadrant\n\nUsually incidental, but can present as palpable mass\n\nFrequently multiple\n\nUsually less than a centimeter, but can be larger\n\nClassic appearance mammographically\n\nViewed tangentially, reniform shape with a fatty hilum\n\nViewed en face, fatty hilum will be central\n\nIf classic appearance is not demonstrated mammographically, ultrasound may be helpful\n\nUltrasound appearance: oval, circumscribed, parallel mass with hypoechoic cortex, echogenic hilum and feeding vessel\n\nContrast-enhanced MR will routinely demonstrate \u201cwashout\u201d enhancement kinetics\n\nTo avoid mistaking for a suspicious finding, correlate with the fat-suppressed image to identify the classic reniform shape and central fatty hilum\nManagement\nClassic appearance requires no further evaluation\n\nAnnual screening mammography",
+      "question_image": "case_013.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-014",
+      "source_note_id": "1782291716160",
+      "label": "Case 14",
+      "history": "Screening mammogram.",
+      "diagnosis": "Skin Lesion",
+      "question_images": [
+        "case_014.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nStandard images demonstrate a circumscribed, iso-dense, round mass in the upper central breast with a surrounding lucent halo or \u201cair crescent\u201d (arrow)\n\nA metallic BB was placed on a raised nevus to demonstrate that the \u201cmass\u201d is actually a raised skin lesion\nDifferential Diagnosis\nTrue mass within the breast parenchyma\nTeaching Points\nSkin lesions can project over the breast and appear to represent intraparenchymal masses\n\nTechnologists should diagram raised skin lesions or affix lesions with radiopaque markers (unless numerous lesions are present, such as a patient with neurofibromatosis)\n\nSome lesions (seborrheic keratosis) may contain reticulated lucencies or hyperdense debris and are less likely to be mistaken for a parenchymal mass\n\nKeloid scars can occur following breast surgery\n\nAppear as raised tubular masses along incision lines\nManagement\nAfter confirmation of a skin lesion (either with physical exam or with placement of a radiopaque marker) no additional evaluation is warranted\n\nAnnual screening mammography",
+      "question_image": "case_014.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-015",
+      "source_note_id": "1782291716162",
+      "label": "Case 15",
+      "history": "Post-excision mammogram following lumpectomy for invasive ductal carcinoma (IDC).",
+      "diagnosis": "Seroma Following Lumpectomy",
+      "question_images": [
+        "case_015.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nThere is an oval, circumscribed, high-density mass in the upper inner quadrant at the lumpectomy site (a linear metallic scar marker is present)\n\nMultiple surgical clips are present at the edges of the mass\nDifferential Diagnosis\nHematoma\nTeaching Points\nSeroma and hematoma occur commonly following excisional biopsy/ lumpectomy\n\nSeroma is an accumulation of serous fluid in the biopsy cavity\n\nIf rapidly enlarging, surgical evacuation may be required to exclude active hemorrhage/hematoma\n\nAir\u2013fluid levels can be seen in the acute postoperative period\n\nTypically self-limited and diminish in size and mammographic density over time\n\nGrowth or increased density should be regarded with suspicion\n\nUltrasound usually demonstrates a fluid collection with debris and thin movable septa\n\nBreast conservation therapy (BCT) describes surgical removal of a malignancy (lumpectomy) and subsequent radiation treatment\n\nBroad spectrum of mammographic findings after BCT, including architectural distortion, stromal/trabecular thickening, fat necrosis, skin thickening, global increased density (and decreased compressibility)\n\nConspicuity of findings usually decreases over several years but can be chronic\nManagement\nAspiration of postoperative seroma can usually be avoided but may be performed if the patient is symptomatic\n\nRadiation therapy and subsequent annual diagnostic mammography",
+      "question_image": "case_015.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-016",
+      "source_note_id": "1782291716164",
+      "label": "Case 16",
+      "history": "Palpable mass in the right superior central breast (indicated by a metallic BB).",
+      "diagnosis": "Invasive Lobular Carcinoma (ILC)",
+      "question_images": [
+        "case_016.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Metallic BB marks a high-density lobular mass with partially circumscribed, partially obscured margins in the upper central right breast (circles)\n\nThe patient is status post remote benign excisional biopsy resulting in skin thickening and distortion anteriorly (arrows)\n\nUltrasound: Irregular, hypoechoic solid mass with microlobulated margins with a non-parallel orientation\nDifferential Diagnosis\nInvasive ductal carcinoma\n\nMedullary carcinoma\n\nPhyllodes tumor\n\nAtypical presentation of fibroadenoma (much less likely)\nTeaching Points\nMay present as palpable mass or \u201cthickening\u201d\n\nAccounts for less than 10% of all invasive breast cancers\n\nHigher rate of multifocal, multicentric, and/or bilateral involvement compared to invasive ductal cancer (IDC)\n\nILC has a variable appearance mammographically\n\nIso-dense or high-density mass with spiculated or indistinct margins\n\nArchitectural distortion\n\nDeveloping density\n\nCan be a one-view finding\n\nMicrocalcifications NOT a characteristic feature\n\nVariable appearance on ultrasound\n\nHypoechoic irregular mass (shown in this case)\n\nDiffuse acoustic shadowing\n\nMore common with larger tumors\n\nTumor cells grow in single-file lines, infiltrating between collagen bundles\n\nThis growth pattern is thought to contribute to the subtle presentation of some tumors\n\nNotoriously difficult to detect mammographically\nManagement\nBI-RADS\u00ae Category 5: Highly suspicious for malignancy\n\nUltrasound-guided core-needle biopsy for tissue diagnosis\n\nWhen diagnosis of ILC is confirmed, contrast-enhanced MR should be considered\n\nDelineate extent of disease for surgical planning\n\nEvaluate the contralateral breast for clinically and mammographically occult disease",
+      "question_image": "case_016.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-017",
+      "source_note_id": "1782291716166",
+      "label": "Case 17",
+      "history": "Screening mammogram.",
+      "diagnosis": "Reduction Mammoplasty (Breast Reduction)",
+      "question_images": [
+        "case_017.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nNote the subareolar fibrotic band (arrowheads), elevation of the nipple, \u201cswirling\u201d of the glandular tissue due to surgical relocation (arrows), and paucity of breast tissue in the lower breast\nDifferential Diagnosis\nNone\u2014classic findings are demonstrated\nTeaching Points\nElective plastic surgery procedure\n\nTo treat macromastia\n\nTo achieve symmetry in patients following contralateral breast cancer surgery (breast conservation therapy or mastectomy with reconstruction)\n\nTo address congenital asymmetry\n\nVariable techniques described\n\nCircumareolar (\u201ckeyhole\u201d) incision most commonly employed\n\nOverall breast density may be reduced when compared with pre-reduction exams\n\nOther classic imaging findings (not seen in this case) include\n\nFat necrosis with dystrophic calcifications and oil cysts\n\nSkin calcifications along suture lines\n\nArchitectural distortion\n\nSkin thickening\n\nAltered breast contour\n\nPreoperative mammogram recommended to exclude occult malignancy\n\nMammaplasty and mammoplasty are both accepted spelling\nManagement\nBI-RADS\u00ae Category 2: Benign findings\n\nAnnual screening mammography",
+      "question_image": "case_017.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-018",
+      "source_note_id": "1782291716168",
+      "label": "Case 18",
+      "history": "Calcifications detected on baseline screening mammogram.",
+      "diagnosis": "Milk of Calcium",
+      "question_images": [
+        "case_018.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nGrouped amorphous \u201csmudgy\u201d microcalcifications on the CC magnification view\n\nThe 90-degree lateral magnification view clearly demonstrates layering (\u201cteacup\u201d appearance) of the same calcifications\n\nNote the increased conspicuity on 90-degree lateral magnification view\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nRepresents sedimented calcifications in small cysts\n\nClassically high-density calcium which changes shape between the CC and ML views\n\nIndistinct, amorphous, circular/oval on CC view (en face view)\n\nAssumes \u201cteacup\u201d, semi-lunar, or meniscus appearance on 90-degree lateral\n\nMagnification views of calcifications permit better depiction of morphology\n\nBeam must be directed horizontally (90 degrees) to calcifications\n\nMLO magnification views will NOT optimally depict milk of calcium\n\nOccasionally, leaving the patient in ML compression for 2 to 3 minutes will permit calcium to layer in the dependent portion of the microcysts and be more clearly depicted\n\nCalcium oxalate, which can manifest as microcalcifications on mammography requires polarized light microscopy for accurate identification by histology\n\nBeware the satisfaction of search\n\nMalignant calcifications can coexist in patients with benign calcifications\nManagement\nBIRADS\u00ae Category 2: Benign findings\n\nAnnual screening mammography",
+      "question_image": "case_018.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-019",
+      "source_note_id": "1782291716170",
+      "label": "Case 19",
+      "history": "Screening mammogram (left breast images included).",
+      "diagnosis": "Complicated Cyst",
+      "question_images": [
+        "case_019.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: There is a round-to-oval equal-density, circumscribed mass (circles) in the subareolar breast\n\nUltrasound: There is a parallel, hypoechoic mass with posterior acoustic enhancement and no Doppler flow\nDifferential Diagnosis\nSimple cyst (with artifactual internal echoes)\n\nGalactocele\n\nSolid mass\n\nFibroadenoma\n\nMucinous carcinoma\n\nIf thick wall, thick septations, and/or mural nodule/intracystic mass present, consider the differential for complex cyst\n\nIntraductal papilloma\n\nIntracyctic papillary DCIS\n\nInvasive ductal carcinoma (high-grade IDC can be a circumscribed, nearly anechoic mass)\nTeaching Points\nCommonly encountered\n\nComplicated cysts contain internal echoes that may or may not be mobile during real-time ultrasound scanning\n\nMay have a layered appearance (fluid/debris level)\n\nMay shift with changes in positioning\n\nThe absence of blood flow is not a reliable discriminator for cystic versus solid masses as not all solid masses will demonstrate Doppler flow\n\nMay be palpable/symptomatic or detected incidentally\n\nMost commonly seen in mid 40s to early 50s\n\nFrequently co-exist with simple cysts\nManagement\nIf incidental/asymptomatic, and mobile internal echoes or fluid/debris level present, annual screening recommended\n\nIf atypical features, non-mobile echoes present, or concern that the mass is solid, then ultrasound-guided aspiration recommended\n\nNon-bloody aspirate should be discarded as it is unreliable for diagnosis\n\nIf new/enlarging or painful, ultrasound-guided aspiration/biopsy should be considered for diagnosis and/or symptomatic relief",
+      "question_image": "case_019.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-020",
+      "source_note_id": "1782291716172",
+      "label": "Case 20",
+      "history": "Painful, erythematous mass in the left breast, upper outer quadrant.",
+      "diagnosis": "Abscess",
+      "question_images": [
+        "case_020.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nIncreased soft tissue density and an obscured mass at the 2 o\u2019clock position (skin BB marker)\n\nTrabecular thickening, skin thickening (arrowheads), and axillary adenopathy (arrows)\n\nUltrasound:\n\nIrregular, heterogeneously hypoechoic mass with a thickened rim and posterior acoustic enhancement\n\nDuring real-time scanning, some mobile internal debris was evident. An enlarged axillary lymph node correlates with the mammogram findings\n\nClinical exam demonstrates marked erythema, skin thickening, and extreme tenderness\nDifferential Diagnosis\nHigh-grade invasive ductal carcinoma with features of inflammatory carcinoma\nTeaching Points\nBegins as mastitis\n\nMost common organisms are Streptococcus and Staphylococcus entering through broken skin or nipple\n\nTypically subareolar but may be peripheral, as in this patient\n\nUltrasound is the favored imaging modality in patients less than 30 years old\n\nPatients may not tolerate mammography due to pain\n\nMost common in lactating mothers (puerperal mastitis)\n\nMay occur in immune-compromised or diabetic patients\n\nChronic smokers may have recurrent subareolar abscess formation\n\nCan develop spontaneous periareolar fistulas\nManagement\nCulture (aspiration can be performed by palpation or using ultrasound guidance)\n\nAntibiotic therapy (oral or intravenous depending on size/organism)\n\nLarger abscesses may require indwelling catheter placement or surgical treatment\n\nMust follow up to complete clinical resolution to exclude underlying carcinoma",
+      "question_image": "case_020.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-021",
+      "source_note_id": "1782291716174",
+      "label": "Case 21",
+      "history": "Screening mammogram.",
+      "diagnosis": "Vascular Calcifications",
+      "question_images": [
+        "case_021.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: There are multiple dense, parallel (\u201ctram-track\u201d) calcifications in tubular structures\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nRepresents calcification within the arterial walls (atherosclerosis)\n\nCommon, especially in diabetic and dialysis patients\n\nIncreased frequency with advancing age\n\nMost cases easily recognized\n\nMagnification views may be helpful to delineate detail and confirm diagnosis when early or developing\n\nLook for a non-calcified portion of a vessel leading up to the calcification in order to differentiate from other causes of calcification\n\nWhen atypical imaging features are present consider\n\nSecretory calcifications\n\nDuctal carcinoma in situ (DCIS)\nManagement\nAnnual screening mammography",
+      "question_image": "case_021.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-022",
+      "source_note_id": "1782291716176",
+      "label": "Case 22",
+      "history": "Palpable mass left breast, upper outer quadrant (metallic BB).",
+      "diagnosis": "Lipoma",
+      "question_images": [
+        "case_022.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Oval/lenticular, circumscribed, fat-density, superficial mass (arrowheads)\n\nUltrasound: Parallel homogenous mass with echotexture identical to surrounding fat (arrowheads)\n\nClinical exam demonstrates a non-tender, soft, mobile mass\nDifferential Diagnosis\nClassic appearance demonstrated\n\nHamartoma (fibroadenolipoma) may mimic lipoma when scant fibroglandular elements are present\nTeaching Points\nMay occur anywhere in the breast\n\nMost arise within the subcutaneous fat layer\n\nLess often within the retroglandular fat\n\nMammogram appearance\n\nRadiolucent/fat-density mass with thin radiopaque capsule\n\nCapsule may or may not be visible\n\nTangent mammographic view may depict the mass to better advantage\n\nUltrasound appearance\n\nUltrasound typically not warranted\n\nVariable: isoechoic to mildly hyperechoic relative to adjacent fat lobules\n\nCapsule may or may not be visible\nManagement\nBI-RADS\u00ae Category 2: Benign finding\n\nAnnual screening mammography",
+      "question_image": "case_022.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-023",
+      "source_note_id": "1782291716178",
+      "label": "Case 23",
+      "history": "Screening mammogram (bilateral MLO images shown).",
+      "diagnosis": "Axillary Lymph Node Calcifications",
+      "question_images": [
+        "case_023.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nHyperdensities (calcifications) are present in the axillary lymph nodes bilaterally\nDifferential Diagnosis\nAntiperspirant/deodorant artifact\n\nDDx for \u201chyperdensities\u201d within axillary lymph node\n\nGranulomatous disease (histoplasmosis, tuberculosis, sarcoid)\n\nSilicone from prior implant rupture\n\nMetastatic disease (from breast, ovarian, or papillary thyroid primary)\n\nGold particles from rheumatoid arthritis treatment (uncommon and of historical importance only)\nTeaching Points\nBilateral axillary nodal calcifications are most commonly due to granulomatous disease\n\nUsually coarse, dense with a benign appearance (as in this case)\n\nSilicone from extracapsular rupture of silicone breast implants can migrate into axillary lymph nodes\n\nRuptured implant may be present or may have been explanted\n\nHistory of prior rupture/explantation usually provided\n\nMay see adjacent \u201cfree\u201d silicone in the breast\n\nCalcifications from metastatic malignancy may be unilateral or bilateral\n\nOvarian metastasis calcifications are typically amorphous in morphology (reflect psammoma body formation)\n\nCalcifications from metastatic breast primary may appear similar to the primary tumor (e.g., pleomorphic)\n\nCareful inspection of the ipsilateral mammogram necessary\nManagement\nRecall from screening mammogram when there is an associated suspicious mammographic finding\n\nIf there is a known history of granulomatous disease, then annual screening mammography is appropriate",
+      "question_image": "case_023.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-024",
+      "source_note_id": "1782291716180",
+      "label": "Case 24",
+      "history": "Screening mammogram (left breast images included).",
+      "diagnosis": "Neurofibromatosis Type 1",
+      "question_images": [
+        "case_024.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMultiple masses of varying size project over the left breast on both views\n\nNote the sharp margin and air-crescent, or lucent \u201chalo\u201d (arrow) surrounding many of the lesions (arrowheads)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nAutosomal dominant inheritance pattern\n\nAlso known as von Recklinghausen\u2019s disease\n\nAccounts for 90% of neurofibromatosis patients\n\nResults in multiple, bilateral, raised skin lesions\n\nLesions imaged in profile (tangent) will project from the skin\n\nThose projecting over the parenchyma will have sharp margins and a partial or complete air-crescent\n\nCan mimic a solid mass within the breast\n\nIf uncertain, place a metallic marker over the lesion in question and perform a single tangent view\n\nCareful attention to the underlying parenchyma is critical to avoid overlooking a suspicious finding\n\nCommonly larger and more pronounced in the periareolar tissue\n\nThe imaging technologist should document the presence of multiple raised skin lesions\nManagement\nAnnual screening mammography",
+      "question_image": "case_024.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-025",
+      "source_note_id": "1782291716182",
+      "label": "Case 25",
+      "history": "Decrease in left breast size.",
+      "diagnosis": "Collapsed Saline Breast Implant",
+      "question_images": [
+        "case_025.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Saline implant is collapsed; note the redundant folds and lack of volume on both views (appearance similar to a deflated balloon)\nDifferential Diagnosis\nClassic appearance demonstrated\nTeaching Points\nClinically, patient reports an abrupt change in the breast size/appearance\n\nSometimes associated with blunt trauma\n\nDiagnosis of ruptured saline implant made clinically: Imaging is not required\n\nThis patient was overdue for screening mammography and imaging was requested in advance of implant revision to exclude malignancy before an elective breast surgery\n\nSilicone implant rupture is frequently asymptomatic and may require imaging for diagnosis\n\nUltrasound for extracapsular rupture\n\nNon-contrast MR for intra- or extracapsular rupture\nManagement\nExplantation and replacement as desired by the patient\n\nAnnual screening mammography",
+      "question_image": "case_025.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-026",
+      "source_note_id": "1782291716184",
+      "label": "Case 26",
+      "history": "40-year-old woman with a palpable mass in the right breast.",
+      "diagnosis": "Fibroadenoma",
+      "question_images": [
+        "case_026.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nA metallic BB denotes the palpable area of concern (note: BB not seen on magnification images)\n\nThere is an oval, circumscribed, equal-density mass in the lower inner quadrant, corresponding with the palpable mass\n\nBenign calcifications are noted incidentally\nDifferential Diagnosis\nLactating adenoma (in a pregnant or lactating female)\n\nPhyllodes tumor (when rapidly enlarging, or presenting as a larger mass)\n\nTubular adenoma (rare)\n\nMalignancy (when atypical features are present, such as obscured or irregular margins)\nTeaching Points\nMost common solid mass in women\n\nPeak incidence 20 to 30 years of age\n\nMultiple in 15% to 20% of patients\n\nWhen palpable, typically firm but mobile\n\nMay fluctuate in size during menstrual cycle or pregnancy\n\nMammogram: If classic \u201cpopcorn\u201d or coarse calcifications are present, the mass is definitively benign and no further imaging is warranted\n\nUltrasound: Classic appearance is a homogeneous, hypoechoic, parallel, circumscribed, oval, solid mass\n\nMay or may not demonstrate posterior acoustic enhancement\n\nWhen degenerating, calcifications may cause posterior acoustic shadowing\n\nMay not always demonstrate Doppler flow\n\nMR: Variable appearance, but frequently T2 intense, oval, circumscribed mass with homogeneous persistent enhancement\n\nMay or may not demonstrate non-enhancing internal septations\nManagement\nGiven the palpable presentation of this mass, ultrasound-guided core needle biopsy is recommended for tissue diagnosis (BI-RADS\u00ae Category 4A: Suspicious abnormality, low suspicion for malignancy)\n\nA non-palpable mass with similar imaging features (detected on a baseline screening mammogram) could be followed every six months until 2 years of stability was documented (BI-RADS\u00ae Category 3)\n\nBI-RADS\u00ae Category 3 assessment is reserved for non-palpable, non-calcified, well- circumscribed masses detected on baseline imaging (or in patients without available comparison exams) that have been subjected to a complete imaging evaluation\n\nBI-RADS\u00ae Category 3 assessment should not be assigned to a screening examination",
+      "question_image": "case_026.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-027",
+      "source_note_id": "1782291716186",
+      "label": "Case 27",
+      "history": "Screening mammogram.",
+      "diagnosis": "Implant Capsular Calcifications",
+      "question_images": [
+        "case_027.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nExtensive plaque-like calcifications involve the fibrous capsule of the subglandular saline implant (arrowheads indicate representative areas)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nFibrous (\u201cbiological\u201d) capsules develop around implants shortly after implantation\n\nImperceptible unless calcifications develop\n\nCapsular calcifications are common and benign\n\nMost frequent with implants more than 10 years old\n\nClassic appearance easily recognized\n\nDystrophic, \u201csheet-like\u201d or \u201cplaque-like\u201d\n\nParallel and contiguous with the implant surface\n\nCan be visualized on standard and implant displaced views\n\nMagnification views should be performed if calcifications are suspected to arise from parenchyma\n\nCan be erroneously mistaken for extracapsular rupture\n\nMay persist after explantation of subglandular implants without capsulectomy\n\nCalcifications remain just anterior to the pectoralis muscle\n\nDense, linear, and \u201cplaque-like\u201d\nManagement\nAnnual screening mammography",
+      "question_image": "case_027.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-028",
+      "source_note_id": "1782291716188",
+      "label": "Case 28",
+      "history": "Screening mammogram (and subsequent diagnostic ultrasound).",
+      "diagnosis": "Pseudoangiomatous Stromal Hyperplasia (PASH)",
+      "question_images": [
+        "case_028.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Circumscribed, non-calcified, heterogeneous oval mass in the left upper outer quadrant\n\nUltrasound: Parallel, mixed echogenicity, oval, circumscribed, solid mass without posterior acoustic enhancement or posterior acoustic shadowing\nDifferential Diagnosis\nFibroadenoma\n\nFibroadenolipoma/hamartoma\n\nStromal fibrosis\n\nPhyllodes tumor\nTeaching Points\nTypically incidental finding detected at screening mammography\n\nSimilar imaging features to fibroadenoma\n\nRarely may have architectural distortion or features suspicious for malignancy\n\nCan present as firm, painless palpable mass, or as local increased stroma\n\nBenign overgrowth of stromal tissue\n\nNot considered premalignant or high-risk\n\nMore common in premenopausal females\n\nFine-needle aspiration nonspecific; core needle biopsy required for definitive diagnosis\n\nPathologist must distinguish PASH from low-grade angiosarcoma and phyllodes tumor\n\nCommon incidental finding at core needle biopsy\nManagement\nCore needle biopsy recommended if palpable or enlarging or atypical imaging features at baseline presentation (e.g., angular margins)\n\nReturn to annual screening mammography when core needle biopsy is benign and concordant\n\nLarger masses may require excision",
+      "question_image": "case_028.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-029",
+      "source_note_id": "1782291716190",
+      "label": "Case 29",
+      "history": "58 year-old woman with a palpable mass (indicated by a metallic BB) in the left breast, upper outer quadrant.",
+      "diagnosis": "Sarcoma",
+      "question_images": [
+        "case_029.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: High-density, round, non-calcified mass with circumscribed margins anteriorly, and somewhat ill-defined margins posteriorly. Note the mild lobulation superiorly\n\nUltrasound: Round mass with indistinct margins and heterogeneous echogenicity\nDifferential Diagnosis\nMetastatic lymph node (given the upper outer quadrant location in this case)\n\nInvasive ductal carcinoma\n\nPhyllodes tumor\nTeaching Points\nRare\n\nVarious types described (angiosarcoma, phyllodes tumor, liposarcoma, osteosarcoma)\n\nMay contain fibrous or osseous elements\n\nCoarse calcifications may develop with osseous elements\n\nFrequently present as a palpable, painless, and rapidly enlarging mass\n\nMay arise from breast or chest wall\n\nUltrasound or contrast-enhanced MR may help delineate origin\n\nAngiosarcoma may arise as a fast-growing vascular mass after breast irradiation\n\nHighly malignant\n\nPoor prognosis for many of the types, depending on the grade\nManagement\nCore needle biopsy for tissue diagnosis\n\nMastectomy versus wide local excision for definitive surgical therapy\n\nStaging evaluation\n\nHematogenous spread: metastasizes to the lung, bone, and liver\n\nLymph node metastases are rare; therefore, axillary lymph node dissection not usually indicated",
+      "question_image": "case_029.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-030",
+      "source_note_id": "1782291716192",
+      "label": "Case 30",
+      "history": "53 year-old woman with left breast swelling and erythema.",
+      "diagnosis": "Inflammatory Breast Carcinoma",
+      "question_images": [
+        "case_030.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Diffuse skin thickening (arrowheads), increased trabecular markings, and overall hazy (or \u201cwhiter\u201d) appearance, due to edema and decreased compressibility of the breast\n\nLarge axillary lymph nodes are present (arrows)\n\nPhotograph (from another patient) demonstrates clinical findings of erythema, peau d\u2019orange, edema\n\nNote the raised erythematous lesions (arrowheads)\n\nThere is tissue breakdown and discharge adjacent to the nipple (not a typical feature)\nDifferential Diagnosis\nMastitis\n\nMastitis complicated by abscess\n\nWhen unilateral breast edema is present, consider the following (unlikely in this particular case given the presence of adenopathy)\n\nPrevious breast conservation/radiation therapy\n\nTrauma\n\nVenous obstruction (in the setting of an indwelling catheter)\n\nAsymmetric edema from congestive heart failure due to preferential positioning (i.e., sleeping on one side)\nTeaching Points\nRare, accounts for approximately 1% of all breast cancers\n\nMammogram findings are variable (classic findings shown in this case) and may also include\n\nBreast mass\n\nNipple retraction\n\nFocal asymmetry\n\nSuspicious microcalcifications (uncommon)\n\nUsually a clinical diagnosis\n\nUltrasound demonstrates skin thickening and edema\n\nLower-frequency transducer may improve penetration\n\nIn few patients, may detect underlying mass\n\nOften large and multifocal\n\nMay help direct biopsy\n\n\u201cPunch\u201d skin biopsy demonstrates tumor cells invading the dermal lymphatics\n\nAggressive, with poor prognosis\nManagement\nDiagnosis with \u201cpunch\u201d skin biopsy and/or ultrasound-guided core needle breast biopsy\n\nIf there is high clinical suspicion for mastitis, a brief course of antibiotic therapy may be considered; however, biopsy should be performed if no clinical improvement is documented in 2 to 3 weeks\n\nMultimodal therapy including mastectomy, chemotherapy, and radiation may improve survival\n\nNeoadjuvant chemotherapy is increasingly utilized as first-line treatment",
+      "question_image": "case_030.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-031",
+      "source_note_id": "1782291716194",
+      "label": "Case 31",
+      "history": "Abnormal screening mammogram (diagnostic mammogram images shown).",
+      "diagnosis": "Radial Scar",
+      "question_images": [
+        "case_031.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nArchitectural distortion in the upper outer quadrant (circles)\n\nNote the long spicules, and relative central lucency (arrowheads) on the spot magnification view\nDifferential Diagnosis\nInvasive ductal carcinoma\n\nInvasive lobular carcinoma\n\nTubular carcinoma\n\nArchitectural distortion from prior lumpectomy/biopsy\nTeaching Points\nBenign lesion that can simulate malignancy mammographically\n\nDespite the term \u201cscar,\u201d it is not the result of prior trauma or surgery\n\nClassic mammographic features shown but may also demonstrate:\n\nCentral density\n\nAssociated microcalcifications\n\nNonspecific and variable ultrasound appearance\n\nRanges from non-apparent to an ill-defined, hypoechoic mass to a shadowing irregular mass with features similar to invasive ductal carcinoma\n\nMay have associated atypical ductal hyperplasia, low-grade DCIS or tubular carcinoma\n\nHas multiple synonyms in the literature and in practice\n\nComplex sclerosing lesion, radial sclerosing lesion, non-encapsulated sclerosing lesion\n\nPathologists may differentiate terminology based on size\n\n<1 cm: radial scar\n\n>1 cm: complex sclerosing lesion\n\nUsually an incidental, asymptomatic finding\nManagement\nBiopsy is warranted\n\nRadial scar cannot be distinguished from malignancy based on imaging\n\nControversy exists over method of biopsy\n\nPercutaneous core needle biopsy (PCNB) versus excisional biopsy when radial scar is the favored diagnosis\n\nPCNB can be performed; however, surgical excision is usually recommended when radial scar is found at core biopsy\n\nReports of associated or adjacent malignancy\n\nMay be under-sampling with PCNB",
+      "question_image": "case_031.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-032",
+      "source_note_id": "1782291716196",
+      "label": "Case 32",
+      "history": "Screening mammogram.",
+      "diagnosis": "Direct Silicone Injections",
+      "question_images": [
+        "case_032.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nInnumerable high-density round masses with \u201ceggshell\u201d calcifications throughout both breasts (silicone granulomas)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\n\nParaffin injections can have a similar appearance\nTeaching Points\nBreast augmentation with various injected substances, including paraffin, was first documented in the early 1900s\n\nSilicone injections were first reported in Japan in 1946\n\nSilicone was frequently contaminated or adulterated\n\nReported complications include disfigurement, granuloma formation, migration, pulmonary emboli, and rarely death\n\nCoalescence of the liquid silicone forms masses called oleomas\n\nBecome palpable\n\nMammography can confirm silicone granuloma\n\nSignificantly limits physical exam reducing the ability to detect a clinically significant mass\n\nSubstantially reduces sensitivity of screening mammography\n\nRenders mammography almost useless for the detection of early malignancy in certain patients\n\nUltrasound demonstrates a \u201csnowstorm\u201d appearance\n\nObscures underlying tissue and limits evaluation\n\nIllegal practice in the United States\n\nStill performed in parts of Asia\nManagement\nCounsel patients regarding limitations of mammography and ultrasound imaging for breast cancer screening\n\nContrast-enhanced MR may be considered for screening, given reduced sensitivity of mammography and ultrasound\n\nGranulomas may enhance, confounding imaging and interpretation",
+      "question_image": "case_032.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-033",
+      "source_note_id": "1782291716198",
+      "label": "Case 33",
+      "history": "37-year-old woman with a tender, palpable, tubular mass in the right breast.",
+      "diagnosis": "Mondor Disease (Also Known as Mondor\u2019s Disease)",
+      "question_images": [
+        "case_033.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nThe palpable mass corresponds with a superficial, dilated, tubular hypoechoic/ anechoic structure with no demonstrable flow by color Doppler (circled on full view; arrowheads on magnification view)\nDifferential Diagnosis\nDilated duct\nTeaching Points\nUncommon\n\nBenign superficial thrombophlebitis of the thoracoepigastric, lateral thoracic, or superior epigastric vein\n\nClassically presents as a palpable cord (with or without associated tenderness)\n\nTypically occurs in younger patients (third to fifth decade)\n\nIncidence: women > men (3:1)\n\nMost cases are idiopathic, self-limiting, and inconsequential\n\nChronic thrombophlebitis may result in vascular calcifications\n\nRare association with underlying breast malignancy, mammography should be performed in patients over age 35\nManagement\nSymptomatic treatment and reassurance; most cases resolve in several weeks",
+      "question_image": "case_033.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-034",
+      "source_note_id": "1782291716200",
+      "label": "Case 34",
+      "history": "Abnormal screening mammogram; magnification views of calcifications shown.",
+      "diagnosis": "Atypical Ductal Hyperplasia (ADH)",
+      "question_images": [
+        "case_034.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nGrouped amorphous (indistinct) calcifications\nDifferential Diagnosis\nLow-grade ductal carcinoma in situ (DCIS)\n\nUsual ductal hyperplasia\n\nFibrocystic change\nTeaching Points\nADH is most often found in association with amorphous calcifications\n\n20% of biopsies for amorphous calcifications will contain ADH\n\nPathologically, defined as having some but not all of the features of low-grade DCIS\n\nNuclei may appear enlarged, irregular, and hyperchromatic\n\nCan be difficult for pathologist to distinguish ADH from DCIS with core needle biopsy samples\n\nADH on core biopsy warrants excisional biopsy\n\nVariable reports of upgrade to malignancy (DCIS or invasive carcinoma)\n\n10% to 25% in large-core biopsy patients\n\nHigh-risk marker for breast cancer\n\nFour- to five-fold increased relative risk\n\nRisk increased bilaterally\nManagement\nTissue diagnosis of microcalcifications with vacuum-assisted stereotactic core needle biopsy (CNB)\n\nWhile ADH found at CNB requires surgical excision, re-excision is not required when present at the margins of a surgical specimen\n\nADH as the only risk factor for breast cancer should not prompt screening MR\n\nWith other risk factors, if calculated lifetime risk exceeds 20%, consider MR screening\n\nConsider chemoprevention (tamoxifen)",
+      "question_image": "case_034.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-035",
+      "source_note_id": "1782291716202",
+      "label": "Case 35",
+      "history": "35-year-old woman with several firm, palpable masses in the right breast.",
+      "diagnosis": "Oil Cysts/Fat Necrosis from a Seat-Belt Injury",
+      "question_images": [
+        "case_035.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMetallic BBs mark the palpable areas of concern. There are multiple round and oval, circumscribed, fat-density masses with varying degrees of peripheral, \u201ceggshell\u201d calcifications (arrowheads)\nDifferential Diagnosis\nNone\u2014classic appearance of oil cysts demonstrated\nTeaching Points\nFat necrosis may result following any trauma to the breast:\n\nBlunt trauma\n\nSurgery (reduction mammoplasty, lumpectomy, reconstruction [e.g., TRAM flap])\n\nIn motor vehicle accidents, the site of breast injury often correlates with seat-belt position\n\nMay also reflect injury from airbag deployment\n\nTiming of injury helpful to correlate with imaging findings\n\nAcute: Breast hematoma\n\nSeveral months: Oil cysts possible\n\nYears: Dystrophic parenchymal calcifications possible\n\nMammography is the preferred imaging modality\n\nMagnified tangent view is helpful to characterize oil cysts and confirm diagnosis\n\nUltrasound often yields a variable and sometimes ominous appearance\n\nMay depict non-specific, round, circumscribed hypoechoic or anechoic masses\nManagement\nBI-RADS\u00ae Category 2: Benign findings\n\nReassure patient\n\nAnnual screening mammography beginning at age 40",
+      "question_image": "case_035.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-036",
+      "source_note_id": "1782291716204",
+      "label": "Case 36",
+      "history": "43-year-old woman with a rapidly enlarging palpable mass in the right breast.",
+      "diagnosis": "Phyllodes Tumor",
+      "question_images": [
+        "case_036.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Round, equal-density, non-calcified mass with partially obscured margins\n\nUltrasound: Round, heterogenously hypoechoic mass with relatively circumscribed margins and associated posterior acoustic enhancement\nDifferential Diagnosis\nFibroadenoma\n\nInvasive ductal carcinoma\nTeaching Points\nRare (<1% of all breast tumors)\n\nPeak incidence 45 to 49 years\n\nSimilar imaging features to fibroadenoma\n\nMany cases demonstrate increased vascularity\n\nIs not a \u201cgiant fibroadenoma\u201d (a term that should not be used)\n\nCommonly presents as a rapidly enlarging palpable mass\n\nPathologically can be benign, locally aggressive or malignant\n\nMost are benign\n\nLarger tumors (>3 cm) more likely to be malignant\n\nPhyllodes means \u201cleaf-like\u201d which describes the stromal growth pattern\nManagement\nUltrasound-guided core needle biopsy for diagnosis\n\nMay be difficult for pathologist to distinguish from fibroadenoma\n\nIf concerned, recommend excision\n\nIf diagnosis of phyllodes confirmed, wide local excision recommended\n\nRadiation therapy reduces local recurrence\n\nMalignant variety spreads hematogenously (similar to sarcomas)\n\nTherefore, axillary lymph node sampling not usually required",
+      "question_image": "case_036.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-037",
+      "source_note_id": "1782291716206",
+      "label": "Case 37",
+      "history": "51-year-old woman with a palpable mass detected by her new physician on routine clinical breast exam.",
+      "diagnosis": "Retained Catheter Cuff",
+      "question_images": [
+        "case_037.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nThe palpable mass corresponds with a retained cuff from a previous central venous catheter (circled)\n\nA portion of a separate, current hemodialysis catheter is also included on the film (arrow)\n\nNote also diffuse skin thickening; this is secondary to edema from chronic fluid overload (arrowheads)\nDifferential Diagnosis\nNone\u2014classic findings demonstrated\nTeaching Points\nMost tunneled central venous catheters (used for long-term venous access, including hemodialysis) have a polyester (Dacron) cuff. Fibrous tissue growth is stimulated by the cuff to anchor the catheter\n\nCuffs are removed via traction or blunt dissection when the catheter is no longer required or has become infected\n\nRetention of catheter cuffs has been widely reported\n\nCatheter cuff retention is typically inconsequential\n\nUsually noted in the upper inner quadrant of the right breast\n\nMay present as a firm, palpable mass\n\nMore commonly found incidentally on a screening mammogram\nManagement\nIn the absence of infection, no action is required\n\nAnnual screening mammography",
+      "question_image": "case_037.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-038",
+      "source_note_id": "1782291716208",
+      "label": "Case 38",
+      "history": "Screening mammogram.",
+      "diagnosis": "Invasive Lobular Carcinoma with Nipple Retraction",
+      "question_images": [
+        "case_038.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Architectural distortion with the suggestion of a lobular mass with spiculated margins in the subareolar breast. The spot magnification image shows margin detail to greatest advantage (circle)\n\nNote the associated nipple retraction (arrowheads)\n\nUltrasound: Lobular, hypoechoic mass with angular margins and posterior acoustic shadowing\nDifferential Diagnosis\nInvasive ductal carcinoma\n\nPostoperative scar\nTeaching Points\nNipple retraction should be distinguished from benign nipple inversion\n\nBenign nipple inversion\n\nOften long-standing and bilateral\n\nCan be corrected (everted) with manual pressure\n\nNipple retraction\n\nMalignancy can result in thickening and shortening of subareolar ducts\n\nNew or increasing retraction should prompt thorough evaluation for underlying malignancy\n\nImaging pitfalls\n\nSubareolar masses may be difficult to perceive mammographically\n\nNipples must be profiled on at least one view (screening exams)\n\nPerform spot magnification views with nipple in profile when patient presents for diagnostic evaluation\n\nUltrasound of subareolar tissue must be performed carefully\n\nNipple areolar complex normally shadows\n\nMay need to angle beam to best visualize tissue\n\nPresentation and clinical course\n\nSkin/nipple retraction may be postoperative\n\nCorrelate with prior scars and use mammographic scar markers if necessary\n\nRarely, patient may report bloody or serous nipple discharge\n\nCancers in this location may metastasize to the lymph nodes early\n\nUse ultrasound to evaluate the axilla for possible lymph node metastasis\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nWhen diagnosis confirmed, consider MR to evaluate extent of disease and for ancillary screening of the contralateral breast",
+      "question_image": "case_038.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-039",
+      "source_note_id": "1782291716210",
+      "label": "Case 39",
+      "history": "26-year-old woman who is 39 weeks pregnant with a mobile, soft, palpable mass.",
+      "diagnosis": "Lactating Adenoma",
+      "question_images": [
+        "case_039.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nUltrasound: Circumscribed oval, parallel, mass (arrowheads) with heterogeneous echotexture and internal septa (arrow)\n\nIncreased vascularity on color Doppler\nDifferential Diagnosis\nFibroadenoma\n\nInvasive ductal carcinoma\nTeaching Points\nBenign tumor, related to fibroadenoma and tubular adenoma\n\nMost commonly present in third trimester or during lactation\n\nNew palpable masses in pregnant and lactating patients are common\n\nMust be carefully evaluated to exclude malignancy\n\nClassic imaging findings: circumscribed, homogenously hypoechoic mass with parallel orientation and posterior acoustic enhancement; typically 2 to 4 cm\n\nSimilar imaging features to fibroadenoma\n\nMay be multiple\n\nBut may mimic malignancy when angular margins or internal heterogeneity are present\n\nMost regress after cessation of breast feeding\nManagement\nUltrasound-guided core needle biopsy\n\nConsent for the possibility of a milk fistula\n\nRare and less likely with core needle biopsy than excisional biopsy\n\nFine-needle aspiration may not be diagnostic",
+      "question_image": "case_039.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-040",
+      "source_note_id": "1782291716212",
+      "label": "Case 40",
+      "history": "62-year-old male with a palpable right breast mass.",
+      "diagnosis": "Male Breast Cancer (Invasive Ductal Carcinoma)",
+      "question_images": [
+        "case_040.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Dense lobular mass with minimally spiculated margins (arrowhead) with associated nipple retraction and skin thickening (arrows)\n\nNote the engorged vessels (black arrow)\n\nUltrasound: Irregular, heterogeneously hypoechoic solid mass with microlobulated margins (arrowheads) and an echogenic rim (arrow)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\n\nIn male patients with a palpable mass, consider gynecomastia (but imaging excludes gynecomastia in this case)\nTeaching Points\nRare (<1% of all breast cancers)\n\nClassic mammogram findings: subareolar, high-density, lobulated mass with spiculated margins (similar features to IDC in women)\n\nDistinguish from the \u201cflame shape\u201d of gynecomastia\n\nExtensive gynecomastia can obscure underlying mass\n\nCalcifications uncommon\n\nIntracystic papillary DCIS may have circumscribed margins\n\nUltrasound typically demonstrates irregular hypoechoic shadowing mass\n\nClinically presents as a non-tender, firm palpable mass\n\nNipple retraction more common (compared to female patients)\n\nMean age 60 to 64 years\n\n50% have palpable adenopathy at presentation\n\nSerous or bloody nipple discharge possible\n\nOverwhelmingly male breast cancer is invasive ductal carcinoma (85%)\n\nOther histologic subtypes are unusual\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nIf suspicious axillary lymph nodes are present, tissue-sampling with ultrasound-guided fine-needle aspiration or core needle biopsy may confirm metastatic disease\n\nPerform contralateral mammogram to exclude occult malignancy (uncommon)\n\nRefer patient for genetic counseling\n\nApproximately 10% will have a BRCA2 gene mutation",
+      "question_image": "case_040.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-041",
+      "source_note_id": "1782291716214",
+      "label": "Case 41",
+      "history": "61-year-old woman with a new palpable mass in the left breast.",
+      "diagnosis": "Primary Breast Lymphoma (B-cell)",
+      "question_images": [
+        "case_041.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nLobular, high-density, circumscribed mass\n\nSeveral dense lymph nodes are present in the left axilla on the MLO view\n\nUltrasound\n\nHeterogeneous, irregular, hypervascular mass with indistinct margins and posterior acoustic enhancement\nDifferential Diagnosis\nInvasive ductal carcinoma\n\nMetastatic lymphoma or other non-breast primary malignancy\nTeaching Points\nRare (<0.6% of all breast malignancies)\n\nDiagnosis not usually considered unless patient has a history of lymphoma (treated or concurrently)\n\nNon-Hodgkin lymphoma of the breast is usually secondary to disseminated disease\n\nConsidered primary breast lymphoma when isolated to the breast\n\nTypically presents as a palpable mass\n\n30% to 40% have associated axillary adenopathy\n\nMay appear as circumscribed mass (as in this case) or ill-defined, obscured mass on mammogram\n\nSpiculated margins uncommon\n\nInfrequently may present with multiple masses\n\nNo associated calcifications\n\nUltrasound appearance varies\n\nHypoechoic to nearly anechoic mass\n\nPosterior acoustic enhancement common\n\nTake care to avoid misinterpreting as a cyst\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nWhen biopsy reveals lymphoma, staging recommended to exclude systemic disease",
+      "question_image": "case_041.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-042",
+      "source_note_id": "1782291716216",
+      "label": "Case 42",
+      "history": "Asymptomatic woman with a personal history of left breast cancer.",
+      "diagnosis": "Retained Localization Wire",
+      "question_images": [
+        "case_042.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nExpected changes of lumpectomy and radiation therapy are present (architectural distortion at the lumpectomy site, trabecular thickening, skin thickening and edema)\n\nA portion of a localizing wire, including the distal \u201chook,\u201d is present adjacent to the lumpectomy bed (circle)\n\nA surgical clip is present (arrow)\n\nA scar marker was placed on the skin (arrowhead)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nWire localization is frequently performed in advance of surgical excision\n\nUseful for non-palpable masses\n\nDecreases the rate of positive margins when performed in conjunction with specimen radiography\n\nWire may be inadvertently transected during surgery\n\nRetained wires are uncommon\n\nUsually asymptomatic\n\nComplications are rare, but migration of wire fragments has been reported\n\nIf partially contained in pectoralis muscle, complications more likely\nManagement\nSpecimen radiography should be performed following all preoperative wire localizations to evaluate inclusion of the target and to confirm complete removal of the wire\n\nIf the wire is not entirely included in the specimen, the surgeon should be alerted immediately in the operating room to facilitate prompt removal\n\nThe patient should be informed if a retained wire fragment is present\n\nConsider short-term follow-up to assess for migration\n\nOffer re-excision",
+      "question_image": "case_042.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-043",
+      "source_note_id": "1782291716218",
+      "label": "Case 43",
+      "history": "45-year-old woman with a new, soft, palpable mass in the right breast.",
+      "diagnosis": "Medullary Carcinoma",
+      "question_images": [
+        "case_043.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nEqual-density, non-calcified mass that is predominantly obscured by surrounding dense glandular tissue (difficult to discern on the CC view). There is a partially circumscribed margin superiorly on the MLO view (arrowhead)\n\nProminent axillary lymph nodes are present (circle)\n\nUltrasound\n\nHeterogeneously hypoechoic irregular mass with posterior acoustic enhancement\n\nNote that the superficial margin is smooth and circumscribed, while the posterior margin is microlobulated, with the suggestion of an echogenic halo (arrowhead)\nDifferential Diagnosis\nInvasive ductal carcinoma (high-grade)\n\nMucinous carcinoma\n\nPhyllodes tumor\nTeaching Points\nVariant of invasive ductal carcinoma\n\nLess than 5% of breast cancers\n\nTypical and atypical subtypes exist\n\nMore common in\n\nYounger patients\n\nPatients with Japanese or African-American heritage\n\nMay mimic a benign mass on imaging and clinical exam\n\nMammographic appearance\n\nRound or oval\n\nEqual-density or high-density\n\nMargins may be partially circumscribed\n\nSpiculated margins atypical\n\nCalcifications uncommon\n\nAxillary adenopathy common but may be reactive rather than metastatic disease\n\nUltrasound appearance\n\nRound\n\nHypoechoic, or nearly anechoic with posterior acoustic enhancement\n\nMost margins appear circumscribed, but usually a portion is irregular or angular\n\nInternal vascular flow with color Doppler\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nTypical variety has better prognosis than invasive ductal carcinoma, with a 5-year survival of 89% to 95%",
+      "question_image": "case_043.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-044",
+      "source_note_id": "1782291716220",
+      "label": "Case 44",
+      "history": "47-year-old woman with a palpable mass in the left axilla.",
+      "diagnosis": "Mammographically Occult Breast Cancer Presenting with Metastatic Axillary Lymphadenopathy",
+      "question_images": [
+        "case_044.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nEnlarged, dense, axillary lymph nodes\n\nNo mammographically detectable mass, calcifications, architectural distortion, or other sign of malignancy\nDifferential Diagnosis\nLymphoma\n\nMetastatic carcinoma from extra-mammary site\n\nReactive adenopathy\n\nSystemic illness\n\nCat-scratch disease\nTeaching Points\nUncommon presentation of breast carcinoma\nManagement\nUltrasound-guided fine-needle aspiration of the lymph node for diagnosis\n\nCore needle biopsy may be requested to identify tumor receptor status in patients undergoing neoadjuvant chemotherapy\n\nWhen diagnosis of metastatic adenocarcinoma consistent with a breast primary is confirmed, careful mammographic evaluation is warranted\n\nHigh-quality imaging is imperative in these patients\n\nContrast-enhanced breast MR should be performed if mammography is negative\n\nLesions detected are typically small and/or multifocal\n\nMR-guided biopsy may identify the \u201coccult\u201d malignancy\n\nTreatment is controversial\n\nMastectomy has historically been the treatment of choice, and is still an accepted treatment option\n\nPrimary tumor not always found in the mastectomy specimen\n\nRecently, whole breast radiation without mastectomy has been utilized when the primary malignancy is not detected",
+      "question_image": "case_044.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-045",
+      "source_note_id": "1782291716222",
+      "label": "Case 45",
+      "history": "57 year-old woman with spontaneous left bloody nipple discharge referred for galactography (ductogram).",
+      "diagnosis": "Papilloma (Appearance on Galactogram)",
+      "question_images": [
+        "case_045.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nThere are multiple intraductal masses seen as multiple filling defects (arrowheads) and as abrupt termination of the contrast filled ducts (arrows)\nDifferential Diagnosis\nDuctal carcinoma in situ (DCIS)\n\nPapillary carcinoma\n\nPapillomatosis/multiple papillomas\nTeaching Points\nPapillomas are benign ductal neoplasms\n\nMay bleed into the duct, causing nipple discharge\n\nMost common cause of bloody nipple discharge\n\nPathologic discharge is usually defined as persistent, unilateral, serous or bloody, spontaneous secretion from a single duct\n\nBenign bloody discharge may occur in late pregnancy, early postpartum\n\nDiagnostic mammography is the first-line imaging evaluation of pathologic nipple discharge\n\nAssess for suspicious calcifications or masses\n\nGalactography (ductography) is reserved for the evaluation of pathologic nipple discharge\n\nDirect injection of contrast into the discharging duct\n\nTechnique:\n\nTypically performed immediately prior to surgical excision\n\nMagnifying glass and high-intensity lamp help with visualization of the duct opening\n\n27- or 30-gauge straight or curved needle-catheter system is used to cannulate the discharging duct\n\nWater-soluble contrast (e.g., Conray 60) \u2022 Eliminate air bubbles in tubing \u2022 Include a few drops of methylene blue if requested by surgeon for same-day surgical excision \u2022 Inject 0.2 to 0.3 cc slowly\n\nMagnification CC and ML images after injection\n\nIf extravasation occurs, must reschedule patient in 7 to 10 days\n\nContraindications\n\nContrast allergy\n\nPrior nipple/areolar surgery\n\nAs breast surgeons increasingly perform ductoscopy and/or ductal lavage to evaluate pathologic nipple discharge, galactography is less commonly requested\nManagement\nDirected duct excision (microductectomy) is both diagnostic and therapeutic for resolving bloody nipple discharge",
+      "question_image": "case_045.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-046",
+      "source_note_id": "1782291716224",
+      "label": "Case 46",
+      "history": "Screening mammogram.",
+      "diagnosis": "Explantation (Removal) of Bilateral Subglandular Implants",
+      "question_images": [
+        "case_046.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nArchitectural distortion seen on both the CC and MLO views in the posterior breasts (retroglandular fat) centrally (arrows)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nClinical history is important in interpretation of imaging studies\n\nImaging findings after implant removal (explantation) are variable\n\nMay appear normal\n\nFat necrosis/dystrophic calcifications are common\n\nCapsular calcifications, dense scarring, architectural distortion and/or residual free silicone may result in a more suspicious appearance\n\nFluid may accumulate in the implant cavity (seroma)\nManagement\nBI-RADS\u00ae Category 2: Benign findings\n\nAnnual screening mammography",
+      "question_image": "case_046.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-047",
+      "source_note_id": "1782291716226",
+      "label": "Case 47",
+      "history": "Screening mammogram (right breast images shown).",
+      "diagnosis": "Sternalis Muscle",
+      "question_images": [
+        "case_047.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nTriangular or \u201csail-shaped\u201d density in the medial breast on the CC view (arrowhead); no correlate is present on the MLO view\n\nCleavage view demonstrates the finding to greatest advantage (arrow)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nNormal variant of chest wall musculature\n\nMuscle oriented parallel to sternum\n\nNo known function\n\nUncommon, less than 8% of the population\n\nOccasionally seen on CC view of mammogram\n\nTypically triangular, flame- or \u201csail-shaped,\u201d but may appear rounded\n\nIf the appearance is not classic, recall the patient for a diagnostic evaluation in order to exclude a true mass\nManagement\nAnnual screening mammography",
+      "question_image": "case_047.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-048",
+      "source_note_id": "1782291716228",
+      "label": "Case 48",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Tubular Carcinoma",
+      "question_images": [
+        "case_048.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nSmall, high-density, irregular mass with spiculated margins\n\nNote the spicules extending into surrounding fatty tissue on the spot magnification view (arrows)\n\nUltrasound\n\nIrregular, hypoechoic, non-parallel (vertical orientation) mass with posterior acoustic shadowing and a subtle echogenic rim\nDifferential Diagnosis\nInvasive ductal carcinoma\n\nRadial scar (classically has long spiculations with central lucency)\n\nTubular cancer may coexist with radial scar/radial sclerosing lesions (RS/RSL)\n\nInvasive lobular carcinoma\nTeaching Points\nSpecial type of well-differentiated invasive ductal carcinoma\n\nUncommon, accounts for less than 5% of all invasive breast carcinomas\n\nNamed for histologic appearance: tubule formation with surrounding desmoplastic reaction\n\nUsually screen detected\n\nClassic imaging features demonstrated in this case\n\nSlow-growing (small when detected) and may appear stable mammographically for years\n\nMay have associated calcifications\n\nFavorable prognosis, typically without metastasis at diagnosis\nManagement\nUltrasound-guided core biopsy for tissue diagnosis\n\nOpinions vary regarding the association between RS/RSL and tubular carcinoma\n\nWhen RS/RSL is found at core needle biopsy, and suspicious imaging features are present mammographically (architectural distortion/spiculated mass), surgical excision is recommended to exclude coexisting malignancy\n\nData evolving",
+      "question_image": "case_048.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-049",
+      "source_note_id": "1782291716230",
+      "label": "Case 49",
+      "history": "64-year-old woman with a personal history of breast cancer, for which the patient was treated with right mastectomy 2 years ago.",
+      "diagnosis": "Recurrent Breast Cancer after Mastectomy",
+      "question_images": [
+        "case_049.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nIrregular, hypoechoic, solid mass with a hyperechoic rim (arrows) and non-parallel (vertical) orientation. An underlying rib limits evaluation of the posterior acoustic features (asterisk)\nDifferential Diagnosis\nNew primary breast malignancy arising from residual breast tissue following mastectomy\n\nPostoperative fibrosis (unlikely in this case given imaging features)\nTeaching Points\nMastectomy significantly reduces the risk of local recurrence but does not eliminate risk entirely\n\nRecurrence is most likely to occur in the chest wall or in skin\n\nTypically detected with clinical exam\n\n60% to 80% occur within 2 years of mastectomy\n\nUltrasound is the first-line imaging modality when patients present with clinical symptoms at the mastectomy site\n\nTypically, recurrence manifests as an irregular, hypoechoic solid mass (similar to a primary breast malignancy)\n\nMammography has a limited role in patients post mastectomy\n\nSurveillance of mastectomy sites with annual mammography is controversial and not routinely performed at most institutions\n\nDiagnostic mammography may be performed in symptomatic patients but is rarely contributory\n\nPalpable masses in reconstructed myocutaneous flaps (e.g., TRAM) most commonly represent fat necrosis and not recurrence\n\nMammography will usually confirm the diagnosis and obviate the need for ultrasound or biopsy\n\nFour types of mastectomies\n\nRadical (includes resection of the pectoralis muscle, overlying skin, and axillary lymph node dissection; rarely performed today)\n\nModified radical\n\nSimple\n\nSkin-sparing (more options for reconstruction)\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nIf there is scant tissue surrounding the mass ultrasound-guided fine needle aspiration (FNA) may be preferable and more technically feasible",
+      "question_image": "case_049.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-050",
+      "source_note_id": "1782291716232",
+      "label": "Case 50",
+      "history": "Screening mammogram.",
+      "diagnosis": "Bilateral Axillary Adenopathy Secondary to HIV Infection",
+      "question_images": [
+        "case_050.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMultiple, bilateral, enlarged axillary lymph nodes (circles) without associated calcifications. No suspicious finding is present in the breast parenchyma\nDifferential Diagnosis\nBilateral axillary adenopathy\n\nLymphoma\n\nCollagen vascular disease/rheumatoid arthritis\n\nGranulomatous disease (sarcoidosis, tuberculosis)\n\nMetastatic disease\nTeaching Points\nLymph nodes are frequently included on MLO projections\n\nDifferential considerations differ if unilateral versus bilateral adenopathy\n\nUltrasound may help characterize and narrow differential\n\nEccentric cortical thickening suggests metastatic disease\n\nLoss of fatty hilum is highly suspicious\n\nUniform, smooth cortical thickening suggests reactive adenopathy\n\n\u201cSnowstorm\u201d appearance is consistent with silicone adenopathy\nManagement\nCorrelate with clinical history\n\nIf no known history to explain findings, further evaluation with ultrasound and biopsy of lymph nodes for diagnosis should be considered\n\nUltrasound-guided fine-needle aspiration or core needle biopsy",
+      "question_image": "case_050.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-051",
+      "source_note_id": "1782291716234",
+      "label": "Case 51",
+      "history": "Screening mammogram.",
+      "diagnosis": "Steatocystoma Multiplex",
+      "question_images": [
+        "case_051.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nInnumerable, fat-density, circumscribed, round masses with thin capsules, distributed bilaterally (arrowheads)\n\nMay be more numerous in the axillary tail\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\n\nMay project over the breast parenchyma on mammographic views\nTeaching Points\nSteatocystomas are small, intradermal, 1 to 20-mm papules containing oily fluid (hence fat density on mammography)\n\nBenign lesions\n\nAppear in adolescence\n\nDistributed over the trunk, back, proximal extremities, and external genitalia\n\nIntradermal location distinguishes them from breast parenchymal oil cysts/fat necrosis\n\nTangent (horizontal beam) film may show fat\u2013fluid meniscus\n\nUncommon disorder\n\nAutosomal dominant inheritance pattern described, but many cases are sporadic\nManagement\nAnnual screening mammography",
+      "question_image": "case_051.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-052",
+      "source_note_id": "1782291716236",
+      "label": "Case 52",
+      "history": "40-year-old woman with a palpable mass in the left breast.",
+      "diagnosis": "Saline Implant Valve (Presenting as a Palpable Mass)",
+      "question_images": [
+        "case_052.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nUltrasound\n\nCharacteristic appearance of the filling valve within saline breast implants. Note the hyperechoic linear structure deep to the envelope (arrow)\n\nMammogram\n\nThe metallic BB denoting the patient\u2019s area of concern projects over the saline implant valve. The filling valve is easily seen mammographically (circle)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nInflatable saline implants, tissue expanders, and some double-lumen implants have filling valves or ports\n\nInstilled with sterile saline at the time of implantation\n\nAllows adjustment of size\n\nDifferent valve types\n\nLeaflet \u2022 Unlikely to present as palpable mass\n\nDiaphragm \u2022 More common\n\nValves usually placed in subareolar tissue\n\nMay migrate as implant rotates\n\nMay evert and become palpable (normally the valve protrudes inward)\n\nPatients may present with mobile \u201cmass\u201d\nManagement\nReassure patient\n\nAnnual screening mammography",
+      "question_image": "case_052.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-053",
+      "source_note_id": "1782291716238",
+      "label": "Case 53",
+      "history": "46-year-old woman with a palpable thickening in her left breast.",
+      "diagnosis": "Ultrasound Appearance of Extracapsular Rupture of a Silicone Implant",
+      "question_images": [
+        "case_053.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nUltrasound\n\n\u201cSnowstorm\u201d or \u201cdirty shadowing\u201d appearance of free silicone (increased echogenicity in the near-field with loss of posterior detail)\n\nMammogram\n\nConfirms that the lobular density extends anterior from the implant (arrows), and is consistent with leaking silicone\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nExtracapsular rupture is silicone gel that has leaked into the soft tissue outside both the implant membrane (shell) and the fibrous capsule\n\nFibrous capsule develops shortly after implantation\n\nSilicone causes reverberation and refraction of ultrasound waves, resulting in \u201csnowstorm\u201d or \u201cdirty-shadowing\u201d appearance\n\nAppearance is pathognomonic\n\nDifficult to evaluate deeper tissue\n\nSilicone implant rupture is typically asymptomatic\n\nOver time, most implants will fail (rupture)\n\nThere is no proven increased risk for breast cancer or collagen vascular disease in patients with ruptured silicone implants\nManagement\nInform patient of extracapsular implant rupture\n\nPatient may consider explantation or revision\n\nDifficult to remove all free silicone in most cases\n\nAnnual screening mammography",
+      "question_image": "case_053.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-054",
+      "source_note_id": "1782291716240",
+      "label": "Case 54",
+      "history": "56-year-old asymptomatic woman presents for her annual screening mammogram (CC views shown).",
+      "diagnosis": "Effects of Hormone Replacement Therapy (HRT)",
+      "question_images": [
+        "case_054.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nExams performed 3 years apart demonstrate interval increase of glandular tissue in a bilateral and symmetric pattern. There is no suspicious finding in either breast\nDifferential Diagnosis\nInterval weight loss (which results in increased compressibility of breast tissue)\n\nLactational change (in a lactating patient)\nTeaching Points\nBreast parenchyma normally involutes in postmenopausal patients\n\nMammographic density usually diminishes\n\nDeveloping densities may occur in postmenopausal patients on HRT\n\nMay be symmetric and global (as in this case)\n\nVariable time frame (months to years) for developing after HRT started\n\nMay be focal\n\nView with suspicion to exclude malignancy\n\nDiagnostic mammogram and ultrasound\n\nNatural involution resumes when HRT is discontinued in most patients\n\nBreast parenchymal density is considered an independent risk factor for development of breast cancer\n\nThe Women\u2019s Health Initiative (2002) demonstrated increased risk of invasive breast cancer for women on combination HRT (estrogen and progesterone)\nManagement\nCorrelate with the clinical history\n\nIf bilateral and symmetric, annual screening mammography is appropriate\n\nIf there is a new focal asymmetry, diagnostic mammogram and ultrasound are required to exclude a developing malignancy",
+      "question_image": "case_054.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-055",
+      "source_note_id": "1782291716242",
+      "label": "Case 55",
+      "history": "43-year-old woman with a firm palpable mass in the right upper outer quadrant.",
+      "diagnosis": "Granular Cell Tumor (GCT)",
+      "question_images": [
+        "case_055.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nSubtle, equal-density, irregular mass with spiculated margins (circles)\n\nUltrasound\n\nIrregular, hypoechoic mass with microlobulated margins and dense posterior acoustic shadowing\nDifferential Diagnosis\nInvasive ductal carcinoma (IDC)\n\nInvasive lobular carcinoma (ILC)\n\nTubular carcinoma\nTeaching Points\nRare\n\nTypically benign, but can be locally aggressive or malignant (2%)\n\n5% to 10% are multiple\n\nWhen deep may adhere to pectoralis fascia\n\nMimics invasive ductal carcinoma (IDC) both radiographically and pathologically\n\nIDC is far more common\n\nMisdiagnosis possible\n\nAxillary adenopathy is atypical\n\nCan occur anywhere in the body\n\nHead and neck most common\n\n5% of all GCTs occur in breast\n\nProbably arise from Schwann cells in lobular breast stroma\nManagement\nBI-RADS\u00ae Category 5: Highly suspicious for malignancy\n\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nGood prognosis\n\nWide local excision recommended when diagnosis confirmed at core needle biopsy",
+      "question_image": "case_055.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-056",
+      "source_note_id": "1782291716244",
+      "label": "Case 56",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Lobular Carcinoma In Situ (LCIS)",
+      "question_images": [
+        "case_056.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nSolitary cluster of predominantly round calcifications. No associated mass or architectural distortion\n\nSpecimen radiograph demonstrates inclusion of the calcifications at excision\nDifferential Diagnosis\nDuctal carcinoma in situ (DCIS)\n\nAtypical lobular hyperplasia (ALH)\n\nBenign calcifications (e.g., fibrocystic change, sclerosing adenosis)\nTeaching Points\n\u201cLobular neoplasia\u201d includes LCIS and ALH\n\nHigh-risk lesions associated with increased risk of breast cancer bilaterally\n\nOften multifocal and bilateral\n\nRelative risk approximately 10x\n\nAssociated with invasive lobular carcinoma (ILC)\n\nHigh-risk lesions diagnosed at core needle biopsy may represent malignancy when surgically excised\n\nVariable reports of \u201cupstage\u201d to malignancy (10-27%)\n\nUsually mammographically occult or nonspecific in appearance\n\nFound incidentally at core needle biopsy\n\nUsually when biopsy performed for suspicious calcifications\n\nMore frequent in white patients than African-American patients\n\nMean age 45 years\nManagement\nExcisional biopsy is recommended when LCIS or ALH are present in a core needle biopsy (CNB) specimen\n\nWhile LCIS and ALH found at CNB require surgical excision, re-excision is not required when present at the margins of a surgical specimen\n\nHigh-risk surveillance pattern may be recommended\n\nAnnual MR for additional screening\n\nChemoprevention used in some patients (e.g., tamoxifen)\n\nRarely, patients may elect prophylactic mastectomies particularly if other risk factors are present",
+      "question_image": "case_056.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-057",
+      "source_note_id": "1782291716246",
+      "label": "Case 57",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Low-grade Ductal Carcinoma In Situ",
+      "question_images": [
+        "case_057.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nSolitary cluster of amorphous microcalcifications\nDifferential Diagnosis\nAtypical ductal hyperplasia (ADH)\n\nBenign calcifications (e.g., fibrocystic change, sclerosing adenosis)\n\nLobular neoplasia (LCIS, ALH)\nTeaching Points\nNon-invasive (Stage 0) carcinoma\n\nPotential to become invasive\n\nDCIS is graded as low, intermediate, high\n\nLow grade refers to low nuclear grade (low mitotic activity)\n\nNo necrosis\n\nLittle prognostic value\n\nClassically clustered, amorphous/indistinct microcalcifications on screening mammography\n\nAlso described as \u201cpowdery\u201d or \u201ccotton-ball like\u201d\n\n\u201cAmorphous\u201d is preferred terminology in BI-RADS\u00ae lexicon\n\nLocated within the terminal duct lobular unit (TDLU)\n\nMay be mammographically stable for years; however, stability of microcalcifications should never dissuade biopsy of suspicious findings\n\nRarely low-grade DCIS may be associated with a mass that is detected on clinical exam or by imaging\nManagement\nStereotactic core needle biopsy for tissue diagnosis\n\nCalcifications must be present in core tissue submitted for pathologic analysis\n\nTo assist in surgical planning, document the extent of disease\n\nBiopsy of additional microcalcifications may be required\n\nMost patients will be candidates for breast conserving therapy\n\nMastectomy may be required if extensive\n\nPatients with estrogen-receptor\u2013positive DCIS are typically offered tamoxifen",
+      "question_image": "case_057.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-058",
+      "source_note_id": "1782291716248",
+      "label": "Case 58",
+      "history": "43-year-old diabetic woman (type 1, diagnosed in childhood) with a firm, palpable mass in the left breast.",
+      "diagnosis": "Diabetic Mastopathy",
+      "question_images": [
+        "case_058.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nThere is a vague increased density without a discrete mass or architectural distortion (circles) in the area of palpable concern. No suspicious calcifications are present\n\nUltrasound\n\nThere is focal posterior acoustic shadowing with the suggestion of an indistinct mass\nDifferential Diagnosis\nInvasive ductal carcinoma (IDC)\n\nInvasive lobular carcinoma (ILC)\n\nStromal fibrosis\nTeaching Points\nRare\n\nAlso known as diabetic fibrous breast disease\n\nClassically patients present with firm, palpable mass(es)\n\nOccurs in type 1 diabetics of long duration (average 20 years)\n\nMammogram appearance: symmetric density without a discrete mass\n\nUltrasound appearance: ill-defined mass, frequently with posterior acoustic shadowing\n\nNo increased risk for breast cancer\n\nMR not helpful in discriminating the diagnosis\nManagement\nImaging is nonspecific; therefore, tissue diagnosis with ultrasound-guided core needle biopsy is recommended\n\nFine-needle aspiration does not provide sufficient tissue to establish the diagnosis\n\nSome patients may require excisional biopsy to achieve concordant results",
+      "question_image": "case_058.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-059",
+      "source_note_id": "1782291716250",
+      "label": "Case 59",
+      "history": "Screening mammogram.",
+      "diagnosis": "Static Artifact on Analog (Film-screen) Mammogram",
+      "question_images": [
+        "case_059.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nStar-burst, non-anatomic \u201cplus-density\u201d (darker) artifact resulting from static electric discharge at film surface prior to processing (circle)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nAnalog (film-screen) mammography is susceptible to artifacts\n\nMay obscure normal and/or abnormal findings\n\nMay mimic suspicious findings (e.g., calcifications)\n\nArtifacts may arise from film manufacturing or handling, equipment-related problems, processing, environmental issues, or positioning problems\n\nProcessing is the primary source of artifacts for analog imaging\n\nStatic marks may appear when air in the darkroom is too dry\n\nHumidity should be between 30% and 50%\n\nDigital mammography is also subject to artifacts (but not covered here)\nManagement\nAnnual screening mammography\n\nReview quality control of imaging in accordance with MQSA guidelines/ regulations\n\nConsult lead quality control (QC) tech\n\nConsult physicist\n\nRefer to FDA website www.fda.gov/cdrh/mammography",
+      "question_image": "case_059.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-060",
+      "source_note_id": "1782291716252",
+      "label": "Case 60",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Tattoo Artifact",
+      "question_images": [
+        "case_060.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMultiple groups of heterogeneous hyperdensities. Tangent view confirms that they reside in the dermis (arrow). Clinical exam confirmed a tattoo in this location\nDifferential Diagnosis\nParenchymal microcalcifications\nTeaching Points\nMultiple materials applied to skin contain radiodense material and may mimic suspicious microcalcifications\n\nAntiperspirant containing aluminum most common\n\nCream, ointment, powder\n\nMetallic salts in some tattoo pigments may appear radiopaque\n\nTangent (horizontal beam) mammography will confirm dermal location\n\nCorrelation with physical exam helpful to confirm tattoo location\nManagement\nAnnual screening mammography",
+      "question_image": "case_060.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-061",
+      "source_note_id": "1782291716254",
+      "label": "Case 61",
+      "history": "48-year-old woman with a mass detected on screening mammogram.",
+      "diagnosis": "Apocrine Metaplasia",
+      "question_images": [
+        "case_061.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nLobular circumscribed low-density mass in the lower inner quadrant (arrowheads). No associated calcifications or distortion\n\nUltrasound\n\nClustered microcysts; note thin septa (arrow). No vascular flow was detected on Doppler imaging\nDifferential Diagnosis\nFibrocystic change\n\nComplex cyst (when solid component suspected)\nTeaching Points\nCommon\n\nWomen, ages 40s and 50s\n\nSmall circumscribed lobular nodule with a corresponding cluster of simple cysts suggests apocrine metaplasia\n\nUltrasound demonstrates tiny (2 to 3 mm) anechoic cysts with thin intervening septations\n\nNo solid component\n\nHigh-frequency transducer required for optimal imaging\n\nMilk of calcium may coexist\nManagement\nAnnual screening mammography\n\nWhen classic features present\n\nShort-term follow-up BI-RADS\u00ae Category 3\n\nWhen classic features are not optimally demonstrated on ultrasound\n\nCore needle biopsy is warranted when new, painful, enlarging, or solid component suspected\n\nLower threshold in postmenopausal women\n\nAspiration can be done; however, mass may not resolve due to the many septa",
+      "question_image": "case_061.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-062",
+      "source_note_id": "1782291716256",
+      "label": "Case 62",
+      "history": "32-year-old lactating woman with a new palpable mass.",
+      "diagnosis": "Galactocele",
+      "question_images": [
+        "case_062.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nOval, nearly anechoic mass with posterior acoustic enhancement. No discernable internal vascular flow with Doppler imaging\nDifferential Diagnosis\nSimple cyst\n\nComplicated or complex cyst (if internal echoes present)\nTeaching Points\nFocal collection of breast milk\n\nUncommon\n\nOccurs in lactating females or patients who recently discontinued lactation\n\nFew reports described in female and male infants\n\nMay mimic fibroadenoma or malignancy on clinical exam\n\nMammogram appearance\n\nTypically a circumscribed, round or oval, equal-density mass\n\nFat\u2013fluid level may be seen on lateral view\n\nMost patients are imaged with ultrasound, so rarely seen in practice\n\nHigh lipid content may result in more radiolucent appearance\n\nCan mimic lipoma or hamartoma\n\nUltrasound shows circumscribed, round or oval mass\n\nAnechoic or low-level internal echoes\n\nMay have fluid\u2013debris level\n\nMay have internal echoes mimicking a solid component\n\nConsider aspiration to exclude a true complex mass\nManagement\nIf uncertain of the diagnosis or if the patient is symptomatic, aspiration can be performed (but is not typically required)\n\nDemonstrates milk/milky fluid",
+      "question_image": "case_062.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-063",
+      "source_note_id": "1782291716258",
+      "label": "Case 63",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Metastatic Ovarian Cancer to the Breast",
+      "question_images": [
+        "case_063.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nLobular, high-density mass with circumscribed margins and associated dense microcalcifications in the upper outer quadrant\n\nMagnified images show innumerable calcifications in multiple lymph nodes\nDifferential Diagnosis\nMetastatic breast carcinoma\n\nSilicone granuloma after implant rupture\n\nGranulomatous disease (e.g., tuberculosis, sarcoidosis)\n\nMetastatic thyroid carcinoma (rare)\n\nGold particles from rheumatoid arthritis treatment (rare)\nTeaching Points\nMetastasis of extra-mammary primary malignancy to the breast is uncommon\n\nHematogenous spread\n\nMelanoma most common\n\nDark tissue at core biopsy\n\nIn this case, ovarian cancer (papillary serous adenocarcinoma) metastasized to an intramammary lymph node and axillary lymph nodes\n\nPoor prognosis\n\nClinical history of known primary malignancy helpful\nManagement\nUltrasound-guided core needle biopsy for diagnosis\n\nWhen diagnosis of metastatic disease confirmed, clinical management for primary malignancy\n\nConsider genetic counseling/testing\n\nBRCA gene mutations are associated with breast and ovarian cancer",
+      "question_image": "case_063.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-064",
+      "source_note_id": "1782291716260",
+      "label": "Case 64",
+      "history": "55-year-old asymptomatic woman.",
+      "diagnosis": "Synchronous Bilateral Breast Cancer",
+      "question_images": [
+        "case_064.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nRight breast: Subtle architectural distortion in the outer breast on the CC projection (circle), better demonstrated on the spot magnification CC view (circle)\n\nLeft breast: Group of linear branching (\u201ccasting\u201d) microcalcifications in the upper outer quadrant (circles). The associated density is suspicious for an invasive component of malignancy (arrowheads) amidst ductal carcinoma in situ (best appreciated on specimen radiograph)\nDifferential Diagnosis\nRight breast\n\nInvasive lobular carcinoma (ILC)\n\nInvasive ductal carcinoma (IDC)\n\nRadial scar\n\nLeft breast\n\nInvasive ductal carcinoma with extensive intraductal component\n\nDuctal carcinoma in situ (DCIS)\nTeaching Points\nSynchronous bilateral breast cancer is uncommon\n\nPrevalence reported from 1% to 3%\n\nHas variable definitions in the literature\n\nRange includes as short as 3 months to as long as 12 months following the diagnosis of an index cancer\n\nHigher incidence with tumors having lobular histology (up to 30%)\n\nHigher risk for multifocal/multicentric disease\n\nBilateral cancers may or may not have similar imaging features\n\nGenetic counseling should be considered in patients who present with bilateral cancer\n\nHigher risk for genetic disposition\n\nResist satisfaction of search\n\nLower your threshold for biopsy in patients with a known index cancer\n\nBoth in the affected breast, and the contralateral breast\nManagement\nBilateral image-guided percutaneous core needle biopsy for tissue diagnosis\n\nConsider contrast enhanced MR to evaluate extent of disease bilaterally",
+      "question_image": "case_064.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-065",
+      "source_note_id": "1782291716262",
+      "label": "Case 65",
+      "history": "58-year-old woman with a new palpable mass in the left breast.",
+      "diagnosis": "Invasive Papillary Carcinoma",
+      "question_images": [
+        "case_065.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nHigh-density lobular mass with partially circumscribed, partially obscured margins. No associated calcifications. No associated architectural distortion\n\nUltrasound\n\nLobular, hypoechoic, mass with circumscribed margins and marked increased vascularity on color Doppler imaging\nDifferential Diagnosis\nInvasive ductal carcinoma\n\nPhyllodes tumor\n\nFibroadenoma (in younger patients)\nTeaching Points\nRare (approximately 0.5% of invasive breast cancers)\n\nMean age 65 years\n\nInvasive carcinoma with exclusively papillary morphology\n\nPathologist must distinguish from other malignant papillary neoplasms\n\nNot the same entity as invasive micro-papillary carcinoma (IMPC) \u2022 IMPC is more aggressive with poorer prognosis\n\nClassic presentation\n\nMammogram\n\nSolitary, predominantly circumscribed, high-density, round or oval mass, frequently in the central breast\n\nMay have partially obscured or indistinct margin\n\nCommonly large (2 to 3 cm) at diagnosis\n\nUltrasound\n\nSolid or complex cystic mass with increased vascularity on color Doppler imaging\n\nTypically favorable prognosis\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nWhen presenting as a complex cystic mass, target the solid component for best sampling",
+      "question_image": "case_065.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-066",
+      "source_note_id": "1782291716264",
+      "label": "Case 66",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Invasive Ductal Carcinoma with Extensive Intraductal Component (EIC)",
+      "question_images": [
+        "case_066.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nHigh-density irregular mass with spiculated margins in lower inner left breast. A few faint calcifications are associated with the mass\n\nNote the prominent duct anterior to the mass, suggesting intraductal extension (arrow)\n\nUltrasound\n\nIrregular hypoechoic mass with indistinct margins and marked posterior acoustic shadowing\nDifferential Diagnosis\nDuctal carcinoma in situ (less likely, given the presence of a mass)\n\nInvasive lobular carcinoma\nTeaching Points\nTumors are classified as having an extensive intraductal component (EIC) when\n\nPredominantly intraductal, with small areas of invasion, or\n\nPrimarily invasive, with DCIS filling ducts within the invasive tumor, or\n\nDCIS is present adjacent to the invasive tumor\n\nAssociated with higher risk for local recurrence\n\nEvaluating extent of disease is important in surgical planning\n\nMagnification views best depict extent of microcalcifications\n\nClassic mammographic appearance depicts a suspicious mass with associated and adjacent suspicious microcalcifications\n\nNon-calcified DCIS can be mammographically occult\n\nTubular (ductal) density associated with a mass is suspicious (as in this case)\n\nUltrasound may demonstrate findings of ductal extension\n\n\u201cTail\u201d of index mass extending into a duct\n\nHypoechoic material/mass within a dilated duct\n\nResist satisfaction of search\n\nLook carefully for associated calcifications and other masses when a suspicious abnormality is detected\nManagement\nUltrasound-guided core biopsy for tissue diagnosis\n\nWhen DCIS and invasive malignancy found on core biopsy, EIC probable\n\nMultiple wire localization (\u201cbracket\u201d needle localization) recommended to include the full extent of disease\n\nClose correlation with specimen radiograph required\n\nIn cases with extensive microcalcifications, consider post-excision (pre-radiation) mammogram with magnification views of the surgical site, to document complete excision, even when surgical margins are histologically negative",
+      "question_image": "case_066.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-067",
+      "source_note_id": "1782291716266",
+      "label": "Case 67",
+      "history": "Screening mammogram.",
+      "diagnosis": "Invasive Ductal Carcinoma as a One-view Finding",
+      "question_images": [
+        "case_067.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nFocal asymmetry with architectural distortion in the upper breast, seen only on the MLO projection (larger white circle indicates the finding; the smaller circle is a mole marker placed on the skin)\n\nCould not be demonstrated on any CC projections\n\nUltrasound\n\nHypoechoic, irregular solid mass with angular margins in the upper inner quadrant (the entire upper breast was imaged in order to correlate with the one-view mammogram finding)\nDifferential Diagnosis\nTubular carcinoma\n\nRadial scar (much less likely given ultrasound appearance)\nTeaching Points\nDiagnostic evaluation was performed in an attempt to localize and characterize the initial finding (in this case exaggerated lateral CC and cleavage views were obtained)\n\nTailored views may assist in localizing a one view finding in the orthogonal plane\n\nWhen a finding is seen on MLO but not CC, measure the posterior nipple line (PNL)\n\nPNL on CC view should be within 1 cm of PNL on MLO view. If not, then deep tissue excluded from CC view. Repeat CC or perform exaggerated views\n\nAsymmetry may be the only imaging feature of carcinoma on screening examinations\n\nOne-view finding by definition\n\nMost asymmetries represent summation artifact\n\nAny new or developing asymmetry should be evaluated with diagnostic imaging\n\nEspecially in retroglandular fat, medial breast, subareolar breast\n\nView with greater suspicion when associated with\n\nArchitectural distortion\n\nUnderlying solid mass\n\nMicrocalcifications\n\nOr when palpable\n\nComparing right and left breasts (\u201cback-to-back\u201d) will help improve detection of masses that project over the pectoralis muscle\n\nPitfall: Mistaking a suspicious mass/asymmetry for a normal lymph node projecting over the pectoralis muscle on the MLO view\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis",
+      "question_image": "case_067.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-068",
+      "source_note_id": "1782291716268",
+      "label": "Case 68",
+      "history": "63-year-old asymptomatic woman who underwent breast conservation therapy (BCT) four years ago.",
+      "diagnosis": "Recurrent Ductal Carcinoma In Situ (DCIS)",
+      "question_images": [
+        "case_068.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nFine linear branching calcifications are noted anterior to the lumpectomy bed (arrowheads)\nDifferential Diagnosis\nFat necrosis (highly unlikely in this case, given morphology of the calcifications)\nTeaching Points\nDiagnostic mammography should be performed annually in patients who have undergone BCT\n\nIn the first 5 years following BCT, magnification views of the lumpectomy bed should be performed\n\nMore difficult to detect recurrent cancer in a treated breast due to\n\nArchitectural distortion from surgery\n\nRadiation changes\n\nFat necrosis commonly occurs in the lumpectomy bed\n\nTypically round, lucent center\n\nTypically develops more than 2 years post-treatment\n\nCareful analysis of the calcification morphology can allow discrimination between most benign and suspicious findings\n\nBiopsy indeterminate findings\n\nNSABP-B-60 (National Surgical Adjuvant Breast and Bowel Project) trial data\n\n70% of ipsilateral recurrences occurred within 10 years of BCT\n\n40% in the first 5 years\n\n30% in the second 5 years\n\nRecurrence rarely occurs in the first 18 months following completion of therapy\nManagement\nStereotactic core needle biopsy for tissue diagnosis\n\nMastectomy recommended for patients with recurrent malignancy following BCT",
+      "question_image": "case_068.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-069",
+      "source_note_id": "1782291716270",
+      "label": "Case 69",
+      "history": "New screen-detected mass in the left breast, lower inner quadrant.",
+      "diagnosis": "Ductal Adenoma",
+      "question_images": [
+        "case_069.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nRound, non-calcified, equal-density mass. Note the partially obscured border (arrowheads)\n\nUltrasound\n\nRound, hypoechoic, solid, circumscribed mass with mild posterior acoustic enhancement\nDifferential Diagnosis\nFibroadenoma\n\nLactating adenoma (in a pregnant or lactating female; typically presents as a palpable mass)\n\nMalignancy (high-grade invasive ductal carcinoma, mucinous carcinoma)\nTeaching Points\nAlso known as tubular adenoma\n\nRare\n\nBenign\n\nRelated to fibroadenoma\n\nTypically encountered in younger patients\n\nMay present as a palpable mass on clinical exam\n\nMay be screen-detected in patients over 40 years\n\nClassic appearance\n\nMammogram\n\nRound or oval, circumscribed mass\n\n+/- calcifications\n\nUltrasound\n\nRound or oval, circumscribed homogeneously hypoechoic mass\n\nSimilar imaging appearance to fibroadenoma in younger patients\n\nMay have indeterminate or suspicious features in older patients\nManagement\nBI-RADS\u00ae Category 4: Suspicious abnormality\n\nUltrasound-guided core needle biopsy for tissue diagnosis",
+      "question_image": "case_069.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-070",
+      "source_note_id": "1782291716272",
+      "label": "Case 70",
+      "history": "Baseline screening mammogram.",
+      "diagnosis": "Bilateral Benign-Appearing Masses (Rule of Multiplicity)",
+      "question_images": [
+        "case_070.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMultiple, bilateral, round to oval, predominantly circumscribed, non-calcified equal-density masses\nDifferential Diagnosis\nMultiple bilateral benign cysts\n\nMultiple bilateral fibroadenomas\nTeaching Points\nMultiple bilateral benign-appearing masses are most likely cysts or fibroadenomas\n\nNo increased risk for breast cancer\n\nDiagnostic workup not required, as outlined below\n\nCriteria to invoke rule of multiplicity and assign BI-RADS\u00ae Category 2 assessment on screening examination\n\nAt least three masses present (at least one mass in each breast)\n\nCircumscribed margins (more than 75% clearly visible)\n\nNo indistinct or spiculated margins may be present\n\nNo suspicious microcalcifications\n\nMasses must appear generally similar in shape, size, density\n\nDiagnostic evaluation REQUIRED when\n\nAny suspicious finding superimposed on bilateral benign-appearing masses\n\nInterval increase in size of one mass\n\nOr development of suspicious features\n\nPalpable mass present\n\nMultifocal/multicentric cancer is typically unilateral\n\nCritical that masses be bilateral in order to assign a benign assessment\nManagement\nBI-RADS\u00ae Category 2: Benign findings\n\nAnnual screening mammography",
+      "question_image": "case_070.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-071",
+      "source_note_id": "1782291716274",
+      "label": "Case 71",
+      "history": "54-year-old woman undergoing annual screening mammography.",
+      "diagnosis": "Bilateral Benign Metastatic Calcifications in a Patient with Renal Failure and Hyperparathyroidism",
+      "question_images": [
+        "case_071.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMultiple, bilateral, coarse, diffuse calcifications superimposed on a background of punctuate and round diffuse calcifications\n\nAlso note the extensive vascular calcifications (arrows)\nDifferential Diagnosis\nDermatomyositis (produces extensive skin calcifications, which at first glance may have a similar appearance)\nTeaching Points\nThis case is an extremely extensive presentation of this diagnosis\n\nChronic renal failure results in altered calcium metabolism\n\nLeads to secondary hyperparathyroidism\n\nCan result in metastatic soft tissue calcifications\n\n\u201cMetastatic\u201d in this context does not refer to a malignant or neoplastic process, but rather names the accumulation of calcium salts in previously healthy tissues\n\nBenign breast calcifications are very common in dialysis patients\n\nVascular\n\nStromal\n\nSecretory\n\nSkin\n\nCan occur in patients on dialysis or post-transplant\nManagement\nBI-RADS\u00ae Category 2: Benign findings\n\nAnnual screening mammography",
+      "question_image": "case_071.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-072",
+      "source_note_id": "1782291716276",
+      "label": "Case 72",
+      "history": "49-year-old woman with a history of atypical ductal hyperplasia (ADH) excised from the right breast upper outer quadrant three years ago.",
+      "diagnosis": "Atypical Ductal Hyperplasia (ADH) at Site of Previous Excisional Biopsy for ADH",
+      "question_images": [
+        "case_072.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nAmorphous and indistinct microcalcifications on the CC view (circle)\n\nCalcifications appear to have a linear distribution on the lateral magnification view (arrow)\n\nArchitectural distortion is attributed to previous excision and was stable mammographically\nDifferential Diagnosis\nDuctal carcinoma in situ (DCIS)\n\nBenign calcifications (adenosis, fibrocystic change)\nTeaching Points\nADH is a high-risk marker for breast cancer\n\n4- to 5-fold increased relative risk\n\nRisk increased bilaterally\n\nADH on core needle biopsy warrants surgical excisional biopsy\n\nVariable reports (10% to 25%) of upgrade to malignancy (DCIS or invasive carcinoma) at surgical excision\n\nADH is most often found in association with amorphous calcifications\n\nMay coexist with fibroadenomas or papillomas\n\nWhen ADH is present at surgical margins, re-excision is not required\nManagement\nGiven this patient\u2019s history of ADH in the same quadrant previously, excisional biopsy was performed for diagnosis (in lieu of stereotactic core needle biopsy)\n\nFelt to be at high risk for additional ADH or DCIS\n\nPatient is at high risk for developing breast cancer\n\nLower threshold for biopsy in high-risk patients\n\nConsider MR screening in conjunction with annual mammography\n\nChemoprevention (e.g., Tamoxifen) may be considered for risk reduction",
+      "question_image": "case_072.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-073",
+      "source_note_id": "1782291716278",
+      "label": "Case 73",
+      "history": "55-year-old woman undergoing annual screening examination.",
+      "diagnosis": "Normal Fatty Involution of Breast Parenchyma",
+      "question_images": [
+        "case_073.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nBilateral, symmetric, decrease in overall glandular tissue (fatty replacement) since the previous examination. No suspicious finding in either breast\nDifferential Diagnosis\nSignificant weight gain (increase in fatty tissue)\n\nIncorrect patient (consider this when there is a dramatic difference in the overall appearance of exams)\n\nReduction mammoplasty (may result in decreased density, but associated postoperative findings would be present)\nTeaching Points\nAll mammogram reports should contain a description of breast parenchymal density\n\nFour described densities (BI-RADS\u00ae terminology)\n\nAlmost entirely fat (<25% glandular)\n\nScattered fibroglandular densities (25% to 50% glandular)\n\nHeterogeneously dense (51% to 75% glandular)\n\nExtremely dense (>75% glandular)\n\nMammographic density is affected by multiple factors\n\nAge\n\nHormonal status\n\nGenetics\n\nWeight fluctuations\n\nSensitivity of mammography is inversely related to density: as density increases, sensitivity decreases\n\nGenerally, parenchymal density is inverse to age\n\nYounger women have denser breasts\n\nFatty replacement occurs with advancing age\n\nIncreasing parenchymal density is commonly observed when patients are\n\nPregnant/lactating\n\nTaking exogenous hormone replacement therapy (HRT)\nManagement\nAnnual screening mammography",
+      "question_image": "case_073.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-074",
+      "source_note_id": "1782291716280",
+      "label": "Case 74",
+      "history": "Food and Drug Administration (FDA) inspection next week.",
+      "diagnosis": "Phantom Imaging for Quality Assurance",
+      "question_images": [
+        "case_074.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nDigital image of American College of Radiology (ACR) phantom within acceptable parameters\nDifferential Diagnosis\nVariable depending on appearance of phantom\nTeaching Points\nMammography Quality Standards Act (MQSA) of 1992 requires mammography facilities to be accredited, certified, and inspected\n\nIllegal to practice mammography without a current MQSA certificate\n\nFacility is subject to annual FDA inspection\n\nOr state certifying body\n\nACR is an MQSA-approved accreditation body\n\nPhantom imaging for ACR accreditation performed with dosimeter\n\nReviewed by ACR physicists\n\nPhantom imaging is required weekly\n\nImages kept for annual inspection\n\nTests performance of the imaging system\n\nQuantitative evaluation of unit\u2019s ability to image small structures similar to those found in vivo\n\nMaterials embedded within the phantom simulate\n\nCalcifications\n\nTumor masses\n\nDigital and analog mammography systems must score the following on phantom images\n\nFour fibers\n\nThree speck groups\n\nThree masses\n\nFDA requires facilities with digital mammography to follow the quality control (QC) manual from the manufacturer\n\nEach manufacturer has specific QC program for test frequencies and parameters\n\nEvery facility must have a lead interpreting physician to oversee quality assurance (QA) program\n\nConsult lead QC technologist and medical physicist when questions or problems arise\nManagement\nPerform QC in accordance with FDA/MQSA guidelines\n\nFDA website for up-to-date information is http://www.fda.gov/Radiation- EmittingProducts/MammographyQualityStandardsActandProgram/default.htm",
+      "question_image": "case_074.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-075",
+      "source_note_id": "1782291716282",
+      "label": "Case 75",
+      "history": "Screening mammogram.",
+      "diagnosis": "Bilateral Benign Calcifications",
+      "question_images": [
+        "case_075.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nInnumerable, bilateral, diffusely scattered, punctate and round microcalcifications\nDifferential Diagnosis\nImaging artifact (analog mammography)\n\nMimics of calcifications\n\nTalc\n\nAntiperspirant\nTeaching Points\nBilateral diffuse benign calcifications are commonly attributed to\n\nAdenosis\n\nSclerosing adenosis\n\nFibrocystic change\n\nAnalysis of morphology and distribution critical to appropriate management of calcifications\n\nDiffuse, bilateral benign-appearing calcifications do not require diagnostic workup or biopsy\n\nIf new, focal, grouped, or clustered, then additional evaluation with magnification mammography is recommended\n\nPatients with benign calcifications can develop malignancy\n\nLook carefully for morphologically suspicious calcifications superimposed on a background of benign calcifications\n\nExtensive calcifications may raise suspicion for ductal carcinoma in situ (DCIS) when\n\nUnilateral and morphologically suspicious\n\nSegmental rather than diffuse distribution\n\nMost suspicious feature directs management\nManagement\nBI-RADS\u00ae Category 2: Benign findings\n\nAnnual screening mammography",
+      "question_image": "case_075.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-076",
+      "source_note_id": "1782291716284",
+      "label": "Case 76",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Ductal Carcinoma In Situ (Intermediate-Grade)",
+      "question_images": [
+        "case_076.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nClustered pleomorphic microcalcifications with associated linear (\u201ccasting\u201d) calcifications\nDifferential Diagnosis\nInvasive ductal carcinoma\nTeaching Points\nDCIS is graded as low, intermediate, high\n\nIntermediate grade refers to low nuclear grade with focal necrosis\n\nClassically presents as calcifications on screening mammogram\n\nPleomorphic\n\nAmorphous/indistinct\n\nFine linear branching\n\nOccasionally has associated mass/density\n\nConsider ultrasound when density present\n\nMay represent an invasive component of malignancy\n\nUltrasound-guided core needle biopsy may be feasible\n\nCareful diagnostic evaluation required to evaluate extent of disease\n\nMagnification views may reveal additional suspicious calcifications\n\nAssists in surgical planning\n\nDifficult to distinguish grade by imaging, and is clinically unnecessary\n\nPathologic determination made at time of core biopsy/excision\n\nWhen extensive calcifications are present, multiple wire localization (\u201cbracket\u201d needle localization) is recommended to include the full extent of disease\n\nClose correlation with specimen radiograph required\n\nConsider post-excision (pre-radiation) mammogram with magnification views of the surgical site, to document complete excision, even when surgical margins are histologically negative\nManagement\nStereotactic core needle biopsy for tissue diagnosis\n\nGiven the highly suspicious imaging features in this case, any core needle biopsy result yielding benign histology would be considered discordant\n\nDiscordant biopsy results require surgical excision",
+      "question_image": "case_076.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-077",
+      "source_note_id": "1782291716286",
+      "label": "Case 77",
+      "history": "52-year-old woman with a new palpable mass in the left breast.",
+      "diagnosis": "Invasive Ductal Carcinoma (Grade 2) and Ductal Carcinoma In Situ (Low-Grade) in a Patient with Implants",
+      "question_images": [
+        "case_077.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nA subpectoral silicone implant present\n\nNo discernable abnormality is present on the standard views\n\nThe MLO implant-displaced and spot ML magnification views demonstrate architectural distortion corresponding with the palpable mass (circles)\n\nUltrasound\n\nIrregular, hypoechoic mass with indistinct margins and increased vascular flow\nDifferential Diagnosis\nInvasive lobular carcinoma\nTeaching Points\nImplants can make performing and interpreting mammography more challenging\n\nLimit visualization of parenchyma\n\nMake it difficult to achieve adequate compression\n\nCompression may be painful when capsular contracture present\n\nWhen mammography is performed correctly, risk of implant damage is extremely low\n\nStandard CC, MLO, and \u201cimplant-displaced\u201d CC and MLO (also known as Eklund or \u201cpush-back\u201d) views must be performed\n\nNote in this case how the mass is imperceptible on the standard (non-implant displaced) views\n\nIn symptomatic patients with implants, increase reliance on and utilization of ultrasound (US) in conjunction with mammography\n\nEven when fatty replaced on mammogram\n\nDirected US will ensure that a palpable mass is not obscured by the implant mammographically\n\nPalpable mass(es) may represent silicone from extracapsular implant rupture\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nObtain informed consent for possible implant rupture\n\nCareful attention to positioning and needle placement is necessary during the biopsy to avoid damaging the underlying implant\n\nConsider using a cutting needle without a \u201cthrow\u201d for increased control\n\nInject local anesthetic posterior to the mass to increase distance between the target and underlying implant\n\nRarely, percutaneous core needle biopsy may not be technically feasible in patients with implants\n\nConsider fine-needle aspiration or surgical excision for diagnosis when appropriate",
+      "question_image": "case_077.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-078",
+      "source_note_id": "1782291716288",
+      "label": "Case 78",
+      "history": "A 33-year-old woman with a new palpable mass in the right medial breast.",
+      "diagnosis": "Sebaceous Cyst",
+      "question_images": [
+        "case_078.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nSuperficial, homogeneously hypoechoic, oval mass without internal vascular flow\n\nNote the tract extending from the mass to the skin surface (arrow)\nDifferential Diagnosis\nEpidermal inclusion cyst (caused by surgery, biopsy, or penetrating trauma)\n\nSuperficial abscess\n\nMontgomery gland cyst (if periareloar location)\nTeaching Points\nSuperficial, often palpable, cutaneous or subcutaneous epithelial cyst\n\nContains sebaceous glands\n\nClinically presents as\n\nA palpable mass\n\nOften with a visible punctum or \u201cblackhead\u201d at the skin surface\n\nMay be erythematous and tender when inflamed/infected\n\nMore commonly seen in cleavage/medial breast and axilla\n\nMay be entirely in the skin, partially subcutaneous, or mostly subcutaneous with a small tract connecting out to the skin surface\n\nPartially subcutaneous may demonstrate \u201cclaw sign\u201d\n\nHyperechoic skin seen around the subcutaneous portion of the lesion\n\nDeep lesions may show gland neck/tract to skin (as in this case)\n\nImaging evaluation\n\nTangential magnification views may show relationship to skin to best advantage\n\nUltrasound helpful to demonstrate classic findings (as seen in this case)\n\nImaging with standoff pad or extra gel helpful to see tract\n\nIncreased peripheral vascularity common when inflamed\n\nImportant to differentiate from a breast parenchymal neoplasm\n\nCaveat: Do not mistake a superficial suspicious mass for a sebaceous cyst\nManagement\nVery conservative except when infected\n\nBI-RADS\u00ae Category 2 assessment when classic features are present\n\nAspiration is not helpful\n\nThick material may not aspirate, or may reaccumulate\n\nMay precipitate infection or inflammation\n\nCan be surgically excised if clinically indicated",
+      "question_image": "case_078.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-079",
+      "source_note_id": "1782291716290",
+      "label": "Case 79",
+      "history": "62 year-old woman with a palpable mass in the left breast.",
+      "diagnosis": "Multicentric Invasive Ductal Carcinoma",
+      "question_images": [
+        "case_079.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nIrregular high-density mass with spiculated margins in the upper outer quadrant corresponding to the palpable mass\n\nMultiple additional similar-appearing masses (arrows) extend into the upper inner quadrant\n\nNote the extensive lymphadenopathy (circle)\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\nTeaching Points\nMulticentric (MC) disease involves more than two foci of malignancy in different quadrants (or >5 cm total involvement)\n\nTrue MC disease is uncommon\n\nMultifocal (MF) disease involves more than two foci of malignancy in the same quadrant\n\nSignificant treatment and prognostic implications\n\nMC disease typically precludes breast conservation therapy\n\nPatients with either MF and/or MC disease are at increased risk for local recurrence\n\nLower threshold for additional biopsies of findings in the affected breast\n\n\u201cIncidental\u201d lesions with \u201cprobably benign\u201d findings more likely to be malignant\n\nResist satisfaction of search\nManagement\nUltrasound-guided core needle biopsy of two distinct masses for tissue diagnosis and to document full extent of disease\n\nUltrasound-guided fine-needle aspiration (FNA) of the most suspicious axillary lymph node\n\nIf the lymph node FNA yields metastatic disease, then sentinel lymph node sampling is not performed; the patient would undergo axillary lymph node dissection\n\nConsider MR for additional screening of the contralateral breast\n\nMastectomy was performed",
+      "question_image": "case_079.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-080",
+      "source_note_id": "1782291716292",
+      "label": "Case 80",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Ductal Carcinoma In Situ (DCIS) Arising in a Papilloma",
+      "question_images": [
+        "case_080.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nRound, partially circumscribed, partially obscured (arrow), equal-density mass with associated heterogeneous microcalcifications\nDifferential Diagnosis\nBenign papilloma\n\nAtypical papilloma\n\nInvasive ductal carcinoma\nTeaching Points\nPapillary lesions of any type (benign, atypical, or malignant) are relatively rare\n\nMay represent as many as 5% of biopsied lesions, but many series report fewer\n\nPapillary lesions occur within the lactiferous ducts\n\nComposed of frond-like excrescences of tissue consisting of a fibrovascular core or stalk lined with an inner myoepithelial cell layer and an outer epithelial cell layer\n\nPapillary lesions confer an increased risk of breast cancer\n\nBoth DCIS and papillary lesions can present with bloody nipple discharge\n\nDifficult to distinguish benign or malignant papillary features pathologically\nManagement\nUltrasound-guided or stereotactic core needle biopsy for tissue diagnosis\n\nIf a papillary lesion is suspected prospectively, extensive tissue sampling recommended\n\nUniversal agreement to excise papillary lesions with associated atypia or malignancy found at core needle biopsy (CNB)\n\nHowever, a CNB resulting in a \u201cbenign\u201d papilloma may result in atypia or malignancy upon excisional\n\nReports vary as to how many patients are \u201cupgraded\u201d on excision biopsy to atypia or malignancy (range from 0% to 25%)\n\nCareful correlation between imaging and biopsy results recommended \u2022 If the radiologist or pathologist are uncertain, or discordant result, recommend excision",
+      "question_image": "case_080.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-081",
+      "source_note_id": "1782291716294",
+      "label": "Case 81",
+      "history": "Screening mammogram.",
+      "diagnosis": "Global Asymmetric Breast Tissue\u2014Normal Variant",
+      "question_images": [
+        "case_081.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nAsymmetric glandular tissue involving the entire left upper outer quadrant. No mass, architectural distortion, or calcifications present\nDifferential Diagnosis\nPseudoangiomatous stromal hyperplasia (PASH)\n\nInvasive lobular carcinoma (when global asymmetry is new or developing)\nTeaching Points\nGlobal asymmetry by definition involves a quadrant, or more, of the breast\n\nPreviously known as \u201casymmetric breast tissue\u201d\n\nAsymmetric fibroglandular tissue more pronounced in one breast than the other\n\nTypically a normal variant\n\nConcave outward borders\n\nDistinguishes from a mass\n\nInterspersed with fat\n\nFrequently involves the upper outer quadrant\n\nNo mass or architectural distortion present\n\nVisible on both views (unlike focal asymmetry)\n\nLess concerning than a focal asymmetry\n\nIf corresponds with palpable mass, diagnostic mammography and ultrasound required\nManagement\nBI-RADS\u00ae 2: Benign finding\n\nWhen encountered at screening (non-palpable finding), very low probability of malignancy\n\nSuch a dramatic finding would be palpable if malignant\n\nTherefore, annual screening mammography recommended\n\nComparison with previous films always helpful\n\nIf new or developing, biopsy should be considered",
+      "question_image": "case_081.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-082",
+      "source_note_id": "1782291716296",
+      "label": "Case 82",
+      "history": "54-year-old woman undergoing screening mammogram (Select 90\u00b0 lateral magnification mammography images included).",
+      "diagnosis": "Multicentric Ductal Carcinoma In Situ (DCIS)",
+      "question_images": [
+        "case_082.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nExtensive calcifications are present in the right breast\n\nGrouped pleomorphic calcifications are present in the deep breast (arrow)\n\nFaint linear calcifications extend anteriorly to the nipple (arrowheads) spanning a total distance of 7 cm\nDifferential Diagnosis\nDCIS with invasive ductal carcinoma (IDC)\nTeaching Points\nMulticentric disease involves\n\nmore than two foci of malignancy in different quadrants or\n\nmore than 5 cm total involvement\n\nWhen biopsy-proven extent of disease exceeds 5 cm most patients are not considered candidates for breast conserving surgery\n\nMultiple biopsies may be required to prove extent of disease\n\nWhen extensive suspicious microcalcifications are present, ultrasound can be performed to possibly identify an underlying or obscured mass (especially in patients with dense breast parenchyma)\n\nProving the presence of invasive disease helps direct surgical management\n\nIf present on core biopsy, patients undergo sentinel lymph node biopsy at the time of lumpectomy\nManagement\nStereotactic core needle biopsy for tissue diagnosis\n\nMultiple sites biopsied to prove extent\n\nChoose most suspicious sites, which are furthest apart, to assist in surgical planning\n\nMastectomy for definitive treatment",
+      "question_image": "case_082.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-083",
+      "source_note_id": "1782291716298",
+      "label": "Case 83",
+      "history": "New palpable mass in the right breast.",
+      "diagnosis": "Hematoma",
+      "question_images": [
+        "case_083.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nVague focal asymmetry in upper outer right breast (circle) in the area of palpable concern\n\nTangential view confirms superficial location of the lesion (arrows)\n\nUltrasound\n\nFluid-containing, heterogeneous, oval superficial mass with echogenic wall\nDifferential Diagnosis\nOil cysts/fat necrosis\n\nCysts\n\nIntra-cystic neoplasm with hemorrhage\nTeaching Points\nCollection of blood in breast tissue\n\nHistory is important in making correct diagnosis\n\nMay be due to any blunt force or penetrating trauma\n\nThe patient may not recall a specific traumatic event\n\nMammography may demonstrate a mass or new density with mixed tissue and fat\n\nUltrasound appearance will depend on stage\n\nAnechoic (fluid), solid (clot), or heterogeneous (both)\n\nMay have thick echogenic wall\n\nPosterior acoustic enhancement common\n\nOccasionally fluid\u2013debris level\n\nFat necrosis may develop with time\n\nOil cysts\n\nCalcifications\nManagement\nClinical exam and history helpful to avoid misdiagnosis\n\nConservative management and follow-up to complete clinical and/or imaging resolution\n\nRarely, a neoplasm may present with hemorrhage that obscures an underlying mass\n\nWhen a mass persists on clinical exam, short-term imaging follow-up will ensure that an underlying suspicious mass was not obscured\n\nIf symptoms/mass resolve clinically, follow-up imaging is not required",
+      "question_image": "case_083.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-084",
+      "source_note_id": "1782291716300",
+      "label": "Case 84",
+      "history": "34-year-old woman who reports spontaneous right bloody nipple discharge.",
+      "diagnosis": "Multiple Papillomas/Papillomatosis",
+      "question_images": [
+        "case_084.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nGlobal asymmetry in the right breast\n\nMultiple round and tubular densities are present throughout the right breast\n\nA scar marker corresponds with architectural distortion (circles) from the prior benign excisional biopsy (which demonstrated papillomatosis)\nDifferential Diagnosis\nMultifocal invasive ductal carcinoma with intraductal extension\n\nExtensive duct ectasia (unlikely)\n\nAsymmetric cysts (unlikely)\nTeaching Points\n\u201cPapillomatosis\u201d indicates multiple papillomas\n\nCan also refer to a pathologic diagnosis of microscopic foci of intraductal hyperplasia without atypia\n\nCommonly presents with pathologic nipple discharge\n\nSpontaneous or serous bloody nipple discharge from a single duct orifice\n\nGalactography/ductography can be helpful for imaging evaluation\n\nDuctoscopy (performed by some surgeons) is frequently diagnostic\n\nPapillary lesions of any type (benign, atypical, or malignant) are relatively rare\n\nMay represent up to 5% of biopsied lesions, but many series report fewer\n\nPapillary lesions are associated with an increased risk of breast cancer\n\nHaving multiple papillomas confers a greater risk than a single papilloma\nManagement\nUltrasound-guided or stereotactic core needle biopsy for tissue diagnosis at the time of initial presentation\n\nThis patient has known papillomatosis and is followed closely with clinical and imaging surveillance\n\nIf there is interval change on imaging, repeat biopsy may be warranted\n\nAfter appropriate treatment (which may include surgical excision), careful screening follow-up is warranted, given the increased risk for breast cancer",
+      "question_image": "case_084.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-085",
+      "source_note_id": "1782291716302",
+      "label": "Case 85",
+      "history": "Screening mammogram.",
+      "diagnosis": "Axillary Breast Tissue\u2014Normal Variant",
+      "question_images": [
+        "case_085.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nDensity that resembles normal-appearing glandular breast tissue projecting over the axilla on the MLO view (circle)\n\nNote there is no architectural distortion, mass, or suspicious microcalcifications\nDifferential Diagnosis\nNone\u2014classic appearance demonstrated\n\nCaveat: Do not dismiss a new or developing density or suspicious mass as normal axillary breast tissue\nTeaching Points\nAberrant or accessory breast tissue separate from the glandular tissue in the breast\n\nResults from incomplete involution of the mammary streak during embryonic development\n\nDistinct from the \u201ctail of Spence,\u201d which is contiguous with the upper outer quadrant tissue\n\nUsually seen on the MLO view\n\nMay be unilateral or bilateral\n\nRight > left reported\n\nTypically asymptomatic\n\nMay present during pregnancy or with engorgement postpartum\n\nMay present with cyclical pain\n\nMay result in cosmetic concern for the patient\n\nSubject to same pathology as normally located breast tissue\n\nRare reports of fibroadenoma or cancer\n\nBreast cancer can develop in any breast tissue\n\nA spectrum of aberrant clinical findings can exist along the \u201cmilk line\u201d or mammary line (a line extending from the axillary region to the groin along which breast tissue can form)\n\nAccessory/supernumerary nipple(s)\n\nAxillary glandular tissue\n\nComplete accessory breast in axilla\nManagement\nAnnual screening mammography\n\nFurther imaging or ultrasound only if concerning or symptomatic\n\nComparison with previous exams helpful\n\nSpot views may be helpful on baseline exam to exclude underlying suspicious findings",
+      "question_image": "case_085.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-086",
+      "source_note_id": "1782291716304",
+      "label": "Case 86",
+      "history": "Screening mammogram in a woman with a BRCA1 gene mutation.",
+      "diagnosis": "Bilateral Transverse Rectus Abdominis Myocutaneous (TRAM) Flap Reconstructions",
+      "question_images": [
+        "case_086.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nBilateral fatty tissue with complete absence of fibroglandular tissue\n\nNote the non-anatomic bands (arrowheads)\n\nThe nipple-areolar complex (NAC) was reconstructed in this patient\n\nThe patient is status post bilateral prophylactic mastectomies with TRAM reconstruction\nDifferential Diagnosis\nOther autologous tissue breast reconstructions such as deep inferior epigastric perforator (DIEP), latissimus dorsi myocutaneous (LDM), gluteal free flap, or lateral transverse thigh flap\n\nReduction mammoplasty (absence of NAC and clinical history will differentiate)\nTeaching Points\nBreast reconstruction is most often non-autologous\n\nTissue expanders and/or implants\n\nTRAM flap is the most common method of autologous breast reconstruction\n\nMultiple techniques\n\nPedicle\n\nFree flap\n\nDelayed flap\n\nOther tissue flaps can be used (as noted in the differential diagnosis)\n\nClassically, mammography depicts\n\nPredominantly radiolucent (fatty) tissue\n\nMuscular pedicle may be visible posteriorly on MLO views\n\nPosterior surgical clips\n\nNon-anatomic bands\n\nNo NAC\n\nAlthough may have reconstructed NAC \u2022 Soft tissue and tattoo for pigmentation\n\nFat necrosis common\n\nMost often seen in the periphery where blood supply is most tenuous\n\nPalpable mass in TRAM or soft tissue mass is much more likely to be fat necrosis than recurrence\n\nFirst-line imaging evaluation should be with mammography\n\nCan demonstrate classic fat necrosis (which has a more variable appearance at ultrasound)\n\nMR may demonstrate a spectrum of findings\n\nNormal\n\nExpected postoperative changes including\n\nFibrosis, fat necrosis, skin thickening, seroma\nManagement\nSurveillance with clinical exam\n\nRoutine mammographic screening of soft-tissue reconstructions is controversial and not routinely recommended by most breast imaging radiologists",
+      "question_image": "case_086.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-087",
+      "source_note_id": "1782291716306",
+      "label": "Case 87",
+      "history": "Abnormal screening mammogram.",
+      "diagnosis": "Invasive Ductal Carcinoma (Low Grade)",
+      "question_images": [
+        "case_087.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram\n\nVery small irregular mass with spiculated margins and associated architectural distortion, best seen on the full CC and spot magnification CC views (circle)\n\nUltrasound\n\nSmall, irregular, hypoechoic mass with microlobulated margins and associated posterior acoustic shadowing\nDifferential Diagnosis\nInvasive lobular carcinoma\n\nTubular carcinoma\n\nRadial scar\nTeaching Points\nFinding very small early cancers in dense breast tissue requires high-quality imaging\n\nRadiologists can improve their ability to detect smaller lesions by\n\nComparing with prior exams when available\n\nLearning and applying search patterns\n\nUnderstanding subtle signs of malignancy\n\nWorking in a darkened room without distractions\n\nInterpreting both screening and diagnostic exams\n\nResisting satisfaction of search when one abnormality is detected\n\nReviewing false-negative exams as part of an annual audit may help improve performance\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nIf ultrasound did not demonstrate a correlate for the mammographic findings, tissue sampling with stereotactic core needle biopsy is appropriate\n\nConsider breast MR for further evaluation once diagnosis of cancer confirmed\n\nExtent of disease in the affected breast\n\nAncillary screening of the contralateral breast",
+      "question_image": "case_087.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-088",
+      "source_note_id": "1782291716308",
+      "label": "Case 88",
+      "history": "34-year-old woman with a palpable breast mass and skin thickening, not improving with antibiotic therapy.",
+      "diagnosis": "High-grade Invasive Ductal Carcinoma (Clinically Mistaken for an Abscess)",
+      "question_images": [
+        "case_088.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nLarge heterogeneous complex mass with thick internal septations demonstrating increased vascularity on Doppler imaging\n\nNote the enlarged axillary lymph node with thickened cortex (asterisk)\nDifferential Diagnosis\nAbscess\nTeaching Points\nPatients with clinical features suggesting breast infection should be followed carefully\n\nFailure to improve on appropriate antibiotic coverage is a worrisome sign\n\nInitially, inflammatory breast carcinoma may have similar clinical presentation to mastitis\n\nLarge (greater than 2 cm) invasive carcinomas are prone to central necrosis\n\nRapid growth results in decreased vascularity centrally as tumor outgrows blood supply\n\nNecrosis most common in high-grade invasive carcinoma NOS (not otherwise specified)\nManagement\nUltrasound-guided core needle biopsy for tissue diagnosis\n\nTarget the solid portion for best tissue sampling\n\nFine-needle aspiration of the suspicious lymph node\n\nBilateral mammography to evaluate extent of disease and screen the contralateral breast\n\nOnce the diagnosis of malignancy is confirmed, contrast enhanced MR for additional evaluation (extent of disease and ancillary screening of the contralateral breast)",
+      "question_image": "case_088.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-089",
+      "source_note_id": "1782291716310",
+      "label": "Case 89",
+      "history": "Patient with biopsy-proven left breast cancer undergoing neoadjuvant chemotherapy.",
+      "diagnosis": "Favorable Response to Neoadjuvant Chemotherapy",
+      "question_images": [
+        "case_089.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nBaseline mammogram demonstrates a mass in the lower inner quadrant of the left breast (known biopsy-proven cancer)\n\nRepeat mammogram 16 weeks later demonstrates a tissue marker clip that was placed at the time of biopsy, no residual measurable mass, with minimal residual density\nTeaching Points\nCurrently, many patients with large tumors are given neo-adjuvant chemotherapy which consists of anti-cancer agents (may include endocrine therapy) to shrink mass(es) prior to definitive surgical treatment\n\nMore common at tertiary care centers\n\nPerformed both on and off clinical trial protocols\n\nMethods of assessing treatment response are available, but vary in applicability depending on individual patients, specific medications and imaging modalities used\n\nWorld Health Organization (WHO) set criteria for assessing treatment response in 1979\n\nResponse Evaluation Criteria in Solid Tumors (RECIST) guidelines, established in 2000, clarify and further codify methods for assessing treatment response\n\nTerms applied to both clinical assessments of measuring and imaging measurement\n\nComplete response\n\nPartial response\n\nStable disease\n\nProgressive disease\n\nFor breast imaging, precise measurement in one, two, or three dimensions can be made using mammography, ultrasound, and MR\n\nMany digital imaging applications are capable of assessing area or volume of masses\n\nMay be a more accurate assessment of response\n\nNot specifically used in most clinical trials\n\nMammographic density often decreases with response to treatment, but this is even harder to quantify\n\nMR may be useful in assessing response, although, due to marked variability of effect on vascularity, may over- or under-estimate actual tumor size\n\nTumor grade and extensive intraductal component (EIC) also affect the accuracy of preoperative measurements\nManagement\nInnumerable factors affect measurement accuracy across all imaging modalities\n\nUse measurements as a guide without dictating treatment decisions\n\nBest methods for obtaining and reporting imaging measurements will vary depending on the setting (investigational or clinical)\n\nDefinitive surgery is performed when neo-adjuvant chemotherapy is completed",
+      "question_image": "case_089.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-090",
+      "source_note_id": "1782291716312",
+      "label": "Case 90",
+      "history": "Select non-contrast MR silicone-sensitive images from two patients (with the same diagnosis) are shown.",
+      "diagnosis": "Intracapsular Rupture of Silicone Implants (MR Appearance)",
+      "question_images": [
+        "case_090.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nNon-contrast MR: Silicone-sensitive sequence image demonstrates a \u201ckeyhole\u201d sign (black arrowheads)\n\nSelected image from the second patient depicts the \u201clinguine\u201d sign (white arrows), the \u201cnoose\u201d sign (circle), and \u201ckeyhole\u201d signs (white arrowheads)\nDifferential Diagnosis\nNormal radial folds can mimic intracapsular rupture\nTeaching Points\nNon-contrast MR is the modality of choice to detect intracapsular rupture\n\nImplants are not \u201clifetime devices\u201d\n\nUse a dedicated breast coil\n\nSequences may include\n\nT2 weighted spin echo\n\nSilicone-sensitive sequences\n\nAxial and sagittal acquisitions\n\nSigns of intracapsular rupture\n\nLinguine sign: dark lines within the implant indicating complete collapse of the implant envelope within the fibrous capsule\n\nMost sensitive sign\n\nKeyhole sign: silicone present between the fibrous capsule and the uncollapsed envelope (also known as \u201cinverted teardrop\u201d or \u201cnoose\u201d)\n\nWater droplets: round areas that follow water signal intensity on all sequences\n\nLow specificity\n\nClinical history important to avoid false-positives\n\nKnow the type of implant\n\nMay misdiagnose double-lumen or stacked implants as ruptured\n\nSilicone implants injected with saline or antibiotics during implantation\n\nWater droplets may mimic microperforation\n\nExtracapsular rupture from previous implants may confound imaging\n\nCurrent implant may be entirely intact, despite the presence of \u201cfree\u201d silicone\n\nTrace peri-implant fluid is commonly seen on T2-weighted images\n\nLarge collections may indicate infection\n\nFDA recommends non-contrast screening MR 3 years after placement of silicone implants and every 2 years thereafter to evaluate implant integrity\n\nNon-contrast breast MR is not intended to detect breast cancer\n\nMR should not be used in the evaluation of saline implants\nManagement\nImplant revision is performed based on patient wishes and the recommendations of her plastic surgeon",
+      "question_image": "case_090.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-091",
+      "source_note_id": "1782291716314",
+      "label": "Case 91",
+      "history": "40-year-old woman at high risk for developing breast cancer (Gail score = 28%).",
+      "diagnosis": "Normal Background Glandular Enhancement",
+      "question_images": [
+        "case_091.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMIP image demonstrates bilateral symmetric intense enhancement consistent with background enhancement (BE)\n\nThis patient was imaged in the third week of her menstrual cycle\nDifferential Diagnosis\nClassic appearance demonstrated\n\nFibrocystic change\n\nWhen focal or asymmetric, may mimic malignancy\nTeaching Points\nGlandular tissue normally demonstrates enhancement\n\nExtensive (\u201cmarked\u201d or \u201csevere\u201d) BE may reduce sensitivity and specificity\n\nCan obscure abnormality and/or cause false-positives\n\nDoes not necessarily correlate with mammographic density\n\nVaries during menstrual cycle (more pronounced in the first and fourth weeks)\n\nIdeal to image patients in the second week (days 7 to 14)\n\nImportant for screening patients\n\nDo not delay imaging in patients with new cancer diagnosis\n\nPostmenopausal patients on HRT may have increased BE\n\nBE typically decreases in patients status post breast conserving surgery (lumpectomy and radiation therapy)\n\nTamoxifen reduces background enhancement\n\nIndications for contrast enhanced breast MR\n\nScreening high-risk women in conjunction with annual mammography (American Cancer Society guidelines)\n\nBRCA mutation or first-degree relative with known BRCA mutation\n\nCalculated lifetime risk >20% to 25%\n\nRadiation to chest between ages 10 and 30\n\nFew rare genetic syndromes\n\nDiagnostic evaluation\n\nNew diagnosis of cancer \u2022 Evaluate extent of disease \u2013 Especially important in young patients, and those with tumors having lobular histology \u2022 Screening the contralateral breast \u2022 Evaluate for pectoralis muscle invasion\n\nEvaluating patients with metastatic axillary disease for possible occult breast malignancy\n\nResponse to neoadjuvant chemotherapy\n\nNot typically used for problem solving \u2022 Not for pain, lump, or other clinical problem that should be evaluated with mammography/ultrasound \u2022 Should not dissuade biopsy of a finding that is suspicious on mammography or ultrasound\n\nConsiderations/recommendations for contrast MR technique and reporting\n\nHave recent mammogram for correlation\n\nCheck renal function as warranted\n\nUse a dedicated breast coil\n\nObtain bilateral imaging\n\nUse BI-RADS\u00ae lexicon terminology in reports\n\nDescribe morphology and kinetics\n\nInclude succinct management recommendations\n\nACR accreditation for breast MR now available\nManagement\nAnnual screening mammography and annual screening MR, given high-risk status",
+      "question_image": "case_091.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-092",
+      "source_note_id": "1782291716316",
+      "label": "Case 92",
+      "history": "55-year-old woman with newly diagnosed breast cancer.",
+      "diagnosis": "Invasive Ductal Carcinoma",
+      "question_images": [
+        "case_092.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nContrast enhanced images depicts an irregular enhancing mass with spiculated margins (arrow) demonstrating mixed contrast kinetics including washout component\n\nNote the slight skin retraction superficial to the tumor\nDifferential Diagnosis\nInvasive lobular carcinoma\nTeaching Points\nMR does not replace thorough mammographic and sonographic evaluation of patients with suspicious clinical or imaging findings\n\nTumor angiogenesis is postulated to explain lesion enhancement\n\nMorphology is the most important feature to consider in evaluating lesions on MR\n\nContrast kinetic information is more critical to determining the possibility of malignancy in cases with more benign-appearing morphology\n\nClassic appearance on MR depicts irregular, enhancing mass (+/- rim enhancement) with washout kinetic curve\n\nMay have internal enhancing septations\n\nWith the appearance in this case, the probability of malignancy approaches 100%\n\nPatients with a new cancer diagnosis may benefit from breast MR, especially those with dense parenchyma on mammography\n\nMR evaluates extent of disease in the affected breast and serves for ancillary screening of the contralateral breast\nManagement\nBreast conserving therapy (lumpectomy and radiation therapy)",
+      "question_image": "case_092.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-093",
+      "source_note_id": "1782291716318",
+      "label": "Case 93",
+      "history": "42-year-old woman at high risk for developing breast cancer (Gail score = 38%).",
+      "diagnosis": "Ductal Carcinoma In Situ (DCIS)",
+      "question_images": [
+        "case_093.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nContrast enhanced MR demonstrates abnormal segmental enhancement in the right medial breast. Kinetic analysis (not shown) demonstrated predominantly a plateau-curve enhancement pattern\nDifferential Diagnosis\nFibrocystic change\n\nAsymmetric background enhancement\nTeaching Points\nMR is extremely sensitive for the detection of breast malignancy\n\nSlightly diminished sensitivity for detection of DCIS\n\nReported between 77% and 96%\n\nClassic MR appearance of DCIS depicts non-mass-like, clumped enhancement in linear or segmental distribution\n\nVariable kinetic curves reported\n\nUnreliable discriminator\u2014persistent kinetic curve should not dissuade biopsy of a morphologically suspicious finding\n\nMR may depict true extent of non-calcified DCIS\n\nConsider MR in select patients with new diagnosis of DCIS\n\nYoung\n\nDense breasts mammographically\n\nExtensive calcifications with possible underlying invasive component\nManagement\nTissue sampling is warranted for diagnosis, given the highly suspicious appearance of the right breast\n\nCorrelation with current mammogram (evaluate for suspicious microcalcifications in the same distribution) that would permit targeting for stereotactic core needle biopsy\n\nIf mammogram is normal, consider second-look ultrasound\n\nLower yield for DCIS than a mass\n\nIf ultrasound is normal, MR-guided biopsy is recommended for tissue diagnosis",
+      "question_image": "case_093.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-094",
+      "source_note_id": "1782291716320",
+      "label": "Case 94",
+      "history": "39-year-old woman at high risk for developing breast cancer (Gail score = 21%).",
+      "diagnosis": "Bilateral Fibroadenomas (FA)",
+      "question_images": [
+        "case_094.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nContrast enhanced MR demonstrates bilateral multiple enhancing masses (circles) with similar imaging features: circumscribed, oval, homogeneously enhancing with non-enhancing internal septations (arrows). Kinetic analyses (not shown) demonstrate persistent enhancement curves\nDifferential Diagnosis\nClassic appearance demonstrated (multiplicity and imaging findings)\n\nIf isolated to one mass, consider more suspicious etiology (malignancy)\n\nCaveat: In high-risk patients, especially those with BRCA mutations, malignancy can masquerade as benign findings\nTeaching Points\nMost common benign solid breast mass\n\nClassic MR appearance depicts oval, circumscribed, +/- gentle lobulation, homogeneously enhancing mass with or without non-enhancing internal septations\n\nNon-enhancing internal septations\n\nHigh negative predictive value: very specific sign of FA \u2022 Not always present\n\nKinetic analysis is variable but classically demonstrates persistent enhancement\n\nMay have increased T2 signal, but variable\n\nNonspecific discriminator\n\nDegenerating FA may not enhance\n\nRarely phyllodes tumor can masquerade as FA on MR\nManagement\nCorrelation with recent mammogram may demonstrate bilateral degenerating fibroadenomas (masses with coarse or \u201cpopcorn\u201d calcifications)\n\nGiven the multiplicity and classic appearance of non-enhancing internal septations, annual mammography and MR were recommended. The above findings have been stable for more than 3 years\n\nIf atypical features (morphology or kinetic curve) are present, or solitary finding, second-look ultrasound should be performed for additional evaluation\n\nIf new or enlarging, tissue diagnosis is warranted",
+      "question_image": "case_094.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-095",
+      "source_note_id": "1782291716322",
+      "label": "Case 95",
+      "history": "58-year-old woman status post left breast excisional biopsy at an outside facility.",
+      "diagnosis": "Residual Invasive Ductal Carcinoma",
+      "question_images": [
+        "case_095.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nContrast MR demonstrates homogeneously low signal in the biopsy cavity (corresponding high T2 signal, not shown) with multiple adjacent irregular, enhancing masses (arrowheads) demonstrating predominantly \u201cwashout\u201d kinetics (red indicates washout on color MIP, circle)\nDifferential Diagnosis\nClassic appearance for residual malignancy in the setting of known malignancy and positive surgical margins\nTeaching Points\nMR is helpful to assess for residual disease in patients with close or positive margins at the time of surgical excision, especially in cases with:\n\nDense breasts mammographically\n\nTumors with invasive lobular histology\n\nExtensive intraductal component (EIC)\n\nMay be more reliable if performed 3 to 4 weeks postoperatively\n\nThick, nodular, or irregular enhancement at biopsy site is highly suspicious\n\nThin (<5 mm) enhancing rim around biopsy cavity is expected, but in the setting of positive margins, re-excision is still warranted\n\nMicroscopic disease not reliably imaged\n\nIf suspicious calcifications are present on the preoperative mammogram, a post-excision mammogram is helpful to assess for residual suspicious calcifications\n\nSuspicious calcifications are highly predictive for residual disease\n\nMammography is more limited to assess for residual masses and/or architectural distortion due to expected postoperative changes\nManagement\nRe-excision in attempt to achieve acceptable negative margins\n\nSurgeon can be alerted to areas of bulky residual disease\n\nAssist in surgical planning\n\nIf distant lesion is detected that might preclude breast conserving surgery, second-look ultrasound and biopsy would be warranted",
+      "question_image": "case_095.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-096",
+      "source_note_id": "1782291716324",
+      "label": "Case 96",
+      "history": "48 year-old woman with known cancer in the right upper outer quadrant in a patient with extremely dense breasts.",
+      "diagnosis": "Contralateral Synchronous Cancer Detected by MR",
+      "question_images": [
+        "case_096.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMR demonstrates a heterogeneously enhancing mass with lobular margins in the left inner breast. Contrast kinetics analysis showed a dominant washout curve\n\nKnown cancer in the right breast was also visible (not shown) and had similar imaging features\nDifferential Diagnosis\nInvasive lobular cancer\n\nBenign solid mass unlikely, given the highly suspicious features\nTeaching Points\nMR detects contralateral breast cancer in 3% to 8% of patients\n\nSynchronous bilateral cancer\n\nWithin 3 to 12 months following diagnosis of index cancer (exact timeframe variably defined)\n\nPrevalence of synchronous bilateral breast cancer is 1% to 3%\n\nHigher risk for multicentric disease\n\nMetachronous contralateral cancer\n\nSubsequent contralateral cancer (>12 months following diagnosis of index cancer)\n\nRisk estimate is approximately1% per year following diagnosis of index cancer\n\nMR should be considered in patients with new diagnosis of breast cancer, especially those with\n\nYoung age\n\nMammographically dense breasts\n\nLobular tumor histology\n\nFamily history\n\nMR has high sensitivity which may lead to false-positive findings\n\nPatients should be counseled about the potential for additional imaging (second-look ultrasound) and procedures (additional biopsies)\nManagement\nSecond-look ultrasound in order to perform ultrasound-guided core needle biopsy\n\nIf mass could not be detected with ultrasound, then MR biopsy for diagnosis would be required\n\nPatients presenting with bilateral cancer have a higher risk for genetic mutation\n\nConsider genetic counseling",
+      "question_image": "case_096.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-097",
+      "source_note_id": "1782291716326",
+      "label": "Case 97",
+      "history": "44-year-old woman with newly diagnosed breast cancer.",
+      "diagnosis": "Invasive Lobular Carcinoma (ILC)",
+      "question_images": [
+        "case_097.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMIP image depicts a large enhancing irregular mass in the upper inner right breast. Sagittal post-contrast image demonstrates an irregular mass with rim enhancement (arrowheads). Note the enlarged vessels in the right breast\nDifferential Diagnosis\nInvasive ductal carcinoma (IDC)\nTeaching Points\nSecond most common breast carcinoma\n\n10% to 15% of all invasive breast cancers\n\nHigher rate of multiplicity and bilaterality compared to IDC\n\nMR is more sensitive than mammography and ultrasound in assessing\n\nMultifocal and/or multicentric tumors\n\nTumor size (classically underestimated with mammography and ultrasound)\n\nMR is helpful for preoperative surgical planning\n\nMastectomy may be required when more extensive disease is documented\n\nIf patient is motivated for breast conserving surgery, additional biopsies should be performed to document true extent\n\nVariable MR appearance but classically depicts solitary, irregular enhancing mass with spiculated margins, +/- rim enhancement\n\nMay have diffuse enhancement pattern mimicking normal glandular tissue\n\nEnhancing strands may be seen amidst multiple enhancing foci\n\nContrast kinetics are variable, but majority have delayed enhancement resulting in plateau or persistent contrast enhancement curves\n\nMay increase false-negative exams if not recognized\nManagement\nBreast conservation therapy (lumpectomy and radiation therapy) or mastectomy, depending on extent",
+      "question_image": "case_097.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-098",
+      "source_note_id": "1782291716328",
+      "label": "Case 98",
+      "history": "52-year-old woman with a newly diagnosed left breast cancer.",
+      "diagnosis": "Breast Cancer with Invasion of the Pectoralis Muscle",
+      "question_images": [
+        "case_098.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nContrast MR demonstrates two heterogeneously enhancing spiculated masses in the left upper inner quadrant (arrowheads). The posterior mass directly invades the pectoralis muscle (arrow)\nDifferential Diagnosis\nClassic appearance demonstrated\nTeaching Points\nAccurate evaluation of deep/posterior tumors is critical for treatment planning and staging; however, assessing pectoralis muscle involvement with clinical exam and imaging can be difficult\n\nMR is an excellent modality to assess for possible pectoralis muscle invasion\n\nInvolvement of the pectoralis fascia/muscle or chest wall may prompt neoadjuvant chemotherapy or more aggressive surgery\n\nA portion of the fascia/muscle may require excision\n\nPectoralis muscle normally enhances following contrast administration\n\nTumor involvement shows infiltrative enhancement or mass-like enhancement\n\nAbnormal enhancement highly predictive of true invasion\n\nTrue invasion is unlikely when a mass directly abuts the muscle (obliteration of the intervening fat plane) but normal pectoralis enhancement is observed\nManagement\nDocument extent of disease in order to direct treatment planning\n\nConsider follow-up imaging during and after neoadjuvant chemotherapy to assess response",
+      "question_image": "case_098.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-099",
+      "source_note_id": "1782291716330",
+      "label": "Case 99",
+      "history": "35-year-old woman with newly diagnosed 2.2-cm right breast cancer (high grade invasive ductal carcinoma).",
+      "diagnosis": "Multifocal Carcinoma (True Disease Extent Demonstrated on MR Imaging)",
+      "question_images": [
+        "case_099.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nSagittal MIP image from contrast MR demonstrates the known index tumor: a lobulated heterogeneously enhancing mass (arrow)\n\nMultiple additional, smaller, enhancing masses are present in a segmental distribution (arrowheads indicate two representative lesions)\n\nAll masses demonstrated similar washout contrast kinetics (not shown)\nDifferential Diagnosis\nPapillomatosis/Multiple papillomas\n\nBenign masses or fibrocystic change (highly unlikely given the appearance and distribution)\nTeaching Points\nMultifocal breast cancer is associated with higher local recurrence rates\n\nMay preclude breast conservation therapy\n\nConsider extent versus breast size to achieve acceptable surgical margins and aesthetic outcome\n\nWide variation (6% to 34%) reported in MR sensitivity for detecting additional ipsilateral disease\n\nMR is especially helpful to determine ipsilateral extent of disease in women with\n\nYoung age\n\nMammographically dense breasts\n\nLobular tumor histology\n\nBRCA mutation\n\nMR has a high positive predictive value when there is a suspicious finding in the same breast as the known cancer\n\nMR has lower specificity than sensitivity\n\nBiopsy should be performed to confirm diagnosis, given the possibility for false positive findings\n\nSurgical decision making should be based on biopsy-proven findings rather than imaging appearance alone in patients motivated for breast conserving therapy (BCT)\n\nNot all \u201csuspicious\u201d findings on MR are malignant\nManagement\nDirected, second-look ultrasound of MR findings, to perform ultrasound-guided core needle biopsy and document true extent of disease\n\nIf the MR findings cannot be reliably detected with ultrasound, then MR biopsy for definitive diagnosis may be required",
+      "question_image": "case_099.jpg",
+      "answer_image": null
+    },
+    {
+      "id": "CORE-BR-100",
+      "source_note_id": "1782291716332",
+      "label": "Case 100",
+      "history": "46-year-old woman with an abnormal screening mammogram.",
+      "diagnosis": "Silicone-Laden Lymph Node Mimicking Cancer on a Mammogram",
+      "question_images": [
+        "case_100.jpg"
+      ],
+      "answer_images": [],
+      "answer_details": "Findings\nMammogram: Spiculated focal asymmetry with \u201cmass-like\u201d features (convex borders) in the deep upper breast on the MLO view (circle). No correlate is present on the CC view\n\nGiven the lack of ultrasound correlate for the mammographic finding, and the history of prior silicone implants, a non-contrast breast MR was performed to pursue the possibility of silicone granuloma/silicone adenopathy\n\nA silicone-sensitive sequence confirms silicone in a sub-pectoral lymph node (arrow). This accounts for the mammographic finding (and the anatomic location explains the inability to visualize on ultrasound imaging)\nDifferential Diagnosis\nWith only the mammogram finding\n\nInvasive ductal carcinoma\n\nInvasive lobular carcinoma\n\nOccult breast primary malignancy with metastatic adenopathy\n\nWith addition of the MR, classic finding of silicone adenopathy demonstrated\nTeaching Points\nClinical correlation can be critical to image interpretation, including\n\nPast surgical history\n\nBenign\n\nMalignant\n\nCosmetic\n\nKnown diagnoses\n\nSystemic illness (e.g., collagen vascular disease)\n\nGenetic disorders (e.g., neurofibromatosis)\n\nMR should not typically used for \u201cproblem solving\u201d but was critical in this case\n\nMeticulous diagnostic mammography, in conjunction with ultrasound, overwhelmingly resolves questionable mammographic findings\n\nMR should never be first-line imaging for screen-detected findings\n\nRarely, MR may be indicated when mammography is problematic (after thorough diagnostic evaluation is completed)\n\nQuestionable architectural distortion\n\nQuestionable new focal asymmetry\n\nOne-view suspicious finding\n\nAssists in lesion localization and permits accurate second-look ultrasound\n\nScar versus recurrent tumor\nManagement\nPatient reassurance and annual screening mammography",
+      "question_image": "case_100.jpg",
+      "answer_image": null
+    }
+  ]
+}
