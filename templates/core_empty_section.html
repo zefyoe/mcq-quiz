@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CORE {{ section.label }}</title>
+    <title>CORE {{ section.label_nl if language == "nl" else section.label }}</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -12,9 +12,15 @@
       <section class="core-panel">
         <span class="core-brand-mark">C</span>
         <p class="eyebrow">CORE RADIOLOGY</p>
-        <h1>{{ section.label }}</h1>
-        <div class="core-empty-count">0/0</div>
-        <p>{{ "Deze module is voorbereid en wordt later met cases gevuld." if language == "nl" else "This module is prepared and will be populated with cases later." }}</p>
+        <h1>{{ section.label_nl if language == "nl" else section.label }}</h1>
+        <div class="core-empty-count">{{ section.display_count }} {{ "cases" if language == "nl" else "cases" }}</div>
+        <div class="core-import-status" role="status">
+          <span class="core-import-spinner" aria-hidden="true"></span>
+          <div>
+            <strong>{{ "Content wordt verwerkt" if language == "nl" else "Content processing in progress" }}</strong>
+            <small>{{ "Casebeelden en leernotities worden gesynchroniseerd." if language == "nl" else "Case images and learning notes are being synchronized." }}</small>
+          </div>
+        </div>
         {% set active_product = "core" %}
         {% include "_product_switcher.html" %}
         <a href="{{ url_for('core_home') }}" class="core-primary-button">{{ "Terug naar CORE" if language == "nl" else "Back to CORE" }}</a>

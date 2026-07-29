@@ -1460,7 +1460,7 @@ def get_core_dashboard(user_id: int) -> dict:
 
     return {
         "sections": section_rows,
-        "total": len(all_questions),
+        "total": sum(section["display_count"] for section in sections),
         "seen": len(seen_progress),
         "coverage": round(len(seen_progress) / len(all_questions) * 100) if all_questions else 0,
         "mastered": sum(

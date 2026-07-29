@@ -44,7 +44,7 @@
             {% include "_product_switcher.html" %}
             {% if active_core_session %}
               <div class="core-header-session">
-                <span>{{ active_core_session.count }} cases · {{ active_core_session.section.label }}</span>
+                <span>{{ active_core_session.count }} cases · {{ active_core_session.section.label_nl if language == "nl" else active_core_session.section.label }}</span>
                 <a href="{{ active_core_session.resume_url }}" class="core-primary-button">{{ "Sessie hervatten" if language == "nl" else "Resume session" }}</a>
               </div>
             {% else %}
@@ -87,25 +87,17 @@
             </div>
             <div class="product-category-list core-category-list">
               {% for section in core_dashboard.sections %}
-                {% if section.count %}
-                  <a href="{{ url_for('core_section_setup', section_key=section.key) }}" class="product-category-row">
-                {% else %}
-                  <div class="product-category-row is-empty">
-                {% endif %}
+                <a href="{{ url_for('core_section_setup', section_key=section.key) }}" class="product-category-row{% if section.is_placeholder %} is-in-progress{% endif %}">
                     <span class="product-category-code">{{ "%02d"|format(loop.index) }}</span>
                     <span class="product-category-copy">
-                      <strong>{{ section.label }}</strong>
+                      <strong>{{ section.label_nl if language == "nl" else section.label }}</strong>
                       <small>
-                      {% if section.count %}
                         {{ section.coverage }}% {{ "bekeken" if language == "nl" else "reviewed" }}
-                      {% else %}
-                        {{ "Binnenkort beschikbaar" if language == "nl" else "Coming soon" }}
-                      {% endif %}
                       </small>
                     </span>
-                    <span class="product-category-count">{{ section.seen }}/{{ section.count }}</span>
-                    <span class="product-category-arrow" aria-hidden="true">{% if section.count %}→{% else %}—{% endif %}</span>
-                {% if section.count %}</a>{% else %}</div>{% endif %}
+                    <span class="product-category-count">{{ section.seen }}/{{ section.display_count }}</span>
+                    <span class="product-category-arrow" aria-hidden="true">→</span>
+                </a>
               {% endfor %}
             </div>
           </article>

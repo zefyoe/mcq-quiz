@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CORE {{ section.label }}</title>
+    <title>CORE {{ section.label_nl if language == "nl" else section.label }}</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -22,7 +22,7 @@
     <main class="core-setup-page">
       <section class="core-setup-hero">
         <p class="eyebrow">CORE GASTRO-INTESTINAL</p>
-        <h1>{{ section.label }}</h1>
+          <h1>{{ section.label_nl if language == "nl" else section.label }}</h1>
         <p>{{ "Kies je casepool en het aantal open flashcards. CORE gebruikt uitsluitend actieve recall, nooit meerkeuze." if language == "nl" else "Choose your case pool and deck size. CORE uses open active recall exclusively, never multiple choice." }}</p>
         <div class="core-anki-notice"><span>ANKI ONLY</span>{{ "Diagnose eerst zelf, antwoord daarna onthullen." if language == "nl" else "Formulate the diagnosis before revealing the answer." }}</div>
       </section>

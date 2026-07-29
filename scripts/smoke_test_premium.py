@@ -280,7 +280,8 @@ assert b"Anatomy" in response.data
 assert b"core-nav-product-link" not in response.data
 assert b">CORE Gastro-intestinal</a>" not in response.data
 assert_ok(client.get("/core/chest"), "empty CORE section")
-assert b"0/0" in client.get("/core/chest").data
+assert b"164 cases" in client.get("/core/chest").data
+assert b"Content processing in progress" in client.get("/core/chest").data
 response = client.get("/core/gastrointestinal")
 assert_ok(response, "CORE GI setup")
 assert b"ANKI ONLY" in response.data
@@ -385,7 +386,7 @@ assert_ok(style_response, "static stylesheet")
 assert "max-age=604800" in style_response.headers.get("Cache-Control", "")
 assert b".core-product .flashcard-image-frame" in style_response.data
 assert b".core-image-grid.panel-count-1" in style_response.data
-assert b"width: 48%" in style_response.data
+assert b"width: 72%" in style_response.data
 assert b".core-media-collection.media-count-2" in style_response.data
 assert b".core-learning-header" in style_response.data
 assert b".core-note-section.note-teaching" in style_response.data
