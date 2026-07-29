@@ -60,7 +60,7 @@ body {
   min-height: 100vh;
   background:
     linear-gradient(rgba(11, 18, 32, 0.42), rgba(11, 18, 32, 0.42)),
-    url("/static/images/login-bg.jpg") center/cover no-repeat;
+    url("/static/images/login-bg-optimized.jpg") center/cover no-repeat;
   padding: 20px;
   display: flex;
   align-items: center;

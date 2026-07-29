@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login • Bymed</title>
   {% include "_favicon.html" %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+  <link rel="preload" as="image" href="{{ url_for('static', filename='images/login-bg-optimized.jpg') }}" fetchpriority="high">
+  <link rel="stylesheet" href="{{ url_for('static', filename='login.css', v=asset_version) }}">
 </head>
 <body>
   {% include "_language_switcher.html" %}
@@ -15,7 +16,7 @@
       <section class="login-hero">
         <div class="login-hero-overlay"></div>
         <div class="login-hero-content">
-          <p class="eyebrow">Anatomy / FMH1 QBank</p>
+          <p class="eyebrow">Anatomy / CORE</p>
           <h1>Rady</h1>
           <p class="hero-text">
             {{ tr("Your private medical question bank.") }}
