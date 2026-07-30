@@ -127,7 +127,7 @@
             {% if question_image_urls %}
               <div class="core-media-collection media-count-{{ question_image_urls|length }}">
                 {% for image_url in question_image_urls %}
-                  <div class="flashcard-image-frame is-loading" data-image-frame>
+                  <div class="flashcard-image-frame is-loading" data-image-frame tabindex="0">
                     <img
                       data-src="{{ image_url }}"
                       {% if loop.first and preload_card_images %}src="{{ image_url }}" fetchpriority="high"{% else %}fetchpriority="low"{% endif %}
@@ -141,6 +141,7 @@
                         {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
                       </button>
                     </div>
+                    <span class="core-image-copyright">© UZ Brussel Radiologie</span>
                   </div>
                 {% endfor %}
               </div>
@@ -159,7 +160,7 @@
               {% if answer_image_urls %}
                 <div class="core-media-collection core-answer-collection media-count-{{ answer_image_urls|length }}">
                   {% for image_url in answer_image_urls %}
-                    <div class="core-answer-image" data-image-frame>
+                    <div class="core-answer-image" data-image-frame tabindex="0">
                       <img
                         data-src="{{ image_url }}"
                         fetchpriority="high"
@@ -173,6 +174,7 @@
                           {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
                         </button>
                       </div>
+                      <span class="core-image-copyright">© UZ Brussel Radiologie</span>
                     </div>
                   {% endfor %}
                 </div>
@@ -197,7 +199,8 @@
                   </button>
                 {% endfor %}
               </div>
-              {% if question.get("answer_sections") %}
+              {% set displayed_answer_sections = question.get("answer_sections_nl") if language == "nl" else question.get("answer_sections") %}
+              {% if displayed_answer_sections %}
                 <section class="core-learning-notes" aria-label="{{ 'Casebespreking' if language == 'nl' else 'Case review' }}">
                   <header class="core-learning-header">
                     <div>
@@ -221,7 +224,7 @@
                   </header>
 
                   <div class="core-note-stack">
-                    {% for section in question["answer_sections"] %}
+                    {% for section in displayed_answer_sections %}
                       {% set section_labels = {
                         "findings": "Bevindingen",
                         "differential": "Differentiaaldiagnose",

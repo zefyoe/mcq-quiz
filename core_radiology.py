@@ -53,6 +53,14 @@ def _clean_extracted_text(value):
     return value.replace("oft en", "often").replace("aft er", "after")
 
 
+def _capitalize_initial(value):
+    value = (value or "").strip()
+    for index, character in enumerate(value):
+        if character.isalpha():
+            return value[:index] + character.upper() + value[index + 1:]
+    return value
+
+
 def _split_learning_points(section_key, lines):
     text = " ".join(line.strip() for line in lines if line.strip())
     text = re.sub(r"\s+", " ", text).strip()
@@ -142,10 +150,14 @@ def load_core_section(section_key):
     dutch_translations = load_core_translations(section_key, "nl")
     dutch_histories = dutch_translations.get("histories", {})
     dutch_diagnoses = dutch_translations.get("diagnoses", {})
+    dutch_answer_details = dutch_translations.get("answer_details", {})
     cards = []
     for card in payload.get("cards", []):
-        diagnosis = card.get("diagnosis") or "Diagnosis unavailable"
+        diagnosis = _capitalize_initial(
+            card.get("diagnosis") or "Diagnosis unavailable"
+        )
         answer_details = card.get("answer_details") or ""
+        answer_details_nl = dutch_answer_details.get(card["id"], answer_details)
         history = card.get("history") or "Review the imaging case and formulate the diagnosis."
         question_images = card.get("question_images") or (
             [card["question_image"]] if card.get("question_image") else []
@@ -159,7 +171,9 @@ def load_core_section(section_key):
             "Vraag": history,
             "Vraag_nl": dutch_histories.get(card["id"], history),
             "Correct": [diagnosis],
-            "Correct_nl": [dutch_diagnoses.get(card["id"], diagnosis)],
+            "Correct_nl": [
+                _capitalize_initial(dutch_diagnoses.get(card["id"], diagnosis))
+            ],
             "A": "",
             "B": "",
             "C": "",
@@ -182,6 +196,8 @@ def load_core_section(section_key):
             ],
             "answer_details": answer_details,
             "answer_sections": parse_answer_details(answer_details),
+            "answer_details_nl": answer_details_nl,
+            "answer_sections_nl": parse_answer_details(answer_details_nl),
             "radiopaedia_url": f"https://radiopaedia.org/search?q={quote_plus(diagnosis)}",
             "case_label": card.get("label") or card["id"],
             "core_section": section_key,

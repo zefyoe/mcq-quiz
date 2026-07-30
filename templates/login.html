@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login • Bymed</title>
   {% include "_favicon.html" %}
-  <link rel="preload" as="image" href="{{ url_for('static', filename='images/login-bg-optimized.jpg') }}" fetchpriority="high">
+  <link rel="preload" as="image" href="{{ url_for('static', filename='images/login-rx-background.jpg') }}" fetchpriority="high">
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css', v=asset_version) }}">
 </head>
 <body>
@@ -40,7 +40,7 @@
             <input type="hidden" name="next" value="{{ next }}">
 
             <label for="email">{{ tr("Email") }}</label>
-            <input id="email" name="email" type="email" placeholder="admin@example.com" required>
+            <input id="email" name="email" type="email" placeholder="admin@example.com" value="{{ submitted_email or '' }}" required>
 
             <label for="password">{{ tr("Password") }}</label>
             <div class="password-wrap">

@@ -58,9 +58,13 @@ body {
 
 .login-page {
   min-height: 100vh;
-  background:
-    linear-gradient(rgba(11, 18, 32, 0.42), rgba(11, 18, 32, 0.42)),
-    url("/static/images/login-bg-optimized.jpg") center/cover no-repeat;
+  background-color: #0b1220;
+  background-image:
+    radial-gradient(circle at 18% 20%, rgba(79, 70, 229, 0.26), transparent 38%),
+    linear-gradient(135deg, #08111f 0%, #18223a 52%, #0b1220 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 20px;
   display: flex;
   align-items: center;
@@ -86,6 +90,9 @@ body {
   display: flex;
   align-items: flex-end;
   padding: 42px;
+  background:
+    linear-gradient(135deg, rgba(18, 28, 53, 0.38), rgba(15, 23, 42, 0.74)),
+    url("/static/images/login-rx-background.jpg") center/cover no-repeat;
 }
 
 .login-hero-overlay {
@@ -155,6 +162,16 @@ body {
   color: var(--muted);
   font-size: 15px;
   line-height: 1.5;
+}
+
+.required-hint {
+  margin: -16px 0 20px !important;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.required-marker {
+  color: #dc2626;
 }
 
 .login-error {
@@ -271,9 +288,13 @@ body {
 @media (max-width: 640px) {
   .login-page {
     padding: 0;
-    background:
+    background-image:
       linear-gradient(rgba(11, 18, 32, 0.5), rgba(11, 18, 32, 0.5)),
-      url("/static/images/login-bg.jpg") center/cover no-repeat;
+      url("/static/images/login-rx-background.jpg");
+    background-size: cover, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: scroll, scroll;
   }
 
   .login-shell {

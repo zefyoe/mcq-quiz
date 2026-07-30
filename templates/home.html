@@ -8,13 +8,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
   <body>
-    <div class="dashboard-strip">
-      <div class="dashboard-strip-inner">
-        <span>{{ "Gestructureerde anatomie-oefening voor gerichte dagelijkse herhaling" if language == "nl" else "Structured anatomy practice designed for focused daily review" }}</span>
-        <a href="{{ url_for('anatomy_sections') }}" class="dashboard-strip-action">{{ tr("Start Now") }}</a>
-      </div>
-    </div>
-
     <div class="dashboard-shell">
       <aside class="dashboard-sidebar">
         <a href="{{ url_for('home') }}" class="dashboard-sidebar-brand">

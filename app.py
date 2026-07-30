@@ -237,6 +237,14 @@ def normalize_text_answer(value: str) -> str:
     return re.sub(r"\s+", " ", (value or "").strip()).casefold()
 
 
+def capitalize_initial(value: str) -> str:
+    value = (value or "").strip()
+    for index, character in enumerate(value):
+        if character.isalpha():
+            return value[:index] + character.upper() + value[index + 1:]
+    return value
+
+
 def normalize_category(s: str) -> str:
     return (s or "").strip().lower()
 
@@ -615,7 +623,21 @@ def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
             if not dedupe_key or dedupe_key in seen_keys:
                 continue
             seen_keys.add(dedupe_key)
-            merged.append(question)
+            normalized_question = dict(question)
+            for answer_key in ("A", "B", "C", "D"):
+                normalized_question[answer_key] = capitalize_initial(
+                    normalized_question.get(answer_key, "")
+                )
+            normalized_question["Correct"] = [
+                (
+                    answer
+                    if len((answer or "").strip()) == 1
+                    and (answer or "").strip().upper() in {"A", "B", "C", "D", "T"}
+                    else capitalize_initial(answer)
+                )
+                for answer in normalized_question.get("Correct", [])
+            ]
+            merged.append(normalized_question)
 
     return merged
 
@@ -3208,9 +3230,11 @@ def login():
 
     error = None
     next_url = safe_redirect_target(request.args.get("next"), "home")
+    submitted_email = ""
 
     if request.method == "POST":
-        email = (request.form.get("email") or "").strip().lower()
+        submitted_email = (request.form.get("email") or "").strip()
+        email = submitted_email.lower()
         password = request.form.get("password") or ""
 
         user = User.query.filter_by(email=email).first()
@@ -3222,7 +3246,7 @@ def login():
             login_user(user)
             return redirect(next_url)
 
-    return render_template("login.html", error=error, next=next_url)
+    return render_template("login.html", error=error, next=next_url, submitted_email=submitted_email)
 
 
 @app.route("/register", methods=["GET", "POST"])

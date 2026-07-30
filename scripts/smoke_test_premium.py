@@ -34,7 +34,7 @@ os.environ["DATABASE_URL"] = f"sqlite:///{database_file.name}"
 os.environ["SECRET_KEY"] = "premium-smoke-test"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app import app, db, get_questions_by_ids  # noqa: E402
+from app import app, capitalize_initial, db, get_questions_by_ids  # noqa: E402
 from core_radiology import load_core_section, parse_answer_details  # noqa: E402
 from models import QuizAttempt, User  # noqa: E402
 from sqlalchemy import inspect  # noqa: E402
@@ -69,6 +69,13 @@ assert len(core_cards) == 171
 assert all(card["Vraag_nl"] for card in core_cards)
 assert sum(card["Vraag_nl"] != card["Vraag"] for card in core_cards) == 171
 assert core_cards[0]["Vraag_nl"] == "68-jarige man met dysfagie."
+assert all(card["answer_sections_nl"] for card in core_cards)
+assert all(
+    card["answer_details_nl"] != card["answer_details"]
+    for card in core_cards
+)
+assert capitalize_initial("lowercase answer") == "Lowercase answer"
+assert capitalize_initial("MRI finding") == "MRI finding"
 
 core_gu_cards = load_core_section("genitourinary")
 assert len(core_gu_cards) == 129
@@ -82,6 +89,13 @@ assert core_gu_cards[0]["Correct_nl"] == [
 ]
 assert len(core_gu_cards[0]["image_urls"]) == 3
 assert len(core_gu_cards[0]["answer_image_urls"]) == 2
+assert all(card["answer_sections_nl"] for card in core_gu_cards)
+
+core_breast_cards = load_core_section("breast")
+assert len(core_breast_cards) == 100
+assert all(card["Vraag_nl"] != card["Vraag"] for card in core_breast_cards)
+assert sum(card["Correct_nl"] != card["Correct"] for card in core_breast_cards) >= 95
+assert all(card["answer_sections_nl"] for card in core_breast_cards)
 
 
 with app.app_context():
@@ -293,6 +307,7 @@ response = client.get("/core/genitourinary/study?pool=all&count=2")
 assert_ok(response, "CORE GU study")
 assert b"/static/core/genitourinary/" in response.data
 assert b"core-media-collection" in response.data
+assert b"\xc2\xa9 UZ Brussel Radiologie" in response.data
 with client.session_transaction() as core_gu_language_session:
     core_gu_language_session["language"] = "nl"
 response = client.get("/core/genitourinary/study?resume=1")
@@ -343,6 +358,8 @@ assert_ok(response, "Dutch CORE GI study")
 core_cards_by_id = {card["ID"]: card for card in core_cards}
 for qid in core_order:
     assert core_cards_by_id[qid]["Vraag_nl"].encode("utf-8") in response.data
+    translated_finding = core_cards_by_id[qid]["answer_sections_nl"][0]["items"][0]["text"]
+    assert translated_finding.encode("utf-8") in response.data
 assert b"Toon antwoord" in response.data
 assert b"Alle rechten voorbehouden." in response.data
 with client.session_transaction() as core_language_session:
@@ -410,6 +427,9 @@ assert response.status_code == 302
 assert response.headers["Location"].endswith("/core")
 
 client.get("/logout")
+response = client.get("/login")
+assert_ok(response, "login page")
+assert b"login-rx-background.jpg" in response.data
 response = client.post(
     "/login",
     data={"email": "y@bymed.be", "password": "strong-password"},
