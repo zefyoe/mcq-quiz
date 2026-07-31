@@ -64,6 +64,12 @@
               <span id="labralisToolStatus">{{ "Bezig met scrollen" if language == "nl" else "Scroll mode" }}</span>
               <span id="labralisWindowHud">W: - L: -</span>
             </div>
+            <div class="core-labralis-context-menu" id="labralisContextMenu" hidden>
+              <button type="button" data-context-tool="pan">{{ "Pan / Selecteren" if language == "nl" else "Pan / Select" }}</button>
+              <button type="button" data-context-tool="window">{{ "Window level" if language == "nl" else "Window level" }}</button>
+              <button type="button" data-context-tool="scroll">{{ "Bezig met scrollen" if language == "nl" else "Scroll mode" }}</button>
+              <button type="button" data-context-action="reset">{{ "Reset window" if language == "nl" else "Reset window" }}</button>
+            </div>
           </div>
           <div class="core-labralis-slice-control">
             <div>
@@ -99,7 +105,7 @@
             </label>
           </div>
           <p class="core-labralis-hint">
-            {{ "Scroll met het muiswiel of de coupebalk. Kies Window level en sleep links-rechts voor contrast, op-neer voor densiteit." if language == "nl" else "Scroll with the mouse wheel or slice bar. Choose Window level and drag left-right for contrast, up-down for density." }}
+            {{ "Scroll met het muiswiel of de coupebalk. Rechtsklik-sleep om direct te windowen: links-rechts voor contrast, op-neer voor densiteit." if language == "nl" else "Scroll with the mouse wheel or slice bar. Right-click drag to window directly: left-right for contrast, up-down for density." }}
           </p>
         </article>
 
@@ -165,6 +171,7 @@
       const sliceLabel = document.getElementById("labralisSliceLabel");
       const toolStatus = document.getElementById("labralisToolStatus");
       const windowHud = document.getElementById("labralisWindowHud");
+      const contextMenu = document.getElementById("labralisContextMenu");
       const levelSlider = document.getElementById("labralisLevelSlider");
       const widthSlider = document.getElementById("labralisWidthSlider");
       const levelValue = document.getElementById("labralisLevelValue");
@@ -188,6 +195,7 @@
         range: 1,
       };
       let windowDrag = null;
+      let suppressNextContextMenu = false;
       const text = {
         empty: {{ ("Typ eerst uw diagnose." if language == "nl" else "Type your diagnosis first.")|tojson }},
         correct: {{ ("Correct." if language == "nl" else "Correct.")|tojson }},
@@ -197,6 +205,11 @@
         viewerFailed: {{ ("CT-volume kon niet worden geladen." if language == "nl" else "Could not load CT volume.")|tojson }},
         scrolling: {{ ("Bezig met scrollen" if language == "nl" else "Scroll mode")|tojson }},
         windowing: {{ ("Window level actief" if language == "nl" else "Window level active")|tojson }},
+      };
+      const contextToolMap = {
+        pan: "scroll",
+        scroll: "scroll",
+        window: "window",
       };
 
       function getAxialSliceCount(nv) {
@@ -330,6 +343,31 @@
         viewer.classList.toggle("is-windowing", tool === "window");
       }
 
+      function hideContextMenu() {
+        contextMenu.hidden = true;
+      }
+
+      function showContextMenu(event) {
+        event.preventDefault();
+        if (suppressNextContextMenu) {
+          suppressNextContextMenu = false;
+          hideContextMenu();
+          return;
+        }
+        if (!contextMenu || !viewer.parentElement) return;
+        const wrapRect = viewer.parentElement.getBoundingClientRect();
+        const menuWidth = contextMenu.offsetWidth || 230;
+        const menuHeight = contextMenu.offsetHeight || 190;
+        const x = Math.min(event.clientX - wrapRect.left, wrapRect.width - menuWidth - 8);
+        const y = Math.min(event.clientY - wrapRect.top, wrapRect.height - menuHeight - 8);
+        contextMenu.style.left = `${Math.max(8, x)}px`;
+        contextMenu.style.top = `${Math.max(8, y)}px`;
+        contextMenu.hidden = false;
+        contextMenu.querySelectorAll("[data-context-tool]").forEach((button) => {
+          button.classList.toggle("active", contextToolMap[button.dataset.contextTool] === activeTool);
+        });
+      }
+
       async function initializeViewer() {
         try {
           niivue = new Niivue({
@@ -418,15 +456,20 @@
       });
 
       viewer.addEventListener("pointerdown", (event) => {
-        if (activeTool !== "window" || !getVolume()) return;
+        hideContextMenu();
+        const isRightButton = event.button === 2;
+        if ((activeTool !== "window" && !isRightButton) || !getVolume()) return;
         event.preventDefault();
         viewer.setPointerCapture(event.pointerId);
+        toolStatus.textContent = text.windowing;
         windowDrag = {
           pointerId: event.pointerId,
           x: event.clientX,
           y: event.clientY,
           level: windowState.level,
           width: windowState.width,
+          temporaryRightButton: isRightButton && activeTool !== "window",
+          hasMoved: false,
         };
       });
 
@@ -435,6 +478,7 @@
         event.preventDefault();
         const dx = event.clientX - windowDrag.x;
         const dy = event.clientY - windowDrag.y;
+        windowDrag.hasMoved = windowDrag.hasMoved || Math.abs(dx) + Math.abs(dy) > 4;
         const width = Math.max(1, windowDrag.width + dx * windowState.range / 360);
         const level = windowDrag.level - dy * windowState.range / 360;
         applyWindowLevel(level, width);
@@ -442,17 +486,42 @@
 
       viewer.addEventListener("pointercancel", () => {
         windowDrag = null;
+        toolStatus.textContent = activeTool === "window" ? text.windowing : text.scrolling;
       });
 
       viewer.addEventListener("wheel", () => {
+        hideContextMenu();
         window.setTimeout(updateSliceControlFromViewer, 0);
       });
 
       viewer.addEventListener("pointerup", (event) => {
         if (windowDrag && event.pointerId === windowDrag.pointerId) {
+          suppressNextContextMenu = windowDrag.temporaryRightButton && windowDrag.hasMoved;
           windowDrag = null;
+          toolStatus.textContent = activeTool === "window" ? text.windowing : text.scrolling;
         }
         updateSliceControlFromViewer();
+      });
+
+      viewer.addEventListener("contextmenu", showContextMenu);
+
+      contextMenu.addEventListener("click", (event) => {
+        const button = event.target.closest("button");
+        if (!button) return;
+        const tool = contextToolMap[button.dataset.contextTool];
+        if (tool) {
+          setActiveTool(tool);
+        }
+        if (button.dataset.contextAction === "reset") {
+          applyWindowPreset("auto");
+        }
+        hideContextMenu();
+      });
+
+      document.addEventListener("pointerdown", (event) => {
+        if (!contextMenu.hidden && !contextMenu.contains(event.target) && event.target !== viewer) {
+          hideContextMenu();
+        }
       });
 
       initializeViewer();
