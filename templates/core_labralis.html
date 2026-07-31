@@ -42,6 +42,13 @@
             </div>
             <span>NIfTI</span>
           </div>
+          <div class="core-labralis-pacs-toolbar" aria-label="{{ 'Viewer tools' if language == 'nl' else 'Viewer tools' }}">
+            <button type="button" class="active" data-viewer-tool="scroll">{{ "Scroll" if language == "nl" else "Scroll" }}</button>
+            <button type="button" data-viewer-tool="window">{{ "Window level" if language == "nl" else "Window level" }}</button>
+            <button type="button" data-window-reset>{{ "Reset" if language == "nl" else "Reset" }}</button>
+            <span>2D</span>
+            <span>AX</span>
+          </div>
           <div class="core-labralis-viewer-wrap">
             <canvas
               id="labralisViewer"
@@ -52,6 +59,10 @@
             ></canvas>
             <div class="core-labralis-loading" id="labralisLoading">
               {{ "CT-volume laden..." if language == "nl" else "Loading CT volume..." }}
+            </div>
+            <div class="core-labralis-viewer-hud">
+              <span id="labralisToolStatus">{{ "Bezig met scrollen" if language == "nl" else "Scroll mode" }}</span>
+              <span id="labralisWindowHud">W: - L: -</span>
             </div>
           </div>
           <div class="core-labralis-slice-control">
@@ -69,8 +80,26 @@
               aria-label="{{ 'CT-coupe kiezen' if language == 'nl' else 'Choose CT slice' }}"
             >
           </div>
+          <div class="core-labralis-window-panel">
+            <div class="core-labralis-preset-row">
+              <button type="button" class="active" data-window-preset="auto">Auto</button>
+              <button type="button" data-window-preset="soft">{{ "Wekdelen" if language == "nl" else "Soft" }}</button>
+              <button type="button" data-window-preset="bone">{{ "Bot" if language == "nl" else "Bone" }}</button>
+              <button type="button" data-window-preset="high">{{ "Hoog contrast" if language == "nl" else "High contrast" }}</button>
+            </div>
+            <label class="core-labralis-window-row" for="labralisLevelSlider">
+              <span>{{ "Densiteit" if language == "nl" else "Level" }}</span>
+              <input id="labralisLevelSlider" type="range" min="0" max="1" value="0" step="1" disabled>
+              <strong id="labralisLevelValue">-</strong>
+            </label>
+            <label class="core-labralis-window-row" for="labralisWidthSlider">
+              <span>{{ "Contrast" if language == "nl" else "Width" }}</span>
+              <input id="labralisWidthSlider" type="range" min="1" max="2" value="1" step="1" disabled>
+              <strong id="labralisWidthValue">-</strong>
+            </label>
+          </div>
           <p class="core-labralis-hint">
-            {{ "Scroll met het muiswiel boven het beeld of gebruik de balk om gecontroleerd door de coupes te bladeren." if language == "nl" else "Use the mouse wheel over the image or the slider to move through slices with more control." }}
+            {{ "Scroll met het muiswiel of de coupebalk. Kies Window level en sleep links-rechts voor contrast, op-neer voor densiteit." if language == "nl" else "Scroll with the mouse wheel or slice bar. Choose Window level and drag left-right for contrast, up-down for density." }}
           </p>
         </article>
 
@@ -134,11 +163,31 @@
       const viewer = document.getElementById("labralisViewer");
       const sliceSlider = document.getElementById("labralisSliceSlider");
       const sliceLabel = document.getElementById("labralisSliceLabel");
+      const toolStatus = document.getElementById("labralisToolStatus");
+      const windowHud = document.getElementById("labralisWindowHud");
+      const levelSlider = document.getElementById("labralisLevelSlider");
+      const widthSlider = document.getElementById("labralisWidthSlider");
+      const levelValue = document.getElementById("labralisLevelValue");
+      const widthValue = document.getElementById("labralisWidthValue");
+      const toolButtons = document.querySelectorAll("[data-viewer-tool]");
+      const presetButtons = document.querySelectorAll("[data-window-preset]");
+      const resetButton = document.querySelector("[data-window-reset]");
       const form = document.getElementById("labralisQuizForm");
       const answerInput = document.getElementById("labralisAnswer");
       const feedback = document.getElementById("labralisFeedback");
       let niivue = null;
       let sliceCount = 1;
+      let activeTool = "scroll";
+      let windowState = {
+        min: 0,
+        max: 1,
+        level: 0.5,
+        width: 1,
+        rangeMin: 0,
+        rangeMax: 1,
+        range: 1,
+      };
+      let windowDrag = null;
       const text = {
         empty: {{ ("Typ eerst uw diagnose." if language == "nl" else "Type your diagnosis first.")|tojson }},
         correct: {{ ("Correct." if language == "nl" else "Correct.")|tojson }},
@@ -146,6 +195,8 @@
         rightAnswer: {{ ("Juiste antwoord:" if language == "nl" else "Correct answer:")|tojson }},
         failed: {{ ("Het antwoord kon niet worden nagekeken." if language == "nl" else "Could not check the answer.")|tojson }},
         viewerFailed: {{ ("CT-volume kon niet worden geladen." if language == "nl" else "Could not load CT volume.")|tojson }},
+        scrolling: {{ ("Bezig met scrollen" if language == "nl" else "Scroll mode")|tojson }},
+        windowing: {{ ("Window level actief" if language == "nl" else "Window level active")|tojson }},
       };
 
       function getAxialSliceCount(nv) {
@@ -176,6 +227,109 @@
         updateSliceControlFromViewer();
       }
 
+      function formatWindowNumber(value) {
+        if (!Number.isFinite(value)) return "-";
+        return String(Math.round(value));
+      }
+
+      function getVolume() {
+        return niivue?.volumes?.[0] || null;
+      }
+
+      function updateWindowLabels() {
+        const width = Math.max(1, windowState.width);
+        const level = windowState.level;
+        levelValue.textContent = formatWindowNumber(level);
+        widthValue.textContent = formatWindowNumber(width);
+        windowHud.textContent = `W: ${formatWindowNumber(width)} L: ${formatWindowNumber(level)}`;
+        levelSlider.value = String(Math.round(level));
+        widthSlider.value = String(Math.round(width));
+      }
+
+      function applyWindowLevel(level, width, updatePreset = true) {
+        const volume = getVolume();
+        if (!volume) return;
+        const safeWidth = Math.max(1, Number(width) || 1);
+        const safeLevel = Number(level) || 0;
+        windowState.level = safeLevel;
+        windowState.width = safeWidth;
+        windowState.min = safeLevel - safeWidth / 2;
+        windowState.max = safeLevel + safeWidth / 2;
+        volume.cal_min = windowState.min;
+        volume.cal_max = windowState.max;
+        niivue.updateGLVolume();
+        niivue.drawScene();
+        updateWindowLabels();
+        if (updatePreset) {
+          presetButtons.forEach((button) => button.classList.remove("active"));
+        }
+      }
+
+      function applyWindowPreset(presetName) {
+        const { rangeMin, rangeMax, range } = windowState;
+        const presets = {
+          auto: { level: rangeMin + range * 0.5, width: range },
+          soft: { level: rangeMin + range * 0.52, width: range * 0.46 },
+          bone: { level: rangeMin + range * 0.68, width: range * 0.74 },
+          high: { level: rangeMin + range * 0.55, width: range * 0.26 },
+        };
+        const preset = presets[presetName] || presets.auto;
+        applyWindowLevel(preset.level, preset.width, false);
+        presetButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.windowPreset === presetName);
+        });
+      }
+
+      function initializeWindowControls() {
+        const volume = getVolume();
+        if (!volume) return;
+        const values = [
+          volume.robust_min,
+          volume.cal_min,
+          volume.hdr?.cal_min,
+          0,
+        ].filter(Number.isFinite);
+        const maxValues = [
+          volume.robust_max,
+          volume.cal_max,
+          volume.hdr?.cal_max,
+          255,
+        ].filter(Number.isFinite);
+        const rangeMin = Math.min(...values);
+        let rangeMax = Math.max(...maxValues);
+        if (!Number.isFinite(rangeMax) || rangeMax <= rangeMin) {
+          rangeMax = rangeMin + 255;
+        }
+        const range = rangeMax - rangeMin;
+        windowState = {
+          min: rangeMin,
+          max: rangeMax,
+          level: rangeMin + range / 2,
+          width: range,
+          rangeMin,
+          rangeMax,
+          range,
+        };
+        levelSlider.min = String(Math.floor(rangeMin));
+        levelSlider.max = String(Math.ceil(rangeMax));
+        levelSlider.step = String(Math.max(1, Math.round(range / 400)));
+        widthSlider.min = String(Math.max(1, Math.round(range / 80)));
+        widthSlider.max = String(Math.max(2, Math.round(range * 1.4)));
+        widthSlider.step = levelSlider.step;
+        levelSlider.disabled = false;
+        widthSlider.disabled = false;
+        applyWindowPreset("auto");
+      }
+
+      function setActiveTool(tool) {
+        activeTool = tool;
+        toolButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.viewerTool === tool);
+        });
+        toolStatus.textContent = tool === "window" ? text.windowing : text.scrolling;
+        viewer.classList.toggle("is-windowing", tool === "window");
+      }
+
       async function initializeViewer() {
         try {
           niivue = new Niivue({
@@ -185,12 +339,14 @@
           await niivue.attachTo("labralisViewer");
           niivue.setCrosshairWidth(0);
           niivue.setCrosshairColor([1, 0, 0, 0]);
+          niivue.setIsOrientationTextVisible(false);
           niivue.setSliceType(niivue.sliceTypeAxial);
           await niivue.loadVolumes([{ url: volumeUrl, name: caseFilename }]);
           sliceCount = getAxialSliceCount(niivue);
           sliceSlider.max = String(sliceCount);
           sliceSlider.disabled = sliceCount <= 1;
           setViewerSlice(Math.max(1, Math.round(sliceCount / 2)));
+          initializeWindowControls();
           loading.hidden = true;
         } catch (error) {
           loading.textContent = text.viewerFailed;
@@ -240,11 +396,64 @@
         setViewerSlice(event.target.value);
       });
 
+      levelSlider.addEventListener("input", (event) => {
+        applyWindowLevel(Number(event.target.value), windowState.width);
+      });
+
+      widthSlider.addEventListener("input", (event) => {
+        applyWindowLevel(windowState.level, Number(event.target.value));
+      });
+
+      toolButtons.forEach((button) => {
+        button.addEventListener("click", () => setActiveTool(button.dataset.viewerTool || "scroll"));
+      });
+
+      presetButtons.forEach((button) => {
+        button.addEventListener("click", () => applyWindowPreset(button.dataset.windowPreset || "auto"));
+      });
+
+      resetButton.addEventListener("click", () => {
+        applyWindowPreset("auto");
+        setActiveTool("scroll");
+      });
+
+      viewer.addEventListener("pointerdown", (event) => {
+        if (activeTool !== "window" || !getVolume()) return;
+        event.preventDefault();
+        viewer.setPointerCapture(event.pointerId);
+        windowDrag = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          level: windowState.level,
+          width: windowState.width,
+        };
+      });
+
+      viewer.addEventListener("pointermove", (event) => {
+        if (!windowDrag || event.pointerId !== windowDrag.pointerId) return;
+        event.preventDefault();
+        const dx = event.clientX - windowDrag.x;
+        const dy = event.clientY - windowDrag.y;
+        const width = Math.max(1, windowDrag.width + dx * windowState.range / 360);
+        const level = windowDrag.level - dy * windowState.range / 360;
+        applyWindowLevel(level, width);
+      });
+
+      viewer.addEventListener("pointercancel", () => {
+        windowDrag = null;
+      });
+
       viewer.addEventListener("wheel", () => {
         window.setTimeout(updateSliceControlFromViewer, 0);
       });
 
-      viewer.addEventListener("pointerup", updateSliceControlFromViewer);
+      viewer.addEventListener("pointerup", (event) => {
+        if (windowDrag && event.pointerId === windowDrag.pointerId) {
+          windowDrag = null;
+        }
+        updateSliceControlFromViewer();
+      });
 
       initializeViewer();
     </script>
