@@ -180,9 +180,9 @@ LABRALIS_CASE = {
     "prompt_en": "Review the scrollable CT shoulder arthrogram and formulate the most likely diagnosis.",
     "processing_stats": (
         ("Origineel DICOM", "~113 MB"),
-        ("Na dikke-coupe verwerking", "1,7 MB"),
-        ("Reductiefactor", "~66x"),
-        ("Coupedikte", "0,31 mm -> 5 mm"),
+        ("Na 2,5 mm webverwerking", "3,5 MB"),
+        ("Reductiefactor", "~33x"),
+        ("Coupedikte", "0,31 mm -> 2,5 mm"),
         ("Instellingsgegevens", "verwijderd"),
     ),
 }
