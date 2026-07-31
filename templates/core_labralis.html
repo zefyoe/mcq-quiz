@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CORE LABRALIS beta</title>
+    {% include "_favicon.html" %}
+    <link rel="preload" as="fetch" href="{{ case.volume_url }}" crossorigin>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
+  </head>
+  <body class="core-product">
+    <header class="core-compact-topbar">
+      <a href="{{ url_for('core_home') }}" class="core-compact-brand">CORE <span>Radiology</span></a>
+      <div>
+        <a href="{{ url_for('core_home') }}">{{ "Overzicht" if language == "nl" else "Overview" }}</a>
+        <a href="{{ url_for('core_history') }}">{{ "Geschiedenis" if language == "nl" else "History" }}</a>
+        {% set active_product = "core" %}
+        {% include "_product_switcher.html" %}
+        {% include "_language_switcher.html" %}
+      </div>
+    </header>
+
+    <main class="core-labralis-page">
+      <section class="core-setup-hero core-labralis-hero">
+        <p class="eyebrow">CORE BETA MODULE</p>
+        <h1>LABRALIS</h1>
+        <p>
+          {{ "Scrollbare CT-quizdemo voor een voorbereide schouderarthro-case." if language == "nl" else "Scrollable CT quiz demo for one prepared shoulder arthrogram case." }}
+        </p>
+        <div class="core-anki-notice">
+          <span>BETA</span>
+          {{ "Een hardcoded proof-of-conceptcase voor de fundingpitch." if language == "nl" else "One hardcoded proof-of-concept case for the funding pitch." }}
+        </div>
+      </section>
+
+      <section class="core-labralis-layout">
+        <article class="core-panel core-labralis-viewer-panel">
+          <div class="core-panel-heading">
+            <div>
+              <p class="eyebrow">CT VIEWER</p>
+              <h2>{{ case.label }}</h2>
+            </div>
+            <span>NIfTI</span>
+          </div>
+          <div class="core-labralis-viewer-wrap">
+            <canvas
+              id="labralisViewer"
+              class="core-labralis-viewer"
+              width="512"
+              height="512"
+              aria-label="{{ 'Scrollbare CT-viewer' if language == 'nl' else 'Scrollable CT viewer' }}"
+            ></canvas>
+            <div class="core-labralis-loading" id="labralisLoading">
+              {{ "CT-volume laden..." if language == "nl" else "Loading CT volume..." }}
+            </div>
+          </div>
+          <p class="core-labralis-hint">
+            {{ "Scroll met het muiswiel boven het beeld om door de coupes te bladeren." if language == "nl" else "Use the mouse wheel over the image to scroll through slices." }}
+          </p>
+        </article>
+
+        <aside class="core-labralis-side">
+          <article class="core-panel core-labralis-quiz-panel">
+            <div class="core-panel-heading">
+              <div>
+                <p class="eyebrow">{{ "OPEN RECALL" if language == "nl" else "OPEN RECALL" }}</p>
+                <h2>{{ "Uw diagnose" if language == "nl" else "Your diagnosis" }}</h2>
+              </div>
+              <span>{{ case.id }}</span>
+            </div>
+            <p>{{ case.prompt_nl if language == "nl" else case.prompt_en }}</p>
+            <form id="labralisQuizForm" class="core-labralis-answer-form">
+              <label for="labralisAnswer">{{ "Antwoord" if language == "nl" else "Answer" }}</label>
+              <input
+                id="labralisAnswer"
+                name="answer"
+                type="text"
+                autocomplete="off"
+                placeholder="{{ 'Typ uw diagnose...' if language == 'nl' else 'Type your diagnosis...' }}"
+              >
+              <button type="submit" class="core-primary-button">
+                {{ "Nakijken" if language == "nl" else "Check answer" }}
+              </button>
+            </form>
+            <div class="answer-feedback core-labralis-feedback" id="labralisFeedback" hidden></div>
+          </article>
+
+          <article class="core-panel core-labralis-processing-panel">
+            <div class="core-panel-heading">
+              <div>
+                <p class="eyebrow">{{ "VERWERKING" if language == "nl" else "PROCESSING" }}</p>
+                <h2>{{ "Demo-afgeleide" if language == "nl" else "Demo derivative" }}</h2>
+              </div>
+            </div>
+            <div class="core-labralis-stat-list">
+              {% for label, value in case.processing_stats %}
+                <div class="core-labralis-stat-row">
+                  <span>{{ label }}</span>
+                  <strong>{{ value }}</strong>
+                </div>
+              {% endfor %}
+            </div>
+            <p class="small-muted">
+              {{ "Deze beta-module gebruikt enkel dit al-verwerkte bestand. Upload, anonimisering en conversie blijven bewust buiten scope." if language == "nl" else "This beta module only uses this prepared file. Upload, de-identification, and conversion are intentionally out of scope." }}
+            </p>
+          </article>
+        </aside>
+      </section>
+    </main>
+    {% include "_site_footer.html" %}
+
+    <script type="module">
+      import { Niivue } from "https://unpkg.com/@niivue/niivue@0.57.0/dist/index.js";
+
+      const volumeUrl = {{ case.volume_url|tojson }};
+      const caseFilename = {{ case.filename|tojson }};
+      const checkUrl = {{ url_for("check_core_labralis_answer")|tojson }};
+      const loading = document.getElementById("labralisLoading");
+      const form = document.getElementById("labralisQuizForm");
+      const answerInput = document.getElementById("labralisAnswer");
+      const feedback = document.getElementById("labralisFeedback");
+      const text = {
+        empty: {{ ("Typ eerst uw diagnose." if language == "nl" else "Type your diagnosis first.")|tojson }},
+        correct: {{ ("Correct." if language == "nl" else "Correct.")|tojson }},
+        incorrect: {{ ("Nog niet volledig." if language == "nl" else "Not quite yet.")|tojson }},
+        rightAnswer: {{ ("Juiste antwoord:" if language == "nl" else "Correct answer:")|tojson }},
+        failed: {{ ("Het antwoord kon niet worden nagekeken." if language == "nl" else "Could not check the answer.")|tojson }},
+        viewerFailed: {{ ("CT-volume kon niet worden geladen." if language == "nl" else "Could not load CT volume.")|tojson }},
+      };
+
+      async function initializeViewer() {
+        try {
+          const nv = new Niivue({
+            isResizeCanvas: true,
+            dragAndDropEnabled: false,
+          });
+          await nv.attachTo("labralisViewer");
+          nv.setSliceType(nv.sliceTypeAxial);
+          await nv.loadVolumes([{ url: volumeUrl, name: caseFilename }]);
+          loading.hidden = true;
+        } catch (error) {
+          loading.textContent = text.viewerFailed;
+          loading.classList.add("has-error");
+        }
+      }
+
+      function showFeedback(payload) {
+        const diagnosis = payload.diagnosis || "";
+        feedback.hidden = false;
+        feedback.className = `answer-feedback core-labralis-feedback ${
+          payload.correct ? "answer-feedback-correct" : "answer-feedback-wrong"
+        }`;
+        feedback.innerHTML = `<strong>${payload.correct ? text.correct : text.incorrect}</strong> ${text.rightAnswer} ${diagnosis}`;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const answer = answerInput.value.trim();
+        if (!answer) {
+          feedback.hidden = false;
+          feedback.className = "answer-feedback core-labralis-feedback answer-feedback-wrong";
+          feedback.textContent = text.empty;
+          answerInput.focus();
+          return;
+        }
+
+        try {
+          const response = await fetch(checkUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ answer }),
+          });
+          const payload = await response.json();
+          if (!response.ok || !payload.ok) {
+            throw new Error(payload.error || text.failed);
+          }
+          showFeedback(payload);
+        } catch (error) {
+          feedback.hidden = false;
+          feedback.className = "answer-feedback core-labralis-feedback answer-feedback-wrong";
+          feedback.textContent = error.message || text.failed;
+        }
+      });
+
+      initializeViewer();
+    </script>
+  </body>
+</html>

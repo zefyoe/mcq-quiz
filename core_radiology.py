@@ -17,6 +17,7 @@ CORE_SECTIONS = (
     {"key": "emergency", "label": "Emergency Radiology", "label_nl": "Spoedradiologie", "placeholder_count": 118},
     {"key": "cardiac", "label": "Cardiac Imaging", "label_nl": "Cardiale beeldvorming", "placeholder_count": 84},
     {"key": "breast", "label": "Breast Imaging", "label_nl": "Borstbeeldvorming", "placeholder_count": 96},
+    {"key": "labralis", "label": "LABRALIS", "label_nl": "LABRALIS", "placeholder_count": 1, "is_beta_demo": True},
 )
 
 DATA_DIRECTORY = Path(__file__).resolve().parent / "data"
@@ -210,6 +211,8 @@ def get_core_sections():
     sections = []
     for section in CORE_SECTIONS:
         count = len(load_core_section(section["key"]))
+        if section.get("is_beta_demo"):
+            count = section.get("placeholder_count", 1)
         sections.append({
             **section,
             "count": count,

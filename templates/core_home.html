@@ -87,15 +87,19 @@
             </div>
             <div class="product-category-list core-category-list">
               {% for section in core_dashboard.sections %}
-                <a href="{{ url_for('core_section_setup', section_key=section.key) }}" class="product-category-row{% if section.is_placeholder %} is-in-progress{% endif %}">
+                <a href="{{ url_for('core_labralis') if section.is_beta_demo else url_for('core_section_setup', section_key=section.key) }}" class="product-category-row{% if section.is_placeholder %} is-in-progress{% endif %}{% if section.is_beta_demo %} is-beta-demo{% endif %}">
                     <span class="product-category-code">{{ "%02d"|format(loop.index) }}</span>
                     <span class="product-category-copy">
                       <strong>{{ section.label_nl if language == "nl" else section.label }}</strong>
                       <small>
-                        {{ section.coverage }}% {{ "bekeken" if language == "nl" else "reviewed" }}
+                        {% if section.is_beta_demo %}
+                          {{ "Beta proof-of-concept" if language == "nl" else "Beta proof of concept" }}
+                        {% else %}
+                          {{ section.coverage }}% {{ "bekeken" if language == "nl" else "reviewed" }}
+                        {% endif %}
                       </small>
                     </span>
-                    <span class="product-category-count">{{ section.seen }}/{{ section.display_count }}</span>
+                    <span class="product-category-count">{{ "BETA" if section.is_beta_demo else section.seen ~ "/" ~ section.display_count }}</span>
                     <span class="product-category-arrow" aria-hidden="true">→</span>
                 </a>
               {% endfor %}

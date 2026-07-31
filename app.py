@@ -170,6 +170,33 @@ FLASHCARD_RATINGS = {
 DISABLED_CATEGORIES = {"physics"}
 ANATOMY_PUBLIC_URL = os.environ.get("ANATOMY_PUBLIC_URL", "https://bymed.be/")
 CORE_PUBLIC_URL = os.environ.get("CORE_PUBLIC_URL", "https://core.bymed.be/core")
+LABRALIS_CASE = {
+    "id": "case01",
+    "label": "LABRALIS beta case 01",
+    "filename": "case01__sequelen-van-posterieure-glenohumerale-luxatie-klein-reversed-hill-sachs-letsel-en-reversed-bony-bankart-letsel.nii.gz",
+    "diagnosis": "Sequelen van posterieure glenohumerale luxatie: Klein reversed Hill-Sachs-letsel en reversed bony Bankart-letsel.",
+    "volume_url": "/static/core/labralis/case01__sequelen-van-posterieure-glenohumerale-luxatie-klein-reversed-hill-sachs-letsel-en-reversed-bony-bankart-letsel.nii.gz",
+    "prompt_nl": "Bekijk de scrollbare CT-schouderarthro en formuleer de meest waarschijnlijke diagnose.",
+    "prompt_en": "Review the scrollable CT shoulder arthrogram and formulate the most likely diagnosis.",
+    "processing_stats": (
+        ("Origineel DICOM", "~113 MB"),
+        ("Na dikke-coupe verwerking", "1,7 MB"),
+        ("Reductiefactor", "~66x"),
+        ("Coupedikte", "0,31 mm -> 5 mm"),
+        ("Instellingsgegevens", "verwijderd"),
+    ),
+}
+LABRALIS_ACCEPTED_ANSWERS = (
+    LABRALIS_CASE["diagnosis"],
+    "Reversed Hill-Sachs-letsel en reversed bony Bankart-letsel na posterieure glenohumerale luxatie",
+    "Sequelen posterieure schouderluxatie met reversed Hill-Sachs en reversed bony Bankart",
+)
+LABRALIS_REQUIRED_TERMS = (
+    ("posterieure", "posterior"),
+    ("luxatie", "dislocation"),
+    ("reversed hill sachs", "reverse hill sachs"),
+    ("bony bankart", "bankart"),
+)
 
 
 # -------------------------
@@ -2112,12 +2139,58 @@ def core_history():
     )
 
 
+def grade_labralis_answer(answer: str) -> bool:
+    def normalize_labralis_text(value: str) -> str:
+        return normalize_text_answer(re.sub(r"[^0-9a-zA-ZÀ-ÿ]+", " ", value))
+
+    normalized_answer = normalize_labralis_text(answer)
+    if not normalized_answer:
+        return False
+
+    accepted_answers = {
+        normalize_labralis_text(value)
+        for value in LABRALIS_ACCEPTED_ANSWERS
+    }
+    if normalized_answer in accepted_answers:
+        return True
+
+    return all(
+        any(normalize_labralis_text(term) in normalized_answer for term in group)
+        for group in LABRALIS_REQUIRED_TERMS
+    )
+
+
+@app.route("/core/labralis")
+@login_required
+def core_labralis():
+    return render_template(
+        "core_labralis.html",
+        case=LABRALIS_CASE,
+        home_url=url_for("core_home"),
+    )
+
+
+@app.route("/core/labralis/check", methods=["POST"])
+@login_required
+def check_core_labralis_answer():
+    payload = request.get_json(silent=True) or {}
+    answer = (payload.get("answer") or "").strip()
+    is_correct = grade_labralis_answer(answer)
+    return jsonify({
+        "ok": True,
+        "correct": is_correct,
+        "diagnosis": LABRALIS_CASE["diagnosis"],
+    })
+
+
 @app.route("/core/<section_key>")
 @login_required
 def core_section_setup(section_key):
     section = get_core_section(section_key)
     if not section:
         return redirect(url_for("core_home"))
+    if section.get("is_beta_demo"):
+        return redirect(url_for("core_labralis"))
     questions = load_core_section(section_key)
     if not questions:
         return render_template("core_empty_section.html", section=section)
