@@ -54,8 +54,23 @@
               {{ "CT-volume laden..." if language == "nl" else "Loading CT volume..." }}
             </div>
           </div>
+          <div class="core-labralis-slice-control">
+            <div>
+              <label for="labralisSliceSlider">{{ "Coupe" if language == "nl" else "Slice" }}</label>
+              <span id="labralisSliceLabel">- / -</span>
+            </div>
+            <input
+              id="labralisSliceSlider"
+              type="range"
+              min="1"
+              max="1"
+              value="1"
+              disabled
+              aria-label="{{ 'CT-coupe kiezen' if language == 'nl' else 'Choose CT slice' }}"
+            >
+          </div>
           <p class="core-labralis-hint">
-            {{ "Scroll met het muiswiel boven het beeld om door de coupes te bladeren." if language == "nl" else "Use the mouse wheel over the image to scroll through slices." }}
+            {{ "Scroll met het muiswiel boven het beeld of gebruik de balk om gecontroleerd door de coupes te bladeren." if language == "nl" else "Use the mouse wheel over the image or the slider to move through slices with more control." }}
           </p>
         </article>
 
@@ -116,9 +131,14 @@
       const caseFilename = {{ case.filename|tojson }};
       const checkUrl = {{ url_for("check_core_labralis_answer")|tojson }};
       const loading = document.getElementById("labralisLoading");
+      const viewer = document.getElementById("labralisViewer");
+      const sliceSlider = document.getElementById("labralisSliceSlider");
+      const sliceLabel = document.getElementById("labralisSliceLabel");
       const form = document.getElementById("labralisQuizForm");
       const answerInput = document.getElementById("labralisAnswer");
       const feedback = document.getElementById("labralisFeedback");
+      let niivue = null;
+      let sliceCount = 1;
       const text = {
         empty: {{ ("Typ eerst uw diagnose." if language == "nl" else "Type your diagnosis first.")|tojson }},
         correct: {{ ("Correct." if language == "nl" else "Correct.")|tojson }},
@@ -128,15 +148,49 @@
         viewerFailed: {{ ("CT-volume kon niet worden geladen." if language == "nl" else "Could not load CT volume.")|tojson }},
       };
 
+      function getAxialSliceCount(nv) {
+        const dims = nv.volumes?.[0]?.dims || [];
+        if (dims.length > 3 && dims[0] <= 7) {
+          return Number(dims[3]) || 1;
+        }
+        return Number(dims[2]) || Number(dims[0]) || 1;
+      }
+
+      function getCurrentSliceIndex() {
+        const location = niivue?.scene?.crosshairPos?.[2] ?? 0.5;
+        return Math.max(1, Math.min(sliceCount, Math.round(location * (sliceCount - 1)) + 1));
+      }
+
+      function updateSliceControlFromViewer() {
+        if (!sliceSlider || !sliceLabel) return;
+        const sliceIndex = getCurrentSliceIndex();
+        sliceSlider.value = String(sliceIndex);
+        sliceLabel.textContent = `${sliceIndex} / ${sliceCount}`;
+      }
+
+      function setViewerSlice(sliceIndex) {
+        if (!niivue?.scene?.crosshairPos) return;
+        const boundedIndex = Math.max(1, Math.min(sliceCount, Number(sliceIndex) || 1));
+        niivue.scene.crosshairPos[2] = sliceCount > 1 ? (boundedIndex - 1) / (sliceCount - 1) : 0.5;
+        niivue.drawScene();
+        updateSliceControlFromViewer();
+      }
+
       async function initializeViewer() {
         try {
-          const nv = new Niivue({
+          niivue = new Niivue({
             isResizeCanvas: true,
             dragAndDropEnabled: false,
           });
-          await nv.attachTo("labralisViewer");
-          nv.setSliceType(nv.sliceTypeAxial);
-          await nv.loadVolumes([{ url: volumeUrl, name: caseFilename }]);
+          await niivue.attachTo("labralisViewer");
+          niivue.setCrosshairWidth(0);
+          niivue.setCrosshairColor([1, 0, 0, 0]);
+          niivue.setSliceType(niivue.sliceTypeAxial);
+          await niivue.loadVolumes([{ url: volumeUrl, name: caseFilename }]);
+          sliceCount = getAxialSliceCount(niivue);
+          sliceSlider.max = String(sliceCount);
+          sliceSlider.disabled = sliceCount <= 1;
+          setViewerSlice(Math.max(1, Math.round(sliceCount / 2)));
           loading.hidden = true;
         } catch (error) {
           loading.textContent = text.viewerFailed;
@@ -181,6 +235,16 @@
           feedback.textContent = error.message || text.failed;
         }
       });
+
+      sliceSlider.addEventListener("input", (event) => {
+        setViewerSlice(event.target.value);
+      });
+
+      viewer.addEventListener("wheel", () => {
+        window.setTimeout(updateSliceControlFromViewer, 0);
+      });
+
+      viewer.addEventListener("pointerup", updateSliceControlFromViewer);
 
       initializeViewer();
     </script>

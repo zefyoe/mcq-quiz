@@ -2103,6 +2103,48 @@ body {
   font-size: 0.82rem;
 }
 
+.core-labralis-slice-control {
+  width: min(100%, 760px);
+  margin: 16px auto 10px;
+  padding: 13px 14px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid #dbe6e8;
+  border-radius: 10px;
+  background: #f8fbfb;
+}
+
+.core-labralis-slice-control > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #536b74;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.core-labralis-slice-control label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.core-labralis-slice-control span {
+  color: var(--core-teal);
+  font-variant-numeric: tabular-nums;
+}
+
+.core-labralis-slice-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--core-teal);
+  cursor: pointer;
+}
+
+.core-labralis-slice-control input[type="range"]:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
 .core-labralis-side {
   display: grid;
   gap: 18px;
