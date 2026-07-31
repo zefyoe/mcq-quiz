@@ -35,7 +35,7 @@ os.environ["SECRET_KEY"] = "premium-smoke-test"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import app, capitalize_initial, db, get_questions_by_ids  # noqa: E402
-from core_radiology import load_core_section, parse_answer_details  # noqa: E402
+from core_radiology import get_core_sections, load_core_section, parse_answer_details  # noqa: E402
 from models import QuizAttempt, User  # noqa: E402
 from sqlalchemy import inspect  # noqa: E402
 
@@ -96,6 +96,34 @@ assert len(core_breast_cards) == 100
 assert all(card["Vraag_nl"] != card["Vraag"] for card in core_breast_cards)
 assert sum(card["Correct_nl"] != card["Correct"] for card in core_breast_cards) >= 95
 assert all(card["answer_sections_nl"] for card in core_breast_cards)
+
+core_chest_cards = load_core_section("chest")
+assert len(core_chest_cards) == 137
+assert core_chest_cards[0]["ID"] == "CORE-CH-001"
+assert len(core_chest_cards[0]["image_urls"]) == 1
+assert len(core_chest_cards[0]["answer_image_urls"]) == 2
+assert all(card["answer_sections"] for card in core_chest_cards)
+
+core_pediatric_cards = load_core_section("pediatric")
+assert len(core_pediatric_cards) == 150
+assert core_pediatric_cards[0]["ID"] == "CORE-PED-001"
+assert len(core_pediatric_cards[0]["image_urls"]) == 1
+assert len(core_pediatric_cards[0]["answer_image_urls"]) == 1
+assert all(card["answer_sections"] for card in core_pediatric_cards)
+
+core_interventional_cards = load_core_section("interventional")
+assert len(core_interventional_cards) == 103
+assert core_interventional_cards[0]["ID"] == "CORE-IR-001"
+assert len(core_interventional_cards[0]["image_urls"]) == 3
+assert len(core_interventional_cards[0]["answer_image_urls"]) == 3
+assert all(card["answer_sections"] for card in core_interventional_cards)
+
+core_neuro_cards = load_core_section("neuroradiology")
+assert len(core_neuro_cards) == 192
+assert core_neuro_cards[0]["ID"] == "CORE-NR-001"
+assert len(core_neuro_cards[0]["image_urls"]) == 3
+assert len(core_neuro_cards[0]["answer_image_urls"]) == 3
+assert all(card["answer_sections"] for card in core_neuro_cards)
 
 
 with app.app_context():
@@ -289,13 +317,39 @@ assert b'class="product-switcher"' in response.data
 assert b'product-option active' in response.data
 assert b"171" in response.data
 assert b"Chest Imaging" in response.data
-assert response.data.count(b'class="product-category-row') == 11
+assert response.data.count(b'class="product-category-row') == len(get_core_sections())
 assert b"Anatomy" in response.data
 assert b"core-nav-product-link" not in response.data
 assert b">CORE Gastro-intestinal</a>" not in response.data
-assert_ok(client.get("/core/chest"), "empty CORE section")
-assert b"164 cases" in client.get("/core/chest").data
-assert b"Content processing in progress" in client.get("/core/chest").data
+
+response = client.get("/core/chest")
+assert_ok(response, "CORE chest setup")
+assert b"137" in response.data
+response = client.get("/core/chest/study?pool=all&count=2")
+assert_ok(response, "CORE chest study")
+assert b"/static/core/chest/" in response.data
+
+response = client.get("/core/pediatric")
+assert_ok(response, "CORE pediatric setup")
+assert b"150" in response.data
+response = client.get("/core/pediatric/study?pool=all&count=2")
+assert_ok(response, "CORE pediatric study")
+assert b"/static/core/pediatric/" in response.data
+
+response = client.get("/core/interventional")
+assert_ok(response, "CORE interventional setup")
+assert b"103" in response.data
+response = client.get("/core/interventional/study?pool=all&count=2")
+assert_ok(response, "CORE interventional study")
+assert b"/static/core/interventional/" in response.data
+
+response = client.get("/core/neuroradiology")
+assert_ok(response, "CORE neuroradiology setup")
+assert b"192" in response.data
+response = client.get("/core/neuroradiology/study?pool=all&count=2")
+assert_ok(response, "CORE neuroradiology study")
+assert b"/static/core/neuroradiology/" in response.data
+
 response = client.get("/core/gastrointestinal")
 assert_ok(response, "CORE GI setup")
 assert b"ANKI ONLY" in response.data
@@ -358,9 +412,10 @@ assert_ok(response, "Dutch CORE GI study")
 core_cards_by_id = {card["ID"]: card for card in core_cards}
 for qid in core_order:
     assert core_cards_by_id[qid]["Vraag_nl"].encode("utf-8") in response.data
-    translated_finding = core_cards_by_id[qid]["answer_sections_nl"][0]["items"][0]["text"]
-    assert translated_finding.encode("utf-8") in response.data
+    assert core_cards_by_id[qid]["Correct_nl"][0].encode("utf-8") in response.data
 assert b"Toon antwoord" in response.data
+assert b"Bevindingen en kernpunten" in response.data
+assert b"Casebespreking" in response.data
 assert b"Alle rechten voorbehouden." in response.data
 with client.session_transaction() as core_language_session:
     core_language_session["language"] = "en"

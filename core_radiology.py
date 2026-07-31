@@ -6,17 +6,17 @@ from urllib.parse import quote_plus
 
 
 CORE_SECTIONS = (
-    {"key": "chest", "label": "Chest Imaging", "label_nl": "Thoraxbeeldvorming", "placeholder_count": 164},
-    {"key": "neuroradiology", "label": "Neuroradiology", "label_nl": "Neuroradiologie", "placeholder_count": 148},
-    {"key": "pediatric", "label": "Pediatric Imaging", "label_nl": "Pediatrische beeldvorming", "placeholder_count": 92},
-    {"key": "interventional", "label": "Interventional Radiology", "label_nl": "Interventieradiologie", "placeholder_count": 86},
+    {"key": "chest", "label": "Chest Imaging", "label_nl": "Thoraxbeeldvorming"},
+    {"key": "neuroradiology", "label": "Neuroradiology", "label_nl": "Neuroradiologie"},
+    {"key": "pediatric", "label": "Pediatric Imaging", "label_nl": "Pediatrische beeldvorming"},
+    {"key": "interventional", "label": "Interventional Radiology", "label_nl": "Interventieradiologie"},
     {"key": "genitourinary", "label": "Genitourinary Radiology", "label_nl": "Urogenitale radiologie"},
     {"key": "gastrointestinal", "label": "Gastrointestinal Imaging", "label_nl": "Gastro-intestinale beeldvorming"},
     {"key": "body-mri", "label": "Body MRI", "label_nl": "MRI van het lichaam", "placeholder_count": 105},
     {"key": "musculoskeletal", "label": "Musculoskeletal Imaging", "label_nl": "Musculoskeletale beeldvorming", "placeholder_count": 172},
     {"key": "emergency", "label": "Emergency Radiology", "label_nl": "Spoedradiologie", "placeholder_count": 118},
     {"key": "cardiac", "label": "Cardiac Imaging", "label_nl": "Cardiale beeldvorming", "placeholder_count": 84},
-    {"key": "breast", "label": "Breast Imaging", "label_nl": "Borstbeeldvorming", "placeholder_count": 96},
+    {"key": "breast", "label": "Breast Imaging", "label_nl": "Borstbeeldvorming"},
     {"key": "labralis", "label": "LABRALIS", "label_nl": "LABRALIS", "placeholder_count": 1, "is_beta_demo": True},
 )
 
