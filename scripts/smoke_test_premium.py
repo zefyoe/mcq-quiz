@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import sqlite3
 import sys
 import tempfile
@@ -84,6 +85,25 @@ parsed_teaching = parse_answer_details(
     "Teaching Points\n" + "\n".join(f"Point {index}." for index in range(1, 18))
 )
 assert len(parsed_teaching[0]["items"]) <= 6
+parsed_figure_findings = parse_answer_details(
+    "Bevindingen\nBorstradiografie (Fig. 79.4) toont een verbreed mediastinum.\n\n"
+    "Axiale beelden (fig. 79.5 en 79.6) tonen een aortaletsel.\n\n"
+    "Figuur 79,7 toont het letsel vóór behandeling (Figuur 79,8)."
+)
+figure_findings = parsed_figure_findings[0]["items"]
+assert len(figure_findings) == 3
+assert all(
+    not re.search(r"\b(?:fig|figs|figure|figures|figuur|figuren)\b", item["text"], re.I)
+    for item in figure_findings
+)
+assert figure_findings[0]["text"].startswith("Borstradiografie toont")
+orphaned_figure_numbers = parse_answer_details(
+    "Bevindingen\nEen volledige bevinding.\n13.3, 13.4.\nNog een bevinding."
+)[0]["items"]
+assert [item["text"] for item in orphaned_figure_numbers] == [
+    "Een volledige bevinding.",
+    "Nog een bevinding.",
+]
 
 core_cards = load_core_section("gastrointestinal")
 assert len(core_cards) == 171
@@ -125,7 +145,12 @@ assert len(core_chest_cards[0]["image_urls"]) == 1
 assert len(core_chest_cards[0]["answer_image_urls"]) == 2
 assert all(card["answer_sections"] for card in core_chest_cards)
 assert all(card["Vraag_nl"] for card in core_chest_cards)
+assert all(card["Vraag_nl"] != card["Vraag"] for card in core_chest_cards)
 assert all(card["answer_details_nl"] != card["answer_details"] for card in core_chest_cards)
+chest_hypertension = next(card for card in core_chest_cards if card["ID"] == "CORE-CH-069")
+assert chest_hypertension["Vraag_nl"] == (
+    "35-jarige man met ongecontroleerde hypertensie bij wie beeldvorming wordt verricht."
+)
 
 core_pediatric_cards = load_core_section("pediatric")
 assert len(core_pediatric_cards) == 150
@@ -134,6 +159,7 @@ assert len(core_pediatric_cards[0]["image_urls"]) == 1
 assert len(core_pediatric_cards[0]["answer_image_urls"]) == 1
 assert all(card["answer_sections"] for card in core_pediatric_cards)
 assert all(card["Vraag_nl"] for card in core_pediatric_cards)
+assert all(card["Vraag_nl"] != card["Vraag"] for card in core_pediatric_cards)
 assert all(card["answer_details_nl"] != card["answer_details"] for card in core_pediatric_cards)
 
 core_interventional_cards = load_core_section("interventional")
@@ -143,7 +169,21 @@ assert len(core_interventional_cards[0]["image_urls"]) == 3
 assert len(core_interventional_cards[0]["answer_image_urls"]) == 3
 assert all(card["answer_sections"] for card in core_interventional_cards)
 assert all(card["Vraag_nl"] for card in core_interventional_cards)
+assert all(card["Vraag_nl"] != card["Vraag"] for card in core_interventional_cards)
 assert all(card["answer_details_nl"] != card["answer_details"] for card in core_interventional_cards)
+ir_079 = next(card for card in core_interventional_cards if card["ID"] == "CORE-IR-079")
+assert ir_079["Vraag_nl"] == "50-jarige vrouw na een verkeersongeval met hoge snelheid."
+assert next(
+    card for card in core_interventional_cards if card["ID"] == "CORE-IR-078"
+)["Vraag_nl"].startswith("25-jarige man, per ambulance binnengebracht")
+ir_079_findings = next(
+    section for section in ir_079["answer_sections_nl"] if section["key"] == "findings"
+)["items"]
+assert len(ir_079_findings) == 4
+assert all(
+    not re.search(r"\b(?:fig|figs|figure|figures|figuur|figuren)\b", item["text"], re.I)
+    for item in ir_079_findings
+)
 
 core_neuro_cards = load_core_section("neuroradiology")
 assert len(core_neuro_cards) == 192
@@ -186,6 +226,15 @@ assert len(core_cardiac_cards[0]["answer_image_urls"]) == 0
 assert all(card["answer_sections"] for card in core_cardiac_cards)
 assert all(card["Vraag_nl"] for card in core_cardiac_cards)
 assert all(card["answer_details_nl"] for card in core_cardiac_cards)
+cardiac_without_history = [
+    card for card in core_cardiac_cards
+    if card["Vraag"] == "What is the abnormality on the images below?"
+]
+assert len(cardiac_without_history) == 63
+assert all(
+    card["Vraag_nl"] == "Wat is de afwijking op onderstaande beelden?"
+    for card in cardiac_without_history
+)
 
 core_emergency_cards = load_core_section("emergency")
 assert len(core_emergency_cards) == 164

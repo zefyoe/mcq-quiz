@@ -37,6 +37,26 @@ ANSWER_SECTION_HEADINGS = {
     "references": re.compile(r"^(Further Readings?|Referenties)$", re.IGNORECASE),
 }
 
+CARDIAC_QUESTION_DEFAULT = "What is the abnormality on the images below?"
+CARDIAC_QUESTION_DEFAULT_NL = "Wat is de afwijking op onderstaande beelden?"
+MISSING_CLINICAL_HISTORY = {
+    "",
+    "none",
+    "n/a",
+    "na",
+    "not available",
+    "clinical information not available",
+    "no clinical history",
+}
+FIGURE_WORD = r"(?:fig(?:s|ure|ures|uur|uren)?|afb(?:eelding|eeldingen)?)\.?"
+FIGURE_LABEL = r"(?:\d+(?:[.,]\d+)?[a-z]?|[A-Z])"
+FIGURE_REFERENCE = re.compile(
+    rf"\(?\b{FIGURE_WORD}\s*{FIGURE_LABEL}"
+    r"(?:\s*(?:,|&|and|en|to|tot|[-–])\s*"
+    rf"(?:{FIGURE_WORD})?\s*{FIGURE_LABEL})*\s*\)?",
+    re.IGNORECASE,
+)
+
 
 def _section_key(line):
     for key, pattern in ANSWER_SECTION_HEADINGS.items():
@@ -52,6 +72,15 @@ def _clean_extracted_text(value):
         value,
     )
     return value.replace("oft en", "often").replace("aft er", "after")
+
+
+def _strip_figure_references(value):
+    value = FIGURE_REFERENCE.sub("", value)
+    value = re.sub(r"\b(?:in|op|zie)\s*(?=[),.;])", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"\(\s*\)", "", value)
+    value = re.sub(r"\s+([,.;:])", r"\1", value)
+    value = re.sub(r"^[\s,.;:–-]+", "", value)
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def _capitalize_initial(value):
@@ -96,24 +125,32 @@ def _split_learning_points(section_key, lines):
         chunks = []
         for raw_line in lines:
             for part in re.split(r"\s*■\s*", raw_line.strip()):
-                line = _clean_extracted_text(part.strip())
+                line = _strip_figure_references(
+                    _clean_extracted_text(part.strip())
+                )
                 if line:
                     chunks.append(line)
     else:
         text = " ".join(line.strip() for line in lines if line.strip())
         text = re.sub(r"\s+", " ", text).strip()
-        text = _clean_extracted_text(text)
+        text = _strip_figure_references(_clean_extracted_text(text))
         if not text:
             return []
-        chunks = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", text)
+        chunks = re.split(r"(?<=[.!?])\s+(?=[A-Za-zÀ-ÖØ-öø-ÿ0-9])", text)
 
     if section_key == "teaching":
         chunks = _cap_learning_points(chunks, 6)
 
     items = []
     for chunk in chunks:
-        chunk = chunk.strip()
+        chunk = _capitalize_initial(chunk.strip())
         if not chunk:
+            continue
+        if re.fullmatch(
+            r"\d+(?:[.,]\d+)?[a-z]?(?:\s*,\s*\d+(?:[.,]\d+)?[a-z]?)*\)?[.!]?",
+            chunk,
+            re.IGNORECASE,
+        ):
             continue
         lead = ""
         body = chunk
@@ -189,7 +226,21 @@ def load_core_section(section_key):
         )
         answer_details = card.get("answer_details") or ""
         answer_details_nl = dutch_answer_details.get(card["id"], answer_details)
-        history = card.get("history") or "Review the imaging case and formulate the diagnosis."
+        source_history = (card.get("history") or "").strip()
+        cardiac_history_missing = (
+            section_key == "cardiac"
+            and source_history.lower() in MISSING_CLINICAL_HISTORY
+        )
+        history = (
+            CARDIAC_QUESTION_DEFAULT
+            if cardiac_history_missing
+            else source_history or "Review the imaging case and formulate the diagnosis."
+        )
+        history_nl = (
+            CARDIAC_QUESTION_DEFAULT_NL
+            if cardiac_history_missing
+            else dutch_histories.get(card["id"], history)
+        )
         question_images = card.get("question_images") or (
             [card["question_image"]] if card.get("question_image") else []
         )
@@ -200,7 +251,7 @@ def load_core_section(section_key):
             "ID": card["id"],
             "Category": "CORE Radiology",
             "Vraag": history,
-            "Vraag_nl": dutch_histories.get(card["id"], history),
+            "Vraag_nl": history_nl,
             "Correct": [diagnosis],
             "Correct_nl": [
                 _capitalize_initial(dutch_diagnoses.get(card["id"], diagnosis))
