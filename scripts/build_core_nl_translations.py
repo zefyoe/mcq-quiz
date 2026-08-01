@@ -70,6 +70,59 @@ MANUAL_HISTORY_TRANSLATIONS = {
     "CORE-PED-081": "Premature jongen van 28 weken, één week oud (eerste afbeelding). De tweede afbeelding is acht weken later gemaakt.",
     "CORE-PED-082": "6-jarige met hoofdpijn en een veranderde mentale toestand.",
 }
+MANUAL_ANSWER_TRANSLATIONS = {
+    "CORE-GU-020": (
+        "Bevindingen\n"
+        "De blanco CT toont gas in het parenchym van de transplantatienier. Een voornamelijk gashoudend abces breidt zich uit tot in de perirenale weke delen.\n\n"
+        "Bij een andere patiënt blijft het gas beperkt tot het pyelocaliceale systeem, passend bij emfysemateuze pyelitis.\n"
+        "Differentiaaldiagnose\n"
+        "De differentiaaldiagnose van gas in de nier hangt af van de lokalisatie. Gas dat beperkt blijft tot het pyelocaliceale systeem kan berusten op emfysemateuze pyelitis, recente instrumentatie of een fistel met de darm. Bij deze patiënt bevindt het gas zich in het nierparenchym en breidt het zich uit naar de perinefrische ruimte, kenmerkend voor emfysemateuze pyelonefritis.\n"
+        "Kernpunten\n"
+        "Emfysemateuze pyelonefritis is een acute, fulminante en necrotiserende infectie van het nierparenchym en de perirenale weefsels.\n\n"
+        "Ongeveer 80-96% van de patiënten heeft diabetes; ook immunosuppressie en urinewegobstructie zijn belangrijke risicofactoren.\n\n"
+        "Escherichia coli is de meest voorkomende verwekker.\n\n"
+        "De aandoening kan snel evolueren naar sepsis en overlijden; de totale mortaliteit bedraagt ongeveer 25%, met gerapporteerde waarden van 11-42%.\n\n"
+        "Gas dat door infectie beperkt blijft tot het pyelocaliceale systeem wordt emfysemateuze pyelitis genoemd en heeft een betere prognose dan gas in het nierparenchym.\n\n"
+        "Uitbreiding van gas of een gashoudend abces buiten de nier is prognostisch ongunstig; CT is de gevoeligste en specifiekste techniek om de aanwezigheid, lokalisatie en uitbreiding van het gas te beoordelen.\n"
+        "Beleid\n"
+        "Behandel met intraveneuze antibiotica, drainage van het abces en decompressie van een eventuele urinewegobstructie. Nefrectomie kan nodig zijn bij hoogrisicopatiënten of wanneer conservatieve behandeling faalt.\n"
+        "Referenties\n"
+        "Akhtar AL, Elsayes KM, Woodward S. AJR teaching file: diabetic patient presenting with right flank pain and fever. AJR Am J Roentgenol. 2010;194(6 suppl):WS31-33."
+    ),
+    "CORE-GU-044": (
+        "Bevindingen\n"
+        "Op de blanco CT van de eerste patiënt is hyperdens materiaal zichtbaar dat het linker nierbekken en pyelocaliceale systeem opvult en distendeert. Daarnaast is de rechternier atrofisch.\n\n"
+        "Bij de tweede patiënt toont de blanco CT geen duidelijke laesie. In de nefropyelografische fase is in het rechter nierbekken een lineair vuldefect met spits toelopende randen zichtbaar.\n"
+        "Differentiaaldiagnose\n"
+        "De differentiaaldiagnose bij beide patiënten bestaat uit een bloedstolsel in het pyelocaliceale systeem en een urotheelcarcinoom. Een urotheelcarcinoom heeft een wekedelenattenuatie en neemt contrast op, terwijl een bloedstolsel meestal spontaan hyperdens is en geen contrast opneemt. Bij de eerste patiënt past het hyperdense materiaal in het pyelocaliceale systeem bij een groot bloedstolsel. Bij de tweede patiënt is de diagnose moeilijker, omdat de kleine laesie in het rechter nierbekken niet hyperdens is op de blanco CT. In de nefropyelografische fase wordt de laesie omgeven door hyperdens contrast, waardoor contrastopname moeilijk te beoordelen is. De lineaire configuratie, de spits toelopende randen en de grotendeels door contrast van het urotheel gescheiden ligging pleiten voor een retracterend bloedstolsel boven een urotheelcarcinoom.\n"
+        "Kernpunten\n"
+        "Bloedstolsels in het pyelocaliceale systeem kunnen voorkomen bij patiënten met hematurie.\n\n"
+        "Een bloeding kan ontstaan door infectie, antistolling, een vasculaire malformatie, een iatrogene oorzaak of een onderliggende tumor.\n\n"
+        "Een groot bloedstolsel kan een kleine onderliggende tumor maskeren.\n\n"
+        "Op MRI kan een bloedstolsel een hoge T1-signaalintensiteit vertonen.\n"
+        "Beleid\n"
+        "Behandel de onderliggende oorzaak van de hematurie en sluit een onderliggende urotheeltumor uit.\n"
+        "Referenties\n"
+        "O’Connor OJ, Fitzgerald E, Maher MM. Imaging of hematuria. AJR Am J Roentgenol. 2010;195(4):W263-267."
+    ),
+    "CORE-GU-102": (
+        "Bevindingen\n"
+        "Grijswaarden- en kleuren-Doppleronderzoek van het linker scrotum toont meerdere gedilateerde, hypoechogene tubulaire structuren naast en craniaal van de linker testis, met aantoonbare veneuze flow.\n"
+        "Differentiaaldiagnose\n"
+        "De hypoechogene serpigineuze vaatstructuren zijn gedilateerde venen van de plexus pampiniformis. Deze venen liggen rond de testis en hebben normaal een diameter van ongeveer 1,5 mm. Een diameter groter dan 3 mm, met of zonder toename tijdens het Valsalva-manoeuvre, is diagnostisch voor een varicocèle.\n"
+        "Kernpunten\n"
+        "De meeste varicocèles zijn primair en ontstaan door insufficiënte kleppen in de gonadale venen; ze worden meestal vastgesteld tussen 15 en 25 jaar.\n\n"
+        "Bij lichamelijk onderzoek voelt een varicocèle typisch aan als een zak met wormen.\n\n"
+        "Een primaire varicocèle bevindt zich meestal links door het langere verloop van de linker vena testicularis en de loodrechte uitmonding in de vena renalis.\n\n"
+        "Een secundaire varicocèle ontstaat door verhoogde druk in de gonadale vene, bijvoorbeeld bij een retroperitoneale massa, cirrose of portale hypertensie; een geïsoleerde rechtszijdige varicocèle vereist onderzoek naar retroperitoneale obstructie.\n\n"
+        "Een klinische varicocèle kan samenhangen met mannelijke infertiliteit en een verminderd aantal zaadcellen; voor een uitsluitend op beeldvorming zichtbare subklinische varicocèle is die relatie niet overtuigend aangetoond.\n\n"
+        "Dopplerechografie is zeer gevoelig; onderzoek in staande houding en tijdens het Valsalva-manoeuvre vergroot de zichtbaarheid van veneuze dilatatie en reflux.\n"
+        "Beleid\n"
+        "Behandel zo nodig met chirurgische ligatie of embolisatie.\n"
+        "Referenties\n"
+        "Dogra VS, Gottlieb RH, Oka M, Rubens DJ. Sonography of the scrotum. Radiology. 2003;227(1):18-36."
+    ),
+}
 MAX_CHUNK_LENGTH = 3500
 MEDICAL_REPLACEMENTS = (
     (r"\bSEH is\b", "Er is"),
@@ -319,7 +372,8 @@ def translate_card(card, existing):
             or translate_text(card.get("diagnosis", ""))
         ),
         "answer_details": (
-            existing.get("answer_details", {}).get(card_id)
+            MANUAL_ANSWER_TRANSLATIONS.get(card_id)
+            or existing.get("answer_details", {}).get(card_id)
             or translate_answer_details(card.get("answer_details", ""))
         ),
     }

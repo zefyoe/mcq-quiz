@@ -100,7 +100,6 @@ def _strip_figure_references(value):
     value = FIGURE_REFERENCE.sub("", value)
     value = ORPHAN_FIGURE_PARENTHETICAL.sub("", value)
     value = DANGLING_FIGURE_SUFFIX.sub("", value)
-    value = re.sub(r"\b(?:in|op|zie)\s*(?=[),.;])", "", value, flags=re.IGNORECASE)
     value = re.sub(r"\(\s*\)", "", value)
     value = re.sub(r"\s+([,.;:])", r"\1", value)
     value = re.sub(r"^[\s,.;:–-]+", "", value)

@@ -111,6 +111,12 @@ assert parsed_pointer_figure_reference == [{
     "lead": "",
     "text": "CT-beelden tonen een massa.",
 }]
+preserved_medical_preposition = parse_answer_details(
+    "Differentiaaldiagnose\nEen urotheelcarcinoom neemt contrast op, een stolsel niet."
+)[0]["items"]
+assert preserved_medical_preposition[0]["text"].startswith(
+    "Een urotheelcarcinoom neemt contrast op,"
+)
 parsed_orphaned_figure_references = parse_answer_details(
     "Bevindingen\nCT-beelden (5.1, 5.2 en 5.4) tonen afwijkingen. "
     "MRI-beelden, en 11.3) bevestigen dit. "
@@ -155,13 +161,32 @@ assert core_gu_cards[0]["Correct_nl"] == [
 assert len(core_gu_cards[0]["image_urls"]) == 3
 assert len(core_gu_cards[0]["answer_image_urls"]) == 2
 assert all(card["answer_sections_nl"] for card in core_gu_cards)
+gu_020 = next(card for card in core_gu_cards if card["ID"] == "CORE-GU-020")
+gu_020_findings = next(
+    section for section in gu_020["answer_sections_nl"] if section["key"] == "findings"
+)["items"]
+assert gu_020_findings[0]["text"].startswith(
+    "De blanco CT toont gas in het parenchym van de transplantatienier."
+)
+assert all("20." not in item["text"] for item in gu_020_findings)
 gu_102 = next(card for card in core_gu_cards if card["ID"] == "CORE-GU-102")
 gu_102_findings = next(
     section for section in gu_102["answer_sections_nl"] if section["key"] == "findings"
 )["items"]
 assert len(gu_102_findings) == 1
+assert gu_102_findings[0]["text"].startswith(
+    "Grijswaarden- en kleuren-Doppleronderzoek van het linker scrotum"
+)
 assert "102.1" not in gu_102_findings[0]["text"]
 assert "102.2" not in gu_102_findings[0]["text"]
+gu_044 = next(card for card in core_gu_cards if card["ID"] == "CORE-GU-044")
+gu_044_findings = next(
+    section for section in gu_044["answer_sections_nl"] if section["key"] == "findings"
+)["items"]
+assert gu_044_findings[0]["text"].startswith(
+    "Op de blanco CT van de eerste patiënt is hyperdens materiaal zichtbaar"
+)
+assert all("44." not in item["text"] for item in gu_044_findings)
 
 core_breast_cards = load_core_section("breast")
 assert len(core_breast_cards) == 100
