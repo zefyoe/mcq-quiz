@@ -48,12 +48,33 @@ MISSING_CLINICAL_HISTORY = {
     "clinical information not available",
     "no clinical history",
 }
-FIGURE_WORD = r"(?:fig(?:s|ure|ures|uur|uren)?|afb(?:eelding|eeldingen)?)\.?"
-FIGURE_LABEL = r"(?:\d+(?:[.,]\d+)?[a-z]?|[A-Z])"
+FIGURE_WORD = r"(?:fig(?:uren|ures|uur|ure|s)?|afb(?:eeldingen|eelding)?)\.?"
+FIGURE_LABEL = r"(?:\d+(?:[.,]\d+)?[a-z]?|(?-i:[A-Z]))"
 FIGURE_REFERENCE = re.compile(
     rf"\(?\b{FIGURE_WORD}\s*{FIGURE_LABEL}"
     r"(?:\s*(?:,|&|and|en|to|tot|[-–])\s*"
     rf"(?:{FIGURE_WORD})?\s*{FIGURE_LABEL})*\s*\)?",
+    re.IGNORECASE,
+)
+FIGURE_PARENTHETICAL = re.compile(
+    rf"\([^()]*\b{FIGURE_WORD}\s*{FIGURE_LABEL}"
+    r"(?:\s*(?:,|&|and|en|to|tot|[-–])\s*"
+    rf"(?:{FIGURE_WORD})?\s*{FIGURE_LABEL})*[^()]*\)",
+    re.IGNORECASE,
+)
+NUMERIC_FIGURE_LABEL = r"\d{1,3}[.,]\d{1,3}[a-z]?"
+FIGURE_POINTER = r"(?:arrow|arrows|pijl|pijlen|asterisk)"
+ORPHAN_FIGURE_PARENTHETICAL = re.compile(
+    rf"\(\s*(?:{FIGURE_POINTER}\s+(?:in\s+)?)?"
+    rf"{NUMERIC_FIGURE_LABEL}(?:\s+{FIGURE_POINTER})?"
+    rf"(?:\s*(?:,\s*(?:(?:and|en)\s+)?|(?:and|en)\s+)"
+    rf"(?:{FIGURE_POINTER}\s+(?:in\s+)?)?"
+    rf"{NUMERIC_FIGURE_LABEL}(?:\s+{FIGURE_POINTER})?)*\s*\)",
+    re.IGNORECASE,
+)
+DANGLING_FIGURE_SUFFIX = re.compile(
+    rf",?\s*(?:and|en)\s+{NUMERIC_FIGURE_LABEL}"
+    rf"(?:\s+{FIGURE_POINTER})?\s*\)",
     re.IGNORECASE,
 )
 
@@ -75,7 +96,10 @@ def _clean_extracted_text(value):
 
 
 def _strip_figure_references(value):
+    value = FIGURE_PARENTHETICAL.sub("", value)
     value = FIGURE_REFERENCE.sub("", value)
+    value = ORPHAN_FIGURE_PARENTHETICAL.sub("", value)
+    value = DANGLING_FIGURE_SUFFIX.sub("", value)
     value = re.sub(r"\b(?:in|op|zie)\s*(?=[),.;])", "", value, flags=re.IGNORECASE)
     value = re.sub(r"\(\s*\)", "", value)
     value = re.sub(r"\s+([,.;:])", r"\1", value)

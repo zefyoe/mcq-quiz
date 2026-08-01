@@ -97,6 +97,30 @@ assert all(
     for item in figure_findings
 )
 assert figure_findings[0]["text"].startswith("Borstradiografie toont")
+parsed_plural_figure_reference = parse_answer_details(
+    "Bevindingen\nDopplerbeelden (figuren 102.1 en 102.2) tonen een varicocèle."
+)[0]["items"]
+assert parsed_plural_figure_reference == [{
+    "lead": "",
+    "text": "Dopplerbeelden tonen een varicocèle.",
+}]
+parsed_pointer_figure_reference = parse_answer_details(
+    "Bevindingen\nCT-beelden (witte pijlen in figuren 22.1 en 22.2) tonen een massa."
+)[0]["items"]
+assert parsed_pointer_figure_reference == [{
+    "lead": "",
+    "text": "CT-beelden tonen een massa.",
+}]
+parsed_orphaned_figure_references = parse_answer_details(
+    "Bevindingen\nCT-beelden (5.1, 5.2 en 5.4) tonen afwijkingen. "
+    "MRI-beelden, en 11.3) bevestigen dit. "
+    "De resistieve index blijft verhoogd (RI = 1,0)."
+)[0]["items"]
+assert [item["text"] for item in parsed_orphaned_figure_references] == [
+    "CT-beelden tonen afwijkingen.",
+    "MRI-beelden bevestigen dit.",
+    "De resistieve index blijft verhoogd (RI = 1,0).",
+]
 orphaned_figure_numbers = parse_answer_details(
     "Bevindingen\nEen volledige bevinding.\n13.3, 13.4.\nNog een bevinding."
 )[0]["items"]
@@ -131,6 +155,13 @@ assert core_gu_cards[0]["Correct_nl"] == [
 assert len(core_gu_cards[0]["image_urls"]) == 3
 assert len(core_gu_cards[0]["answer_image_urls"]) == 2
 assert all(card["answer_sections_nl"] for card in core_gu_cards)
+gu_102 = next(card for card in core_gu_cards if card["ID"] == "CORE-GU-102")
+gu_102_findings = next(
+    section for section in gu_102["answer_sections_nl"] if section["key"] == "findings"
+)["items"]
+assert len(gu_102_findings) == 1
+assert "102.1" not in gu_102_findings[0]["text"]
+assert "102.2" not in gu_102_findings[0]["text"]
 
 core_breast_cards = load_core_section("breast")
 assert len(core_breast_cards) == 100
