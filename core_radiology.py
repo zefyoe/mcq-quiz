@@ -37,6 +37,77 @@ ANSWER_SECTION_HEADINGS = {
     "references": re.compile(r"^(Further Readings?|Referenties)$", re.IGNORECASE),
 }
 
+GU_DIFFERENTIAL_OVERRIDES_NL = {
+    "CORE-GU-001": ["Heldercellig niercelcarcinoom", "Urotheelcarcinoom", "Lymfoom", "Oncocytoom"],
+    "CORE-GU-002": ["Urotheelcarcinoom van het nierbekken", "Niercelcarcinoom", "Lymfoom"],
+    "CORE-GU-003": ["Lymfoom", "Sarcoom", "Retroperitoneale fibrose", "Perinefrisch hematoom"],
+    "CORE-GU-004": ["Lymfoom", "Metastasen", "Pyelonefritis"],
+    "CORE-GU-005": ["Lymfoom", "Diabetes mellitus", "Acute glomerulonefritis", "Systemische lupus erythematodes", "Polyarteritis nodosa", "Granulomatose met polyangiitis"],
+    "CORE-GU-006": ["Heldercellig niercelcarcinoom", "Papillair niercelcarcinoom", "Chromofoob niercelcarcinoom", "Oncocytoom", "Vetarm angiomyolipoom"],
+    "CORE-GU-007": ["Urotheelcarcinoom", "Bloedstolsel"],
+    "CORE-GU-015": ["Retroperitoneaal liposarcoom", "Groot exofytisch renaal angiomyolipoom"],
+    "CORE-GU-016": ["Acute pyelonefritis", "Urinewegobstructie", "Nierveentrombose", "Niercontusie", "Vasculitis", "Hypotensie"],
+    "CORE-GU-017": ["Niercyste", "Nierabces"],
+    "CORE-GU-021": ["Diabetes mellitus", "Acute glomerulonefritis", "Vasculitis", "Lymfoom", "HIV-geassocieerde nefropathie"],
+    "CORE-GU-022": ["Lymfoom", "Multifocaal papillair niercelcarcinoom", "Metastasen", "Infectie", "Sarcoïdose", "Granulomatose met polyangiitis"],
+    "CORE-GU-023": ["Xanthogranulomateuze pyelonefritis", "Tuberculose"],
+    "CORE-GU-024": ["Bosniak III-cyste", "Nierabces", "Renale hydatidecyste"],
+    "CORE-GU-025": ["Medullaire nefrocalcinose", "Jichtnefropathie"],
+    "CORE-GU-028": ["Eenvoudige niercyste", "Calyxdivertikel"],
+    "CORE-GU-031": ["Atherosclerotische nierarteriestenose", "Fibromusculaire dysplasie"],
+    "CORE-GU-032": ["Atherosclerotische nierarteriestenose", "Fibromusculaire dysplasie"],
+    "CORE-GU-035": ["Perinefrisch hematoom", "Urinoom", "Lymfocele", "Abces"],
+    "CORE-GU-039": ["Transplantaatafstoting", "Acute tubulusnecrose", "Nierveentrombose"],
+    "CORE-GU-040": ["Hematoom", "Urinoom", "Lymfocele", "Abces"],
+    "CORE-GU-041": ["Acute tubulusnecrose", "Acute transplantaatafstoting", "Chronische transplantaatafstoting", "Nierveentrombose"],
+    "CORE-GU-044": ["Bloedstolsel in het pyelocaliceale systeem", "Urotheelcarcinoom"],
+    "CORE-GU-045": ["Retroperitoneale fibrose", "Retroperitoneaal lymfoom"],
+    "CORE-GU-046": ["Liposarcoom", "Lipoom", "Exofytisch renaal angiomyolipoom", "Teratoom"],
+    "CORE-GU-048": ["Lymfoom", "Retroperitoneale fibrose", "Retroperitoneaal sarcoom"],
+    "CORE-GU-050": ["Tuberculose", "Mycobacterium avium-complexinfectie", "Schimmelinfectie", "Necrotische lymfekliermetastasen", "Ziekte van Whipple"],
+    "CORE-GU-051": ["Cystische degeneratie in een solide tumor", "Behandelingsgerelateerde tumornecrose", "Lymfangioom", "Cystisch teratoom"],
+    "CORE-GU-052": ["Blande trombus", "Tumortrombus"],
+    "CORE-GU-057": ["Lipiderijk bijnieradenoom", "Myelolipoom", "Bijnierbloeding"],
+    "CORE-GU-063": ["Bijniermetastase", "Bijnieradenoom"],
+    "CORE-GU-064": ["Endotheliale bijniercyste", "Bijnierpseudocyste", "Cystisch gedegenereerde bijniertumor"],
+    "CORE-GU-067": ["Traumatische perinefrische collectie", "Postoperatieve collectie", "Perinefrisch abces"],
+    "CORE-GU-069": ["Urotheelcarcinoom", "Bloedstolsel"],
+    "CORE-GU-070": ["Blaassteen", "Bloedstolsel", "Urotheelcarcinoom"],
+    "CORE-GU-072": ["Recente instrumentatie", "Enterovesicale fistel", "Emfysemateuze cystitis"],
+    "CORE-GU-075": ["Bekkenorgaanprolaps", "Neuromusculaire aandoening", "Bindweefselziekte", "Inflammatoire darmziekte"],
+    "CORE-GU-076": ["Urotheelcarcinoom", "Schistosomiasis", "Tuberculose", "Cyclofosfamidecystitis", "Radiatiecystitis"],
+    "CORE-GU-080": ["Utriculuscyste", "Cyste van de ductus Müllerianus", "Cyste van de ductus ejaculatorius", "Cystische benigne prostaathyperplasie", "Prostaatabces"],
+    "CORE-GU-087": ["Urethradivertikel", "Gartnergangcyste", "Bartholin-kliercyste", "Skene-kliercyste", "Naboth-cyste"],
+    "CORE-GU-088": ["Urethradivertikel", "Skene-kliercyste", "Gartnergangcyste", "Bartholin-kliercyste"],
+    "CORE-GU-092": ["Primaire testistumor", "Lymfoom", "Epidermoïdcyste", "Granulomateuze aandoening"],
+    "CORE-GU-093": ["Kiemceltumor", "Lymfoom", "Sarcoïdose"],
+    "CORE-GU-094": ["Epididymo-orchitis", "Testistorsie", "Torsie van een testisappendix"],
+    "CORE-GU-097": ["Kiemceltumor", "Testiculair lymfoom"],
+    "CORE-GU-098": ["Kiemceltumor", "Testiculair lymfoom", "Sarcoïdose"],
+    "CORE-GU-099": ["Spermatocele", "Epididymiscyste"],
+    "CORE-GU-100": ["Epididymo-orchitis", "Testistorsie"],
+    "CORE-GU-101": ["Epididymo-orchitis", "Testistorsie", "Ingeklemde liesbreuk", "Cellulitis", "Gangreen van Fournier"],
+    "CORE-GU-104": ["Endometriumhyperplasie", "Endometriumcarcinoom", "Endometriumpoliep", "Submuceus uterusmyoom"],
+    "CORE-GU-105": ["Endometriumpoliep", "Endometriumhyperplasie", "Endometriumcarcinoom", "Submuceus uterusmyoom"],
+    "CORE-GU-107": ["Hematometra", "Pyometra", "Hydrometra"],
+    "CORE-GU-109": ["Endometriumpoliep", "Submuceus uterusmyoom", "Intra-uteriene synechieën"],
+    "CORE-GU-110": ["Arcuaire uterus", "Septate uterus", "Bicornuate uterus", "Uterus didelphys"],
+    "CORE-GU-112": ["Ovariumcyste", "Hydrosalpinx"],
+    "CORE-GU-114": ["Endometriumhyperplasie", "Endometriumpoliep", "Endometriumcarcinoom", "Tamoxifengerelateerde verandering"],
+    "CORE-GU-115": ["Zeer vroege intra-uteriene zwangerschap", "Anembryonale zwangerschap", "Pseudogestationele zak bij ectopische zwangerschap"],
+    "CORE-GU-116": ["Arterioveneuze malformatie", "Veneuze obstructie", "Pelvien congestiesyndroom", "Asymptomatische anatomische variant"],
+    "CORE-GU-119": ["Hemorragische ovariumcyste", "Maligne ovariumneoplasma"],
+    "CORE-GU-120": [
+        "Hemorragische ovariumcyste",
+        "Endometrioom",
+        "Dermoïdcyste",
+        "Goedaardige of kwaadaardige ovariumtumor",
+    ],
+    "CORE-GU-122": ["Hemorragische ovariumcyste", "Endometrioom", "Hydrosalpinx", "Dermoïdcyste", "Ovariumcarcinoom"],
+    "CORE-GU-124": ["Primair ovariumcarcinoom", "Ovariële metastasen", "Endometrioom"],
+    "CORE-GU-126": ["Tubo-ovarieel abces", "Ovariumneoplasma", "Hemorragische ovariumcyste", "Endometrioom"],
+    "CORE-GU-128": ["Ovariumtorsie", "Ovariumtumor", "Ovarieel hyperstimulatiesyndroom"],
+}
 CARDIAC_QUESTION_DEFAULT = "What is the abnormality on the images below?"
 CARDIAC_QUESTION_DEFAULT_NL = "Wat is de afwijking op onderstaande beelden?"
 MISSING_CLINICAL_HISTORY = {
@@ -223,6 +294,72 @@ def parse_answer_details(value):
     return sections
 
 
+def _compact_gu_differential(card_id, correct_diagnosis):
+    has_override = card_id in GU_DIFFERENTIAL_OVERRIDES_NL
+    candidates = list(GU_DIFFERENTIAL_OVERRIDES_NL.get(card_id, []))
+
+    cleaned = []
+    for candidate in candidates:
+        candidate = re.sub(
+            r"^(?:zoals|waaronder)\s+",
+            "",
+            candidate.strip(" .;:"),
+            flags=re.IGNORECASE,
+        )
+        candidate = _capitalize_initial(candidate)
+        if not candidate or len(candidate) > 120:
+            continue
+        normalized = re.sub(r"\W+", "", candidate.lower())
+        if normalized and all(
+            normalized != re.sub(r"\W+", "", existing.lower())
+            for existing in cleaned
+        ):
+            cleaned.append(candidate)
+
+    if not cleaned:
+        cleaned = [_capitalize_initial(correct_diagnosis)]
+    elif not has_override and not any(
+        re.sub(r"\W+", "", correct_diagnosis.lower())
+        in re.sub(r"\W+", "", candidate.lower())
+        or re.sub(r"\W+", "", candidate.lower())
+        in re.sub(r"\W+", "", correct_diagnosis.lower())
+        for candidate in cleaned
+    ):
+        cleaned.insert(0, _capitalize_initial(correct_diagnosis))
+
+    return [{
+        "lead": "",
+        "text": candidate,
+        "radiopaedia_url": f"https://radiopaedia.org/search?q={quote_plus(candidate)}",
+    } for candidate in cleaned[:6]]
+
+
+def _compact_gu_differential_section(
+    card_id,
+    sections,
+    correct_diagnosis,
+):
+    compact_items = _compact_gu_differential(
+        card_id,
+        correct_diagnosis,
+    )
+    updated = []
+    replaced = False
+    for section in sections:
+        if section["key"] == "differential":
+            updated.append({**section, "items": compact_items})
+            replaced = True
+        else:
+            updated.append(section)
+    if not replaced:
+        updated.insert(1 if updated else 0, {
+            "key": "differential",
+            "label": ANSWER_SECTION_LABELS["differential"],
+            "items": compact_items,
+        })
+    return updated
+
+
 @lru_cache(maxsize=None)
 def load_core_translations(section_key, language):
     data_path = DATA_DIRECTORY / f"core_{section_key}_{language}.json"
@@ -247,6 +384,9 @@ def load_core_section(section_key):
         diagnosis = _capitalize_initial(
             card.get("diagnosis") or "Diagnosis unavailable"
         )
+        diagnosis_nl = _capitalize_initial(
+            dutch_diagnoses.get(card["id"], diagnosis)
+        )
         answer_details = card.get("answer_details") or ""
         answer_details_nl = dutch_answer_details.get(card["id"], answer_details)
         source_history = (card.get("history") or "").strip()
@@ -264,6 +404,13 @@ def load_core_section(section_key):
             if cardiac_history_missing
             else dutch_histories.get(card["id"], history)
         )
+        answer_sections_nl = parse_answer_details(answer_details_nl)
+        if section_key == "genitourinary":
+            answer_sections_nl = _compact_gu_differential_section(
+                card["id"],
+                answer_sections_nl,
+                diagnosis_nl,
+            )
         question_images = card.get("question_images") or (
             [card["question_image"]] if card.get("question_image") else []
         )
@@ -277,7 +424,7 @@ def load_core_section(section_key):
             "Vraag_nl": history_nl,
             "Correct": [diagnosis],
             "Correct_nl": [
-                _capitalize_initial(dutch_diagnoses.get(card["id"], diagnosis))
+                diagnosis_nl
             ],
             "A": "",
             "B": "",
@@ -302,7 +449,7 @@ def load_core_section(section_key):
             "answer_details": answer_details,
             "answer_sections": parse_answer_details(answer_details),
             "answer_details_nl": answer_details_nl,
-            "answer_sections_nl": parse_answer_details(answer_details_nl),
+            "answer_sections_nl": answer_sections_nl,
             "radiopaedia_url": f"https://radiopaedia.org/search?q={quote_plus(diagnosis)}",
             "case_label": card.get("label") or card["id"],
             "core_section": section_key,

@@ -161,6 +161,15 @@ assert core_gu_cards[0]["Correct_nl"] == [
 assert len(core_gu_cards[0]["image_urls"]) == 3
 assert len(core_gu_cards[0]["answer_image_urls"]) == 2
 assert all(card["answer_sections_nl"] for card in core_gu_cards)
+for card in core_gu_cards:
+    differential = next(
+        section
+        for section in card["answer_sections_nl"]
+        if section["key"] == "differential"
+    )
+    assert 1 <= len(differential["items"]) <= 6
+    assert all(len(item["text"]) <= 120 for item in differential["items"])
+    assert all(item.get("radiopaedia_url") for item in differential["items"])
 gu_020 = next(card for card in core_gu_cards if card["ID"] == "CORE-GU-020")
 gu_020_findings = next(
     section for section in gu_020["answer_sections_nl"] if section["key"] == "findings"
@@ -187,6 +196,17 @@ assert gu_044_findings[0]["text"].startswith(
     "Op de blanco CT van de eerste patiënt is hyperdens materiaal zichtbaar"
 )
 assert all("44." not in item["text"] for item in gu_044_findings)
+gu_120 = next(card for card in core_gu_cards if card["ID"] == "CORE-GU-120")
+gu_120_differential = next(
+    section for section in gu_120["answer_sections_nl"]
+    if section["key"] == "differential"
+)["items"]
+assert [item["text"] for item in gu_120_differential] == [
+    "Hemorragische ovariumcyste",
+    "Endometrioom",
+    "Dermoïdcyste",
+    "Goedaardige of kwaadaardige ovariumtumor",
+]
 
 core_breast_cards = load_core_section("breast")
 assert len(core_breast_cards) == 100
