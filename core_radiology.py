@@ -12,7 +12,7 @@ CORE_SECTIONS = (
     {"key": "interventional", "label": "Interventional Radiology", "label_nl": "Interventieradiologie"},
     {"key": "genitourinary", "label": "Genitourinary Radiology", "label_nl": "Urogenitale radiologie"},
     {"key": "gastrointestinal", "label": "Gastrointestinal Imaging", "label_nl": "Gastro-intestinale beeldvorming"},
-    {"key": "body-mri", "label": "Body MRI", "label_nl": "MRI van het lichaam", "placeholder_count": 105},
+    {"key": "body-mri", "label": "Body MRI", "label_nl": "MRI van het lichaam"},
     {"key": "musculoskeletal", "label": "Musculoskeletal Imaging", "label_nl": "Musculoskeletale beeldvorming", "placeholder_count": 172},
     {"key": "emergency", "label": "Emergency Radiology", "label_nl": "Spoedradiologie", "placeholder_count": 118},
     {"key": "cardiac", "label": "Cardiac Imaging", "label_nl": "Cardiale beeldvorming", "placeholder_count": 84},

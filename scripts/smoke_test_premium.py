@@ -125,6 +125,13 @@ assert len(core_neuro_cards[0]["image_urls"]) == 3
 assert len(core_neuro_cards[0]["answer_image_urls"]) == 3
 assert all(card["answer_sections"] for card in core_neuro_cards)
 
+core_body_mri_cards = load_core_section("body-mri")
+assert len(core_body_mri_cards) == 143
+assert core_body_mri_cards[0]["ID"] == "CORE-BMRI-001"
+assert len(core_body_mri_cards[0]["image_urls"]) == 1
+assert len(core_body_mri_cards[0]["answer_image_urls"]) == 1
+assert all(card["answer_sections"] for card in core_body_mri_cards)
+
 
 with app.app_context():
     user_columns = {column["name"] for column in inspect(db.engine).get_columns("user")}
@@ -349,6 +356,13 @@ assert b"192" in response.data
 response = client.get("/core/neuroradiology/study?pool=all&count=2")
 assert_ok(response, "CORE neuroradiology study")
 assert b"/static/core/neuroradiology/" in response.data
+
+response = client.get("/core/body-mri")
+assert_ok(response, "CORE body MRI setup")
+assert b"143" in response.data
+response = client.get("/core/body-mri/study?pool=all&count=2")
+assert_ok(response, "CORE body MRI study")
+assert b"/static/core/body-mri/" in response.data
 
 response = client.get("/core/gastrointestinal")
 assert_ok(response, "CORE GI setup")
