@@ -342,6 +342,16 @@ english_question_fragment = re.compile(
     r"what is the|history of)\b",
     re.IGNORECASE,
 )
+prominent_english_fragment = re.compile(
+    r"\b(?:year-old|woman|female|male|boy|girl|with|undergoes|presents?|history|"
+    r"computed tomography|incidental|preoperative|motor vehicle|collision|"
+    r"following|status post|due to|patient|lesion|collapse|lobe|nerve|sheath|"
+    r"fractures?|dislocation|injury|rupture|disease|mass|chest|blunt|cardiac|"
+    r"left|right|upper|lower|benign|malignant|anomalous|artery|tailgut|"
+    r"smooth muscle|uncertain potential|teardrop|flail|demonstrated|associated|"
+    r"related|and)\b",
+    re.IGNORECASE,
+)
 visible_figure_reference = re.compile(
     r"\b(?:fig(?:uur|uren)?|figure|figures|afb\.)\s*\d",
     re.IGNORECASE,
@@ -354,9 +364,17 @@ for section in get_core_sections():
     for card in section_cards:
         assert card["Vraag_nl"]
         assert card["Correct_nl"][0]
+        for visible_text in (card["Vraag_nl"], card["Correct_nl"][0]):
+            assert "  " not in visible_text, card["ID"]
+            assert visible_text.count("(") == visible_text.count(")"), card["ID"]
+            assert visible_text[-1:] not in ",;:", card["ID"]
+        assert len(card["Correct_nl"][0]) <= 180, card["ID"]
         assert not english_question_fragment.search(card["Vraag_nl"]), card["ID"]
+        assert not prominent_english_fragment.search(card["Vraag_nl"]), card["ID"]
+        assert not prominent_english_fragment.search(card["Correct_nl"][0]), card["ID"]
         assert not obvious_translation_error.search(card["Vraag_nl"]), card["ID"]
         assert not obvious_translation_error.search(card["Correct_nl"][0]), card["ID"]
+        assert not visible_figure_reference.search(card["Vraag_nl"]), card["ID"]
         for answer_section in card["answer_sections_nl"]:
             if answer_section["key"] == "teaching":
                 assert len(answer_section["items"]) <= 6, card["ID"]
