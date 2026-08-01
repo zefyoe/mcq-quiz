@@ -124,6 +124,8 @@ assert core_chest_cards[0]["ID"] == "CORE-CH-001"
 assert len(core_chest_cards[0]["image_urls"]) == 1
 assert len(core_chest_cards[0]["answer_image_urls"]) == 2
 assert all(card["answer_sections"] for card in core_chest_cards)
+assert all(card["Vraag_nl"] for card in core_chest_cards)
+assert all(card["answer_details_nl"] != card["answer_details"] for card in core_chest_cards)
 
 core_pediatric_cards = load_core_section("pediatric")
 assert len(core_pediatric_cards) == 150
@@ -131,6 +133,8 @@ assert core_pediatric_cards[0]["ID"] == "CORE-PED-001"
 assert len(core_pediatric_cards[0]["image_urls"]) == 1
 assert len(core_pediatric_cards[0]["answer_image_urls"]) == 1
 assert all(card["answer_sections"] for card in core_pediatric_cards)
+assert all(card["Vraag_nl"] for card in core_pediatric_cards)
+assert all(card["answer_details_nl"] != card["answer_details"] for card in core_pediatric_cards)
 
 core_interventional_cards = load_core_section("interventional")
 assert len(core_interventional_cards) == 103
@@ -138,6 +142,8 @@ assert core_interventional_cards[0]["ID"] == "CORE-IR-001"
 assert len(core_interventional_cards[0]["image_urls"]) == 3
 assert len(core_interventional_cards[0]["answer_image_urls"]) == 3
 assert all(card["answer_sections"] for card in core_interventional_cards)
+assert all(card["Vraag_nl"] for card in core_interventional_cards)
+assert all(card["answer_details_nl"] != card["answer_details"] for card in core_interventional_cards)
 
 core_neuro_cards = load_core_section("neuroradiology")
 assert len(core_neuro_cards) == 192

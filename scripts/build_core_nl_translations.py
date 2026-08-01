@@ -23,6 +23,28 @@ SECTION_HEADINGS_NL = {
     "management": "Beleid",
     "references": "Referenties",
 }
+MANUAL_HISTORY_TRANSLATIONS = {
+    "CORE-IR-008": "74-jarige man, status na resectie van een niet-kleincellig longcarcinoom in de linker bovenkwab, met een nieuwe anteroposteriore vensterlymfeklier op CT waarvoor biopsie nodig is. Is er een toegangsweg tot deze laesie waarbij het longparenchym wordt gespaard?",
+    "CORE-IR-011": "Twee verschillende patiënten met longkanker, status na resectie van de contralaterale long, verwezen voor biopsie van bijniermassa's. Hoe minimaliseert u het risico op een pneumothorax in de resterende solitaire long?",
+    "CORE-IR-014": "Na beenmergtransplantatie, trombocytopenie en verhoogde leverfunctietests. De druk gemeten met de katheter was 10 mmHg in figuur 14.1 en 24 mmHg in figuur 14.2. De rechteratriumdruk was 6-8 mmHg.",
+    "CORE-IR-022": "60-jarige man met gemetastaseerd coloncarcinoom, recent status na pulmonale metastasectomie, verwezen met de PET/CT-scans in figuren 22.1 en 22.2. Wat zijn de behandelingsopties voor deze patiënt?",
+    "CORE-IR-028": "Koorts en leukocytose twee weken na embolisatie van de arteria hepatica. Figuur 28.3 is één week na embolisatie; figuur 28.4 twee weken erna.",
+    "CORE-IR-031": "Niercelcarcinoom, status na een val.",
+    "CORE-IR-038": "Koorts en leukocytose één week na gastrectomie, gecompliceerd door een abces. Na verwijdering van de draineringskatheter werd de patiënt hypotensief en tachycard, waarna een CT werd verricht (figuur 38.3).",
+    "CORE-IR-047": "Blaascarcinoom, status na cystectomie en ileumconduit, gecompliceerd door bilaterale uretero-enterische anastomosestricturen. Welke katheters zijn zichtbaar in figuur 47.3?",
+    "CORE-IR-051": "65-jarige vrouw met cervixcarcinoom, status na radiotherapie, met lekkage van urine uit het rectum.",
+    "CORE-IR-053": "Slokdarmcarcinoom, status na gastric pull-up, met een proximale dunnedarmobstructie. Toegang voor enterale voeding is noodzakelijk.",
+    "CORE-IR-061": "Coloncarcinoom, status na plaatsing van een biliaire wandstent vier maanden geleden, presenteert zich met koorts en leukocytose.",
+    "CORE-IR-070": "45-jarige vrouw, recent status na resectie van een craniopharyngeoom, met een postoperatieve longembolie, verwezen voor plaatsing van een vena-cava-inferiorfilter. Figuren 70.1 en 70.2 tonen twee verschillende patiënten. Wat is het verschil?",
+    "CORE-IR-071": "Therapieresistente buikpijn, status na plaatsing van een vena-cava-inferiorfilter.",
+    "CORE-IR-072": "60-jarige vrouw met een permanent aanwezige vena-cava-inferiorfilter, zes jaar eerder geplaatst, met een voorgeschiedenis van enkele maanden met chronische bilaterale zwelling van de benen en één week acute verergering. Is er op basis van figuren 72.1-72.5 een mogelijke behandeling?",
+    "CORE-IR-077": "84-jarige man met hypertensie en diabetes, status na endovasculaire reparatie van een infrarenaal abdominaal aorta-aneurysma van 6 cm, drie jaar geleden.",
+    "CORE-IR-096": "34-jarige man, status na een verkeersongeval, met zwelling van de linkerdij. In de collectie op figuur 96.1 werd percutaan een drain geplaatst. Deze bleef twee weken ter plaatse met een aanhoudende seromelkachtige productie van 30-40 cc per dag. Figuur 96.2 toont een contrastonderzoek via de aanwezige drain. Wat zijn de behandelingsopties?",
+    "CORE-IR-099": "67-jarige man, twee weken status na distale oesofagectomie en gedeeltelijke gastrectomie, met nieuwe koorts en leukocytose. De volgende onderzoeken werden verricht.",
+    "CORE-PED-078": "Premature baby van 28 weken, één week oud.",
+    "CORE-PED-081": "Premature jongen van 28 weken, één week oud (eerste afbeelding). De tweede afbeelding is acht weken later gemaakt.",
+    "CORE-PED-082": "6-jarige met hoofdpijn en een veranderde mentale toestand.",
+}
 MAX_CHUNK_LENGTH = 3500
 MEDICAL_REPLACEMENTS = (
     (r"\bSEH is\b", "Er is"),
@@ -74,6 +96,25 @@ MEDICAL_REPLACEMENTS = (
     (r"\bOverall\b", "Over het algemeen"),
     (r"\btumors\b", "tumoren"),
     (r"\bfreebase form\b", "freebasevorm"),
+    (r"\bPresents\b", "presenteert zich"),
+    (r"\bNeeds\b", "heeft behoefte aan"),
+    (r"\bPelvic Mass\b", "bekkenmassa"),
+    (r"\bPelvic\b", "bekken"),
+    (r"\bColon Cancer\b", "coloncarcinoom"),
+    (r"\bStatus Post\b", "status na"),
+    (r"\bBiliaire Wand stent Plaatsing 4 Maanden Ago\b", "plaatsing van een biliaire wandstent vier maanden geleden"),
+    (r"\bBiliaire Wand stent Plaatsing\b", "plaatsing van een biliaire wandstent"),
+    (r"\bSeveral-Month History of Chronische Bilaterale Leg Swelling met 1 Week of Acute Verergering\b", "voorgeschiedenis van enkele maanden met chronische bilaterale zwelling van de benen en één week acute verergering"),
+    (r"\bInwoning Permanente Inferior Vena Cava Filter geplaatst 6 jaar Prior\b", "een permanent aanwezige vena-cava-inferiorfilter, zes jaar eerder geplaatst"),
+    (r"\bLeg Swelling\b", "zwelling van de benen"),
+    (r"\bSeveral-Month History\b", "voorgeschiedenis van enkele maanden"),
+    (r"\bHistory of\b", "voorgeschiedenis van"),
+    (r"\bPrior\b", "eerder"),
+    (r"\bAgo\b", "geleden"),
+    (r"\bAccess Device\b", "toegangssysteem"),
+    (r"\bVascular Access\b", "vasculaire toegang"),
+    (r"\bmislukte Ureterale stent\b", "mislukte plaatsing van een ureterstent"),
+    (r"\bInferior Vena Cava stent Acute bij chronische trombose\b", "stent in de vena cava inferior bij acute trombose bovenop chronische trombose"),
     (r"\bFindings\b", "Bevindingen"),
     (r"\bDifferential Diagnosis\b", "Differentiaaldiagnose"),
     (r"\bTeaching Points\b", "Kernpunten"),
@@ -244,7 +285,8 @@ def translate_card(card, existing):
     card_id = card["id"]
     return card_id, {
         "history": polish_translation(
-            existing.get("histories", {}).get(card_id)
+            MANUAL_HISTORY_TRANSLATIONS.get(card_id)
+            or existing.get("histories", {}).get(card_id)
             or translate_text(card.get("history", ""))
         ),
         "diagnosis": polish_translation(
