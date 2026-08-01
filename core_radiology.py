@@ -63,21 +63,38 @@ def _capitalize_initial(value):
 
 
 def _split_learning_points(section_key, lines):
+    if section_key == "references":
+        # References are line-based citations. Splitting on every number-dot
+        # sequence breaks page ranges such as "1473-1505." into fake items.
+        chunks = []
+        reference_start = re.compile(
+            r"^(?:\d{1,2}\.\s+|[A-Z][A-Za-z'’-]+\s+[A-Z]{1,4}[.,])"
+        )
+        for raw_line in lines:
+            line = _clean_extracted_text(raw_line.strip())
+            if not line:
+                continue
+            if re.match(r"^Case\s+\d+\b", line, re.IGNORECASE):
+                break
+            if not chunks or reference_start.match(line):
+                chunks.append(line)
+            else:
+                chunks[-1] = f"{chunks[-1]} {line}".strip()
+    else:
+        chunks = None
+
     text = " ".join(line.strip() for line in lines if line.strip())
     text = re.sub(r"\s+", " ", text).strip()
     text = _clean_extracted_text(text)
     if not text:
         return []
 
-    if section_key == "references":
-        text = re.sub(r"\s+Case\s+\d+\b.*$", "", text).strip()
-        chunks = re.split(r"(?=\d+\.\s)", text)
-    elif section_key == "differential":
+    if section_key == "differential":
         chunks = re.split(
             r"(?<=[.!?])\s+(?=[A-Z][A-Za-z0-9 ()/,+'-]{1,70}:)",
             text,
         )
-    else:
+    elif section_key != "references":
         chunks = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", text)
 
     items = []

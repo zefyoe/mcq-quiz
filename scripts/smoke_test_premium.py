@@ -63,6 +63,15 @@ assert "definite fistula" in parsed_notes[0]["items"][0]["text"]
 assert parsed_notes[1]["items"][0]["lead"] == "Abscess"
 assert parsed_notes[1]["items"][0]["radiopaedia_url"].endswith("q=Abscess")
 assert parsed_notes[-1]["items"][0]["text"] == "Example reference."
+parsed_references = parse_answer_details(
+    "Findings\nA finding.\nFurther Reading\n"
+    "Koeller KK, Sandberg GD. Example paper. Radiographics. 2002;22:1473-1505.\n"
+    "Meyers SP, Khademian ZP. Second paper. Neuroradiology. 2004;46:770-780."
+)
+reference_items = parsed_references[-1]["items"]
+assert len(reference_items) == 2
+assert "1473-1505" in reference_items[0]["text"]
+assert reference_items[1]["text"].startswith("Meyers SP")
 
 core_cards = load_core_section("gastrointestinal")
 assert len(core_cards) == 171
