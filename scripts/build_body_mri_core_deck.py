@@ -155,13 +155,14 @@ def split_answer_sections(answer_text):
     return sections
 
 
-def render_page(page, output_path, zoom):
-    page_rect = page.rect
+def render_image_region(page, image_info, output_path, zoom):
+    rect = fitz.Rect(image_info["bbox"])
+    padding = 2
     clip = fitz.Rect(
-        page_rect.x0 + 24,
-        page_rect.y0 + 24,
-        page_rect.x1 - 24,
-        page_rect.y1 - 85,
+        max(page.rect.x0, rect.x0 - padding),
+        max(page.rect.y0, rect.y0 - padding),
+        min(page.rect.x1, rect.x1 + padding),
+        min(page.rect.y1, rect.y1 + padding),
     )
     pixmap = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), clip=clip, alpha=False)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -169,7 +170,10 @@ def render_page(page, output_path, zoom):
 
 
 def image_html(filename):
-    return f'<img src="{html.escape(filename)}">'
+    return "".join(
+        f'<img src="{html.escape(name)}">'
+        for name in filename
+    )
 
 
 def build_deck(cards, media_files, apkg_output):
@@ -211,9 +215,9 @@ def build_deck(cards, media_files, apkg_output):
                     str(card["case_number"]),
                     "Body MRI",
                     card["history"],
-                    image_html(card["question_image"]),
+                    image_html(card["question_images"]),
                     card["diagnosis"],
-                    image_html(card["answer_image"]),
+                    image_html(card["answer_images"]),
                     card["sections"]["Findings"],
                     card["sections"]["Differential Diagnosis"],
                     card["sections"]["Teaching Points"],
@@ -236,13 +240,20 @@ def build(pdf_path, media_output, json_output, apkg_output, zoom):
     for case_number in range(1, CASE_COUNT + 1):
         question_page = document[FIRST_CASE_PAGE_INDEX + (case_number - 1) * 2]
         answer_page = document[FIRST_CASE_PAGE_INDEX + (case_number - 1) * 2 + 1]
-        question_image = f"body_mri_{case_number:03d}_q.png"
-        answer_image = f"body_mri_{case_number:03d}_a.png"
-        question_output = media_output / question_image
-        answer_output = media_output / answer_image
-        render_page(question_page, question_output, zoom)
-        render_page(answer_page, answer_output, zoom)
-        media_files.extend([question_output, answer_output])
+        question_images = []
+        answer_images = []
+        for image_index, image_info in enumerate(question_page.get_image_info(xrefs=True)):
+            filename = f"body_mri_{case_number:03d}_q_{image_index}.png"
+            output = media_output / filename
+            render_image_region(question_page, image_info, output, zoom)
+            question_images.append(filename)
+            media_files.append(output)
+        for image_index, image_info in enumerate(answer_page.get_image_info(xrefs=True)):
+            filename = f"body_mri_{case_number:03d}_a_{image_index}.png"
+            output = media_output / filename
+            render_image_region(answer_page, image_info, output, zoom)
+            answer_images.append(filename)
+            media_files.append(output)
 
         answer_text = clean_text(answer_page.get_text("text"))
         discussion_text = answer_text_before_diagnosis(answer_page, case_number)
@@ -255,8 +266,8 @@ def build(pdf_path, media_output, json_output, apkg_output, zoom):
             "label": f"Case {case_number}",
             "history": extract_history(question_page, case_number),
             "diagnosis": extract_diagnosis(answer_text, case_number),
-            "question_images": [question_image],
-            "answer_images": [answer_image],
+            "question_images": question_images,
+            "answer_images": answer_images,
             "answer_details": "\n".join(
                 f"{heading}\n{content}"
                 for heading, content in sections.items()
@@ -264,8 +275,8 @@ def build(pdf_path, media_output, json_output, apkg_output, zoom):
             ),
             "sections": sections,
         }
-        card["question_image"] = question_image
-        card["answer_image"] = answer_image
+        card["question_image"] = question_images[0] if question_images else None
+        card["answer_image"] = answer_images[0] if answer_images else None
         cards.append(card)
 
     json_cards = []

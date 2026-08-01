@@ -128,30 +128,38 @@ assert all(card["answer_sections"] for card in core_neuro_cards)
 core_body_mri_cards = load_core_section("body-mri")
 assert len(core_body_mri_cards) == 143
 assert core_body_mri_cards[0]["ID"] == "CORE-BMRI-001"
-assert len(core_body_mri_cards[0]["image_urls"]) == 1
-assert len(core_body_mri_cards[0]["answer_image_urls"]) == 1
+assert len(core_body_mri_cards[0]["image_urls"]) == 3
+assert len(core_body_mri_cards[0]["answer_image_urls"]) == 0
 assert all(card["answer_sections"] for card in core_body_mri_cards)
+assert all(card["Vraag_nl"] != card["Vraag"] for card in core_body_mri_cards)
+assert all(card["answer_details_nl"] for card in core_body_mri_cards)
 
 core_cardiac_cards = load_core_section("cardiac")
 assert len(core_cardiac_cards) == 115
 assert core_cardiac_cards[0]["ID"] == "CORE-CARD-001"
-assert len(core_cardiac_cards[0]["image_urls"]) == 1
-assert len(core_cardiac_cards[0]["answer_image_urls"]) == 1
+assert len(core_cardiac_cards[0]["image_urls"]) == 2
+assert len(core_cardiac_cards[0]["answer_image_urls"]) == 0
 assert all(card["answer_sections"] for card in core_cardiac_cards)
+assert all(card["Vraag_nl"] for card in core_cardiac_cards)
+assert all(card["answer_details_nl"] for card in core_cardiac_cards)
 
 core_emergency_cards = load_core_section("emergency")
 assert len(core_emergency_cards) == 164
 assert core_emergency_cards[0]["ID"] == "CORE-ER-001"
-assert len(core_emergency_cards[0]["image_urls"]) == 1
-assert len(core_emergency_cards[0]["answer_image_urls"]) == 1
+assert len(core_emergency_cards[0]["image_urls"]) == 4
+assert len(core_emergency_cards[0]["answer_image_urls"]) == 0
 assert all(card["answer_sections"] for card in core_emergency_cards)
+assert all(card["Vraag_nl"] for card in core_emergency_cards)
+assert all(card["answer_details_nl"] for card in core_emergency_cards)
 
 core_msk_cards = load_core_section("musculoskeletal")
 assert len(core_msk_cards) == 145
 assert core_msk_cards[0]["ID"] == "CORE-MSK-001"
-assert len(core_msk_cards[0]["image_urls"]) == 1
-assert len(core_msk_cards[0]["answer_image_urls"]) == 1
+assert len(core_msk_cards[0]["image_urls"]) == 2
+assert len(core_msk_cards[0]["answer_image_urls"]) == 4
 assert all(card["answer_sections"] for card in core_msk_cards)
+assert all(card["Vraag_nl"] for card in core_msk_cards)
+assert all(card["answer_details_nl"] for card in core_msk_cards)
 
 
 with app.app_context():

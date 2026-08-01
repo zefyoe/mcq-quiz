@@ -112,16 +112,27 @@ def extract_answer_sections(answer_page):
     return sections
 
 
-def render_page(page, output_path, zoom):
-    rect = page.rect
-    clip = fitz.Rect(rect.x0 + 24, rect.y0 + 24, rect.x1 - 24, rect.y1 - 85)
+def render_image_region(page, image_info, output_path, zoom):
+    rect = fitz.Rect(image_info["bbox"])
+    padding = 2
+    clip = fitz.Rect(
+        max(page.rect.x0, rect.x0 - padding),
+        max(page.rect.y0, rect.y0 - padding),
+        min(page.rect.x1, rect.x1 + padding),
+        min(page.rect.y1, rect.y1 + padding),
+    )
     pixmap = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), clip=clip, alpha=False)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     pixmap.save(output_path)
 
 
 def image_html(filename):
-    return f'<img src="{html.escape(filename)}">'
+    filenames = filename if isinstance(filename, (list, tuple)) else [filename]
+    return "".join(
+        f'<img src="{html.escape(name)}">'
+        for name in filenames
+        if name
+    )
 
 
 def build_apkg(cards, media_files, output_path, deck_label, model_id, deck_id):
@@ -153,8 +164,8 @@ def build_apkg(cards, media_files, output_path, deck_label, model_id, deck_id):
             model=model,
             fields=[
                 str(card["case_number"]), html.escape(deck_label), html.escape(card["history"]),
-                image_html(card["question_image"]), card["diagnosis"],
-                image_html(card["answer_image"]), html.escape(sections["Findings"]),
+                image_html(card["question_images"]), html.escape(card["diagnosis"]),
+                image_html(card["answer_images"]), html.escape(sections["Findings"]),
                 html.escape(sections["Differential Diagnosis"]), html.escape(sections["Teaching Points"]),
                 html.escape(sections["Management"]), html.escape(sections["Further Reading"]),
             ],
@@ -182,13 +193,22 @@ def build(pdf_path, section_key, section_label, case_count, first_case_page_inde
         question_page_index = question_pages[case_number - 1]
         question_page = document[question_page_index]
         answer_page = document[question_page_index + 1]
-        question_image = f"{section_key}_{case_number:03d}_q.png"
-        answer_image = f"{section_key}_{case_number:03d}_a.png"
-        question_output = media_output / question_image
-        answer_output = media_output / answer_image
-        render_page(question_page, question_output, zoom)
-        render_page(answer_page, answer_output, zoom)
-        media_files.extend([question_output, answer_output])
+        question_infos = question_page.get_image_info(xrefs=True)
+        answer_infos = answer_page.get_image_info(xrefs=True)
+        question_images = []
+        answer_images = []
+        for image_index, image_info in enumerate(question_infos):
+            filename = f"{section_key}_{case_number:03d}_q_{image_index}.png"
+            output = media_output / filename
+            render_image_region(question_page, image_info, output, zoom)
+            question_images.append(filename)
+            media_files.append(output)
+        for image_index, image_info in enumerate(answer_infos):
+            filename = f"{section_key}_{case_number:03d}_a_{image_index}.png"
+            output = media_output / filename
+            render_image_region(answer_page, image_info, output, zoom)
+            answer_images.append(filename)
+            media_files.append(output)
         sections = extract_answer_sections(answer_page)
         cards.append({
             "id": f"{id_prefix}-{case_number:03d}",
@@ -198,14 +218,14 @@ def build(pdf_path, section_key, section_label, case_count, first_case_page_inde
             "label": f"Case {case_number}",
             "history": extract_history(question_page, case_number),
             "diagnosis": extract_diagnosis(answer_page, case_number),
-            "question_images": [question_image],
-            "answer_images": [answer_image],
+            "question_images": question_images,
+            "answer_images": answer_images,
             "answer_details": "\n".join(
                 f"{heading}\n{content}" for heading, content in sections.items() if content
             ),
             "sections": sections,
-            "question_image": question_image,
-            "answer_image": answer_image,
+            "question_image": question_images[0] if question_images else None,
+            "answer_image": answer_images[0] if answer_images else None,
         })
 
     json_output.parent.mkdir(parents=True, exist_ok=True)
