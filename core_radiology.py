@@ -62,6 +62,16 @@ def _capitalize_initial(value):
     return value
 
 
+def _cap_learning_points(chunks, maximum):
+    if len(chunks) <= maximum:
+        return chunks
+    group_size = (len(chunks) + maximum - 1) // maximum
+    return [
+        " ".join(chunks[index:index + group_size]).strip()
+        for index in range(0, len(chunks), group_size)
+    ][:maximum]
+
+
 def _split_learning_points(section_key, lines):
     if section_key == "references":
         # References are line-based citations. Splitting on every number-dot
@@ -80,22 +90,25 @@ def _split_learning_points(section_key, lines):
                 chunks.append(line)
             else:
                 chunks[-1] = f"{chunks[-1]} {line}".strip()
+    elif section_key == "differential":
+        # Differential diagnoses are already line-based in the source data.
+        # Keep each line separate instead of joining names into one paragraph.
+        chunks = []
+        for raw_line in lines:
+            for part in re.split(r"\s*■\s*", raw_line.strip()):
+                line = _clean_extracted_text(part.strip())
+                if line:
+                    chunks.append(line)
     else:
-        chunks = None
-
-    text = " ".join(line.strip() for line in lines if line.strip())
-    text = re.sub(r"\s+", " ", text).strip()
-    text = _clean_extracted_text(text)
-    if not text:
-        return []
-
-    if section_key == "differential":
-        chunks = re.split(
-            r"(?<=[.!?])\s+(?=[A-Z][A-Za-z0-9 ()/,+'-]{1,70}:)",
-            text,
-        )
-    elif section_key != "references":
+        text = " ".join(line.strip() for line in lines if line.strip())
+        text = re.sub(r"\s+", " ", text).strip()
+        text = _clean_extracted_text(text)
+        if not text:
+            return []
         chunks = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", text)
+
+    if section_key == "teaching":
+        chunks = _cap_learning_points(chunks, 6)
 
     items = []
     for chunk in chunks:

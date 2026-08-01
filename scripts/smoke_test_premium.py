@@ -72,6 +72,18 @@ reference_items = parsed_references[-1]["items"]
 assert len(reference_items) == 2
 assert "1473-1505" in reference_items[0]["text"]
 assert reference_items[1]["text"].startswith("Meyers SP")
+parsed_differential = parse_answer_details(
+    "Differential Diagnosis\nDiagnosis one\nDiagnosis two\nDiagnosis three"
+)
+assert [item["text"] for item in parsed_differential[0]["items"]] == [
+    "Diagnosis one",
+    "Diagnosis two",
+    "Diagnosis three",
+]
+parsed_teaching = parse_answer_details(
+    "Teaching Points\n" + "\n".join(f"Point {index}." for index in range(1, 18))
+)
+assert len(parsed_teaching[0]["items"]) <= 6
 
 core_cards = load_core_section("gastrointestinal")
 assert len(core_cards) == 171
