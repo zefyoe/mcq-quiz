@@ -120,7 +120,7 @@ MISSING_CLINICAL_HISTORY = {
     "no clinical history",
 }
 FIGURE_WORD = r"(?:fig(?:uren|ures|uur|ure|s)?|afb(?:eeldingen|eelding)?)\.?"
-FIGURE_LABEL = r"(?:\d+(?:[.,]\d+)?[a-z]?|(?-i:[A-Z]))"
+FIGURE_LABEL = r"(?:\d+(?:[.,]\d+)?[a-z]?|(?-i:[A-Z]))\b"
 FIGURE_REFERENCE = re.compile(
     rf"\(?\b{FIGURE_WORD}\s*{FIGURE_LABEL}"
     r"(?:\s*(?:,|&|and|en|to|tot|[-–])\s*"
@@ -183,6 +183,75 @@ def _capitalize_initial(value):
         if character.isalpha():
             return value[:index] + character.upper() + value[index + 1:]
     return value
+
+
+_DUTCH_TEXT_REPLACEMENTS = (
+    (r"(?m)^Findings$", "Bevindingen"),
+    (r"(?m)^Differential Diagnosis$", "Differentiaaldiagnose"),
+    (r"(?m)^Teaching Points$", "Kernpunten"),
+    (r"(?m)^Management$", "Beleid"),
+    (r"(?m)^Further Readings?$", "Referenties"),
+    (r"\bTrue Disease Extent Demonstrated on MR Imaging\b", "werkelijke ziekte-uitbreiding aangetoond met MRI"),
+    (r"\b(?:niet-contrast|noncontrast|onverbeterde) (?:berekende |gecomputeerde )?tomografie\s*\(CT\)", "CT zonder contrast"),
+    (r"\b(?:niet-contrast|noncontrast|onverbeterde) CT\b", "CT zonder contrast"),
+    (r"\bsingle[- ](?:photon|foton)[- ]?emissie (?:berekende|gecomputeerde) tomografie\b", "SPECT"),
+    (r"\bcontrast[- ]versterkte\b", "contrastversterkte"),
+    (r"\bcontrast[- ]versterkt\b", "contrastversterkt"),
+    (r"\bcross[- ]sectionele imaging\b", "doorsnedebeeldvorming"),
+    (r"\bcross[- ]sectional imaging\b", "doorsnedebeeldvorming"),
+    (r"\bplain film\b", "conventionele radiografie"),
+    (r"\bgecomputeerde tomografie\b", "computertomografie"),
+    (r"\bberekende tomografie\b", "computertomografie"),
+    (r"\bberekend tomografie\b", "computertomografie"),
+    (r"\bonverbeterde\b", "ongecontrasteerde"),
+    (r"\bultrageluid[- ]geleide\b", "echogeleide"),
+    (r"\bultrasound[- ]guided\b", "echogeleide"),
+    (r"\bultrageluid\b", "echografie"),
+    (r"\bultrasound\b", "echografie"),
+    (r"\bimaging findings\b", "beeldvormingsbevindingen"),
+    (r"\bbeeldvorming-bevindingen\b", "beeldvormingsbevindingen"),
+    (r"\bCT findings\b", "CT-bevindingen"),
+    (r"\bMR imaging\b", "MRI"),
+    (r"\bfluid attenuation\b", "vloeistofattenuatie"),
+    (r"\bfluid verzachting\b", "vloeistofattenuatie"),
+    (r"\bfluid demping\b", "vloeistofattenuatie"),
+    (r"\bfluid[- ]fill(?:ed)?\b", "vloeistofgevuld"),
+    (r"\blucht-fluid niveaus?\b", "lucht-vloeistofniveau"),
+    (r"\bconservative management\b", "conservatieve behandeling"),
+    (r"\bmanagement\b", "beleid"),
+    (r"\bworkup\b", "diagnostische evaluatie"),
+    (r"\bfill-in\b", "opvulling"),
+    (r"\bup to\b", "tot"),
+    (r"\bfindings\b", "bevindingen"),
+    (r"\bfinding\b", "bevinding"),
+    (r"\bimaging\b", "beeldvorming"),
+    (r"\bfluid\b", "vloeistof"),
+    (r"\bpresent\b", "aanwezig"),
+    (r"\bnonspecific\b", "niet-specifiek"),
+    (r"\bspecific\b", "specifiek"),
+    (r"\bfixed\b", "vast"),
+    (r"\bcontrast fills\b", "contrastmiddel vult"),
+    (r"\bTumor\b", "tumor"),
+    (r"\bholge\b", "holle"),
+    (r"\baftrekken angiogram\b", "subtractieangiogram"),
+    (r"\bbehoefte aspiratie\b", "naaldaspiratie"),
+    (r"\bcutoffvan\b", "onderbreking van"),
+    (r"\bHeterogenely\b", "heterogeen"),
+    (r"\bsirty-shadowing\b", "vuileschaduwartefact"),
+    (r"\bubareolaire\b", "subareolaire"),
+    (r"\bmammografief\b", "mammografisch"),
+    (r"\blumbometrie\b", "lumpectomie"),
+    (r"\bHet icoken van\b", "Verdikking van"),
+)
+
+
+def _polish_dutch_text(value):
+    text = value or ""
+    for pattern, replacement in _DUTCH_TEXT_REPLACEMENTS:
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+    text = re.sub(r"[ \t]+([,.;:!?])", r"\1", text)
+    text = re.sub(r" {2,}", " ", text)
+    return text.strip()
 
 
 def _cap_learning_points(chunks, maximum):
@@ -385,10 +454,16 @@ def load_core_section(section_key):
             card.get("diagnosis") or "Diagnosis unavailable"
         )
         diagnosis_nl = _capitalize_initial(
-            dutch_diagnoses.get(card["id"], diagnosis)
+            _polish_dutch_text(_clean_extracted_text(
+                dutch_diagnoses.get(card["id"], diagnosis)
+            ))
         )
         answer_details = card.get("answer_details") or ""
-        answer_details_nl = dutch_answer_details.get(card["id"], answer_details)
+        answer_details_nl = _polish_dutch_text(
+            _clean_extracted_text(
+                dutch_answer_details.get(card["id"], answer_details)
+            )
+        )
         source_history = (card.get("history") or "").strip()
         cardiac_history_missing = (
             section_key == "cardiac"
@@ -399,10 +474,12 @@ def load_core_section(section_key):
             if cardiac_history_missing
             else source_history or "Review the imaging case and formulate the diagnosis."
         )
-        history_nl = (
-            CARDIAC_QUESTION_DEFAULT_NL
-            if cardiac_history_missing
-            else dutch_histories.get(card["id"], history)
+        history_nl = _polish_dutch_text(
+            _clean_extracted_text(
+                CARDIAC_QUESTION_DEFAULT_NL
+                if cardiac_history_missing
+                else dutch_histories.get(card["id"], history)
+            )
         )
         answer_sections_nl = parse_answer_details(answer_details_nl)
         if section_key == "genitourinary":

@@ -31,7 +31,7 @@
             <span class="core-pacs-beta-mark">P</span>
             <span>
               <strong>LABRALIS</strong>
-              <small>{{ "CT-schoudercases" if language == "nl" else "CT shoulder cases" }}</small>
+              <small>{{ "CT-schoudervragen" if language == "nl" else "CT shoulder cases" }}</small>
             </span>
           </a>
         </div>
@@ -47,14 +47,14 @@
           <div>
             <p class="eyebrow">CORE RADIOLOGY</p>
             <h1>{{ "Beeldvorming leren door actieve recall" if language == "nl" else "Build imaging expertise through active recall" }}</h1>
-            <p>{{ "Open radiologiecases, formuleer je diagnose en beoordeel daarna eerlijk je herkenning." if language == "nl" else "Review authentic imaging cases, formulate the diagnosis, then rate your recall honestly." }}</p>
+            <p>{{ "Bestudeer radiologievragen, formuleer je diagnose en beoordeel daarna eerlijk je herkenning." if language == "nl" else "Review authentic imaging cases, formulate the diagnosis, then rate your recall honestly." }}</p>
           </div>
           <div class="core-header-actions">
             {% set active_product = "core" %}
             {% include "_product_switcher.html" %}
             {% if active_core_session %}
               <div class="core-header-session">
-                <span>{{ active_core_session.count }} cases · {{ active_core_session.section.label_nl if language == "nl" else active_core_session.section.label }}</span>
+                <span>{{ active_core_session.count }} {{ "vragen" if language == "nl" else "cases" }} · {{ active_core_session.section.label_nl if language == "nl" else active_core_session.section.label }}</span>
                 <a href="{{ active_core_session.resume_url }}" class="core-primary-button">{{ "Sessie hervatten" if language == "nl" else "Resume session" }}</a>
               </div>
             {% else %}
@@ -65,14 +65,14 @@
 
         <section class="core-metric-grid">
           <article>
-            <span>{{ "Beschikbare cases" if language == "nl" else "Available cases" }}</span>
+            <span>{{ "Beschikbare vragen" if language == "nl" else "Available cases" }}</span>
             <strong>{{ core_dashboard.total }}</strong>
             <small>{{ "Actieve CORE-bibliotheek" if language == "nl" else "Active CORE case library" }}</small>
           </article>
           <article>
             <span>{{ "Dekking" if language == "nl" else "Coverage" }}</span>
             <strong>{{ core_dashboard.coverage }}%</strong>
-            <small>{{ core_dashboard.seen }}/{{ core_dashboard.total }} {{ "cases gezien" if language == "nl" else "cases reviewed" }}</small>
+            <small>{{ core_dashboard.seen }}/{{ core_dashboard.total }} {{ "vragen gezien" if language == "nl" else "cases reviewed" }}</small>
           </article>
           <article>
             <span>{{ "Klaar voor herhaling" if language == "nl" else "Ready for review" }}</span>
@@ -90,7 +90,7 @@
           <article class="core-panel core-modules-panel" id="core-case-library">
             <div class="core-panel-heading">
               <div>
-                <p class="eyebrow">{{ "CASE LIBRARY" if language == "nl" else "CASE LIBRARY" }}</p>
+                <p class="eyebrow">{{ "VRAGENBIBLIOTHEEK" if language == "nl" else "CASE LIBRARY" }}</p>
                 <h2>{{ "CORE-subsecties" if language == "nl" else "CORE subspecialties" }}</h2>
               </div>
               <span>{{ "Actieve bibliotheek" if language == "nl" else "Active library" }}</span>
@@ -101,6 +101,9 @@
                 <a href="{{ url_for('core_labralis') if section.is_beta_demo else url_for('core_section_setup', section_key=section.key) }}" class="product-category-row{% if section.is_placeholder %} is-in-progress{% endif %}{% if section.is_beta_demo %} is-beta-demo{% endif %}">
                     <span class="product-category-copy">
                       <strong>{{ section.label_nl if language == "nl" else section.label }}</strong>
+                    </span>
+                    <span class="product-category-count" aria-label="{{ section.seen }} {{ 'van' if language == 'nl' else 'of' }} {{ section.total }} {{ 'vragen' if language == 'nl' else 'questions' }}">
+                      {{ section.seen }}/{{ section.total }} {{ "vragen" if language == "nl" else "questions" }}
                     </span>
                     <span class="product-category-arrow" aria-hidden="true">→</span>
                 </a>
@@ -125,7 +128,7 @@
 
             <article class="core-panel core-buckets-panel">
               <p class="eyebrow">{{ "MOEILIJKHEID" if language == "nl" else "DIFFICULTY" }}</p>
-              <h2>{{ "Persoonlijke casebakken" if language == "nl" else "Personal case buckets" }}</h2>
+              <h2>{{ "Persoonlijke moeilijkheid" if language == "nl" else "Personal case buckets" }}</h2>
               <div class="core-bucket-list">
                 {% for key, count in core_dashboard.rating_counts.items() %}
                   <div class="core-bucket-row bucket-{{ key }}">

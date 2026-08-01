@@ -330,6 +330,43 @@ assert all(card["answer_sections"] for card in core_msk_cards)
 assert all(card["Vraag_nl"] for card in core_msk_cards)
 assert all(card["answer_details_nl"] for card in core_msk_cards)
 
+obvious_translation_error = re.compile(
+    r"\b(?:ultrageluid|ultrasound|berekende tomografie|gecomputeerde tomografie|"
+    r"onverbeterde CT|imaging|findings?|fluid|plain film|management|workup|up to|"
+    r"holge|cutoffvan|behoefte aspiratie|heterogenely|ubareolaire|mammografief|"
+    r"lumbometrie)\b",
+    re.IGNORECASE,
+)
+english_question_fragment = re.compile(
+    r"\b(?:year-old|presents with|undergoes imaging|motor vehicle collision|"
+    r"what is the|history of)\b",
+    re.IGNORECASE,
+)
+visible_figure_reference = re.compile(
+    r"\b(?:fig(?:uur|uren)?|figure|figures|afb\.)\s*\d",
+    re.IGNORECASE,
+)
+for section in get_core_sections():
+    if section.get("is_beta_demo"):
+        continue
+    section_cards = load_core_section(section["key"])
+    assert len(section_cards) == section["display_count"]
+    for card in section_cards:
+        assert card["Vraag_nl"]
+        assert card["Correct_nl"][0]
+        assert not english_question_fragment.search(card["Vraag_nl"]), card["ID"]
+        assert not obvious_translation_error.search(card["Vraag_nl"]), card["ID"]
+        assert not obvious_translation_error.search(card["Correct_nl"][0]), card["ID"]
+        for answer_section in card["answer_sections_nl"]:
+            if answer_section["key"] == "teaching":
+                assert len(answer_section["items"]) <= 6, card["ID"]
+            if answer_section["key"] == "references":
+                continue
+            for item in answer_section["items"]:
+                item_text = f"{item.get('lead', '')} {item['text']}"
+                assert not obvious_translation_error.search(item_text), card["ID"]
+                assert not visible_figure_reference.search(item_text), card["ID"]
+
 
 with app.app_context():
     user_columns = {column["name"] for column in inspect(db.engine).get_columns("user")}
@@ -527,10 +564,41 @@ assert b"PACS CASES (BETA)" in response.data
 assert response.data.count(b'class="product-category-row') == len(
     [section for section in get_core_sections() if not section.get("is_beta_demo")]
 )
-assert b"product-category-count" not in response.data
+active_core_sections = [
+    section for section in get_core_sections() if not section.get("is_beta_demo")
+]
+assert response.data.count(b'class="product-category-count"') == len(active_core_sections)
+for section in active_core_sections:
+    progress_label = f"0/{section['display_count']} questions".encode()
+    assert progress_label in response.data
 assert b"Anatomy" in response.data
 assert b"core-nav-product-link" not in response.data
 assert b">CORE Gastro-intestinal</a>" not in response.data
+
+with client.session_transaction() as core_dashboard_language_session:
+    core_dashboard_language_session["language"] = "nl"
+response = client.get("/core")
+assert_ok(response, "Dutch CORE dashboard")
+for section in active_core_sections:
+    progress_label = f"0/{section['display_count']} vragen".encode()
+    assert progress_label in response.data
+assert b"Beschikbare vragen" in response.data
+assert b"VRAGENBIBLIOTHEEK" in response.data
+expected_core_total = sum(section["display_count"] for section in active_core_sections)
+assert f"0/{expected_core_total} vragen gezien".encode() in response.data
+
+response = client.get("/core/chest")
+assert_ok(response, "Dutch CORE chest setup")
+assert b"CORE THORAXBEELDVORMING" in response.data
+assert b"Alle vragen" in response.data
+assert b"137 vragen" in response.data
+assert b"Aantal vragen" in response.data
+assert b"Start sessie" in response.data
+assert b"CORE GASTRO-INTESTINAL" not in response.data
+assert b"flashcards met open antwoord" in response.data
+assert b"Alle cases" not in response.data
+with client.session_transaction() as core_dashboard_language_session:
+    core_dashboard_language_session["language"] = "en"
 
 response = client.get("/core/chest")
 assert_ok(response, "CORE chest setup")
@@ -682,6 +750,14 @@ for qid, rating in core_ratings.items():
         json={"qid": qid, "rating": rating, "subgroup": "gastrointestinal"},
     )
     assert response.status_code == 200
+
+with client.session_transaction() as core_progress_language_session:
+    core_progress_language_session["language"] = "nl"
+response = client.get("/core")
+assert_ok(response, "CORE section progress")
+assert b"2/171 vragen" in response.data
+with client.session_transaction() as core_progress_language_session:
+    core_progress_language_session["language"] = "en"
 
 response = client.post(
     "/core/gastrointestinal/study",

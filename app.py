@@ -1454,7 +1454,10 @@ def get_dashboard_activity(user_id: int) -> dict:
 
 
 def get_core_dashboard(user_id: int) -> dict:
-    sections = get_core_sections()
+    sections = [
+        section for section in get_core_sections()
+        if not section.get("is_beta_demo")
+    ]
     all_questions = [
         question
         for section in sections
@@ -1477,6 +1480,7 @@ def get_core_dashboard(user_id: int) -> dict:
         ]
         section_rows.append({
             **section,
+            "total": len(questions),
             "seen": len(seen),
             "coverage": round(len(seen) / len(questions) * 100) if questions else 0,
             "mastered": sum(1 for progress in seen if progress.flashcard_rating == "very_easy"),
