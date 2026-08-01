@@ -132,6 +132,27 @@ assert len(core_body_mri_cards[0]["image_urls"]) == 1
 assert len(core_body_mri_cards[0]["answer_image_urls"]) == 1
 assert all(card["answer_sections"] for card in core_body_mri_cards)
 
+core_cardiac_cards = load_core_section("cardiac")
+assert len(core_cardiac_cards) == 115
+assert core_cardiac_cards[0]["ID"] == "CORE-CARD-001"
+assert len(core_cardiac_cards[0]["image_urls"]) == 1
+assert len(core_cardiac_cards[0]["answer_image_urls"]) == 1
+assert all(card["answer_sections"] for card in core_cardiac_cards)
+
+core_emergency_cards = load_core_section("emergency")
+assert len(core_emergency_cards) == 164
+assert core_emergency_cards[0]["ID"] == "CORE-ER-001"
+assert len(core_emergency_cards[0]["image_urls"]) == 1
+assert len(core_emergency_cards[0]["answer_image_urls"]) == 1
+assert all(card["answer_sections"] for card in core_emergency_cards)
+
+core_msk_cards = load_core_section("musculoskeletal")
+assert len(core_msk_cards) == 145
+assert core_msk_cards[0]["ID"] == "CORE-MSK-001"
+assert len(core_msk_cards[0]["image_urls"]) == 1
+assert len(core_msk_cards[0]["answer_image_urls"]) == 1
+assert all(card["answer_sections"] for card in core_msk_cards)
+
 
 with app.app_context():
     user_columns = {column["name"] for column in inspect(db.engine).get_columns("user")}
@@ -363,6 +384,27 @@ assert b"143" in response.data
 response = client.get("/core/body-mri/study?pool=all&count=2")
 assert_ok(response, "CORE body MRI study")
 assert b"/static/core/body-mri/" in response.data
+
+response = client.get("/core/cardiac")
+assert_ok(response, "CORE cardiac setup")
+assert b"115" in response.data
+response = client.get("/core/cardiac/study?pool=all&count=2")
+assert_ok(response, "CORE cardiac study")
+assert b"/static/core/cardiac/" in response.data
+
+response = client.get("/core/emergency")
+assert_ok(response, "CORE emergency setup")
+assert b"164" in response.data
+response = client.get("/core/emergency/study?pool=all&count=2")
+assert_ok(response, "CORE emergency study")
+assert b"/static/core/emergency/" in response.data
+
+response = client.get("/core/musculoskeletal")
+assert_ok(response, "CORE musculoskeletal setup")
+assert b"145" in response.data
+response = client.get("/core/musculoskeletal/study?pool=all&count=2")
+assert_ok(response, "CORE musculoskeletal study")
+assert b"/static/core/musculoskeletal/" in response.data
 
 response = client.get("/core/gastrointestinal")
 assert_ok(response, "CORE GI setup")
