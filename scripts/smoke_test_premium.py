@@ -124,6 +124,23 @@ assert core_neuro_cards[0]["ID"] == "CORE-NR-001"
 assert len(core_neuro_cards[0]["image_urls"]) == 3
 assert len(core_neuro_cards[0]["answer_image_urls"]) == 3
 assert all(card["answer_sections"] for card in core_neuro_cards)
+assert all(card["Vraag_nl"] != card["Vraag"] for card in core_neuro_cards)
+assert sum(card["Correct_nl"] != card["Correct"] for card in core_neuro_cards) >= 188
+assert all(card["answer_details_nl"] != card["answer_details"] for card in core_neuro_cards)
+assert all(card["answer_sections_nl"] for card in core_neuro_cards)
+assert all(
+    not any(
+        f"\n{heading}\n" in card["answer_details_nl"]
+        for heading in (
+            "Findings",
+            "Differential Diagnosis",
+            "Teaching Points",
+            "Management",
+            "Further Reading",
+        )
+    )
+    for card in core_neuro_cards
+)
 
 core_body_mri_cards = load_core_section("body-mri")
 assert len(core_body_mri_cards) == 143
@@ -390,6 +407,20 @@ assert b"192" in response.data
 response = client.get("/core/neuroradiology/study?pool=all&count=2")
 assert_ok(response, "CORE neuroradiology study")
 assert b"/static/core/neuroradiology/" in response.data
+with client.session_transaction() as neuro_language_session:
+    neuro_language_session["language"] = "nl"
+response = client.get("/core/neuroradiology/study?resume=1")
+assert_ok(response, "Dutch CORE neuroradiology study")
+with client.session_transaction() as neuro_session:
+    neuro_order = list(neuro_session["order"])
+neuro_by_id = {card["ID"]: card for card in core_neuro_cards}
+for qid in neuro_order:
+    assert neuro_by_id[qid]["Vraag_nl"].encode("utf-8") in response.data
+    assert neuro_by_id[qid]["Correct_nl"][0].encode("utf-8") in response.data
+assert b"Bevindingen" in response.data
+assert b"Differentiaaldiagnose" in response.data
+with client.session_transaction() as neuro_language_session:
+    neuro_language_session["language"] = "en"
 
 response = client.get("/core/body-mri")
 assert_ok(response, "CORE body MRI setup")

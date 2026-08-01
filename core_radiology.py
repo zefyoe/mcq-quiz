@@ -30,11 +30,11 @@ ANSWER_SECTION_LABELS = {
     "references": "References",
 }
 ANSWER_SECTION_HEADINGS = {
-    "findings": re.compile(r"^Findings$", re.IGNORECASE),
-    "differential": re.compile(r"^Differential Diagnosis$", re.IGNORECASE),
-    "teaching": re.compile(r"^Teaching Points$", re.IGNORECASE),
-    "management": re.compile(r"^Management$", re.IGNORECASE),
-    "references": re.compile(r"^Further Readings?$", re.IGNORECASE),
+    "findings": re.compile(r"^(Findings|Bevindingen)$", re.IGNORECASE),
+    "differential": re.compile(r"^(Differential Diagnosis|Differentiaaldiagnose)$", re.IGNORECASE),
+    "teaching": re.compile(r"^(Teaching Points|Kernpunten)$", re.IGNORECASE),
+    "management": re.compile(r"^(Management|Beleid)$", re.IGNORECASE),
+    "references": re.compile(r"^(Further Readings?|Referenties)$", re.IGNORECASE),
 }
 
 
