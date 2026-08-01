@@ -8,7 +8,7 @@
     <link rel="preload" as="fetch" href="{{ case.volume_url }}" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
-  <body class="core-product">
+  <body class="core-product core-pacs-product">
     <header class="core-compact-topbar">
       <a href="{{ url_for('core_home') }}" class="core-compact-brand">CORE <span>Radiology</span></a>
       <div>
@@ -21,18 +21,14 @@
     </header>
 
     <main class="core-labralis-page">
-      <section class="core-setup-hero core-labralis-hero">
-        <p class="eyebrow">CORE BETA MODULE</p>
-        <h1>LABRALIS</h1>
-        <p>
-          {{ "Scrollbare CT-quizdemo voor een voorbereide schouderarthro-case." if language == "nl" else "Scrollable CT quiz demo for one prepared shoulder arthrogram case." }}
-        </p>
-        <div class="core-anki-notice">
-          <span>BETA</span>
-          {{ "Een hardcoded proof-of-conceptcase voor de fundingpitch." if language == "nl" else "One hardcoded proof-of-concept case for the funding pitch." }}
+      <div class="core-pacs-titlebar">
+        <div>
+          <span class="core-pacs-titlebar-mark">P</span>
+          <strong>LABRALIS</strong>
+          <small>CT SHOULDER ARTHROGRAM</small>
         </div>
-      </section>
-
+        <span class="core-pacs-titlebar-status">CASE 01 / 01</span>
+      </div>
       <section class="core-labralis-layout">
         <article class="core-panel core-labralis-viewer-panel">
           <div class="core-panel-heading">
@@ -64,27 +60,25 @@
               <span id="labralisToolStatus">{{ "Bezig met scrollen" if language == "nl" else "Scroll mode" }}</span>
               <span id="labralisWindowHud">W: - L: -</span>
             </div>
+            <div class="core-labralis-slice-control" aria-label="{{ 'Coupe kiezen' if language == 'nl' else 'Choose slice' }}">
+              <label for="labralisSliceSlider">SLICE</label>
+              <input
+                id="labralisSliceSlider"
+                type="range"
+                min="1"
+                max="1"
+                value="1"
+                disabled
+                aria-label="{{ 'CT-coupe kiezen' if language == 'nl' else 'Choose CT slice' }}"
+              >
+              <span id="labralisSliceLabel">- / -</span>
+            </div>
             <div class="core-labralis-context-menu" id="labralisContextMenu" hidden>
               <button type="button" data-context-tool="pan">{{ "Pan / Selecteren" if language == "nl" else "Pan / Select" }}</button>
               <button type="button" data-context-tool="window">{{ "Window level" if language == "nl" else "Window level" }}</button>
               <button type="button" data-context-tool="scroll">{{ "Bezig met scrollen" if language == "nl" else "Scroll mode" }}</button>
               <button type="button" data-context-action="reset">{{ "Reset window" if language == "nl" else "Reset window" }}</button>
             </div>
-          </div>
-          <div class="core-labralis-slice-control">
-            <div>
-              <label for="labralisSliceSlider">{{ "Coupe" if language == "nl" else "Slice" }}</label>
-              <span id="labralisSliceLabel">- / -</span>
-            </div>
-            <input
-              id="labralisSliceSlider"
-              type="range"
-              min="1"
-              max="1"
-              value="1"
-              disabled
-              aria-label="{{ 'CT-coupe kiezen' if language == 'nl' else 'Choose CT slice' }}"
-            >
           </div>
           <div class="core-labralis-window-panel">
             <div class="core-labralis-preset-row">
@@ -135,25 +129,6 @@
             <div class="answer-feedback core-labralis-feedback" id="labralisFeedback" hidden></div>
           </article>
 
-          <article class="core-panel core-labralis-processing-panel">
-            <div class="core-panel-heading">
-              <div>
-                <p class="eyebrow">{{ "VERWERKING" if language == "nl" else "PROCESSING" }}</p>
-                <h2>{{ "Demo-afgeleide" if language == "nl" else "Demo derivative" }}</h2>
-              </div>
-            </div>
-            <div class="core-labralis-stat-list">
-              {% for label, value in case.processing_stats %}
-                <div class="core-labralis-stat-row">
-                  <span>{{ label }}</span>
-                  <strong>{{ value }}</strong>
-                </div>
-              {% endfor %}
-            </div>
-            <p class="small-muted">
-              {{ "Deze beta-module gebruikt enkel dit al-verwerkte bestand. Upload, anonimisering en conversie blijven bewust buiten scope." if language == "nl" else "This beta module only uses this prepared file. Upload, de-identification, and conversion are intentionally out of scope." }}
-            </p>
-          </article>
         </aside>
       </section>
     </main>

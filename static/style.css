@@ -1547,6 +1547,58 @@ body {
   color: #89a5b1;
 }
 
+.core-pacs-beta-nav {
+  margin-top: 2px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.core-pacs-beta-nav .eyebrow {
+  margin-bottom: 10px;
+  color: #83c7c2;
+}
+
+.core-pacs-beta-link {
+  min-height: 58px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(112, 209, 202, 0.28);
+  border-radius: 9px;
+  background: rgba(23, 126, 120, 0.22);
+  color: white;
+  text-decoration: none;
+}
+
+.core-pacs-beta-link:hover {
+  background: rgba(23, 126, 120, 0.38);
+}
+
+.core-pacs-beta-mark,
+.core-pacs-titlebar-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: #198d85;
+  color: white;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.core-pacs-beta-link span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.core-pacs-beta-link small {
+  color: #a9d2d0;
+  font-size: 0.68rem;
+}
+
 .core-nav .core-nav-product-link {
   min-height: 56px;
   display: grid;
@@ -2041,23 +2093,67 @@ body {
 }
 
 .core-labralis-page {
-  width: min(1280px, calc(100% - 40px));
-  margin: 34px auto;
+  width: min(1500px, calc(100% - 28px));
+  margin: 14px auto 28px;
 }
 
-.core-labralis-hero {
-  padding-bottom: 22px;
+.core-pacs-product {
+  background: #0a1117;
+  color: #dbe8eb;
+}
+
+.core-pacs-product .core-compact-topbar {
+  min-height: 54px;
+  background: #111c24;
+  border-bottom: 1px solid #273943;
+}
+
+.core-pacs-product .site-footer {
+  margin-top: 0;
+}
+
+.core-pacs-titlebar {
+  min-height: 52px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #263943;
+  border-radius: 7px 7px 0 0;
+  background: #17252e;
+  color: white;
+}
+
+.core-pacs-titlebar > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.core-pacs-titlebar small,
+.core-pacs-titlebar-status {
+  color: #8da7ae;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.core-pacs-titlebar small {
+  margin-left: 8px;
 }
 
 .core-labralis-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 10px;
   align-items: start;
 }
 
 .core-labralis-viewer-panel {
   min-width: 0;
+  border-color: #263943;
+  border-radius: 0 0 7px 7px;
   background: #101920;
   color: #d9e6ea;
 }
@@ -2125,7 +2221,7 @@ body {
 .core-labralis-viewer-wrap {
   position: relative;
   width: min(100%, 760px);
-  margin: 22px auto 12px;
+  margin: 14px auto 12px;
   overflow: hidden;
   border: 1px solid #152f42;
   border-radius: 12px;
@@ -2230,40 +2326,48 @@ body {
 }
 
 .core-labralis-slice-control {
-  width: min(100%, 760px);
-  margin: 16px auto 10px;
-  padding: 13px 14px;
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  bottom: 12px;
+  z-index: 5;
+  width: 34px;
+  padding: 9px 5px;
   display: grid;
-  gap: 10px;
-  border: 1px solid #253844;
-  border-radius: 10px;
-  background: #17232c;
-}
-
-.core-labralis-slice-control > div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  color: #b4c6cc;
-  font-size: 0.78rem;
-  font-weight: 800;
+  grid-template-rows: auto minmax(120px, 1fr) auto;
+  gap: 7px;
+  border: 1px solid rgba(112, 145, 153, 0.55);
+  border-radius: 5px;
+  background: rgba(17, 28, 36, 0.82);
 }
 
 .core-labralis-slice-control label {
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: #b4c6cc;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-align: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
 .core-labralis-slice-control span {
   color: #7fd3cf;
+  font-size: 0.56rem;
   font-variant-numeric: tabular-nums;
+  text-align: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
 .core-labralis-slice-control input[type="range"] {
   width: 100%;
+  height: 100%;
+  min-height: 120px;
   accent-color: #1f8d85;
   cursor: pointer;
+  writing-mode: vertical-lr;
+  direction: rtl;
 }
 
 .core-labralis-slice-control input[type="range"]:disabled {
@@ -2312,6 +2416,16 @@ body {
 .core-labralis-side {
   display: grid;
   gap: 18px;
+}
+
+.core-labralis-side .core-panel {
+  border-color: #2c424c;
+  background: #f7fafb;
+}
+
+.core-labralis-side .core-panel-heading > span {
+  background: #dceeed;
+  color: #14736f;
 }
 
 .core-labralis-quiz-panel > p,
@@ -4568,6 +4682,10 @@ a.product-category-row:hover {
   border-color: var(--core-border);
 }
 
+.core-category-list .product-category-row {
+  grid-template-columns: minmax(0, 1fr) 24px;
+}
+
 .core-category-list .product-category-code {
   border-color: #d3e2e3;
   background: var(--core-soft);
@@ -4581,6 +4699,10 @@ a.product-category-row:hover {
 
 .core-category-list .product-category-arrow {
   color: var(--core-teal);
+}
+
+.language-option-en-disabled {
+  display: none !important;
 }
 
 .learning-overview-grid {

@@ -1,8 +1,10 @@
 <div class="language-switcher" aria-label="Language">
   <a
     href="{{ url_for('set_language', language_code='en', next=language_switch_target|default(request.full_path)) }}"
-    class="language-option {% if language == 'en' %}active{% endif %}"
+    class="language-option language-option-en-disabled {% if language == 'en' %}active{% endif %}"
     lang="en"
+    aria-disabled="true"
+    tabindex="-1"
   >EN</a>
   <a
     href="{{ url_for('set_language', language_code='nl', next=language_switch_target|default(request.full_path)) }}"

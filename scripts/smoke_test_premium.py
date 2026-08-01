@@ -190,6 +190,8 @@ response = client.post(
 assert_ok(response, "student login")
 assert b'class="product-switcher"' in response.data
 assert b"/switch-product/core" in response.data
+with client.session_transaction() as language_session:
+    language_session["language"] = "en"
 response = client.get("/switch-product/core")
 assert response.status_code == 302
 assert response.headers["Location"] == "https://core.bymed.be/core"
@@ -230,7 +232,7 @@ answers = {
 answers["duration_seconds"] = "91"
 response = client.post("/quiz/Anatomy?subgroup=mixed", data=answers)
 assert_ok(response, "quiz submission")
-assert b"Report / PDF" in response.data
+assert b"Rapport / PDF" in response.data or b"Report / PDF" in response.data
 
 with app.app_context():
     attempt = QuizAttempt.query.filter_by(user_id=student_id).one()
@@ -343,9 +345,12 @@ assert_ok(response, "CORE dashboard")
 assert b"Bymed BV" in response.data
 assert b'class="product-switcher"' in response.data
 assert b'product-option active' in response.data
-assert b"171" in response.data
 assert b"Chest Imaging" in response.data
-assert response.data.count(b'class="product-category-row') == len(get_core_sections())
+assert b"PACS CASES (BETA)" in response.data
+assert response.data.count(b'class="product-category-row') == len(
+    [section for section in get_core_sections() if not section.get("is_beta_demo")]
+)
+assert b"product-category-count" not in response.data
 assert b"Anatomy" in response.data
 assert b"core-nav-product-link" not in response.data
 assert b">CORE Gastro-intestinal</a>" not in response.data

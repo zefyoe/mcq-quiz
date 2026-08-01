@@ -13,7 +13,7 @@ except ImportError:
 
 
 SUPPORTED_LANGUAGES = {"en", "nl"}
-DEFAULT_LANGUAGE = "en"
+DEFAULT_LANGUAGE = "nl"
 
 
 DUTCH_TRANSLATIONS = {

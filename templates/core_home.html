@@ -25,6 +25,16 @@
           <a href="{{ url_for('profile') }}">{{ "Profiel en leerdoel" if language == "nl" else "Profile and study goal" }}</a>
           <a href="{{ url_for('logout') }}" class="core-nav-muted">{{ tr("Log out") }}</a>
         </nav>
+        <div class="core-pacs-beta-nav">
+          <p class="eyebrow">PACS CASES (BETA)</p>
+          <a href="{{ url_for('core_labralis') }}" class="core-pacs-beta-link">
+            <span class="core-pacs-beta-mark">P</span>
+            <span>
+              <strong>LABRALIS</strong>
+              <small>{{ "CT-schoudercases" if language == "nl" else "CT shoulder cases" }}</small>
+            </span>
+          </a>
+        </div>
         <div class="core-sidebar-switches">
           {% set active_product = "core" %}
           {% include "_product_switcher.html" %}
@@ -83,25 +93,18 @@
                 <p class="eyebrow">{{ "CASE LIBRARY" if language == "nl" else "CASE LIBRARY" }}</p>
                 <h2>{{ "CORE-subsecties" if language == "nl" else "CORE subspecialties" }}</h2>
               </div>
-              <span>{{ core_dashboard.sections|length }} {{ "modules" if language == "nl" else "modules" }}</span>
+              <span>{{ "Actieve bibliotheek" if language == "nl" else "Active library" }}</span>
             </div>
             <div class="product-category-list core-category-list">
               {% for section in core_dashboard.sections %}
+                {% if not section.is_beta_demo %}
                 <a href="{{ url_for('core_labralis') if section.is_beta_demo else url_for('core_section_setup', section_key=section.key) }}" class="product-category-row{% if section.is_placeholder %} is-in-progress{% endif %}{% if section.is_beta_demo %} is-beta-demo{% endif %}">
-                    <span class="product-category-code">{{ "%02d"|format(loop.index) }}</span>
                     <span class="product-category-copy">
                       <strong>{{ section.label_nl if language == "nl" else section.label }}</strong>
-                      <small>
-                        {% if section.is_beta_demo %}
-                          {{ "Beta proof-of-concept" if language == "nl" else "Beta proof of concept" }}
-                        {% else %}
-                          {{ section.coverage }}% {{ "bekeken" if language == "nl" else "reviewed" }}
-                        {% endif %}
-                      </small>
                     </span>
-                    <span class="product-category-count">{{ "BETA" if section.is_beta_demo else section.seen ~ "/" ~ section.display_count }}</span>
                     <span class="product-category-arrow" aria-hidden="true">→</span>
                 </a>
+                {% endif %}
               {% endfor %}
             </div>
           </article>
