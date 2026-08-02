@@ -275,6 +275,42 @@ for broken_phrase in (
 ):
     assert broken_phrase not in ped_063_visible_text
 
+ped_086 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-086")
+assert ped_086["Vraag_nl"] == "2-jarige met een ontwikkelingsachterstand."
+assert ped_086["Correct_nl"] == ["Dandy-Walkermalformatie"]
+assert [section["key"] for section in ped_086["answer_sections_nl"]] == [
+    "findings",
+    "differential",
+    "teaching",
+    "management",
+    "references",
+]
+ped_086_sections = {
+    section["key"]: section["items"]
+    for section in ped_086["answer_sections_nl"]
+}
+assert len(ped_086_sections["findings"]) == 2
+assert "hypoplastisch en craniaal geroteerd" in ped_086_sections["findings"][1]["text"]
+assert len(ped_086_sections["differential"]) == 3
+assert len(ped_086_sections["teaching"]) == 6
+assert len(ped_086_sections["management"]) == 2
+assert len(ped_086_sections["references"]) == 2
+ped_086_visible_text = " ".join(
+    item["text"]
+    for section in ped_086["answer_sections_nl"]
+    if section["key"] != "references"
+    for item in section["items"]
+)
+for broken_phrase in (
+    "2-jarige met vertraging",
+    "Dandy-Walker misvorming",
+    "Het verschil omvat",
+    "Blake Magendie",
+    "De term \"Dandy-Walker De term",
+    "het rangschikken van de posterior fossa",
+):
+    assert broken_phrase not in ped_086_visible_text
+
 ped_145 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-145")
 assert ped_145["Vraag_nl"] == (
     "12-jarige patiënt met een Salter-Harris-IV-fractuur van de proximale tibia "
@@ -442,6 +478,10 @@ for section in get_core_sections():
     for card in section_cards:
         assert card["Vraag_nl"]
         assert card["Correct_nl"][0]
+        dutch_visible_text = " ".join(
+            [card["Vraag_nl"], *card["Correct_nl"], card["answer_details_nl"]]
+        )
+        assert "boogschutter" not in dutch_visible_text.lower(), card["ID"]
         for visible_text in (card["Vraag_nl"], card["Correct_nl"][0]):
             assert "  " not in visible_text, card["ID"]
             assert visible_text.count("(") == visible_text.count(")"), card["ID"]
@@ -736,6 +776,17 @@ assert b"Persisterende ductus omphalomesentericus" in response.data
 assert b"ligamentum umbilicale medianum" in response.data
 assert b"oc a7" not in response.data
 assert b"omfalomesenteric" not in response.data
+with client.session_transaction() as pediatric_case_session:
+    pediatric_case_session["order"] = ["CORE-PED-086"]
+response = client.get("/core/pediatric/study?resume=1")
+assert_ok(response, "Dutch CORE pediatric case 086")
+assert ped_086["Vraag_nl"].encode("utf-8") in response.data
+assert ped_086["Correct_nl"][0].encode("utf-8") in response.data
+assert b"hypoplastisch en craniaal geroteerd" in response.data
+assert b"Blake-pouchcyste" in response.data
+assert b"Dandy-Walkervariant" in response.data
+assert b"Het verschil omvat" not in response.data
+assert b"het rangschikken van de posterior fossa" not in response.data
 with client.session_transaction() as pediatric_case_session:
     pediatric_case_session["language"] = "en"
 

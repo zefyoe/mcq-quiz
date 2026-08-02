@@ -125,6 +125,7 @@ HISTORY_OVERRIDES_NL = {
     "CORE-PED-063": "Jongen van 8 dagen met persisterend vochtverlies uit de navel.",
     "CORE-PED-069": "17-jarige met een testiculaire massa.",
     "CORE-PED-070": "11-jarige met bekkenpijn.",
+    "CORE-PED-086": "2-jarige met een ontwikkelingsachterstand.",
     "CORE-PED-093": "Zuigeling van zes maanden met een toenemende hoofdomtrek.",
     "CORE-PED-098": "A terme geboren zuigeling met een nekmassa.",
     "CORE-PED-145": "12-jarige patiënt met een Salter-Harris-IV-fractuur van de proximale tibia in de voorgeschiedenis.",
@@ -200,6 +201,7 @@ DIAGNOSIS_OVERRIDES_NL = {
     "CORE-PED-044": "Malpositie van navelarterie- en navelvenekatheters",
     "CORE-PED-051": "Autosomaal recessieve polycysteuze nierziekte",
     "CORE-PED-063": "Patente urachus",
+    "CORE-PED-086": "Dandy-Walkermalformatie",
     "CORE-PED-093": "Benigne vergroting van de subarachnoïdale ruimten",
     "CORE-PED-145": "Posttraumatische fysebrug van de proximale tibia",
     "CORE-PED-149": "Ziekte van Blount",
@@ -306,6 +308,26 @@ ANSWER_DETAILS_OVERRIDES_NL = {
         "1. Yu JS, Kim KW, Lee HJ, et al. Urachal remnant diseases: spectrum of CT and US findings. RadioGraphics. 2001;21(2):451-461.\n"
         "2. Galati V, Donovan B, Ramji F, et al. Management of urachal remnants in early childhood. J Urol. 2008;180(4 suppl):1824-1827."
     ),
+    "CORE-PED-086": (
+        "Bevindingen\n"
+        "De axiale en sagittale MR-beelden tonen een vergrote achterste schedelgroeve met een grote liquorhoudende ruimte die vrij communiceert met de vierde ventrikel. Het tentorium staat hoog, de cerebellaire hemisferen zijn uit elkaar gedrongen en de cerebellaire vermis is hypoplastisch en craniaal geroteerd.\n"
+        "Differentiaaldiagnose\n"
+        "Blake-pouchcyste: cystische verwijding vanuit de vierde ventrikel met een intacte of slechts craniaal geroteerde vermis, zonder uitgesproken vergroting van de achterste schedelgroeve.\n\n"
+        "Mega cisterna magna: vergrote retrocerebellaire liquorruimte met een normale vermis en vierde ventrikel, zonder relevant massa-effect.\n\n"
+        "Arachnoïdale cyste van de achterste schedelgroeve: extra-axiale liquorcollectie zonder communicatie met de vierde ventrikel, met massa-effect op een normaal aangelegde vermis.\n"
+        "Kernpunten\n"
+        "De Dandy-Walkermalformatie wordt gekenmerkt door cystische dilatatie van de vierde ventrikel, hypoplasie en craniële rotatie van de vermis en vergroting van de achterste schedelgroeve met elevatie van het tentorium.\n\n"
+        "De verouderde term 'Dandy-Walkervariant' wordt beter vermeden omdat hij verschillende afwijkingen zonder uniforme diagnostische criteria groepeert.\n\n"
+        "Hydrocefalus komt frequent voor en kan bij presentatie verantwoordelijk zijn voor een toenemende hoofdomtrek, braken of tekenen van verhoogde intracraniële druk.\n\n"
+        "Geassocieerde supratentoriële afwijkingen omvatten onder meer dysgenesie van het corpus callosum, heterotopieën van grijze stof, corticale ontwikkelingsstoornissen, holoprosencefalie en encefaloceles.\n\n"
+        "De neurologische prognose wordt vooral bepaald door de ernst van de vermishypoplasie, bijkomende hersenafwijkingen en de mate waarin hydrocefalus onder controle kan worden gebracht.\n\n"
+        "MRI, met name de midsagittale opname, is de beste techniek om de vermis, de communicatie met de vierde ventrikel en bijkomende intracraniële afwijkingen te beoordelen.\n"
+        "Beleid\n"
+        "Beoordeel systematisch de aanwezigheid en ernst van hydrocefalus en zoek naar geassocieerde supra- en infratentoriële afwijkingen. Symptomatische hydrocefalus vereist neurochirurgische behandeling, afgestemd op de liquordynamiek, bijvoorbeeld met een ventriculoperitoneale of cystoperitoneale shunt of een endoscopische derde ventriculostomie.\n"
+        "Referenties\n"
+        "1. Patel S, Barkovich AJ. Analysis and classification of cerebellar malformations. AJNR Am J Neuroradiol. 2002;23(7):1074-1087.\n"
+        "2. Barkovich AJ, Kjos BO, Norman D, Edwards MS. Revised classification of posterior fossa cysts and cystlike malformations based on the results of multiplanar MR imaging. AJR Am J Roentgenol. 1989;153(6):1289-1300."
+    ),
     "CORE-PED-145": (
         "Bevindingen\n"
         "De coronale vetonderdrukte 3D-gradiëntecho-opname van de rechterknie toont onderbreking van de normale hyperintense proximale tibiale fysis door een hypointense benige brug, terwijl de distale femurfysis een normaal aspect heeft.\n"
@@ -398,6 +420,9 @@ _DUTCH_TEXT_REPLACEMENTS = (
     (r"(?m)^Teaching Points$", "Kernpunten"),
     (r"(?m)^Management$", "Beleid"),
     (r"(?m)^Further Readings?$", "Referenties"),
+    (r"\bSuperior Boogschutter Sinus\b", "sinus sagittalis superior"),
+    (r"\bBoogschutters\b", "sagittaal"),
+    (r"\bBoogschutter\b", "sagittaal"),
     (r"\bTrue Disease Extent Demonstrated on MR Imaging\b", "werkelijke ziekte-uitbreiding aangetoond met MRI"),
     (r"\b(?:niet-contrast|noncontrast|onverbeterde) (?:berekende |gecomputeerde )?tomografie\s*\(CT\)", "CT zonder contrast"),
     (r"\b(?:niet-contrast|noncontrast|onverbeterde) CT\b", "CT zonder contrast"),
