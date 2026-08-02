@@ -122,6 +122,7 @@ MISSING_CLINICAL_HISTORY = {
 
 HISTORY_OVERRIDES_NL = {
     "CORE-PED-047": "3-jarige met een urineweginfectie.",
+    "CORE-PED-063": "Jongen van 8 dagen met persisterend vochtverlies uit de navel.",
     "CORE-PED-069": "17-jarige met een testiculaire massa.",
     "CORE-PED-070": "11-jarige met bekkenpijn.",
     "CORE-PED-093": "Zuigeling van zes maanden met een toenemende hoofdomtrek.",
@@ -198,6 +199,7 @@ DIAGNOSIS_OVERRIDES_NL = {
     "CORE-PED-010": "Rechter aortaboog met aberrante linker arteria subclavia",
     "CORE-PED-044": "Malpositie van navelarterie- en navelvenekatheters",
     "CORE-PED-051": "Autosomaal recessieve polycysteuze nierziekte",
+    "CORE-PED-063": "Patente urachus",
     "CORE-PED-093": "Benigne vergroting van de subarachnoïdale ruimten",
     "CORE-PED-145": "Posttraumatische fysebrug van de proximale tibia",
     "CORE-PED-149": "Ziekte van Blount",
@@ -285,6 +287,25 @@ DIAGNOSIS_OVERRIDES_NL = {
 }
 
 ANSWER_DETAILS_OVERRIDES_NL = {
+    "CORE-PED-063": (
+        "Bevindingen\n"
+        "De sagittale echografie van de voorste buikwand toont een tubulaire structuur die de blaaskoepel met de navel verbindt, passend bij een persisterende urachus.\n"
+        "Differentiaaldiagnose\n"
+        "Persisterende ductus omphalomesentericus: deze verbindt de navel met de dunne darm en kan zich presenteren met enterale afscheiding uit de navel.\n\n"
+        "Urachussinus: deze loopt blind vanuit de navel en heeft geen open verbinding met de blaas.\n"
+        "Kernpunten\n"
+        "De urachus is een embryonale verbinding tussen de blaas en de navel die normaal oblitereert tot het ligamentum umbilicale medianum.\n\n"
+        "Er bestaan vier belangrijke urachusafwijkingen: een patente urachus, urachussinus, urachusdivertikel en urachuscyste.\n\n"
+        "Een patente urachus is aan beide uiteinden open en presenteert zich meestal in de neonatale periode met urineverlies uit de navel.\n\n"
+        "Een patente urachus of urachusdivertikel kan samengaan met urethrale obstructie, zoals posterieure-urethrakleppen, urethra-atresie of het prune-bellysyndroom.\n\n"
+        "Echografie in het sagittale vlak is het eerstekeuzeonderzoek; cystografie of fistulografie kan de open verbinding met de blaas bevestigen.\n\n"
+        "Urachusresten kunnen geïnfecteerd raken; maligne ontaarding tot een urachuscarcinoom is een zeldzame late complicatie.\n"
+        "Beleid\n"
+        "Beoordeel eerst of er een onderliggende urinewegobstructie bestaat. Kleine asymptomatische urachusresten bij jonge zuigelingen kunnen aanvankelijk echografisch worden opgevolgd, maar een persisterende symptomatische patente urachus wordt chirurgisch geëxcideerd.\n"
+        "Referenties\n"
+        "1. Yu JS, Kim KW, Lee HJ, et al. Urachal remnant diseases: spectrum of CT and US findings. RadioGraphics. 2001;21(2):451-461.\n"
+        "2. Galati V, Donovan B, Ramji F, et al. Management of urachal remnants in early childhood. J Urol. 2008;180(4 suppl):1824-1827."
+    ),
     "CORE-PED-145": (
         "Bevindingen\n"
         "De coronale vetonderdrukte 3D-gradiëntecho-opname van de rechterknie toont onderbreking van de normale hyperintense proximale tibiale fysis door een hypointense benige brug, terwijl de distale femurfysis een normaal aspect heeft.\n"

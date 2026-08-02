@@ -237,6 +237,44 @@ assert all(card["answer_sections"] for card in core_pediatric_cards)
 assert all(card["Vraag_nl"] for card in core_pediatric_cards)
 assert all(card["Vraag_nl"] != card["Vraag"] for card in core_pediatric_cards)
 assert all(card["answer_details_nl"] != card["answer_details"] for card in core_pediatric_cards)
+ped_063 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-063")
+assert ped_063["Vraag_nl"] == (
+    "Jongen van 8 dagen met persisterend vochtverlies uit de navel."
+)
+assert ped_063["Correct_nl"] == ["Patente urachus"]
+assert [section["key"] for section in ped_063["answer_sections_nl"]] == [
+    "findings",
+    "differential",
+    "teaching",
+    "management",
+    "references",
+]
+ped_063_sections = {
+    section["key"]: section["items"]
+    for section in ped_063["answer_sections_nl"]
+}
+assert len(ped_063_sections["findings"]) == 1
+assert "blaaskoepel met de navel verbindt" in ped_063_sections["findings"][0]["text"]
+assert len(ped_063_sections["differential"]) == 2
+assert len(ped_063_sections["teaching"]) == 6
+assert len(ped_063_sections["management"]) == 2
+assert len(ped_063_sections["references"]) == 2
+ped_063_visible_text = " ".join(
+    item["text"]
+    for section in ped_063["answer_sections_nl"]
+    if section["key"] != "references"
+    for item in section["items"]
+)
+for broken_phrase in (
+    "oc a7",
+    "voortdurend drainerende navel",
+    "Afwatering van de urachus",
+    "omfalomesenteric",
+    "gesloten aan de blaas einde",
+    "vloeistof gevangen tussen",
+):
+    assert broken_phrase not in ped_063_visible_text
+
 ped_145 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-145")
 assert ped_145["Vraag_nl"] == (
     "12-jarige patiënt met een Salter-Harris-IV-fractuur van de proximale tibia "
@@ -687,6 +725,17 @@ assert b"Acuut fyseletsel zonder brugvorming" in response.data
 assert b"operatieve planning" in response.data
 assert "verwende gradiënt".encode("utf-8") not in response.data
 assert b"lichamelijk letsel" not in response.data
+with client.session_transaction() as pediatric_case_session:
+    pediatric_case_session["order"] = ["CORE-PED-063"]
+response = client.get("/core/pediatric/study?resume=1")
+assert_ok(response, "Dutch CORE pediatric case 063")
+assert ped_063["Vraag_nl"].encode("utf-8") in response.data
+assert ped_063["Correct_nl"][0].encode("utf-8") in response.data
+assert b"blaaskoepel met de navel verbindt" in response.data
+assert b"Persisterende ductus omphalomesentericus" in response.data
+assert b"ligamentum umbilicale medianum" in response.data
+assert b"oc a7" not in response.data
+assert b"omfalomesenteric" not in response.data
 with client.session_transaction() as pediatric_case_session:
     pediatric_case_session["language"] = "en"
 
