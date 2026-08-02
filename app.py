@@ -2396,6 +2396,7 @@ def core_study(section_key):
         quiz_run_id=session.get("quiz_run_id") or "core-flashcards",
         switch_to_mcq_url=None,
         rate_url=url_for("rate_core_flashcard"),
+        auto_complete_on_last_rating=True,
         home_url=url_for("core_home"),
         product="core",
         product_name="CORE Radiology",

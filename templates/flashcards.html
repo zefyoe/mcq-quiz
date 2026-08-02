@@ -298,6 +298,7 @@
       const subgroup = {{ subgroup|tojson }};
       const currentUserId = {{ current_user.id|tojson }};
       const quizRunId = {{ quiz_run_id|tojson }};
+      const autoCompleteOnLastRating = {{ (auto_complete_on_last_rating|default(false))|tojson }};
       const storageKey = `flashcardSession:${currentUserId}:${quizRunId}`;
       const startedAtKey = `${storageKey}:startedAt`;
       let startedAt = Number(localStorage.getItem(startedAtKey));
@@ -305,6 +306,7 @@
       let sessionRatings = {};
       let preloadTimer = null;
       let answerPreloadTimer = null;
+      let completionStarted = false;
 
       if (!startedAt) {
         startedAt = Date.now();
@@ -323,6 +325,23 @@
         progressText.textContent = `${completed} / ${flashcardPanels.length}`;
         progressFill.style.width = `${(completed / flashcardPanels.length) * 100}%`;
         finishButton.disabled = completed !== flashcardPanels.length;
+      }
+
+      function allCardsRated() {
+        return flashcardPanels.every((panel) => Boolean(sessionRatings[panel.dataset.qid]));
+      }
+
+      function completeSession() {
+        if (completionStarted || !allCardsRated()) return;
+        completionStarted = true;
+        finishButton.disabled = true;
+        previousButton.disabled = true;
+        nextButton.disabled = true;
+        ratingsInput.value = JSON.stringify(sessionRatings);
+        durationInput.value = String(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(startedAtKey);
+        completionForm.submit();
       }
 
       function findContentRuns(length, hasContent, minimumSize) {
@@ -566,6 +585,10 @@
           nav?.classList.add("rated");
           nav?.setAttribute("data-rating", rating);
           updateProgress();
+          if (autoCompleteOnLastRating && allCardsRated()) {
+            completeSession();
+            return;
+          }
           const nextUnrated = flashcardPanels.findIndex((candidate, index) =>
             index > currentIndex && !sessionRatings[candidate.dataset.qid]
           );
@@ -575,7 +598,9 @@
         } catch (error) {
           alert(error.message);
         } finally {
-          panel.querySelectorAll("[data-rate]").forEach((button) => button.disabled = false);
+          if (!completionStarted) {
+            panel.querySelectorAll("[data-rate]").forEach((button) => button.disabled = false);
+          }
         }
       }
 
@@ -610,13 +635,7 @@
       });
       previousButton.addEventListener("click", () => showCard(Math.max(0, currentIndex - 1)));
       nextButton.addEventListener("click", () => showCard(Math.min(flashcardPanels.length - 1, currentIndex + 1)));
-      finishButton.addEventListener("click", () => {
-        ratingsInput.value = JSON.stringify(sessionRatings);
-        durationInput.value = String(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
-        localStorage.removeItem(storageKey);
-        localStorage.removeItem(startedAtKey);
-        completionForm.submit();
-      });
+      finishButton.addEventListener("click", completeSession);
 
       document.addEventListener("keydown", (event) => {
         const panel = flashcardPanels[currentIndex];

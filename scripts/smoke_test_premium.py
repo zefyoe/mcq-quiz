@@ -669,6 +669,7 @@ response = client.get(
 assert_ok(response, "flashcard session")
 assert b"Show answer" in response.data
 assert b"MCQ" in response.data
+assert b"const autoCompleteOnLastRating = false;" in response.data
 assert b"Question ID:" in response.data
 assert b'<a href="/" class="brand brand-link">Rady</a>' in response.data
 with client.session_transaction() as flashcard_session:
@@ -952,6 +953,10 @@ response = client.get("/core/gastrointestinal/study?pool=all&count=2")
 assert_ok(response, "CORE GI study")
 assert b"Show answer" in response.data
 assert b"MCQ" not in response.data
+assert b"const autoCompleteOnLastRating = true;" in response.data
+assert b"if (autoCompleteOnLastRating &amp;&amp; allCardsRated())" not in response.data
+assert b"if (autoCompleteOnLastRating && allCardsRated())" in response.data
+assert b"finishButton.addEventListener(\"click\", completeSession)" in response.data
 assert b'class="core-learning-notes"' in response.data
 assert b"Explore on Radiopaedia" in response.data
 assert b"note-differential" in response.data
