@@ -21,6 +21,11 @@ CORE_SECTIONS = (
 )
 
 DATA_DIRECTORY = Path(__file__).resolve().parent / "data"
+PEDIATRIC_DIAGNOSIS_OVERRIDES_NL = json.loads(
+    (DATA_DIRECTORY / "core_pediatric_diagnosis_overrides_nl.json").read_text(
+        encoding="utf-8"
+    )
+)
 
 ANSWER_SECTION_LABELS = {
     "findings": "Findings",
@@ -128,6 +133,7 @@ HISTORY_OVERRIDES_NL = {
     "CORE-PED-086": "2-jarige met een ontwikkelingsachterstand.",
     "CORE-PED-093": "Zuigeling van zes maanden met een toenemende hoofdomtrek.",
     "CORE-PED-098": "A terme geboren zuigeling met een nekmassa.",
+    "CORE-PED-133": "Jongen van 13 maanden met verkorting en een standsafwijking van het linker been.",
     "CORE-PED-145": "12-jarige patiënt met een Salter-Harris-IV-fractuur van de proximale tibia in de voorgeschiedenis.",
     "CORE-NR-032": "61-jarige vrouw na trauma van de linker ACI.",
     "CORE-NR-103": "Meisje van 5 maanden na een val van een bank.",
@@ -203,6 +209,7 @@ DIAGNOSIS_OVERRIDES_NL = {
     "CORE-PED-063": "Patente urachus",
     "CORE-PED-086": "Dandy-Walkermalformatie",
     "CORE-PED-093": "Benigne vergroting van de subarachnoïdale ruimten",
+    "CORE-PED-133": "Proximale focale femurdeficiëntie (PFFD)",
     "CORE-PED-145": "Posttraumatische fysebrug van de proximale tibia",
     "CORE-PED-149": "Ziekte van Blount",
     "CORE-IR-009": "Aneurysma van de rechter kransslagader",
@@ -287,6 +294,7 @@ DIAGNOSIS_OVERRIDES_NL = {
     "CORE-BR-070": "Bilaterale benigne ogende massa's",
     "CORE-BR-098": "Borstcarcinoom met invasie van de pectoralisspier",
 }
+DIAGNOSIS_OVERRIDES_NL.update(PEDIATRIC_DIAGNOSIS_OVERRIDES_NL)
 
 ANSWER_DETAILS_OVERRIDES_NL = {
     "CORE-PED-063": (
@@ -327,6 +335,26 @@ ANSWER_DETAILS_OVERRIDES_NL = {
         "Referenties\n"
         "1. Patel S, Barkovich AJ. Analysis and classification of cerebellar malformations. AJNR Am J Neuroradiol. 2002;23(7):1074-1087.\n"
         "2. Barkovich AJ, Kjos BO, Norman D, Edwards MS. Revised classification of posterior fossa cysts and cystlike malformations based on the results of multiplanar MR imaging. AJR Am J Roentgenol. 1989;153(6):1289-1300."
+    ),
+    "CORE-PED-133": (
+        "Bevindingen\n"
+        "Het scanogram toont een uitgesproken verkorting van het linker femur. De epifyse van de femurkop lijkt los te staan van de femurhals doordat de tussenliggende kraakbenige verbinding nog niet is verbeend en daarom niet zichtbaar is op de radiografie.\n\n"
+        "Het linker acetabulum is ondiep en dysplastisch.\n"
+        "Differentiaaldiagnose\n"
+        "Geïsoleerde congenitale verkorting van het femur: hierbij is het femur verkort, maar blijven de proximale femurkop-halsverbinding en de heupstabiliteit relatief goed behouden.\n\n"
+        "Femur-fibula-ulnasyndroom: hierbij gaat de femurafwijking samen met fibulaire en ulnaire reductiedefecten.\n"
+        "Kernpunten\n"
+        "Proximale focale femurdeficiëntie is een spectrum van congenitale afwijkingen, variërend van geringe femurverkorting tot ernstige proximale femurdeficiëntie met acetabulaire dysplasie.\n\n"
+        "De aandoening is meestal sporadisch en unilateraal; ipsilaterale fibulaire hemimelie, tibiale verkorting, knie-instabiliteit en voetafwijkingen kunnen gelijktijdig voorkomen.\n\n"
+        "Bij jonge kinderen kunnen de femurkop, femurhals en hun verbinding grotendeels uit kraakbeen bestaan en daardoor onzichtbaar zijn op conventionele radiografieën.\n\n"
+        "Een herkenbaar acetabulum wijst op de aanwezigheid van een femurkop, maar acetabulaire dysplasie kan ook bij mildere vormen aanwezig zijn.\n\n"
+        "Echografie en vooral MRI tonen de kraakbenige anatomie, de continuïteit tussen femurkop en femurschacht, de heupstabiliteit en de omliggende spieren en ligamenten.\n\n"
+        "De anatomische classificatie en de voorspelde beenlengteongelijkheid op skeletale maturiteit bepalen welke reconstructieve of prothetische behandeling mogelijk is.\n"
+        "Beleid\n"
+        "Maak voor de behandelplanning een MRI en beoordeel de femurkop, de kraakbenige verbinding, het acetabulum, de heupstabiliteit en geassocieerde afwijkingen van knie, onderbeen en voet. De behandeling wordt individueel bepaald en kan bestaan uit reconstructie en beenverlenging, dan wel rotatieplastiek of amputatie met prothetische revalidatie bij een ernstige deficiëntie.\n"
+        "Referenties\n"
+        "1. Bernaerts A, Pouillon M, De Ridder K, Vanhoenacker F. Value of magnetic resonance imaging in early assessment of proximal focal femoral deficiency (PFFD). JBR-BTR. 2006;89(6):325-327.\n"
+        "2. Anton CG, Applegate KE, Kuivila TE, Wilkes DC. Proximal femoral focal deficiency (PFFD): more than an abnormal hip. Semin Musculoskelet Radiol. 1999;3(3):215-226."
     ),
     "CORE-PED-145": (
         "Bevindingen\n"

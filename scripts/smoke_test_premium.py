@@ -237,6 +237,25 @@ assert all(card["answer_sections"] for card in core_pediatric_cards)
 assert all(card["Vraag_nl"] for card in core_pediatric_cards)
 assert all(card["Vraag_nl"] != card["Vraag"] for card in core_pediatric_cards)
 assert all(card["answer_details_nl"] != card["answer_details"] for card in core_pediatric_cards)
+pediatric_cards_by_id = {card["ID"]: card for card in core_pediatric_cards}
+pediatric_diagnosis_overrides = json.loads(
+    (
+        Path(__file__).resolve().parents[1]
+        / "data"
+        / "core_pediatric_diagnosis_overrides_nl.json"
+    ).read_text(encoding="utf-8")
+)
+for card_id, expected_diagnosis in pediatric_diagnosis_overrides.items():
+    assert pediatric_cards_by_id[card_id]["Correct_nl"] == [expected_diagnosis]
+
+untranslated_pediatric_diagnosis = re.compile(
+    r"\b(?:anomaly|aspired|bone cyst|clubfoot|deficency|foreign body|"
+    r"mainstem bronchus|radial ray|air leak phenomena|plain radiographics)\b",
+    re.IGNORECASE,
+)
+for card in core_pediatric_cards:
+    assert not untranslated_pediatric_diagnosis.search(card["Correct_nl"][0]), card["ID"]
+
 ped_063 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-063")
 assert ped_063["Vraag_nl"] == (
     "Jongen van 8 dagen met persisterend vochtverlies uit de navel."
@@ -310,6 +329,45 @@ for broken_phrase in (
     "het rangschikken van de posterior fossa",
 ):
     assert broken_phrase not in ped_086_visible_text
+
+ped_133 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-133")
+assert ped_133["Vraag_nl"] == (
+    "Jongen van 13 maanden met verkorting en een standsafwijking van het linker been."
+)
+assert ped_133["Correct_nl"] == ["Proximale focale femurdeficiëntie (PFFD)"]
+assert [section["key"] for section in ped_133["answer_sections_nl"]] == [
+    "findings",
+    "differential",
+    "teaching",
+    "management",
+    "references",
+]
+ped_133_sections = {
+    section["key"]: section["items"]
+    for section in ped_133["answer_sections_nl"]
+}
+assert len(ped_133_sections["findings"]) == 3
+assert len(ped_133_sections["differential"]) == 2
+assert len(ped_133_sections["teaching"]) == 6
+assert len(ped_133_sections["management"]) == 2
+assert len(ped_133_sections["references"]) == 2
+ped_133_visible_text = " ".join(
+    item["text"]
+    for section in ped_133["answer_sections_nl"]
+    if section["key"] != "references"
+    for item in section["items"]
+)
+for broken_phrase in (
+    "PFED",
+    "Deficency",
+    "lagere ledematen misvorming",
+    "fibrillaire hemimelia",
+    "cartilaginous",
+    "anterior deficiëntie",
+    "tekort is posterior",
+    "proefschrift",
+):
+    assert broken_phrase not in ped_133_visible_text
 
 ped_145 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-145")
 assert ped_145["Vraag_nl"] == (
@@ -787,6 +845,17 @@ assert b"Blake-pouchcyste" in response.data
 assert b"Dandy-Walkervariant" in response.data
 assert b"Het verschil omvat" not in response.data
 assert b"het rangschikken van de posterior fossa" not in response.data
+with client.session_transaction() as pediatric_case_session:
+    pediatric_case_session["order"] = ["CORE-PED-133"]
+response = client.get("/core/pediatric/study?resume=1")
+assert_ok(response, "Dutch CORE pediatric case 133")
+assert ped_133["Vraag_nl"].encode("utf-8") in response.data
+assert ped_133["Correct_nl"][0].encode("utf-8") in response.data
+assert b"kraakbenige verbinding" in response.data
+assert b"Femur-fibula-ulnasyndroom" in response.data
+assert b"prothetische revalidatie" in response.data
+assert b"cartilaginous" not in response.data
+assert b"proefschrift" not in response.data
 with client.session_transaction() as pediatric_case_session:
     pediatric_case_session["language"] = "en"
 
