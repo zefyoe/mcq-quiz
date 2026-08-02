@@ -9,7 +9,7 @@
   </head>
   <body class="core-product">
     <header class="core-compact-topbar">
-      <a href="{{ url_for('core_home') }}" class="core-compact-brand">CORE <span>Radiology</span></a>
+      <a href="{{ url_for('core_home') }}" class="core-compact-brand">CORE <span>Radius</span></a>
       <div>
         <a href="{{ url_for('core_home') }}">{{ "Overzicht" if language == "nl" else "Overview" }}</a>
         <a href="{{ url_for('core_history') }}">{{ "Geschiedenis" if language == "nl" else "History" }}</a>
@@ -24,7 +24,7 @@
         <p class="eyebrow">CORE {{ (section.label_nl if language == "nl" else section.label)|upper }}</p>
         <h1>{{ section.label_nl if language == "nl" else section.label }}</h1>
         <p>{{ "Kies een vragenpool en het aantal flashcards met open antwoord. CORE gebruikt uitsluitend actieve recall, nooit meerkeuze." if language == "nl" else "Choose your case pool and deck size. CORE uses open active recall exclusively, never multiple choice." }}</p>
-        <div class="core-anki-notice"><span>ANKI ONLY</span>{{ "Diagnose eerst zelf, antwoord daarna onthullen." if language == "nl" else "Formulate the diagnosis before revealing the answer." }}</div>
+        <div class="core-anki-notice">{{ "Diagnose eerst zelf, antwoord daarna onthullen." if language == "nl" else "Formulate the diagnosis before revealing the answer." }}</div>
       </section>
 
       <form method="get" action="{{ url_for('core_study', section_key=section.key) }}" class="core-setup-form">

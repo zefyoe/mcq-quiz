@@ -16,14 +16,14 @@
   <body class="{% if product == 'core' %}core-product{% endif %}">
     <header class="topbar">
       <div class="topbar-inner">
-        <a href="{{ home_url }}" class="brand brand-link">{{ product_name or "Rady" }}</a>
+        <a href="{{ home_url }}" class="brand brand-link">{{ product_name or "Radius" }}</a>
         <div class="topbar-actions">
           <div class="topbar-badge">{{ product_label or "Anki Flashcards" }}</div>
-          <a href="{{ home_url }}" class="topbar-link">{{ tr("Home") }}</a>
           <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
           {% set active_product = product|default("anatomy") %}
           {% include "_product_switcher.html" %}
           {% include "_language_switcher.html" %}
+          <a href="{{ home_url }}" class="topbar-link topbar-home">{{ tr("Home") }}</a>
         </div>
       </div>
     </header>
@@ -87,8 +87,6 @@
               <a href="{{ switch_to_mcq_url }}">MCQ</a>
               <span class="active">Anki</span>
             </div>
-          {% else %}
-            <span class="core-anki-only">ANKI ONLY</span>
           {% endif %}
         </header>
 

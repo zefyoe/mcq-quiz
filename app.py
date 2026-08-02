@@ -286,8 +286,16 @@ def tr(text: str) -> str:
 
 
 def localize_quiz_title(title: str) -> str:
+    title = (title or "").replace("CORE Radiology", "CORE Radius")
+    title = title.replace("Rady", "Radius")
     if get_current_language() != "nl":
         return title
+
+    for section in get_core_sections():
+        english_label = section.get("label")
+        dutch_label = section.get("label_nl")
+        if english_label and dutch_label:
+            title = title.replace(english_label, dutch_label)
 
     replacements = {
         "Anatomy - MSK": "Anatomie - MSK",
@@ -2252,6 +2260,11 @@ def core_study(section_key):
     all_questions = load_core_section(section_key)
     if not section or not all_questions:
         return redirect(url_for("core_home"))
+    section_label = (
+        section.get("label_nl", section["label"])
+        if get_current_language() == "nl"
+        else section["label"]
+    )
 
     if request.method == "POST":
         order = [qid for qid in session.get("order", []) if qid]
@@ -2281,7 +2294,7 @@ def core_study(section_key):
             subgroup=section_key,
             quiz_mode="test",
             study_format="flashcard",
-            title=f"CORE Radiology - {section['label']}",
+            title=f"CORE Radius - {section_label}",
             score=score,
             total_questions=len(order),
             question_ids=order,
@@ -2302,7 +2315,7 @@ def core_study(section_key):
         clear_active_quiz_session()
         return render_template(
             "flashcard_result.html",
-            category=f"CORE Radiology - {section['label']}",
+            category=f"CORE Radius - {section_label}",
             total=len(order),
             rating_counts=bucket_counts,
             session_rating_counts=session_rating_counts,
@@ -2377,7 +2390,7 @@ def core_study(section_key):
     }
     return render_template(
         "flashcards.html",
-        category=f"CORE Radiology - {section['label']}",
+        category=f"CORE Radius - {section_label}",
         raw_category="CORE Radiology",
         subgroup=section_key,
         questions_by_id=questions_by_id,
@@ -2399,8 +2412,8 @@ def core_study(section_key):
         auto_complete_on_last_rating=True,
         home_url=url_for("core_home"),
         product="core",
-        product_name="CORE Radiology",
-        product_label=section["label"],
+        product_name="CORE Radius",
+        product_label=section_label,
     )
 
 
@@ -2760,7 +2773,7 @@ def flashcards(category):
         rate_url=url_for("rate_flashcard"),
         home_url=url_for("home"),
         product="anatomy",
-        product_name="Rady",
+        product_name="Radius",
         product_label="Anki Flashcards",
     )
 

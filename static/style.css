@@ -1412,7 +1412,7 @@ body {
   }
 }
 
-/* CORE Radiology product */
+/* CORE Radius product */
 .dashboard-nav-link-core {
   min-height: 58px;
   display: grid;
@@ -1440,6 +1440,21 @@ body {
 
 .core-product .topbar {
   background: #12334a;
+  padding-inline: 18px;
+}
+
+.core-product .topbar-inner {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.core-product .topbar-actions {
+  margin-left: auto;
+}
+
+.core-product .topbar-home {
+  margin-left: 8px;
 }
 
 .core-shell {
@@ -1972,8 +1987,7 @@ body {
   line-height: 1.6;
 }
 
-.core-anki-notice,
-.core-anki-only {
+.core-anki-notice {
   width: fit-content;
   display: inline-flex;
   align-items: center;
@@ -1986,17 +2000,6 @@ body {
 }
 
 .core-anki-notice {
-  padding: 8px 11px;
-}
-
-.core-anki-notice span,
-.core-anki-only {
-  color: var(--core-teal);
-  letter-spacing: 0.08em;
-  font-weight: 900;
-}
-
-.core-anki-only {
   padding: 8px 11px;
 }
 

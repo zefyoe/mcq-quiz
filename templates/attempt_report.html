@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ "Toetsrapport" if language == "nl" else "Test report" }} | Rady</title>
+    <title>{{ "Toetsrapport" if language == "nl" else "Test report" }} | Radius</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -16,7 +16,7 @@
     <main class="report-sheet">
       <header class="report-header">
         <div>
-          <div class="report-brand">{{ "CORE RADIOLOGY" if summary.category == "CORE Radiology" else "RADY" }}</div>
+          <div class="report-brand">{{ "CORE RADIUS" if summary.category == "CORE Radiology" else "RADIUS" }}</div>
           <p>
             {% if summary.category == "CORE Radiology" %}
               {{ "Persoonlijk radiologierapport" if language == "nl" else "Personal radiology report" }}
@@ -33,7 +33,7 @@
 
       <section class="report-title">
         <p class="eyebrow">{{ "TOETSRESULTAAT" if language == "nl" else "TEST RESULT" }}</p>
-        <h1>{{ summary.title }}</h1>
+        <h1>{{ localize_quiz_title(summary.title) }}</h1>
         <p>{{ attempt.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
       </section>
 
@@ -94,7 +94,7 @@
       </section>
 
       <footer class="report-footer">
-        <span>{{ "CORE Radiology" if summary.category == "CORE Radiology" else "Rady Anatomy QBank" }}</span>
+        <span>{{ "CORE Radius" if summary.category == "CORE Radiology" else "Radius Anatomy QBank" }}</span>
         <span>{{ "Gegenereerd op" if language == "nl" else "Generated on" }} {{ attempt.created_at.strftime('%d/%m/%Y') }}</span>
       </footer>
     </main>

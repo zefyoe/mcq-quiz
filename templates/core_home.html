@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CORE Radiology</title>
+    <title>CORE Radius</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -12,7 +12,7 @@
       <aside class="core-sidebar">
         <a href="{{ url_for('core_home') }}" class="core-brand">
           <span class="core-brand-mark">C</span>
-          <span><strong>CORE</strong><small>Radiology</small></span>
+          <span><strong>CORE</strong><small>Radius</small></span>
         </a>
         <div class="core-user">
           <span>{{ "INGELOGD" if language == "nl" else "SIGNED IN" }}</span>
@@ -45,7 +45,7 @@
       <main class="core-main">
         <header class="core-header">
           <div>
-            <p class="eyebrow">CORE RADIOLOGY</p>
+            <p class="eyebrow">CORE RADIUS</p>
             <h1>{{ "Beeldvorming leren door actieve recall" if language == "nl" else "Build imaging expertise through active recall" }}</h1>
             <p>{{ "Bestudeer radiologievragen, formuleer je diagnose en beoordeel daarna eerlijk je herkenning." if language == "nl" else "Review authentic imaging cases, formulate the diagnosis, then rate your recall honestly." }}</p>
           </div>

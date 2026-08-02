@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Rady | MCQ Quiz</title>
+    <title>Radius | MCQ Quiz</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -11,9 +11,9 @@
     <div class="dashboard-shell">
       <aside class="dashboard-sidebar">
         <a href="{{ url_for('home') }}" class="dashboard-sidebar-brand">
-          <div class="dashboard-brand-mark" aria-label="Rady">R</div>
+          <div class="dashboard-brand-mark" aria-label="Radius">R</div>
           <div>
-            <div class="dashboard-brand-title">Rady</div>
+            <div class="dashboard-brand-title">Radius</div>
             <div class="dashboard-brand-subtitle">{{ tr("Anatomy QBank") }}</div>
           </div>
         </a>
@@ -32,7 +32,7 @@
           <a href="{{ url_for('anatomy_sections') }}" class="dashboard-nav-link">{{ tr("New Anatomy Quiz") }}</a>
           <a href="{{ url_for('profile') }}" class="dashboard-nav-link">{{ "Profiel" if language == "nl" else "Profile" }}</a>
           <a href="{{ url_for('core_home') }}" class="dashboard-nav-link dashboard-nav-link-core">
-            <span>CORE Radiology</span>
+            <span>CORE Radius</span>
             <small>core.bymed.be</small>
           </a>
           {% if current_user.is_authenticated and current_user.is_admin %}

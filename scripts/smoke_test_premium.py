@@ -38,11 +38,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app import app, capitalize_initial, db, get_questions_by_ids  # noqa: E402
 from core_radiology import get_core_sections, load_core_section, parse_answer_details  # noqa: E402
 from models import QuizAttempt, User  # noqa: E402
+from markupsafe import escape  # noqa: E402
 from sqlalchemy import inspect  # noqa: E402
 
 
 def assert_ok(response, label):
     assert response.status_code == 200, f"{label}: HTTP {response.status_code}"
+
+
+def assert_rendered_text(response, value):
+    assert str(escape(value)).encode("utf-8") in response.data
 
 
 parsed_notes = parse_answer_details(
@@ -655,6 +660,8 @@ assert_ok(client.get("/previous-tests"), "history")
 response = client.get("/")
 assert_ok(response, "dashboard")
 assert b"Bymed BV" in response.data
+assert b"Radius" in response.data
+assert b"CORE Radius" in response.data
 assert response.data.count(b'class="product-category-row"') == 4
 assert b'href="/anatomy/msk"' in response.data
 assert b'href="/anatomy/genito-urinary"' in response.data
@@ -671,7 +678,7 @@ assert b"Show answer" in response.data
 assert b"MCQ" in response.data
 assert b"const autoCompleteOnLastRating = false;" in response.data
 assert b"Question ID:" in response.data
-assert b'<a href="/" class="brand brand-link">Rady</a>' in response.data
+assert b'<a href="/" class="brand brand-link">Radius</a>' in response.data
 with client.session_transaction() as flashcard_session:
     flashcard_order = list(flashcard_session["order"])
 response = client.get("/quiz/Anatomy?subgroup=mixed&resume=1")
@@ -817,6 +824,11 @@ with client.session_transaction() as pediatric_case_session:
     pediatric_case_session["quiz_pool"] = "all"
 response = client.get("/core/pediatric/study?resume=1")
 assert_ok(response, "Dutch CORE pediatric case 145")
+assert b'<a href="/core" class="brand brand-link">CORE Radius</a>' in response.data
+assert b'<div class="topbar-badge">Pediatrische beeldvorming</div>' in response.data
+assert response.data.find(b'class="language-switcher"') < response.data.find(
+    b'class="topbar-link topbar-home"'
+)
 assert ped_145["Vraag_nl"].encode("utf-8") in response.data
 assert ped_145["Correct_nl"][0].encode("utf-8") in response.data
 assert b"hypointense benige brug" in response.data
@@ -881,8 +893,8 @@ with client.session_transaction() as neuro_session:
     neuro_order = list(neuro_session["order"])
 neuro_by_id = {card["ID"]: card for card in core_neuro_cards}
 for qid in neuro_order:
-    assert neuro_by_id[qid]["Vraag_nl"].encode("utf-8") in response.data
-    assert neuro_by_id[qid]["Correct_nl"][0].encode("utf-8") in response.data
+    assert_rendered_text(response, neuro_by_id[qid]["Vraag_nl"])
+    assert_rendered_text(response, neuro_by_id[qid]["Correct_nl"][0])
 assert b"Bevindingen" in response.data
 assert b"Differentiaaldiagnose" in response.data
 with client.session_transaction() as neuro_language_session:
@@ -918,7 +930,7 @@ assert b"/static/core/musculoskeletal/" in response.data
 
 response = client.get("/core/gastrointestinal")
 assert_ok(response, "CORE GI setup")
-assert b"ANKI ONLY" in response.data
+assert b"ANKI ONLY" not in response.data
 
 response = client.get("/core/genitourinary")
 assert_ok(response, "CORE GU setup")
@@ -1018,7 +1030,7 @@ response = client.post(
     },
 )
 assert_ok(response, "CORE completion")
-assert b"CORE Radiology - Gastrointestinal Imaging" in response.data
+assert b"CORE Radius - Gastrointestinal Imaging" in response.data
 
 with app.app_context():
     core_attempt = QuizAttempt.query.filter_by(
