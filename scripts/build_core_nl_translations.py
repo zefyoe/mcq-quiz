@@ -69,8 +69,30 @@ MANUAL_HISTORY_TRANSLATIONS = {
     "CORE-PED-078": "Premature baby van 28 weken, één week oud.",
     "CORE-PED-081": "Premature jongen van 28 weken, één week oud (eerste afbeelding). De tweede afbeelding is acht weken later gemaakt.",
     "CORE-PED-082": "6-jarige met hoofdpijn en een veranderde mentale toestand.",
+    "CORE-PED-145": "12-jarige patiënt met een Salter-Harris-IV-fractuur van de proximale tibia in de voorgeschiedenis.",
+}
+MANUAL_DIAGNOSIS_TRANSLATIONS = {
+    "CORE-PED-145": "Posttraumatische fysebrug van de proximale tibia",
 }
 MANUAL_ANSWER_TRANSLATIONS = {
+    "CORE-PED-145": (
+        "Bevindingen\n"
+        "De coronale vetonderdrukte 3D-gradiëntecho-opname van de rechterknie toont onderbreking van de normale hyperintense proximale tibiale fysis door een hypointense benige brug, terwijl de distale femurfysis een normaal aspect heeft.\n"
+        "Differentiaaldiagnose\n"
+        "Acuut fyseletsel zonder brugvorming: hierbij is op T2-gewogen beelden een hyperintens signaal in de fysis zichtbaar, met omgevend wekedelenoedeem.\n"
+        "Kernpunten\n"
+        "Een groeistilstand door een fysebrug treedt op bij ongeveer 15% van de fysefracturen.\n\n"
+        "De distale tibia is de frequentste locatie, gevolgd door het distale femur en de proximale tibia.\n\n"
+        "Het risico op een groeistoornis neemt toe bij verplaatsing, comminutie en een fractuurlijn die loodrecht op de fysis staat.\n\n"
+        "Jonge patiënten en letsels van het distale femur of de proximale tibia hebben door de resterende groei een groter risico op standsafwijkingen en beenlengteverschil.\n\n"
+        "Op radiografie kan aanvankelijk vernauwing of verbreding van de fysis zichtbaar zijn; later ontstaan een benige brug, angulaire deformiteit of beenlengteverschil.\n\n"
+        "MRI detecteert een beginnende fysebrug eerder dan radiografie; driedimensionale vetonderdrukte gradiëntecho-opnamen maken kartering van de fysebrug mogelijk voor de operatieve planning.\n"
+        "Beleid\n"
+        "Bij voldoende resterende groei kan een fysebrug die minder dan 50% van het oppervlak van de fysis beslaat, worden gereseceerd. Bij een grotere brug kunnen een corrigerende osteotomie en/of contralaterale epifysiodese nodig zijn om verdere deformiteit of beenlengteverschil te beperken.\n"
+        "Referenties\n"
+        "1. Lohman M, Kivisaari A, Vehmas T, et al. MRI in the assessment of growth arrest. Pediatr Radiol. 2002;32(1):41-45.\n"
+        "2. Ecklund K, Jaramillo D. Imaging of growth disturbance in children. Radiol Clin North Am. 2001;39(4):823-841."
+    ),
     "CORE-GU-020": (
         "Bevindingen\n"
         "De blanco CT toont gas in het parenchym van de transplantatienier. Een voornamelijk gashoudend abces breidt zich uit tot in de perirenale weke delen.\n\n"
@@ -368,7 +390,8 @@ def translate_card(card, existing):
             or translate_text(card.get("history", ""))
         ),
         "diagnosis": polish_translation(
-            existing.get("diagnoses", {}).get(card_id)
+            MANUAL_DIAGNOSIS_TRANSLATIONS.get(card_id)
+            or existing.get("diagnoses", {}).get(card_id)
             or translate_text(card.get("diagnosis", ""))
         ),
         "answer_details": (

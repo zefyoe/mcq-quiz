@@ -237,6 +237,46 @@ assert all(card["answer_sections"] for card in core_pediatric_cards)
 assert all(card["Vraag_nl"] for card in core_pediatric_cards)
 assert all(card["Vraag_nl"] != card["Vraag"] for card in core_pediatric_cards)
 assert all(card["answer_details_nl"] != card["answer_details"] for card in core_pediatric_cards)
+ped_145 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-145")
+assert ped_145["Vraag_nl"] == (
+    "12-jarige patiënt met een Salter-Harris-IV-fractuur van de proximale tibia "
+    "in de voorgeschiedenis."
+)
+assert ped_145["Correct_nl"] == [
+    "Posttraumatische fysebrug van de proximale tibia"
+]
+assert [section["key"] for section in ped_145["answer_sections_nl"]] == [
+    "findings",
+    "differential",
+    "teaching",
+    "management",
+    "references",
+]
+ped_145_sections = {
+    section["key"]: section["items"]
+    for section in ped_145["answer_sections_nl"]
+}
+assert len(ped_145_sections["findings"]) == 1
+assert "hypointense benige brug" in ped_145_sections["findings"][0]["text"]
+assert len(ped_145_sections["differential"]) == 1
+assert len(ped_145_sections["teaching"]) == 6
+assert len(ped_145_sections["management"]) == 2
+assert len(ped_145_sections["references"]) == 2
+ped_145_visible_text = " ".join(
+    item["text"]
+    for section in ped_145["answer_sections_nl"]
+    if section["key"] != "references"
+    for item in section["items"]
+)
+for broken_phrase in (
+    "juiste proximale scheenbeen",
+    "verwende gradiënt",
+    "lichamelijk letsel",
+    "Bony brug",
+    "lichaamsplaat",
+    "gerecupereerd",
+):
+    assert broken_phrase not in ped_145_visible_text
 
 core_interventional_cards = load_core_section("interventional")
 assert len(core_interventional_cards) == 103
@@ -631,6 +671,24 @@ assert b"150" in response.data
 response = client.get("/core/pediatric/study?pool=all&count=2")
 assert_ok(response, "CORE pediatric study")
 assert b"/static/core/pediatric/" in response.data
+with client.session_transaction() as pediatric_case_session:
+    pediatric_case_session["language"] = "nl"
+    pediatric_case_session["category"] = "CORE Radiology"
+    pediatric_case_session["subgroup"] = "pediatric"
+    pediatric_case_session["order"] = ["CORE-PED-145"]
+    pediatric_case_session["question_limit"] = 1
+    pediatric_case_session["quiz_pool"] = "all"
+response = client.get("/core/pediatric/study?resume=1")
+assert_ok(response, "Dutch CORE pediatric case 145")
+assert ped_145["Vraag_nl"].encode("utf-8") in response.data
+assert ped_145["Correct_nl"][0].encode("utf-8") in response.data
+assert b"hypointense benige brug" in response.data
+assert b"Acuut fyseletsel zonder brugvorming" in response.data
+assert b"operatieve planning" in response.data
+assert "verwende gradiënt".encode("utf-8") not in response.data
+assert b"lichamelijk letsel" not in response.data
+with client.session_transaction() as pediatric_case_session:
+    pediatric_case_session["language"] = "en"
 
 response = client.get("/core/interventional")
 assert_ok(response, "CORE interventional setup")

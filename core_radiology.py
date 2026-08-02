@@ -126,6 +126,7 @@ HISTORY_OVERRIDES_NL = {
     "CORE-PED-070": "11-jarige met bekkenpijn.",
     "CORE-PED-093": "Zuigeling van zes maanden met een toenemende hoofdomtrek.",
     "CORE-PED-098": "A terme geboren zuigeling met een nekmassa.",
+    "CORE-PED-145": "12-jarige patiënt met een Salter-Harris-IV-fractuur van de proximale tibia in de voorgeschiedenis.",
     "CORE-NR-032": "61-jarige vrouw na trauma van de linker ACI.",
     "CORE-NR-103": "Meisje van 5 maanden na een val van een bank.",
     "CORE-NR-147": "Eerder gezonde man na trauma met zwelling, pijn en duidelijke afname van de gezichtsscherpte.",
@@ -198,7 +199,7 @@ DIAGNOSIS_OVERRIDES_NL = {
     "CORE-PED-044": "Malpositie van navelarterie- en navelvenekatheters",
     "CORE-PED-051": "Autosomaal recessieve polycysteuze nierziekte",
     "CORE-PED-093": "Benigne vergroting van de subarachnoïdale ruimten",
-    "CORE-PED-145": "Posttraumatische fysebrug",
+    "CORE-PED-145": "Posttraumatische fysebrug van de proximale tibia",
     "CORE-PED-149": "Ziekte van Blount",
     "CORE-IR-009": "Aneurysma van de rechter kransslagader",
     "CORE-IR-027": "Occlusie van de truncus coeliacus met retrograde flow via de arteria gastroduodenalis",
@@ -281,6 +282,27 @@ DIAGNOSIS_OVERRIDES_NL = {
     "CORE-BR-053": "Echografisch beeld van een extracapsulaire ruptuur van een siliconenimplantaat",
     "CORE-BR-070": "Bilaterale benigne ogende massa's",
     "CORE-BR-098": "Borstcarcinoom met invasie van de pectoralisspier",
+}
+
+ANSWER_DETAILS_OVERRIDES_NL = {
+    "CORE-PED-145": (
+        "Bevindingen\n"
+        "De coronale vetonderdrukte 3D-gradiëntecho-opname van de rechterknie toont onderbreking van de normale hyperintense proximale tibiale fysis door een hypointense benige brug, terwijl de distale femurfysis een normaal aspect heeft.\n"
+        "Differentiaaldiagnose\n"
+        "Acuut fyseletsel zonder brugvorming: hierbij is op T2-gewogen beelden een hyperintens signaal in de fysis zichtbaar, met omgevend wekedelenoedeem.\n"
+        "Kernpunten\n"
+        "Een groeistilstand door een fysebrug treedt op bij ongeveer 15% van de fysefracturen.\n\n"
+        "De distale tibia is de frequentste locatie, gevolgd door het distale femur en de proximale tibia.\n\n"
+        "Het risico op een groeistoornis neemt toe bij verplaatsing, comminutie en een fractuurlijn die loodrecht op de fysis staat.\n\n"
+        "Jonge patiënten en letsels van het distale femur of de proximale tibia hebben door de resterende groei een groter risico op standsafwijkingen en beenlengteverschil.\n\n"
+        "Op radiografie kan aanvankelijk vernauwing of verbreding van de fysis zichtbaar zijn; later ontstaan een benige brug, angulaire deformiteit of beenlengteverschil.\n\n"
+        "MRI detecteert een beginnende fysebrug eerder dan radiografie; driedimensionale vetonderdrukte gradiëntecho-opnamen maken kartering van de fysebrug mogelijk voor de operatieve planning.\n"
+        "Beleid\n"
+        "Bij voldoende resterende groei kan een fysebrug die minder dan 50% van het oppervlak van de fysis beslaat, worden gereseceerd. Bij een grotere brug kunnen een corrigerende osteotomie en/of contralaterale epifysiodese nodig zijn om verdere deformiteit of beenlengteverschil te beperken.\n"
+        "Referenties\n"
+        "1. Lohman M, Kivisaari A, Vehmas T, et al. MRI in the assessment of growth arrest. Pediatr Radiol. 2002;32(1):41-45.\n"
+        "2. Ecklund K, Jaramillo D. Imaging of growth disturbance in children. Radiol Clin North Am. 2001;39(4):823-841."
+    ),
 }
 
 FIGURE_WORD = r"(?:fig(?:uren|ures|uur|ure|s)?|afb(?:eeldingen|eelding)?)\.?"
@@ -406,6 +428,7 @@ _DUTCH_TEXT_REPLACEMENTS = (
     (r"\bmammografief\b", "mammografisch"),
     (r"\blumbometrie\b", "lumpectomie"),
     (r"\bHet icoken van\b", "Verdikking van"),
+    (r"\bBeeldvorming of growth disturbance in children\b", "Imaging of growth disturbance in children"),
 )
 
 
@@ -628,7 +651,10 @@ def load_core_section(section_key):
         answer_details = card.get("answer_details") or ""
         answer_details_nl = _polish_dutch_text(
             _clean_extracted_text(
-                dutch_answer_details.get(card["id"], answer_details)
+                ANSWER_DETAILS_OVERRIDES_NL.get(
+                    card["id"],
+                    dutch_answer_details.get(card["id"], answer_details),
+                )
             )
         )
         source_history = (card.get("history") or "").strip()
