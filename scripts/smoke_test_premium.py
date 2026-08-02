@@ -261,6 +261,71 @@ untranslated_pediatric_diagnosis = re.compile(
 for card in core_pediatric_cards:
     assert not untranslated_pediatric_diagnosis.search(card["Correct_nl"][0]), card["ID"]
 
+broken_pediatric_history = re.compile(
+    r"(?:\n|-->|\bddx\b|\bsectional\b|\bbilious\b|\bUTI\b|"
+    r"onbeschofte|juiste proptose|Rt Nier|SMHz|\bfant\b|\bStor\b)",
+    re.IGNORECASE,
+)
+for card in core_pediatric_cards:
+    assert not broken_pediatric_history.search(card["Vraag_nl"]), card["ID"]
+
+ped_001 = pediatric_cards_by_id["CORE-PED-001"]
+assert ped_001["Vraag_nl"] == (
+    "Een zuigeling van 5 maanden met een afwijkende thoraxfoto."
+)
+assert ped_001["Correct_nl"] == [
+    "Tetralogie van Fallot met afwezige pulmonalisklep"
+]
+ped_001_sections = {
+    section["key"]: section["items"]
+    for section in ped_001["answer_sections_nl"]
+}
+assert len(ped_001_sections["differential"]) == 3
+assert len(ped_001_sections["teaching"]) == 6
+assert len(ped_001_sections["references"]) == 2
+ped_001_visible_text = " ".join(
+    item["text"]
+    for section in ped_001["answer_sections_nl"]
+    if section["key"] != "references"
+    for item in section["items"]
+)
+for broken_phrase in (
+    "joeose",
+    "het aantal spreuken",
+    "in de kinderschoenen",
+    "bevindingen van TOR",
+):
+    assert broken_phrase not in ped_001_visible_text
+
+ped_072 = pediatric_cards_by_id["CORE-PED-072"]
+assert ped_072["Vraag_nl"] == (
+    "Een 10-jarige jongen met pubertas praecox. Het eerste beeld toont de "
+    "rechtertestis en het tweede de linkertestis."
+)
+assert ped_072["Correct_nl"] == [
+    "Testiculaire bijnierresten bij congenitale bijnierhyperplasie"
+]
+ped_072_sections = {
+    section["key"]: section["items"]
+    for section in ped_072["answer_sections_nl"]
+}
+assert len(ped_072_sections["differential"]) == 3
+assert len(ped_072_sections["teaching"]) <= 6
+assert len(ped_072_sections["references"]) == 2
+ped_072_visible_text = " ".join(
+    item["text"]
+    for section in ped_072["answer_sections_nl"]
+    if section["key"] != "references"
+    for item in section["items"]
+)
+for broken_phrase in (
+    "Stor",
+    "overseminatie",
+    "precocious puberteit",
+    "Voorste akoestisch",
+):
+    assert broken_phrase not in ped_072_visible_text
+
 ped_063 = next(card for card in core_pediatric_cards if card["ID"] == "CORE-PED-063")
 assert ped_063["Vraag_nl"] == (
     "Jongen van 8 dagen met persisterend vochtverlies uit de navel."
@@ -869,6 +934,24 @@ assert b"Femur-fibula-ulnasyndroom" in response.data
 assert b"prothetische revalidatie" in response.data
 assert b"cartilaginous" not in response.data
 assert b"proefschrift" not in response.data
+with client.session_transaction() as pediatric_case_session:
+    pediatric_case_session["order"] = ["CORE-PED-001"]
+response = client.get("/core/pediatric/study?resume=1")
+assert_ok(response, "Dutch CORE pediatric case 001")
+assert_rendered_text(response, ped_001["Vraag_nl"])
+assert_rendered_text(response, ped_001["Correct_nl"][0])
+assert b"afwezige pulmonalisklep" in response.data
+assert b"joeose" not in response.data
+assert b"het aantal spreuken" not in response.data
+with client.session_transaction() as pediatric_case_session:
+    pediatric_case_session["order"] = ["CORE-PED-072"]
+response = client.get("/core/pediatric/study?resume=1")
+assert_ok(response, "Dutch CORE pediatric case 072")
+assert_rendered_text(response, ped_072["Vraag_nl"])
+assert_rendered_text(response, ped_072["Correct_nl"][0])
+assert b"pubertas praecox" in response.data
+assert b"Een jongen van tien met puberteit" not in response.data
+assert b"overseminatie" not in response.data
 with client.session_transaction() as pediatric_case_session:
     pediatric_case_session["language"] = "en"
 
