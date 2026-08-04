@@ -197,6 +197,9 @@ LABRALIS_REQUIRED_TERMS = (
     ("reversed hill sachs", "reverse hill sachs"),
     ("bony bankart", "bankart"),
 )
+SITE_OFFLINE = os.environ.get("SITE_OFFLINE", "1").strip().lower() in {
+    "1", "true", "yes", "on"
+}
 
 
 # -------------------------
@@ -210,6 +213,8 @@ login_manager.init_app(app)
 
 @app.before_request
 def route_core_domain():
+    if SITE_OFFLINE and request.endpoint != "health" and not request.path.startswith("/static/"):
+        return render_template("maintenance.html"), 503
     hostname = request.host.split(":", 1)[0].lower()
     if hostname == "core.bymed.be" and request.path == "/":
         return redirect(url_for("core_home"))

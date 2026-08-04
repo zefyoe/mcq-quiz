@@ -4364,6 +4364,65 @@ body {
   color: white;
 }
 
+.maintenance-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(88, 142, 213, 0.16), transparent 34%),
+    #eef3f7;
+  color: #172033;
+}
+
+.maintenance-card {
+  width: min(100%, 560px);
+  padding: 56px 48px;
+  border: 1px solid #dbe4eb;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 70px rgba(31, 52, 72, 0.13);
+  text-align: center;
+}
+
+.maintenance-mark {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 26px;
+  border: 2px solid #183b72;
+  border-radius: 50%;
+  color: #183b72;
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+.maintenance-card h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.08;
+}
+
+.maintenance-card p:not(.eyebrow) {
+  margin: 18px auto 28px;
+  max-width: 420px;
+  color: #607284;
+  line-height: 1.65;
+}
+
+.maintenance-card small {
+  color: #8493a0;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  .maintenance-card {
+    padding: 40px 24px;
+  }
+}
+
 @media (max-width: 700px) {
   .study-format-toggle,
   .flashcard-rating-grid {

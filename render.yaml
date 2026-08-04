@@ -14,6 +14,8 @@ services:
         fromDatabase:
           name: mcq-quiz-db
           property: connectionString
+      - key: SITE_OFFLINE
+        value: "1"
 
 databases:
   - name: mcq-quiz-db

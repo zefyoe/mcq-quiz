@@ -6,6 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+os.environ["SITE_OFFLINE"] = "0"
 
 database_file = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
 database_file.close()
