@@ -62,47 +62,29 @@
 
         <section class="stats-grid dashboard-stats">
           <div class="stat-card dashboard-stat-card">
-            <div class="stat-icon stat-icon-blue">SC</div>
             <div>
-              <p class="stat-label">{{ tr("Question Score") }}</p>
+              <p class="stat-label">{{ "Score" if language == "nl" else "Score" }}</p>
               <h3>
                 {% if accuracy is not none %}
-                  {{ accuracy }}% {{ tr("Correct") }}
+                  {{ accuracy }} {{ "procent" if language == "nl" else "percent" }}
                 {% else %}
                   {{ tr("No score yet") }}
                 {% endif %}
               </h3>
-              <p class="stat-note">
-                {% if accuracy is not none %}
-                  {{ "Gebaseerd op je voltooide anatomiesessies." if language == "nl" else "Based on your completed anatomy sessions." }}
-                {% else %}
-                  {{ "Start je eerste anatomiequiz om je prestaties te meten." if language == "nl" else "Start your first anatomy quiz to generate performance data." }}
-                {% endif %}
-              </p>
             </div>
           </div>
 
           <div class="stat-card dashboard-stat-card">
-            <div class="stat-icon stat-icon-green">QB</div>
             <div>
-              <p class="stat-label">{{ tr("QBank Usage") }}</p>
-              <h3>{{ category_cards[0].count if category_cards else 0 }} {{ "vragen" if language == "nl" else "Questions" }}</h3>
-              <p class="stat-note">{{ "Anatomie is momenteel de actieve vragenbank." if language == "nl" else "Anatomy is the active bank available for study right now." }}</p>
+              <p class="stat-label">{{ "Beschikbaar" if language == "nl" else "Available" }}</p>
+              <h3>{{ category_cards[0].count if category_cards else 0 }}</h3>
             </div>
           </div>
 
           <div class="stat-card dashboard-stat-card">
-            <div class="stat-icon stat-icon-amber">TS</div>
             <div>
-              <p class="stat-label">{{ tr("Test Count") }}</p>
-              <h3>{{ total_quizzes }} {{ tr("Completed") }}</h3>
-              <p class="stat-note">
-                {% if streak_days %}
-                  {{ streak_days }} {{ "dagen op rij actief." if language == "nl" else "day streak currently active." }}
-                {% else %}
-                  {{ tr("Complete quizzes consistently to build a streak.") }}
-                {% endif %}
-              </p>
+              <p class="stat-label">{{ "Afgerond" if language == "nl" else "Completed" }}</p>
+              <h3>{{ total_quizzes }}</h3>
             </div>
           </div>
         </section>
@@ -122,7 +104,7 @@
             {% for subgroup in subgroup_cards %}
               <a href="{{ url_for('anatomy_subgroup_setup', subgroup=subgroup.key) }}" class="product-category-row">
                 <span class="product-category-code">
-                  {{ "MIX" if subgroup.key == "mixed" else "GU" if subgroup.key == "genito-urinary" else "HN" if subgroup.key == "head-and-neck" else "MSK" }}
+                  {{ "MIX" if subgroup.key == "mixed" else "GU" if subgroup.key == "genito-urinary" else "HN" if subgroup.key == "head-and-neck" else "CT" if subgroup.key == "cardiothoracic" else "GI" if subgroup.key == "gastrointestinal" else "MSK" }}
                 </span>
                 <span class="product-category-copy">
                   <strong>{{ tr(subgroup.label) }}</strong>
