@@ -1,0 +1,31 @@
+question,filename,answer,source_image
+1,GI_Thoracic_oesophagus.jpeg,"Thoracic oesophagus - 2 points",ctgastrointestinal3.jpeg
+2,GI_Terminal_Ileum.jpeg,"Terminal Ileum - 2 points",ctgastrointestinal17.jpeg
+3,GI_Abdominal_aorta.jpeg,"Abdominal aorta - 2 points",ctgastrointestinal38.jpeg
+4,GI_Body_of_pancreas.jpeg,"Body of pancreas - 2 points",ctgastrointestinal53.jpeg
+5,GI_Left_inferior_gluteal_artery.jpeg,"Left inferior gluteal artery - 2 points",ctgastrointestinal57.jpeg
+6,GI_Inferior_mesenteric_artery.jpeg,"Inferior mesenteric artery - 2 points",ctgastrointestinal60.jpeg
+7,GI_Left_internal_iliac_artery.jpeg,"Left internal iliac artery - 2 points",ctgastrointestinal61.jpeg
+8,GI_Superior_mesenteric_artery.jpeg,"Superior mesenteric artery - 2 points",ctgastrointestinal65.jpeg
+9,GI_Right_diaphragmatic_crus.jpeg,"Right diaphragmatic crus - 2 points",mrigastrointestinal20.jpeg
+10,GI_Spleen.jpeg,"Spleen - 2 points",mrigastrointestinal30.jpeg
+11,GI_Inferior_vena_cava.jpeg,"Inferior vena cava - 2 points",mrigastrointestinal60.jpeg
+12,GI_Right_common_iliac_artery.jpeg,"Right common iliac artery - 2 points",mrigastrointestinal68.jpeg
+13,GI_Left_common_iliac_artery.jpeg,"Left common iliac artery - 2 points",mrigastrointestinal74.jpeg
+14,GI_Right_main_branch_of_portal_vein.jpeg,"Right main branch of portal vein - 2 points",mrigastrointestinal79.jpeg
+15,GI_Right_hemidiaphragm.jpeg,"Right hemidiaphragm - 2 points",usgastrointestinal4.jpeg
+16,GI_Abdominal_aorta_2.jpeg,"Abdominal aorta - 2 points",usgastrointestinal12.jpeg
+17,GI_Left_renal_vein.jpeg,"Left renal vein - 2 points",usgastrointestinal14.jpeg
+18,GI_Gallbladder.jpeg,"Gallbladder - 2 points",usgastrointestinal15.jpeg
+19,GI_Extrahepatic_portal_vein.jpeg,"Extrahepatic portal vein - 2 points",usgastrointestinal32.jpeg
+20,GI_Fundus_of_stomach.jpeg,"Fundus of stomach - 2 points",xraygastrointestinal6.jpeg
+21,GI_Descending_portion_of_duodenum.jpeg,"Descending portion of duodenum - 2 points",xraygastrointestinal8.jpeg
+22,GI_Descending_portion_of_duodenum_2.jpeg,"Descending portion of duodenum - 2 points",xraygastrointestinal10.jpeg
+23,GI_Antrum_Of_Stomach.jpeg,"Antrum Of Stomach - 2 points",xraygastrointestinal15.jpeg
+24,GI_Descending_colon.jpeg,"Descending colon - 2 points",xraygastrointestinal19.jpeg
+25,GI_Prevertebral_Soft_Tissue.jpeg,"Prevertebral Soft Tissue - 2 points",xraygastrointestinal23.jpeg
+26,GI_Urinary_bladder.jpeg,"Urinary bladder - 2 points",xraygastrointestinal25.jpeg
+27,GI_Oesophageal_contour_from_aortic_arch_impression.jpeg,"Oesophageal contour from aortic arch impression - 2 points",xraygastrointestinal30.jpeg
+28,GI_Splenic_artery.jpeg,"Splenic artery - 2 points",xraygastrointestinal33.jpeg
+29,GI_Retroaortic_left_renal_vein.jpeg,"Retroaortic left renal vein - 2 points",ctgastrointestinal80.jpeg
+30,GI_Duplication_of_the_inferior_vena_cava.jpeg,"Duplication of the inferior vena cava - 2 points",ctgastrointestinal83.jpeg

@@ -28,6 +28,8 @@ DUTCH_TRANSLATIONS = {
     "Choose how many questions to include in this quiz.": "Kies hoeveel vragen je in deze quiz wilt opnemen.",
     "Cardiothoracic": "Cardiothoracaal",
     "Cardiothoracic anatomy": "Cardiothoracale anatomie",
+    "Gastrointestinal": "Gastro-intestinaal",
+    "Gastrointestinal anatomy": "Gastro-intestinale anatomie",
     "Choose one answer below, then click Save answer. Once saved, the answer is locked.": "Kies hieronder één antwoord en klik daarna op Antwoord opslaan. Na het opslaan wordt het antwoord vergrendeld.",
     "Choose A, B, C, or D and save to move to the next question. You can still go back before submitting.": "Kies A, B, C of D en sla op om automatisch naar de volgende vraag te gaan. Je kunt vóór het indienen nog teruggaan.",
     "Choose A, B, C, or D, save your answer, and see the correct answer immediately.": "Kies A, B, C of D, sla je antwoord op en bekijk meteen het juiste antwoord.",

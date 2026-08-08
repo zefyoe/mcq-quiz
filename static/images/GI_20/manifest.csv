@@ -1,0 +1,21 @@
+question,filename,answer,source_image
+1,GI_Thoracic_oesophagus.jpeg,"Thoracic oesophagus - 2 points",ctgastrointestinal6.jpeg
+2,GI_Caecum.jpeg,"Caecum - 2 points",ctgastrointestinal16.jpeg
+3,GI_Splenic_flexure_of_large_bowel.jpeg,"Splenic flexure of large bowel - 2 points",ctgastrointestinal19.jpeg
+4,GI_Extrahepatic_portal_vein.jpeg,"Extrahepatic portal vein - 2 points",ctgastrointestinal23.jpeg
+5,GI_Gallbladder.jpeg,"Gallbladder - 2 points",ctgastrointestinal36.jpeg
+6,GI_Left_external_iliac_artery.jpeg,"Left external iliac artery - 2 points",ctgastrointestinal62.jpeg
+7,GI_Splenic_vein.jpeg,"Splenic vein - 2 points",ctgastrointestinal74.jpeg
+8,GI_Rectum.jpeg,"Rectum - 2 points",mrigastrointestinal8.jpeg
+9,GI_Main_pancreatic_duct.jpeg,"Main pancreatic duct - 2 points",mrigastrointestinal17.jpeg
+10,GI_Segment_seven_of_liver.jpeg,"Segment seven of liver - 2 points",usgastrointestinal16.jpeg
+11,GI_Left_renal_artery.jpeg,"Left renal artery - 2 points",mrigastrointestinal66.jpeg
+12,GI_Segment_seven_of_liver_2.jpeg,"Segment seven of liver - 2 points",usgastrointestinal16.jpeg
+13,GI_Superior_mesenteric_artery.jpeg,"Superior mesenteric artery - 2 points",usgastrointestinal10.jpeg
+14,GI_Segment_seven_of_liver_3.jpeg,"Segment seven of liver - 2 points",usgastrointestinal16.jpeg
+15,GI_Spleen.jpeg,"Spleen - 2 points",usgastrointestinal19.jpeg
+16,GI_Inferior_vena_cava.jpeg,"Inferior vena cava - 2 points",usgastrointestinal34.jpeg
+17,GI_Inferior_mesenteric_artery.jpeg,"Inferior mesenteric artery - 2 points",xraygastrointestinal42.jpeg
+18,GI_Left_renal_artery_2.jpeg,"Left renal artery - 2 points",xraygastrointestinal37.jpeg
+19,GI_Inferior_mesenteric_artery_2.jpeg,"Inferior mesenteric artery - 2 points",xraygastrointestinal42.jpeg
+20,GI_Duplication_of_the_inferior_vena_cava.jpeg,"Duplication of the inferior vena cava - 2 points",ctgastrointestinal85.jpeg

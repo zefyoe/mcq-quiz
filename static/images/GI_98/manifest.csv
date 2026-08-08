@@ -1,0 +1,99 @@
+question,filename,answer,source_image
+1,GI_Gallbladder.jpeg,"Gallbladder - 2 points",ctgastrointestinal1.jpeg
+2,GI_Thoracic_oesophagus.jpeg,"Thoracic oesophagus - 2 points",ctgastrointestinal2.jpeg
+3,GI_Small_intestine_loops.jpeg,"Small intestine loops - 2 points",ctgastrointestinal8.jpeg
+4,GI_Left_external_oblique.jpeg,"Left external oblique - 2 points",ctgastrointestinal9.jpeg
+5,GI_Left_internal_oblique.jpeg,"Left internal oblique - 2 points",ctgastrointestinal10.jpeg
+6,GI_Small_Bowel_Mesenteric_Vessels.jpeg,"Small Bowel Mesenteric Vessels - 2 points",ctgastrointestinal13.jpeg
+7,GI_Greater_curvature_of_stomach.jpeg,"Greater curvature of stomach - 2 points",ctgastrointestinal14.jpeg
+8,GI_Hilum_Of_The_Spleen.jpeg,"Hilum Of The Spleen - 2 points",ctgastrointestinal39.jpeg
+9,GI_Head_of_pancreas.jpeg,"Head of pancreas - 2 points",ctgastrointestinal26.jpeg
+10,GI_Falciform_ligament_of_the_liver.jpeg,"Falciform ligament of the liver - 2 points",ctgastrointestinal27.jpeg
+11,GI_Hilum_Of_The_Spleen_2.jpeg,"Hilum Of The Spleen - 2 points",ctgastrointestinal39.jpeg
+12,GI_Inferior_vena_cava.jpeg,"Inferior vena cava - 2 points",ctgastrointestinal32.jpeg
+13,GI_Tail_of_pancreas.jpeg,"Tail of pancreas - 2 points",ctgastrointestinal34.jpeg
+14,GI_Hilum_Of_The_Spleen_3.jpeg,"Hilum Of The Spleen - 2 points",ctgastrointestinal39.jpeg
+15,GI_Right_external_oblique.jpeg,"Right external oblique - 2 points",ctgastrointestinal37.jpeg
+16,GI_Hilum_Of_The_Spleen_4.jpeg,"Hilum Of The Spleen - 2 points",ctgastrointestinal39.jpeg
+17,GI_Urinary_bladder.jpeg,"Urinary bladder - 2 points",ctgastrointestinal41.jpeg
+18,GI_Right_inguinal_canal.jpeg,"Right inguinal canal - 2 points",ctgastrointestinal42.jpeg
+19,GI_Transverse_colon.jpeg,"Transverse colon - 2 points",ctgastrointestinal55.jpeg
+20,GI_Horizontal_portion_of_duodenum.jpeg,"Horizontal portion of duodenum - 2 points",ctgastrointestinal47.jpeg
+21,GI_Left_psoas_major.jpeg,"Left psoas major - 2 points",ctgastrointestinal49.jpeg
+22,GI_Transverse_colon_2.jpeg,"Transverse colon - 2 points",ctgastrointestinal55.jpeg
+23,GI_Tail_of_pancreas_2.jpeg,"Tail of pancreas - 2 points",ctgastrointestinal51.jpeg
+24,GI_Transverse_colon_3.jpeg,"Transverse colon - 2 points",ctgastrointestinal55.jpeg
+25,GI_Left_psoas_minor.jpeg,"Left psoas minor - 2 points",ctgastrointestinal56.jpeg
+26,GI_Left_psoas_minor_2.jpeg,"Left psoas minor - 2 points",ctgastrointestinal56.jpeg
+27,GI_Coeliac_artery.jpeg,"Coeliac artery - 2 points",ctgastrointestinal64.jpeg
+30,GI_Superior_Mesenteric_Artery.jpeg,"Superior Mesenteric Artery - 2 points",ctgastrointestinal69.jpeg
+31,GI_Left_renal_vein.jpeg,"Left renal vein - 2 points",ctgastrointestinal70.jpeg
+32,GI_Superior_mesenteric_artery.jpeg,"Superior mesenteric artery - 2 points",ctgastrointestinal72.jpeg
+33,GI_Splenic_artery.jpeg,"Splenic artery - 2 points",ctgastrointestinal73.jpeg
+34,GI_Splenic_artery_2.jpeg,"Splenic artery - 2 points",ctgastrointestinal77.jpeg
+35,GI_Common_coeliacomesenteric_trunk.jpeg,"Common coeliacomesenteric trunk - 2 points",ctgastrointestinal78.jpeg
+36,GI_Rugal_Folds_Of_Stomach.jpeg,"Rugal Folds Of Stomach - 2 points",ctgastrointestinal79.jpeg
+37,GI_Gallbladder_fundus.jpeg,"Gallbladder fundus - 2 points",mrigastrointestinal2.jpeg
+38,GI_Ligamentum_teres_hepatis.jpeg,"Ligamentum teres hepatis - 2 points",mrigastrointestinal5.jpeg
+39,GI_Descending_colon.jpeg,"Descending colon - 2 points",mrigastrointestinal9.jpeg
+40,GI_Perirectal_space.jpeg,"Perirectal space - 2 points",mrigastrointestinal13.jpeg
+41,GI_Left_hepatic_duct.jpeg,"Left hepatic duct - 2 points",mrigastrointestinal15.jpeg
+42,GI_Right_intrahepatic_bile_duct.jpeg,"Right intrahepatic bile duct - 2 points",mrigastrointestinal16.jpeg
+43,GI_Lumbar_intervertebral_disc.jpeg,"Lumbar intervertebral disc - 2 points",mrigastrointestinal22.jpeg
+44,GI_Lower_Pole_Of_The_Spleen.jpeg,"Lower Pole Of The Spleen - 2 points",mrigastrointestinal23.jpeg
+45,GI_Segment_6_of_right_hepatic_lobe.jpeg,"Segment 6 of right hepatic lobe - 2 points",mrigastrointestinal25.jpeg
+46,GI_Intrahepatic_portal_vein.jpeg,"Intrahepatic portal vein - 2 points",mrigastrointestinal29.jpeg
+47,GI_Right_diaphragmatic_crus.jpeg,"Right diaphragmatic crus - 2 points",mrigastrointestinal31.jpeg
+48,GI_Left_rectus_abdominis.jpeg,"Left rectus abdominis - 2 points",mrigastrointestinal32.jpeg
+49,GI_Right_linea_semilunaris.jpeg,"Right linea semilunaris - 2 points",mrigastrointestinal33.jpeg
+50,GI_Sacral_vertebral_body.jpeg,"Sacral vertebral body - 2 points",mrigastrointestinal36.jpeg
+51,GI_Ascending_colon.jpeg,"Ascending colon - 2 points",mrigastrointestinal40.jpeg
+52,GI_Fundus_of_stomach.jpeg,"Fundus of stomach - 2 points",mrigastrointestinal42.jpeg
+53,GI_Left_uterosacral_ligament.jpeg,"Left uterosacral ligament - 2 points",mrigastrointestinal44.jpeg
+54,GI_Extrahepatic_portal_vein.jpeg,"Extrahepatic portal vein - 2 points",mrigastrointestinal46.jpeg
+55,GI_Right_peritoneal_lining.jpeg,"Right peritoneal lining - 2 points",mrigastrointestinal48.jpeg
+56,GI_Right_Upper_Pole_Renal_Cortex.jpeg,"Right Upper Pole Renal Cortex - 2 points",mrigastrointestinal51.jpeg
+57,GI_Tail_of_the_pancreas.jpeg,"Tail of the pancreas - 2 points",mrigastrointestinal52.jpeg
+58,GI_Body_of_the_pancreas.jpeg,"Body of the pancreas - 2 points",mrigastrointestinal53.jpeg
+59,GI_Descending_portion_of_duodenum.jpeg,"Descending portion of duodenum - 2 points",mrigastrointestinal56.jpeg
+60,GI_Left_renal_artery.jpeg,"Left renal artery - 2 points",mrigastrointestinal57.jpeg
+61,GI_Left_gonadal_vein.jpeg,"Left gonadal vein - 2 points",mrigastrointestinal58.jpeg
+62,GI_Left_renal_vein_2.jpeg,"Left renal vein - 2 points",mrigastrointestinal64.jpeg
+63,GI_Right_common_iliac_artery.jpeg,"Right common iliac artery - 2 points",mrigastrointestinal65.jpeg
+64,GI_Inferior_vena_cava_2.jpeg,"Inferior vena cava - 2 points",mrigastrointestinal70.jpeg
+65,GI_Left_renal_vein_3.jpeg,"Left renal vein - 2 points",mrigastrointestinal75.jpeg
+66,GI_Superior_mesenteric_vein.jpeg,"Superior mesenteric vein - 2 points",mrigastrointestinal77.jpeg
+67,GI_Right_hepatic_vein.jpeg,"Right hepatic vein - 2 points",usgastrointestinal1.jpeg
+68,GI_Left_hepatic_vein.jpeg,"Left hepatic vein - 2 points",usgastrointestinal3.jpeg
+69,GI_Hepatic_portal_vein_branch.jpeg,"Hepatic portal vein branch - 2 points",usgastrointestinal5.jpeg
+70,GI_Portal_vein_confluence.jpeg,"Portal vein confluence - 2 points",usgastrointestinal8.jpeg
+71,GI_Left_lobe_of_liver.jpeg,"Left lobe of liver - 2 points",usgastrointestinal9.jpeg
+72,GI_Inferior_vena_cava_3.jpeg,"Inferior vena cava - 2 points",usgastrointestinal13.jpeg
+73,GI_Extrahepatic_portal_vein_2.jpeg,"Extrahepatic portal vein - 2 points",usgastrointestinal18.jpeg
+74,GI_Left_renal_artery_2.jpeg,"Left renal artery - 2 points",USGastrointestinal20.jpeg
+75,GI_Left_renal_artery_3.jpeg,"Left renal artery - 2 points",usgastrointestinal24.jpeg
+76,GI_Common_bile_duct.jpeg,"Common bile duct - 2 points",usgastrointestinal25.jpeg
+77,GI_Superior_mesenteric_artery_2.jpeg,"Superior mesenteric artery - 2 points",usgastrointestinal27.jpeg
+78,GI_Caudate_lobe_of_liver.jpeg,"Caudate lobe of liver - 2 points",usgastrointestinal30.jpeg
+79,GI_Left_hepatic_vein_2.jpeg,"Left hepatic vein - 2 points",usgastrointestinal31.jpeg
+80,GI_Abdominal_aorta.jpeg,"Abdominal aorta - 2 points",usgastrointestinal35.jpeg
+81,GI_Oesophageal_contour_from_aortic_arch_impression.jpeg,"Oesophageal contour from aortic arch impression - 2 points",xraygastrointestinal1.jpeg
+82,GI_Rugal_Fold_In_Body_Of_Stomach.jpeg,"Rugal Fold In Body Of Stomach - 2 points",xraygastrointestinal5.jpeg
+83,GI_Horizontal_portion_of_duodenum_2.jpeg,"Horizontal portion of duodenum - 2 points",xraygastrointestinal9.jpeg
+84,GI_Greater_curvature_of_stomach_2.jpeg,"Greater curvature of stomach - 2 points",xraygastrointestinal13.jpeg
+85,GI_Transverse_colon_haustral_folds.jpeg,"Transverse colon haustral folds - 2 points",xraygastrointestinal17.jpeg
+86,GI_Oesophageal_contour_from_aortic_arch_impression_2.jpeg,"Oesophageal contour from aortic arch impression - 2 points",xraygastrointestinal28.jpeg
+87,GI_Inferior_mesenteric_artery.jpeg,"Inferior mesenteric artery - 2 points",xraygastrointestinal38.jpeg
+88,GI_Inferior_vena_cava_4.jpeg,"Inferior vena cava - 2 points",xraygastrointestinal40.jpeg
+89,GI_Lumbar_arteries.jpeg,"Lumbar arteries - 2 points",xraygastrointestinal41.jpeg
+90,GI_Splenic_artery_3.jpeg,"Splenic artery - 2 points",xraygastrointestinal43.jpeg
+91,GI_Left_gastric_artery.jpeg,"Left gastric artery - 2 points",xraygastrointestinal47.jpeg
+92,GI_Coeliac_trunk.jpeg,"Coeliac trunk - 2 points",usgastrointestinal37.jpeg
+93,GI_Common_hepatic_artery.jpeg,"Common hepatic artery - 2 points",usgastrointestinal38.jpeg
+94,GI_Splenic_artery_4.jpeg,"Splenic artery - 2 points",usgastrointestinal39.jpeg
+95,GI_Right_hepatic_vein_2.jpeg,"Right hepatic vein - 2 points",usgastrointestinal40.jpeg
+96,GI_Linea_alba.jpeg,"Linea alba - 2 points",usgastrointestinal42.jpeg
+97,GI_Right_posterior_rectus_sheath.jpeg,"Right posterior rectus sheath - 2 points",usgastrointestinal43.jpeg
+98,GI_Left_transversus_abdominis.jpeg,"Left transversus abdominis - 2 points",usgastrointestinal44.jpeg
+99,GI_Retroaortic_left_renal_vein.jpeg,"Retroaortic left renal vein - 2 points",ctgastrointestinal82.jpeg
+100,GI_Transposition_of_inferior_vena_cava.jpeg,"Transposition of inferior vena cava - 2 points",ctgastrointestinal84.jpeg

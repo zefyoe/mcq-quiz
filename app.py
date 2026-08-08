@@ -20,6 +20,7 @@ from werkzeug.utils import secure_filename
 
 from core_radiology import get_core_section, get_core_sections, load_core_section
 from cardiothoracic import load_cardiothoracic_questions
+from gastrointestinal_anatomy import load_gastrointestinal_anatomy_questions
 from localization import (
     DEFAULT_LANGUAGE,
     SUPPORTED_LANGUAGES,
@@ -110,6 +111,10 @@ ANATOMY_SUBGROUPS = {
     "cardiothoracic": {
         "label": "Cardiothoracic",
         "description": "Cardiothoracic anatomy",
+    },
+    "gastrointestinal": {
+        "label": "Gastrointestinal",
+        "description": "Gastrointestinal anatomy",
     },
     "mixed": {
         "label": "Mixed",
@@ -310,6 +315,7 @@ def localize_quiz_title(title: str) -> str:
         "Anatomy - Genito-Urinary": "Anatomie - Urogenitaal",
         "Anatomy - Head and Neck": "Anatomie - Hoofd en hals",
         "Anatomy - Cardiothoracic": "Anatomie - Cardiothoracaal",
+        "Anatomy - Gastrointestinal": "Anatomie - Gastro-intestinaal",
         "Anatomy - Mixed": "Anatomie - Gemengd",
         "Anatomy": "Anatomie",
     }
@@ -398,6 +404,8 @@ def get_anatomy_subgroup_for_category(category: str | None) -> str | None:
         return "head-and-neck"
     if "cardiothoracic" in cat_norm or "cardio thoracic" in cat_norm:
         return "cardiothoracic"
+    if "gastrointestinal" in cat_norm or "gastro intestinal" in cat_norm:
+        return "gastrointestinal"
 
     return None
 
@@ -768,12 +776,14 @@ def get_all_anatomy_questions() -> list[dict]:
     ]
     runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
     cardiothoracic_questions = load_cardiothoracic_questions()
+    gastrointestinal_questions = load_gastrointestinal_anatomy_questions()
 
     return merge_question_lists(
         db_questions,
         static_questions,
         runtime_image_questions,
         cardiothoracic_questions,
+        gastrointestinal_questions,
     )
 
 
@@ -989,7 +999,13 @@ def get_learning_dashboard(
     ]
 
     subgroup_stats = []
-    for subgroup_key in ("msk", "genito-urinary", "head-and-neck", "cardiothoracic"):
+    for subgroup_key in (
+        "msk",
+        "genito-urinary",
+        "head-and-neck",
+        "cardiothoracic",
+        "gastrointestinal",
+    ):
         questions_in_subgroup = [
             question for question in all_questions
             if get_anatomy_subgroup_for_category(question.get("Category")) == subgroup_key
@@ -1156,11 +1172,13 @@ def get_all_questions() -> list[dict]:
     static_questions = list(questions)
     runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
     cardiothoracic_questions = load_cardiothoracic_questions()
+    gastrointestinal_questions = load_gastrointestinal_anatomy_questions()
     return merge_question_lists(
         db_questions,
         static_questions,
         runtime_image_questions,
         cardiothoracic_questions,
+        gastrointestinal_questions,
     )
 
 
@@ -1930,7 +1948,10 @@ def build_runtime_image_questions(category: str) -> list[dict]:
     for index, path in enumerate(image_paths, start=1):
         filename = os.path.basename(path)
         relative_path = os.path.relpath(path, app.static_folder).replace(os.sep, "/")
-        if relative_path.startswith("images/cardiothoracic/"):
+        if (
+            relative_path.startswith("images/cardiothoracic/")
+            or relative_path.startswith("images/GI_")
+        ):
             continue
         override = IMAGE_QUESTION_OVERRIDES.get(filename, {})
         answer_a = (override.get("A") or "").strip() or build_structure_title(filename)
@@ -2554,7 +2575,7 @@ def anatomy_subgroup_setup(subgroup):
     suggested_count = get_question_limit(request.args.get("count"), available_count)
     selected_format = (
         "flashcard"
-        if subgroup_key == "cardiothoracic"
+        if subgroup_key in {"cardiothoracic", "gastrointestinal"}
         else normalize_study_format(request.args.get("format"))
     )
 
@@ -2907,7 +2928,10 @@ def quiz(category):
     if (
         request.method == "GET"
         and normalize_category(category) == normalize_category(ANATOMY_CATEGORY)
-        and normalize_anatomy_subgroup(request.args.get("subgroup")) == "cardiothoracic"
+        and normalize_anatomy_subgroup(request.args.get("subgroup")) in {
+            "cardiothoracic",
+            "gastrointestinal",
+        }
     ):
         flashcard_args = request.args.to_dict(flat=True)
         flashcard_args.pop("format", None)
