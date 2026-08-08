@@ -197,7 +197,7 @@ LABRALIS_REQUIRED_TERMS = (
     ("reversed hill sachs", "reverse hill sachs"),
     ("bony bankart", "bankart"),
 )
-SITE_OFFLINE = os.environ.get("SITE_OFFLINE", "1").strip().lower() in {
+SITE_OFFLINE = os.environ.get("SITE_OFFLINE", "0").strip().lower() in {
     "1", "true", "yes", "on"
 }
 
