@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Radius | MCQ Quiz</title>
+    <title>Radius | Anatomiequiz</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -41,7 +41,6 @@
           {% endif %}
           <a href="{{ url_for('logout') }}" class="dashboard-nav-link dashboard-nav-link-muted">{{ tr("Log out") }}</a>
         </nav>
-        {% include "_language_switcher.html" %}
       </aside>
 
       <main class="dashboard-main">
