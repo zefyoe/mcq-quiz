@@ -63,7 +63,7 @@
         <section class="stats-grid dashboard-stats">
           <div class="stat-card dashboard-stat-card">
             <div>
-              <p class="stat-label">{{ "Score" if language == "nl" else "Score" }}</p>
+              <p class="stat-label">{{ "Score quiz" if language == "nl" else "Quiz score" }}</p>
               <h3>
                 {% if accuracy is not none %}
                   {{ accuracy }} {{ "procent" if language == "nl" else "percent" }}
@@ -76,14 +76,14 @@
 
           <div class="stat-card dashboard-stat-card">
             <div>
-              <p class="stat-label">{{ "Beschikbaar" if language == "nl" else "Available" }}</p>
+              <p class="stat-label">{{ "Beschikbare vragen" if language == "nl" else "Available questions" }}</p>
               <h3>{{ category_cards[0].count if category_cards else 0 }}</h3>
             </div>
           </div>
 
           <div class="stat-card dashboard-stat-card">
             <div>
-              <p class="stat-label">{{ "Afgerond" if language == "nl" else "Completed" }}</p>
+              <p class="stat-label">{{ "Afgeronde toetsen" if language == "nl" else "Completed tests" }}</p>
               <h3>{{ total_quizzes }}</h3>
             </div>
           </div>
