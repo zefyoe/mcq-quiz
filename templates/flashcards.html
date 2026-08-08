@@ -114,7 +114,7 @@
                 <strong>{{ "Vraag-ID" if language == "nl" else "Question ID" }}: {{ qid[3:] if qid.startswith("IMG") else qid }}</strong>
               {% endif %}
             </div>
-            <h2>{{ question.get("Vraag_nl", question["Vraag"]) if product == "core" and language == "nl" else question["Vraag"] }}</h2>
+            <h2>{{ question.get("Vraag_nl", question["Vraag"]) if language == "nl" and question.get("Vraag_nl") else question["Vraag"] }}</h2>
 
             <button type="button" class="flashcard-reveal-button" data-reveal-answer>
               {{ "Toon antwoord" if language == "nl" else "Show answer" }}
@@ -148,7 +148,7 @@
             <div class="flashcard-answer" data-flashcard-answer hidden>
               <p>{{ "JUISTE ANTWOORD" if language == "nl" else "CORRECT ANSWER" }}</p>
               <h3>
-                {% if product == "core" and language == "nl" %}
+                {% if language == "nl" and question.get("Correct_nl") %}
                   {{ (question.get("Correct_nl") or correct_answers_by_id[qid])|join(", ") }}
                 {% else %}
                   {{ correct_answers_by_id[qid]|join(", ") }}

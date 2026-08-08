@@ -1,0 +1,101 @@
+question,filename,answer,source_image
+1,cardiothoracic_Inferior_vena_cava.jpeg,"Inferior vena cava - 2 points",1578827870.jpeg
+2,cardiothoracic_Left_main_pulmonary_artery.jpeg,"Left main pulmonary artery - 2 points",mricardiothoracic1.jpeg
+3,cardiothoracic_Right_costodiaphragmatic_recess.jpeg,"Right costodiaphragmatic recess - 2 points",mricardiothoracic2.jpeg
+4,cardiothoracic_Descending_thoracic_aorta.jpeg,"Descending thoracic aorta - 2 points",mricardiothoracic3.jpeg
+5,cardiothoracic_Descending_thoracic_aorta_2.jpeg,"Descending thoracic aorta - 2 points",mricardiothoracic5.jpeg
+6,cardiothoracic_Epicardium_of_the_left_ventricle.jpeg,"Epicardium of the left ventricle - 2 points",mricardiothoracic7.jpeg
+7,cardiothoracic_Left_Ventricular_Cavity.jpeg,"Left Ventricular Cavity - 2 points",mricardiothoracic9.jpeg
+8,cardiothoracic_Right_ventricular_cavity.jpeg,"Right ventricular cavity - 2 points",mricardiothoracic10.jpeg
+9,cardiothoracic_Right_atrium.jpeg,"Right atrium - 2 points",mricardiothoracic13.jpeg
+10,cardiothoracic_Membranous_Portion_Of_Intreventricular_Septum.jpeg,"Membranous Portion Of Intreventricular Septum - 2 points",mricardiothoracic21.jpeg
+11,cardiothoracic_Aortic_vestibule.jpeg,"Aortic vestibule - 2 points",mricardiothoracic22.jpeg
+12,cardiothoracic_Left_Ventricular_Cavity_2.jpeg,"Left Ventricular Cavity - 2 points",mricardiothoracic23.jpeg
+13,cardiothoracic_Right_inferior_pulmonary_vein.jpeg,"Right inferior pulmonary vein - 2 points",mricardiothoracic28.jpeg
+14,cardiothoracic_Left_main_pulmonary_artery_2.jpeg,"Left main pulmonary artery - 2 points",mricardiothoracic30.jpeg
+15,cardiothoracic_Left_pectoralis_major.jpeg,"Left pectoralis major - 2 points",mricardiothoracic32.jpeg
+16,cardiothoracic_Spinal_Cord_Within_The_Spinal_Canal.jpeg,"Spinal Cord Within The Spinal Canal - 2 points",mricardiothoracic36.jpeg
+17,cardiothoracic_Inferior_vena_cava_2.jpeg,"Inferior vena cava - 2 points",mricardiothoracic37.jpeg
+18,cardiothoracic_Chordae_tendineae_in_left_ventricle.jpeg,"Chordae tendineae in left ventricle - 2 points",mricardiothoracic45.jpeg
+19,cardiothoracic_Right_hemidiaphragm.jpeg,"Right hemidiaphragm - 2 points",uscardiothoracic1.jpeg
+20,cardiothoracic_Tracheal_Ring_Cartilage.jpeg,"Tracheal Ring Cartilage - 2 points",uscardiothoracic2.jpeg
+21,cardiothoracic_Right_costodiaphragmatic_recess_2.jpeg,"Right costodiaphragmatic recess - 2 points",xraycardiothoracic1.jpeg
+22,cardiothoracic_Trachea.jpeg,"Trachea - 2 points",xraycardiothoracic2.jpeg
+23,cardiothoracic_Right_cardiodiaphragmatic_recess.jpeg,"Right cardiodiaphragmatic recess - 2 points",xraycardiothoracic11.jpeg
+24,cardiothoracic_Aortic_pulmonary_window.jpeg,"Aortic pulmonary window - 2 points",xraycardiothoracic16.jpeg
+25,cardiothoracic_Left_descending_interlobar_pulmonary_artery.jpeg,"Left descending interlobar pulmonary artery - 2 points",xraycardiothoracic17.jpeg
+26,cardiothoracic_Carina.jpeg,"Carina - 2 points",xraycardiothoracic18.jpeg
+27,cardiothoracic_Superior_vena_cava.jpeg,"Superior vena cava - 2 points",xraycardiothoracic19.jpeg
+28,cardiothoracic_Left_ventricular_border.jpeg,"Left ventricular border - 2 points",xraycardiothoracic20.jpeg
+29,cardiothoracic_Descending_thoracic_aorta_3.jpeg,"Descending thoracic aorta - 2 points",xraycardiothoracic23.jpeg
+30,cardiothoracic_Left_subclavian_artery.jpeg,"Left subclavian artery - 2 points",xraycardiothoracic31.jpeg
+31,cardiothoracic_Descending_thoracic_aorta_4.jpeg,"Descending thoracic aorta - 2 points",xraycardiothoracic34.jpeg
+32,cardiothoracic_Azygo-esophageal_recess.jpeg,"Azygo-esophageal recess - 2 points",xraycardiothoracic40.jpeg
+33,cardiothoracic_Azygo-oesophageal_recess.jpeg,"Azygo-oesophageal recess - 2 points",xraycardiothoracic42.jpeg
+34,cardiothoracic_Left_internal_thoracic_artery.jpeg,"Left internal thoracic artery - 2 points",xraycardiothoracic44.jpeg
+35,cardiothoracic_Left_cervical_rib.jpeg,"Left cervical rib - 2 points",xraycardiothoracic45.jpeg
+36,cardiothoracic_Superior_vena_cava_2.jpeg,"Superior vena cava - 2 points",ctcardiothoracic5.jpeg
+37,cardiothoracic_Right_main_coronary_artery.jpeg,"Right main coronary artery - 2 points",ctcardiothoracic8.jpeg
+38,cardiothoracic_Left_main_bronchus.jpeg,"Left main bronchus - 2 points",ctcardiothoracic11.jpeg
+39,cardiothoracic_Right_ventricle.jpeg,"Right ventricle - 2 points",ctcardiothoracic12.jpeg
+40,cardiothoracic_Right_main_pulmonary_artery.jpeg,"Right main pulmonary artery - 2 points",ctcardiothoracic13.jpeg
+41,cardiothoracic_Left_common_carotid_artery.jpeg,"Left common carotid artery - 2 points",ctcardiothoracic16.jpeg
+42,cardiothoracic_Left_inferior_pulmonary_vein.jpeg,"Left inferior pulmonary vein - 2 points",ctcardiothoracic17.jpeg
+43,cardiothoracic_Left_superior_lobar_bronchus.jpeg,"Left superior lobar bronchus - 2 points",ctcardiothoracic22.jpeg
+44,cardiothoracic_Left_Superior_Segmental_Lingular_Bronchus.jpeg,"Left Superior Segmental Lingular Bronchus - 2 points",ctcardiothoracic23.jpeg
+45,cardiothoracic_Left_subclavian_artery_2.jpeg,"Left subclavian artery - 2 points",ctcardiothoracic25.jpeg
+46,cardiothoracic_Right_main_bronchus.jpeg,"Right main bronchus - 2 points",ctcardiothoracic29.jpeg
+47,cardiothoracic_Right_main_pulmonary_artery_2.jpeg,"Right main pulmonary artery - 2 points",ctcardiothoracic31.jpeg
+48,cardiothoracic_Azygos_vein.jpeg,"Azygos vein - 2 points",ctcardiothoracic32.jpeg
+49,cardiothoracic_Cusps_Of_Aortic_Valve.jpeg,"Cusps Of Aortic Valve - 2 points",ctcardiothoracic34.jpeg
+50,cardiothoracic_Left_ventricular_outflow_tract.jpeg,"Left ventricular outflow tract - 2 points",ctcardiothoracic35.jpeg
+51,cardiothoracic_Descending_thoracic_aorta_5.jpeg,"Descending thoracic aorta - 2 points",ctcardiothoracic42.jpeg
+52,cardiothoracic_Ascending_thoracic_aorta.jpeg,"Ascending thoracic aorta - 2 points",ctcardiothoracic47.jpeg
+53,cardiothoracic_Anterior_sinus_of_valsalva.jpeg,"Anterior sinus of valsalva - 2 points",ctcardiothoracic48.jpeg
+54,cardiothoracic_Right_main_coronary_artery_2.jpeg,"Right main coronary artery - 2 points",ctcardiothoracic49.jpeg
+55,cardiothoracic_Muscular_part_of_interventricular_septum.jpeg,"Muscular part of interventricular septum - 2 points",ctcardiothoracic51.jpeg
+56,cardiothoracic_Left_Ventricular_Cavity_3.jpeg,"Left Ventricular Cavity - 2 points",ctcardiothoracic54.jpeg
+57,cardiothoracic_Left_inferior_lobar_bronchus.jpeg,"Left inferior lobar bronchus - 2 points",ctcardiothoracic56.jpeg
+58,cardiothoracic_Oblique_Fissure_Of_The_Left_Lung.jpeg,"Oblique Fissure Of The Left Lung - 2 points",ctcardiothoracic58.jpeg
+59,cardiothoracic_Right_greater_fissure.jpeg,"Right greater fissure - 2 points",ctcardiothoracic59.jpeg
+60,cardiothoracic_Right_superior_pulmonary_vein.jpeg,"Right superior pulmonary vein - 2 points",ctcardiothoracic60.jpeg
+61,cardiothoracic_Right_horizontal_fissure.jpeg,"Right horizontal fissure - 2 points",ctcardiothoracic62.jpeg
+62,cardiothoracic_Right_Superior_Lobar_Pulmonary_Artery.jpeg,"Right Superior Lobar Pulmonary Artery - 2 points",ctcardiothoracic67.jpeg
+63,cardiothoracic_Right_superior_pulmonary_vein_2.jpeg,"Right superior pulmonary vein - 2 points",ctcardiothoracic68.jpeg
+64,cardiothoracic_Aortic_Pulmonary_Window.jpeg,"Aortic Pulmonary Window - 2 points",ctcardiothoracic73.jpeg
+65,cardiothoracic_Ascending_thoracic_aorta_2.jpeg,"Ascending thoracic aorta - 2 points",ctcardiothoracic74.jpeg
+66,cardiothoracic_Arch_of_aorta.jpeg,"Arch of aorta - 2 points",ctcardiothoracic75.jpeg
+67,cardiothoracic_Manubrium_of_sternum.jpeg,"Manubrium of sternum - 2 points",ctcardiothoracic76.jpeg
+68,cardiothoracic_Left_ventricular_outflow_tract_2.jpeg,"Left ventricular outflow tract - 2 points",ctcardiothoracic78.jpeg
+69,cardiothoracic_Right_ventricle_2.jpeg,"Right ventricle - 2 points",ctcardiothoracic79.jpeg
+70,cardiothoracic_Dome_Of_Right_Hemidiaphragm.jpeg,"Dome Of Right Hemidiaphragm - 2 points",ctcardiothoracic81.jpeg
+71,cardiothoracic_Muscular_Portion_Of_The_Interventricular_Septum.jpeg,"Muscular Portion Of The Interventricular Septum - 2 points",ctcardiothoracic82.jpeg
+72,cardiothoracic_Coronary_sinus.jpeg,"Coronary sinus - 2 points",ctcardiothoracic89.jpeg
+73,cardiothoracic_Medial_Basal_Segmental_Bronchus_Of_Right_Lower_Lobe.jpeg,"Medial Basal Segmental Bronchus Of Right Lower Lobe - 2 points",ctcardiothoracic96.jpeg
+74,cardiothoracic_Right_medial_segmental_bronchus_of_middle_lobe.jpeg,"Right medial segmental bronchus of middle lobe - 2 points",ctcardiothoracic102.jpeg
+75,cardiothoracic_Right_middle_lobar_bronchus.jpeg,"Right middle lobar bronchus - 2 points",ctcardiothoracic103.jpeg
+76,cardiothoracic_Superior_vena_cava_3.jpeg,"Superior vena cava - 2 points",ctcardiothoracic104.jpeg
+77,cardiothoracic_Posterior_Segment_Of_Right_Upper_Lobe_Bronchus.jpeg,"Posterior Segment Of Right Upper Lobe Bronchus - 2 points",ctcardiothoracic105.jpeg
+78,cardiothoracic_Anterior_segmental_bronchus_of_left_upper_lobe.jpeg,"Anterior segmental bronchus of left upper lobe - 2 points",ctcardiothoracic106.jpeg
+79,cardiothoracic_Left_lower_lobe_superior_segmental_bronchus.jpeg,"Left lower lobe superior segmental bronchus - 2 points",ctcardiothoracic109.jpeg
+80,cardiothoracic_Posterior_basal_segmental_bronchus_of_left_lower_lobe.jpeg,"Posterior basal segmental bronchus of left lower lobe - 2 points",ctcardiothoracic112.jpeg
+81,cardiothoracic_Basal_Lateral_Segmental_Bronchus_Of_Left_Lower_Lobe.jpeg,"Basal Lateral Segmental Bronchus Of Left Lower Lobe - 2 points",ctcardiothoracic113.jpeg
+82,cardiothoracic_Circumflex_branch_of_the_left_coronary_artery.jpeg,"Circumflex branch of the left coronary artery - 2 points",ctcardiothoracic115.jpeg
+83,cardiothoracic_Superior_vena_cava_4.jpeg,"Superior vena cava - 2 points",ctcardiothoracic116.jpeg
+84,cardiothoracic_Anterior_junctional_line.jpeg,"Anterior junctional line - 2 points",ctcardiothoracic119.jpeg
+85,cardiothoracic_Posterior_junctional_line.jpeg,"Posterior junctional line - 2 points",ctcardiothoracic120.jpeg
+86,cardiothoracic_Right_atrium_2.jpeg,"Right atrium - 2 points",ctcardiothoracic123.jpeg
+87,cardiothoracic_Main_pulmonary_artery.jpeg,"Main pulmonary artery - 2 points",ctcardiothoracic124.jpeg
+88,cardiothoracic_Myocardium_of_left_ventricle.jpeg,"Myocardium of left ventricle - 2 points",ctcardiothoracic125.jpeg
+89,cardiothoracic_Right_brachiocephalic_artery.jpeg,"Right brachiocephalic artery - 2 points",ctcardiothoracic129.jpeg
+90,cardiothoracic_Right_subclavian_artery.jpeg,"Right subclavian artery - 2 points",ctcardiothoracic130.jpeg
+91,cardiothoracic_Left_subclavian_artery_3.jpeg,"Left subclavian artery - 2 points",ctcardiothoracic135.jpeg
+92,cardiothoracic_Superior_vena_cava_5.jpeg,"Superior vena cava - 2 points",ctcardiothoracic139.jpeg
+93,cardiothoracic_Right_Main_Coronary_Artery.jpeg,"Right Main Coronary Artery - 2 points",ctcardiothoracic142.jpeg
+94,cardiothoracic_Anterior_interventricular_branch_of_left_coronary_artery.jpeg,"Anterior interventricular branch of left coronary artery - 2 points",ctcardiothoracic145.jpeg
+95,cardiothoracic_Left_Internal_thoracic_artery.jpeg,"Left Internal thoracic artery - 2 points",ctcardiothoracic146.jpeg
+96,cardiothoracic_Superior_vena_cava_6.jpeg,"Superior vena cava - 2 points",ctcardiothoracic147.jpeg
+97,cardiothoracic_Superior_vena_cava_7.jpeg,"Superior vena cava - 2 points",ctcardiothoracic155.jpeg
+98,cardiothoracic_Left_subclavian_artery_4.jpeg,"Left subclavian artery - 2 points",xraycardiothoracic47.jpeg
+99,cardiothoracic_Azygos_lobe.jpeg,"Azygos lobe - 2 points",ctcardiothoracic159.jpeg
+100,cardiothoracic_Right_cervical_rib.jpeg,"Right cervical rib - 2 points",xraycardiothoracic49.jpeg

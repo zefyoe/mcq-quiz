@@ -55,7 +55,7 @@
               href="{{ url_for('anatomy_subgroup_setup', subgroup=subgroup.key) }}"
               class="category-card category-link-card"
             >
-              <span class="category-icon">{{ "MX" if subgroup.key == "mixed" else "GU" if subgroup.key == "genito-urinary" else "HN" if subgroup.key == "head-and-neck" else "MS" }}</span>
+              <span class="category-icon">{{ "MX" if subgroup.key == "mixed" else "GU" if subgroup.key == "genito-urinary" else "HN" if subgroup.key == "head-and-neck" else "CT" if subgroup.key == "cardiothoracic" else "MS" }}</span>
               <span class="category-name">{{ tr(subgroup.label) }}</span>
               <span class="category-desc">{{ tr(subgroup.description) }}</span>
               <span class="category-count">{{ subgroup.count }} {{ "vragen" if language == "nl" else "questions" }}</span>

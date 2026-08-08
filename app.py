@@ -19,6 +19,7 @@ from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
 
 from core_radiology import get_core_section, get_core_sections, load_core_section
+from cardiothoracic import load_cardiothoracic_questions
 from localization import (
     DEFAULT_LANGUAGE,
     SUPPORTED_LANGUAGES,
@@ -105,6 +106,10 @@ ANATOMY_SUBGROUPS = {
     "head-and-neck": {
         "label": "Head and Neck",
         "description": "Head and neck anatomy",
+    },
+    "cardiothoracic": {
+        "label": "Cardiothoracic",
+        "description": "Cardiothoracic anatomy",
     },
     "mixed": {
         "label": "Mixed",
@@ -304,6 +309,7 @@ def localize_quiz_title(title: str) -> str:
         "Anatomy - MSK": "Anatomie - MSK",
         "Anatomy - Genito-Urinary": "Anatomie - Urogenitaal",
         "Anatomy - Head and Neck": "Anatomie - Hoofd en hals",
+        "Anatomy - Cardiothoracic": "Anatomie - Cardiothoracaal",
         "Anatomy - Mixed": "Anatomie - Gemengd",
         "Anatomy": "Anatomie",
     }
@@ -320,7 +326,7 @@ def localize_question_for_display(question: dict) -> dict:
         return localized
 
     prompt = question.get("Vraag") or ""
-    localized["Vraag"] = translate_ui(prompt, "nl")
+    localized["Vraag"] = question.get("Vraag_nl") or translate_ui(prompt, "nl")
     for key in ("A", "B", "C", "D"):
         localized[key] = latinize_anatomy_term(question.get(key) or "")
     if question.get("structure_title"):
@@ -390,6 +396,8 @@ def get_anatomy_subgroup_for_category(category: str | None) -> str | None:
         return "genito-urinary"
     if "head" in cat_norm and "neck" in cat_norm:
         return "head-and-neck"
+    if "cardiothoracic" in cat_norm or "cardio thoracic" in cat_norm:
+        return "cardiothoracic"
 
     return None
 
@@ -590,6 +598,9 @@ def db_question_to_dict(q: Question) -> dict:
 
 
 def get_correct_answer_texts(q: dict) -> list[str]:
+    if get_current_language() == "nl" and q.get("Correct_nl"):
+        return [str(value).strip() for value in q["Correct_nl"] if str(value).strip()]
+
     if q.get("structure_title"):
         return [q["structure_title"]]
 
@@ -756,8 +767,14 @@ def get_all_anatomy_questions() -> list[dict]:
         if is_anatomy_category_name(apply_static_question_override(q).get("Category"))
     ]
     runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
+    cardiothoracic_questions = load_cardiothoracic_questions()
 
-    return merge_question_lists(db_questions, static_questions, runtime_image_questions)
+    return merge_question_lists(
+        db_questions,
+        static_questions,
+        runtime_image_questions,
+        cardiothoracic_questions,
+    )
 
 
 def get_questions_for_anatomy_subgroup(subgroup: str | None) -> list[dict]:
@@ -972,7 +989,7 @@ def get_learning_dashboard(
     ]
 
     subgroup_stats = []
-    for subgroup_key in ("msk", "genito-urinary", "head-and-neck"):
+    for subgroup_key in ("msk", "genito-urinary", "head-and-neck", "cardiothoracic"):
         questions_in_subgroup = [
             question for question in all_questions
             if get_anatomy_subgroup_for_category(question.get("Category")) == subgroup_key
@@ -1138,7 +1155,13 @@ def get_all_questions() -> list[dict]:
     db_questions = [db_question_to_dict(q) for q in Question.query.all()]
     static_questions = list(questions)
     runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
-    return merge_question_lists(db_questions, static_questions, runtime_image_questions)
+    cardiothoracic_questions = load_cardiothoracic_questions()
+    return merge_question_lists(
+        db_questions,
+        static_questions,
+        runtime_image_questions,
+        cardiothoracic_questions,
+    )
 
 
 def get_questions_by_ids(question_ids: list[str]) -> list[dict]:
@@ -1907,6 +1930,8 @@ def build_runtime_image_questions(category: str) -> list[dict]:
     for index, path in enumerate(image_paths, start=1):
         filename = os.path.basename(path)
         relative_path = os.path.relpath(path, app.static_folder).replace(os.sep, "/")
+        if relative_path.startswith("images/cardiothoracic/"):
+            continue
         override = IMAGE_QUESTION_OVERRIDES.get(filename, {})
         answer_a = (override.get("A") or "").strip() or build_structure_title(filename)
         answer_b = (override.get("B") or "").strip()
@@ -2527,6 +2552,11 @@ def anatomy_subgroup_setup(subgroup):
     selected_pool = normalize_quiz_pool(request.args.get("pool"))
     available_count = pool_counts[selected_pool]
     suggested_count = get_question_limit(request.args.get("count"), available_count)
+    selected_format = (
+        "flashcard"
+        if subgroup_key == "cardiothoracic"
+        else normalize_study_format(request.args.get("format"))
+    )
 
     return render_template(
         "anatomy_quiz_setup.html",
@@ -2541,7 +2571,7 @@ def anatomy_subgroup_setup(subgroup):
         quiz_pools=QUIZ_POOLS,
         pool_counts=pool_counts,
         selected_pool=selected_pool,
-        selected_format=normalize_study_format(request.args.get("format")),
+        selected_format=selected_format,
         flashcard_ratings=FLASHCARD_RATINGS,
         flashcard_rating_counts=flashcard_rating_counts,
     )
@@ -2874,6 +2904,14 @@ def quiz(category):
 
     if category not in categories:
         return redirect(url_for("home"))
+    if (
+        request.method == "GET"
+        and normalize_category(category) == normalize_category(ANATOMY_CATEGORY)
+        and normalize_anatomy_subgroup(request.args.get("subgroup")) == "cardiothoracic"
+    ):
+        flashcard_args = request.args.to_dict(flat=True)
+        flashcard_args.pop("format", None)
+        return redirect(url_for("flashcards", category=category, **flashcard_args))
     if request.method == "GET" and normalize_study_format(request.args.get("format")) == "flashcard":
         flashcard_args = request.args.to_dict(flat=True)
         flashcard_args.pop("format", None)
