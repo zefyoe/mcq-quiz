@@ -46,7 +46,7 @@
               <div class="password-wrap">
                 <input id="password" name="password" type="password" placeholder="{{ tr('Password') }}" required class="{% if errors and errors.get('password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('password') else 'false' }}">
                 <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="{{ 'Wachtwoord tonen' if language == 'nl' else 'Show password' }}" aria-pressed="false">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" style="display:block;width:24px;height:24px;fill:none;stroke:#183b72;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
                 </button>
               </div>
               {% if errors and errors.get('password') %}<p class="field-error">{{ errors.get('password') }}</p>{% endif %}

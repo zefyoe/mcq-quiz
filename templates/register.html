@@ -55,7 +55,7 @@
               <div class="password-wrap">
                 <input id="password" name="password" type="password" placeholder="{{ 'Minimaal 8 tekens' if language == 'nl' else 'At least 8 characters' }}" required class="{% if errors and errors.get('password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('password') else 'false' }}" autocomplete="new-password">
                 <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="{{ 'Wachtwoord tonen' if language == 'nl' else 'Show password' }}" aria-pressed="false">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" style="display:block;width:24px;height:24px;fill:none;stroke:#183b72;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
                 </button>
               </div>
               <div class="password-strength" data-password-strength aria-live="polite">
@@ -70,7 +70,7 @@
               <div class="password-wrap">
                 <input id="confirm_password" name="confirm_password" type="password" placeholder="{{ 'Herhaal je wachtwoord' if language == 'nl' else 'Repeat password' }}" required class="{% if errors and errors.get('confirm_password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('confirm_password') else 'false' }}" autocomplete="new-password">
                 <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', this)" aria-label="{{ 'Wachtwoord tonen' if language == 'nl' else 'Show password' }}" aria-pressed="false">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" style="display:block;width:24px;height:24px;fill:none;stroke:#183b72;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
                 </button>
               </div>
               {% if errors and errors.get('confirm_password') %}<p class="field-error">{{ errors.get('confirm_password') }}</p>{% endif %}
