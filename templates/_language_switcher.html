@@ -1,3 +1,4 @@
+{% if language_switcher_enabled %}
 <div class="language-switcher" aria-label="Language">
   <a
     href="{{ url_for('set_language', language_code='en', next=language_switch_target|default(request.full_path)) }}"
@@ -12,3 +13,4 @@
     lang="nl"
   >NL</a>
 </div>
+{% endif %}

@@ -27,7 +27,7 @@ from localization import (
     latinize_anatomy_term,
     translate_ui,
 )
-from models import QuestionProgress, QuizAttempt, db, Question, User
+from models import LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -94,6 +94,7 @@ db.init_app(app)
 AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
 STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
 ADMIN_EMAIL = "y@bymed.be"
+LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "0").strip() == "1"
 ANATOMY_CATEGORY = "Anatomy"
 ANATOMY_SUBGROUPS = {
     "msk": {
@@ -308,6 +309,8 @@ def normalize_category(s: str) -> str:
 
 
 def get_current_language() -> str:
+    if not LANGUAGE_SWITCHER_ENABLED:
+        return "nl"
     language = (session.get("language") or DEFAULT_LANGUAGE).strip().lower()
     return language if language in SUPPORTED_LANGUAGES else DEFAULT_LANGUAGE
 
@@ -390,6 +393,7 @@ def localize_quiz_results(results: list[dict]) -> list[dict]:
 def inject_language_helpers():
     return {
         "language": get_current_language(),
+        "language_switcher_enabled": LANGUAGE_SWITCHER_ENABLED,
         "tr": tr,
         "localize_quiz_title": localize_quiz_title,
         "asset_version": app.config["STATIC_ASSET_VERSION"],
@@ -534,12 +538,31 @@ def ensure_user_profile_schema():
         statements.append('ALTER TABLE "user" ADD COLUMN university VARCHAR(255)')
     if "daily_question_goal" not in column_names:
         statements.append('ALTER TABLE "user" ADD COLUMN daily_question_goal INTEGER NOT NULL DEFAULT 20')
+    if "created_at" not in column_names:
+        statements.append('ALTER TABLE "user" ADD COLUMN created_at TIMESTAMP')
+    if "last_login_at" not in column_names:
+        statements.append('ALTER TABLE "user" ADD COLUMN last_login_at TIMESTAMP')
 
     for statement in statements:
         db.session.execute(text(statement))
 
     if statements:
+        db.session.execute(text(
+            'UPDATE "user" SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL'
+        ))
         db.session.commit()
+
+
+def ensure_login_event_schema():
+    """Create the additive login-history table when a first login needs it."""
+    if "login_event" not in inspect(db.engine).get_table_names():
+        db.create_all()
+
+
+def record_login_event(user: User) -> None:
+    ensure_login_event_schema()
+    db.session.add(LoginEvent(user_id=user.id))
+    db.session.commit()
 
 
 def ensure_question_progress_schema():
@@ -2138,6 +2161,10 @@ def safe_redirect_target(target: str, fallback_endpoint: str = "home") -> str:
 
 @app.route("/language/<language_code>")
 def set_language(language_code):
+    if not LANGUAGE_SWITCHER_ENABLED:
+        session["language"] = "nl"
+        return redirect(safe_redirect_target(request.args.get("next"), "home").rstrip("?"))
+
     language_code = (language_code or "").strip().lower()
     if language_code in SUPPORTED_LANGUAGES:
         session["language"] = language_code
@@ -3101,7 +3128,32 @@ def admin_home():
         return admin_redirect
 
     question_count = db.session.query(func.count(Question.id)).scalar() or 0
-    return render_template("admin_home.html", question_count=question_count)
+    return render_template(
+        "admin_home.html",
+        question_count=question_count,
+        user_count=db.session.query(func.count(User.id)).scalar() or 0,
+    )
+
+
+@app.route("/admin/users")
+def admin_users():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    ensure_login_event_schema()
+    users = User.query.order_by(User.created_at.desc(), User.id.desc()).all()
+    login_events = (
+        LoginEvent.query
+        .order_by(LoginEvent.logged_in_at.desc())
+        .limit(200)
+        .all()
+    )
+    return render_template(
+        "admin_users.html",
+        users=users,
+        login_events=login_events,
+    )
 
 
 @app.route("/admin/database")
@@ -3423,6 +3475,7 @@ def login():
         return redirect(url_for("home"))
 
     error = None
+    field_errors = {}
     next_url = safe_redirect_target(request.args.get("next"), "home")
     submitted_email = ""
 
@@ -3433,14 +3486,33 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
-        if not user or not user.check_password(password):
-            error = "Incorrect email or password."
+        if not email:
+            field_errors["email"] = (
+                "Vul je e-mailadres in."
+                if get_current_language() == "nl"
+                else "Enter your email address."
+            )
+        elif not user or not user.check_password(password):
+            field_errors["password"] = (
+                "Onjuist e-mailadres of wachtwoord."
+                if get_current_language() == "nl"
+                else "Incorrect email or password."
+            )
         else:
             sync_user_admin_flag(user)
+            user.last_login_at = datetime.utcnow()
+            db.session.commit()
+            record_login_event(user)
             login_user(user)
             return redirect(next_url)
 
-    return render_template("login.html", error=error, next=next_url, submitted_email=submitted_email)
+    return render_template(
+        "login.html",
+        error=error,
+        errors=field_errors,
+        next=next_url,
+        submitted_email=submitted_email,
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -3449,6 +3521,7 @@ def register():
         return redirect(url_for("home"))
 
     error = None
+    field_errors = {}
     form_data = {
         "name": "",
         "university": "",
@@ -3467,19 +3540,33 @@ def register():
         password = request.form.get("password") or ""
         confirm_password = request.form.get("confirm_password") or ""
 
+        is_dutch = get_current_language() == "nl"
         if not name:
-            error = "Name is required."
-        elif not university:
-            error = "University is required."
-        elif not email:
-            error = "Email is required."
-        elif len(password) < 8:
-            error = "Password must be at least 8 characters."
-        elif password != confirm_password:
-            error = "Passwords do not match."
-        elif User.query.filter_by(email=email).first():
-            error = "An account with that email already exists."
-        else:
+            field_errors["name"] = "Vul je naam in." if is_dutch else "Enter your name."
+        if not university:
+            field_errors["university"] = "Vul je universiteit in." if is_dutch else "Enter your university."
+        if not email:
+            field_errors["email"] = "Vul je e-mailadres in." if is_dutch else "Enter your email address."
+        if len(password) < 8:
+            field_errors["password"] = (
+                "Gebruik minstens 8 tekens."
+                if is_dutch
+                else "Use at least 8 characters."
+            )
+        if password != confirm_password:
+            field_errors["confirm_password"] = (
+                "De wachtwoorden komen niet overeen."
+                if is_dutch
+                else "The passwords do not match."
+            )
+        if email and User.query.filter_by(email=email).first():
+            field_errors["email"] = (
+                "Dit e-mailadres is al geregistreerd."
+                if is_dutch
+                else "This email address is already registered."
+            )
+
+        if not field_errors:
             user = User(
                 name=name,
                 university=university,
@@ -3489,10 +3576,18 @@ def register():
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
+            user.last_login_at = datetime.utcnow()
+            db.session.commit()
+            record_login_event(user)
             login_user(user)
             return redirect(url_for("home"))
 
-    return render_template("register.html", error=error, form_data=form_data)
+    return render_template(
+        "register.html",
+        error=error,
+        errors=field_errors,
+        form_data=form_data,
+    )
 
 
 @app.route("/logout")

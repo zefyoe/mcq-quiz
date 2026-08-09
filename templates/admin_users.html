@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User register</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
+  </head>
+  <body>
+    <header class="admin-topbar">
+      <div class="admin-topbar-inner">
+        <div class="admin-brand">Radius</div>
+        <div class="admin-topbar-actions">
+          <div class="admin-topbar-badge">User register</div>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('admin_home') }}">Admin</a>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('logout') }}">Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-container admin-database-container">
+      <div class="admin-page-heading">
+        <div>
+          <p class="admin-eyebrow">ACCOUNT ACTIVITY</p>
+          <h1>User register</h1>
+          <p>{{ users|length }} registered user(s). Passwords are never shown.</p>
+        </div>
+      </div>
+
+      <section class="admin-table-section">
+        <div class="admin-table-heading">
+          <h2>Registered users</h2>
+          <span>{{ users|length }} user(s)</span>
+        </div>
+        <div class="admin-user-table">
+          <div class="admin-user-row admin-user-header">
+            <div>Name</div>
+            <div>University</div>
+            <div>Email</div>
+            <div>Role</div>
+            <div>Registered</div>
+            <div>Last login</div>
+          </div>
+          {% for user in users %}
+            <div class="admin-user-row">
+              <div><strong>{{ user.name or "—" }}</strong></div>
+              <div>{{ user.university or "—" }}</div>
+              <div>{{ user.email }}</div>
+              <div>{{ "Admin" if user.is_admin else "Student" }}</div>
+              <div>{{ user.created_at.strftime("%d/%m/%Y %H:%M") if user.created_at else "—" }}</div>
+              <div>{{ user.last_login_at.strftime("%d/%m/%Y %H:%M") if user.last_login_at else "Not logged in yet" }}</div>
+            </div>
+          {% else %}
+            <div class="admin-table-empty">No users registered yet.</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="admin-table-section">
+        <div class="admin-table-heading">
+          <h2>Login history</h2>
+          <span>Last {{ login_events|length }} login(s)</span>
+        </div>
+        <div class="admin-user-table">
+          <div class="admin-login-row admin-user-header">
+            <div>User</div>
+            <div>Email</div>
+            <div>University</div>
+            <div>Logged in at</div>
+          </div>
+          {% for event in login_events %}
+            <div class="admin-login-row">
+              <div><strong>{{ event.user.name or "—" }}</strong></div>
+              <div>{{ event.user.email }}</div>
+              <div>{{ event.user.university or "—" }}</div>
+              <div>{{ event.logged_in_at.strftime("%d/%m/%Y %H:%M") }}</div>
+            </div>
+          {% else %}
+            <div class="admin-table-empty">No login history recorded yet.</div>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

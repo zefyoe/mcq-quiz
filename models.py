@@ -13,14 +13,23 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     daily_question_goal = db.Column(db.Integer, nullable=False, default=20)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=True, index=True)
+    last_login_at = db.Column(db.DateTime, nullable=True, index=True)
     quiz_attempts = db.relationship("QuizAttempt", backref="user", lazy=True, cascade="all, delete-orphan")
     question_progress = db.relationship("QuestionProgress", backref="user", lazy=True, cascade="all, delete-orphan")
+    login_events = db.relationship("LoginEvent", backref="user", lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, pw: str):
         self.password_hash = generate_password_hash(pw)
 
     def check_password(self, pw: str) -> bool:
         return check_password_hash(self.password_hash, pw)
+
+
+class LoginEvent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    logged_in_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)

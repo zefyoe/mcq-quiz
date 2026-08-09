@@ -32,20 +32,24 @@
             <p>{{ "Gebruik je account om verder te gaan." if language == "nl" else "Use your account to continue." }}</p>
           </div>
 
-          {% if error %}
-          <div class="login-error">{{ tr(error) }}</div>
-          {% endif %}
-
           <form method="post" class="login-form">
             <input type="hidden" name="next" value="{{ next }}">
 
-            <label for="email">{{ tr("Email") }}</label>
-            <input id="email" name="email" type="email" placeholder="admin@example.com" value="{{ submitted_email or '' }}" required>
+            <div class="form-field">
+              <label for="email">{{ tr("Email") }}</label>
+              <input id="email" name="email" type="email" placeholder="admin@example.com" value="{{ submitted_email or '' }}" required class="{% if errors and errors.get('email') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('email') else 'false' }}">
+              {% if errors and errors.get('email') %}<p class="field-error">{{ errors.get('email') }}</p>{% endif %}
+            </div>
 
-            <label for="password">{{ tr("Password") }}</label>
-            <div class="password-wrap">
-              <input id="password" name="password" type="password" placeholder="{{ tr('Password') }}" required>
-              <button type="button" class="toggle-password" onclick="togglePassword()">{{ "Tonen" if language == "nl" else "Show" }}</button>
+            <div class="form-field">
+              <label for="password">{{ tr("Password") }}</label>
+              <div class="password-wrap">
+                <input id="password" name="password" type="password" placeholder="{{ tr('Password') }}" required class="{% if errors and errors.get('password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('password') else 'false' }}">
+                <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="{{ 'Wachtwoord tonen' if language == 'nl' else 'Show password' }}" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                </button>
+              </div>
+              {% if errors and errors.get('password') %}<p class="field-error">{{ errors.get('password') }}</p>{% endif %}
             </div>
 
             <button type="submit" class="login-button">{{ tr("Login") }}</button>
@@ -63,15 +67,16 @@
   </div>
 
   <script>
-    function togglePassword() {
-      const input = document.getElementById("password");
-      const btn = document.querySelector(".toggle-password");
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
       if (input.type === "password") {
         input.type = "text";
-        btn.textContent = {{ ("Verbergen" if language == "nl" else "Hide")|tojson }};
+        btn.setAttribute("aria-pressed", "true");
+        btn.setAttribute("aria-label", {{ ("Wachtwoord verbergen" if language == "nl" else "Hide password")|tojson }});
       } else {
         input.type = "password";
-        btn.textContent = {{ ("Tonen" if language == "nl" else "Show")|tojson }};
+        btn.setAttribute("aria-pressed", "false");
+        btn.setAttribute("aria-label", {{ ("Wachtwoord tonen" if language == "nl" else "Show password")|tojson }});
       }
     }
   </script>
