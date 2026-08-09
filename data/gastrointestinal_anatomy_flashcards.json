@@ -7,10 +7,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gallbladder",
-      "answer_nl": "galblaas",
+      "answer_nl": "Vesica biliaris",
       "image": "GI_100/GI_Gallbladder.jpeg",
       "source_set": "GI_100",
-      "source_question": "1"
+      "source_question": "1",
+      "options": {
+        "A": "Ductus hepaticus communis",
+        "B": "Musculus sphincter ampullae",
+        "C": "Vesica biliaris",
+        "D": "Ductus hepaticus dexter"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI002",
@@ -18,10 +25,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Azygos vein",
-      "answer_nl": "vena azygos",
+      "answer_nl": "Vena azygos",
       "image": "GI_100/GI_Azygos_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "2"
+      "source_question": "2",
+      "options": {
+        "A": "Vena suprarenalis sinistra",
+        "B": "Vena iliaca externa sinistra",
+        "C": "Vena testicularis/ovarica sinistra",
+        "D": "Vena azygos"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI003",
@@ -29,10 +43,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Hepatic flexure of large bowel",
-      "answer_nl": "flexura hepatica van het colon",
+      "answer_nl": "Flexura coli dextra",
       "image": "GI_100/GI_Hepatic_flexure_of_large_bowel.jpeg",
       "source_set": "GI_100",
-      "source_question": "3"
+      "source_question": "3",
+      "options": {
+        "A": "Ampulla recti",
+        "B": "Ostium ileale",
+        "C": "Valva ileocaecalis",
+        "D": "Flexura coli dextra"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI004",
@@ -40,10 +61,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Second liver segment",
-      "answer_nl": "tweede leversegment",
+      "answer_nl": "Segmentum hepatis II",
       "image": "GI_100/GI_Second_liver_segment.jpeg",
       "source_set": "GI_100",
-      "source_question": "4"
+      "source_question": "4",
+      "options": {
+        "A": "Segmentum hepatis III",
+        "B": "Lobus quadratus hepatis",
+        "C": "Segmentum hepatis II",
+        "D": "Ligamentum teres hepatis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI005",
@@ -51,10 +79,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Intrahepatic portal vein",
-      "answer_nl": "intrahepatische poortader",
+      "answer_nl": "Vena portae hepatis intrahepatica",
       "image": "GI_100/GI_Intrahepatic_portal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "5"
+      "source_question": "5",
+      "options": {
+        "A": "Vena portae hepatis intrahepatica",
+        "B": "Ramus anterior venae portae dextrae",
+        "C": "Ramus sinister venae portae hepatis",
+        "D": "Vena mesenterica inferior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI006",
@@ -62,10 +97,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Ileocaecal valve",
-      "answer_nl": "ileocaecale klep",
+      "answer_nl": "Valva ileocaecalis",
       "image": "GI_100/GI_Ileocaecal_valve.jpeg",
       "source_set": "GI_100",
-      "source_question": "6"
+      "source_question": "6",
+      "options": {
+        "A": "Valva ileocaecalis",
+        "B": "Colon ascendens",
+        "C": "Taeniae coli",
+        "D": "Rectum"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI007",
@@ -73,10 +115,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending portion of duodenum",
-      "answer_nl": "dalend deel van het duodenum",
+      "answer_nl": "Pars descendens duodeni",
       "image": "GI_100/GI_Descending_portion_of_duodenum.jpeg",
       "source_set": "GI_100",
-      "source_question": "7"
+      "source_question": "7",
+      "options": {
+        "A": "Flexura duodenojejunalis",
+        "B": "Jejunum",
+        "C": "Ileum terminale",
+        "D": "Pars descendens duodeni"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI008",
@@ -84,10 +133,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right transversus abdominis",
-      "answer_nl": "rechter musculus transversus abdominis",
+      "answer_nl": "Musculus transversus abdominis dexter",
       "image": "GI_100/GI_Right_transversus_abdominis.jpeg",
       "source_set": "GI_100",
-      "source_question": "8"
+      "source_question": "8",
+      "options": {
+        "A": "Musculus rectus abdominis dexter",
+        "B": "Musculus iliacus sinister",
+        "C": "Musculus transversus abdominis dexter",
+        "D": "Linea alba"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI009",
@@ -95,10 +151,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Crus Of Right Hemidiaphragm",
-      "answer_nl": "crus van het rechter hemidiafragma",
+      "answer_nl": "Crus dextrum diaphragmatis",
       "image": "GI_100/GI_Crus_Of_Right_Hemidiaphragm.jpeg",
       "source_set": "GI_100",
-      "source_question": "9"
+      "source_question": "9",
+      "options": {
+        "A": "Hemidiaphragma sinistrum",
+        "B": "Hiatus oesophageus",
+        "C": "Centrum tendineum",
+        "D": "Crus dextrum diaphragmatis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI010",
@@ -106,10 +169,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right twelfth rib",
-      "answer_nl": "rechter twaalfde rib",
+      "answer_nl": "Costa XII dextra",
       "image": "GI_100/GI_Right_twelfth_rib.jpeg",
       "source_set": "GI_100",
-      "source_question": "10"
+      "source_question": "10",
+      "options": {
+        "A": "Articulatio sacroiliaca dextra",
+        "B": "Corpus vertebrae lumbalis",
+        "C": "Costa XII dextra",
+        "D": "Liquor cerebrospinalis in canali vertebrali"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI011",
@@ -117,10 +187,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric vein",
-      "answer_nl": "vena mesenterica superior",
+      "answer_nl": "Vena mesenterica superior",
       "image": "GI_100/GI_Superior_mesenteric_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "11"
+      "source_question": "11",
+      "options": {
+        "A": "Ramus anterior venae portae dextrae",
+        "B": "Vena splenica",
+        "C": "Vena mesenterica superior",
+        "D": "Confluens venarum portarum"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI012",
@@ -128,10 +205,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Posterior branch of right portal vein",
-      "answer_nl": "posterieure tak van de rechter poortader",
+      "answer_nl": "Ramus posterior venae portae dextrae",
       "image": "GI_100/GI_Posterior_branch_of_right_portal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "12"
+      "source_question": "12",
+      "options": {
+        "A": "Ramus posterior venae portae dextrae",
+        "B": "Ramus sinister venae portae hepatis",
+        "C": "Confluens venarum portarum",
+        "D": "Vena mesenterica inferior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI013",
@@ -139,10 +223,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Third liver segment",
-      "answer_nl": "derde leversegment",
+      "answer_nl": "Segmentum hepatis III",
       "image": "GI_100/GI_Third_liver_segment.jpeg",
       "source_set": "GI_100",
-      "source_question": "13"
+      "source_question": "13",
+      "options": {
+        "A": "Segmentum hepatis VII",
+        "B": "Segmentum hepatis III",
+        "C": "Lobus Riedeli hepatis",
+        "D": "Lobus hepatis dexter"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI014",
@@ -150,10 +241,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Crus Of Right Hemidiaphragm",
-      "answer_nl": "crus van het rechter hemidiafragma",
+      "answer_nl": "Crus dextrum diaphragmatis",
       "image": "GI_100/GI_Crus_Of_Right_Hemidiaphragm_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "14"
+      "source_question": "14",
+      "options": {
+        "A": "Hemidiaphragma sinistrum",
+        "B": "Ligamentum arcuatum medianum",
+        "C": "Crus dextrum diaphragmatis",
+        "D": "Foramen venae cavae"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI015",
@@ -161,10 +259,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Body of stomach",
-      "answer_nl": "corpus van de maag",
+      "answer_nl": "Corpus gastricum",
       "image": "GI_100/GI_Body_of_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "15"
+      "source_question": "15",
+      "options": {
+        "A": "Musculus sphincter pyloricus",
+        "B": "Corpus gastricum",
+        "C": "Cardia gastrica",
+        "D": "Junctio gastro-oesophagealis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI016",
@@ -172,10 +277,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Rectum",
-      "answer_nl": "rectum",
+      "answer_nl": "Rectum",
       "image": "GI_100/GI_Rectum.jpeg",
       "source_set": "GI_100",
-      "source_question": "16"
+      "source_question": "16",
+      "options": {
+        "A": "Colon transversum",
+        "B": "Rectum",
+        "C": "Appendices omentales",
+        "D": "Ostium ileale"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI017",
@@ -183,10 +295,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_100/GI_Superior_mesenteric_artery.jpeg",
       "source_set": "GI_100",
-      "source_question": "17"
+      "source_question": "17",
+      "options": {
+        "A": "Truncus coeliacomesentericus",
+        "B": "Arteria suprarenalis media",
+        "C": "Arteria mesenterica superior",
+        "D": "Truncus coeliacus"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI018",
@@ -194,10 +313,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left gastric artery",
-      "answer_nl": "arteria gastrica sinistra",
+      "answer_nl": "Arteria gastrica sinistra",
       "image": "GI_100/GI_Left_gastric_artery.jpeg",
       "source_set": "GI_100",
-      "source_question": "18"
+      "source_question": "18",
+      "options": {
+        "A": "Arteria hepatica communis",
+        "B": "Arteria gastrica sinistra",
+        "C": "Arteria gastroduodenalis",
+        "D": "Arteria mesenterica inferior"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI019",
@@ -205,10 +331,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal vein",
-      "answer_nl": "linker vena renalis",
+      "answer_nl": "Vena renalis sinistra",
       "image": "GI_100/GI_Left_renal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "19"
+      "source_question": "19",
+      "options": {
+        "A": "Vena renalis sinistra",
+        "B": "Vena iliaca communis sinistra",
+        "C": "Vena testicularis/ovarica dextra",
+        "D": "Vena iliaca communis dextra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI020",
@@ -216,10 +349,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Neck Of Pancreas",
-      "answer_nl": "collum van de pancreas",
+      "answer_nl": "Collum pancreatis",
       "image": "GI_100/GI_Neck_Of_Pancreas.jpeg",
       "source_set": "GI_100",
-      "source_question": "20"
+      "source_question": "20",
+      "options": {
+        "A": "Incisura pancreatis",
+        "B": "Caput pancreatis",
+        "C": "Facies posterior pancreatis",
+        "D": "Collum pancreatis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI021",
@@ -227,10 +367,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Spleen",
-      "answer_nl": "milt",
+      "answer_nl": "Splen",
       "image": "GI_100/GI_Spleen.jpeg",
       "source_set": "GI_100",
-      "source_question": "21"
+      "source_question": "21",
+      "options": {
+        "A": "Splen",
+        "B": "Facies gastrica splenis",
+        "C": "Facies diaphragmatica splenis",
+        "D": "Margo superior splenis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI022",
@@ -238,10 +385,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending portion of duodenum",
-      "answer_nl": "dalend deel van het duodenum",
+      "answer_nl": "Pars descendens duodeni",
       "image": "GI_100/GI_Descending_portion_of_duodenum_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "22"
+      "source_question": "22",
+      "options": {
+        "A": "Pars descendens duodeni",
+        "B": "Ileum terminale",
+        "C": "Flexura duodenojejunalis",
+        "D": "Pars superior duodeni"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI023",
@@ -249,10 +403,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Posterior branch of left internal iliac artery",
-      "answer_nl": "posterieure tak van de linker arteria iliaca interna",
+      "answer_nl": "Ramus posterior arteriae iliacae internae sinistrae",
       "image": "GI_100/GI_Posterior_branch_of_left_internal_iliac_artery.jpeg",
       "source_set": "GI_100",
-      "source_question": "23"
+      "source_question": "23",
+      "options": {
+        "A": "Ramus posterior arteriae iliacae internae sinistrae",
+        "B": "Arteria umbilicalis sinistra",
+        "C": "Arteria iliaca externa dextra",
+        "D": "Arteria iliaca interna dextra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI024",
@@ -260,10 +421,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_100/GI_Superior_mesenteric_artery_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "24"
+      "source_question": "24",
+      "options": {
+        "A": "Arteria hepatica dextra aberrans",
+        "B": "Arteria hepatica propria",
+        "C": "Arteria suprarenalis media",
+        "D": "Arteria mesenterica superior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI025",
@@ -271,10 +439,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal vein",
-      "answer_nl": "linker vena renalis",
+      "answer_nl": "Vena renalis sinistra",
       "image": "GI_100/GI_Left_renal_vein_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "25"
+      "source_question": "25",
+      "options": {
+        "A": "Vena renalis sinistra",
+        "B": "Vena iliaca communis sinistra",
+        "C": "Vena iliaca externa sinistra",
+        "D": "Vena lumbalis ascendens sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI026",
@@ -282,10 +457,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_100/GI_Superior_mesenteric_artery_3.jpeg",
       "source_set": "GI_100",
-      "source_question": "26"
+      "source_question": "26",
+      "options": {
+        "A": "Arteria gastroduodenalis",
+        "B": "Truncus coeliacus",
+        "C": "Arteria hepatica communis",
+        "D": "Arteria mesenterica superior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI027",
@@ -293,10 +475,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Portal Venous Confluence",
-      "answer_nl": "confluens van de poortader",
+      "answer_nl": "Confluens venarum portarum",
       "image": "GI_100/GI_Portal_Venous_Confluence.jpeg",
       "source_set": "GI_100",
-      "source_question": "27"
+      "source_question": "27",
+      "options": {
+        "A": "Ramus anterior venae portae dextrae",
+        "B": "Ramus dexter venae portae hepatis",
+        "C": "Vena pancreaticoduodenalis superior posterior",
+        "D": "Confluens venarum portarum"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI028",
@@ -304,10 +493,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Anterior branch of right portal vein",
-      "answer_nl": "anterieure tak van de rechter poortader",
+      "answer_nl": "Ramus anterior venae portae dextrae",
       "image": "GI_100/GI_Anterior_branch_of_right_portal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "28"
+      "source_question": "28",
+      "options": {
+        "A": "Ramus anterior venae portae dextrae",
+        "B": "Vena splenica",
+        "C": "Vena colica media",
+        "D": "Vena mesenterica superior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI029",
@@ -315,10 +511,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Body Of Gallbladder",
-      "answer_nl": "corpus van de galblaas",
+      "answer_nl": "Corpus vesicae biliaris",
       "image": "GI_100/GI_Body_Of_Gallbladder.jpeg",
       "source_set": "GI_100",
-      "source_question": "29"
+      "source_question": "29",
+      "options": {
+        "A": "Ductus hepaticus dexter",
+        "B": "Ductus hepaticus communis",
+        "C": "Ductus pancreaticus major",
+        "D": "Corpus vesicae biliaris"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI030",
@@ -326,10 +529,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Fundus of the stomach",
-      "answer_nl": "fundus van de maag",
+      "answer_nl": "Fundus gastricus",
       "image": "GI_100/GI_Fundus_of_the_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "30"
+      "source_question": "30",
+      "options": {
+        "A": "Corpus gastricum",
+        "B": "Fundus gastricus",
+        "C": "Incisura angularis",
+        "D": "Junctio gastro-oesophagealis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI031",
@@ -337,10 +547,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior vena cava",
-      "answer_nl": "vena cava superior",
+      "answer_nl": "Vena cava superior",
       "image": "GI_100/GI_Superior_vena_cava.jpeg",
       "source_set": "GI_100",
-      "source_question": "31"
+      "source_question": "31",
+      "options": {
+        "A": "Vena renalis sinistra retroaortica",
+        "B": "Vena renalis dextra",
+        "C": "Vena cava superior",
+        "D": "Vena cava inferior"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI032",
@@ -348,10 +565,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Pyloric antrum of the stomach",
-      "answer_nl": "antrum pyloricum van de maag",
+      "answer_nl": "Antrum pyloricum",
       "image": "GI_100/GI_Pyloric_antrum_of_the_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "32"
+      "source_question": "32",
+      "options": {
+        "A": "Cardia gastrica",
+        "B": "Antrum pyloricum",
+        "C": "Plica gastrica corporis gastrici",
+        "D": "Paries anterior gastricus"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI033",
@@ -359,10 +583,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common hepatic duct",
-      "answer_nl": "ductus hepaticus communis",
+      "answer_nl": "Ductus hepaticus communis",
       "image": "GI_100/GI_Common_hepatic_duct.jpeg",
       "source_set": "GI_100",
-      "source_question": "33"
+      "source_question": "33",
+      "options": {
+        "A": "Ductus hepaticus communis",
+        "B": "Collum vesicae biliaris",
+        "C": "Ductus pancreaticus minor",
+        "D": "Musculus sphincter ampullae"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI034",
@@ -370,10 +601,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Anal canal",
-      "answer_nl": "anaalkanaal",
+      "answer_nl": "Canalis analis",
       "image": "GI_100/GI_Anal_canal.jpeg",
       "source_set": "GI_100",
-      "source_question": "34"
+      "source_question": "34",
+      "options": {
+        "A": "Flexura coli sinistra",
+        "B": "Appendices omentales",
+        "C": "Canalis analis",
+        "D": "Ostium ileale"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI035",
@@ -381,10 +619,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Linea alba",
-      "answer_nl": "linea alba",
+      "answer_nl": "Linea alba",
       "image": "GI_100/GI_Linea_alba.jpeg",
       "source_set": "GI_100",
-      "source_question": "35"
+      "source_question": "35",
+      "options": {
+        "A": "Vagina musculi recti abdominis posterior dextra",
+        "B": "Canalis inguinalis dexter",
+        "C": "Musculus obliquus internus abdominis sinister",
+        "D": "Linea alba"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI036",
@@ -392,10 +637,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right ischiorectal fossa",
-      "answer_nl": "rechter fossa ischiorectalis",
+      "answer_nl": "Fossa ischioanalis dextra",
       "image": "GI_100/GI_Right_ischiorectal_fossa.jpeg",
       "source_set": "GI_100",
-      "source_question": "36"
+      "source_question": "36",
+      "options": {
+        "A": "Ureter sinister",
+        "B": "Ligamentum rectouterinum sinistrum",
+        "C": "Uterus",
+        "D": "Fossa ischioanalis dextra"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI037",
@@ -403,10 +655,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Anal canal",
-      "answer_nl": "anaalkanaal",
+      "answer_nl": "Canalis analis",
       "image": "GI_100/GI_Anal_canal_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "37"
+      "source_question": "37",
+      "options": {
+        "A": "Appendix vermiformis",
+        "B": "Colon sigmoideum",
+        "C": "Flexura coli sinistra",
+        "D": "Canalis analis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI038",
@@ -414,10 +673,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending portion of duodenum",
-      "answer_nl": "dalend deel van het duodenum",
+      "answer_nl": "Pars descendens duodeni",
       "image": "GI_100/GI_Descending_portion_of_duodenum_3.jpeg",
       "source_set": "GI_100",
-      "source_question": "38"
+      "source_question": "38",
+      "options": {
+        "A": "Vasa mesenterica intestini tenuis",
+        "B": "Ansae intestini tenuis",
+        "C": "Pars ascendens duodeni",
+        "D": "Pars descendens duodeni"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI039",
@@ -425,10 +691,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Main pancreatic duct",
-      "answer_nl": "ductus pancreaticus principalis",
+      "answer_nl": "Ductus pancreaticus major",
       "image": "GI_100/GI_Main_pancreatic_duct.jpg",
       "source_set": "GI_100",
-      "source_question": "39"
+      "source_question": "39",
+      "options": {
+        "A": "Musculus sphincter ampullae",
+        "B": "Ductus hepaticus sinister",
+        "C": "Ductus choledochus",
+        "D": "Ductus pancreaticus major"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI040",
@@ -436,10 +709,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Riedel lobe of liver",
-      "answer_nl": "Riedel-kwab van de lever",
+      "answer_nl": "Lobus Riedeli hepatis",
       "image": "GI_100/GI_Riedel_lobe_of_liver.jpeg",
       "source_set": "GI_100",
-      "source_question": "40"
+      "source_question": "40",
+      "options": {
+        "A": "Segmentum hepatis II",
+        "B": "Fissura ligamenti teretis",
+        "C": "Ligamentum teres hepatis",
+        "D": "Lobus Riedeli hepatis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI041",
@@ -447,10 +727,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Fundus of gallbladder",
-      "answer_nl": "fundus van de galblaas",
+      "answer_nl": "Fundus vesicae biliaris",
       "image": "GI_100/GI_Fundus_of_gallbladder.jpeg",
       "source_set": "GI_100",
-      "source_question": "41"
+      "source_question": "41",
+      "options": {
+        "A": "Fundus vesicae biliaris",
+        "B": "Ductus pancreaticus minor",
+        "C": "Ductus biliaris intrahepaticus dexter",
+        "D": "Ductus choledochus"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI042",
@@ -458,10 +745,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Abdominal aorta",
-      "answer_nl": "abdominale aorta",
+      "answer_nl": "Aorta abdominalis",
       "image": "GI_100/GI_Abdominal_aorta.jpeg",
       "source_set": "GI_100",
-      "source_question": "42"
+      "source_question": "42",
+      "options": {
+        "A": "Arteria gastroduodenalis",
+        "B": "Aorta abdominalis",
+        "C": "Arteriae lumbales",
+        "D": "Arteria mesenterica superior"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI043",
@@ -469,10 +763,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Fundus of the stomach",
-      "answer_nl": "fundus van de maag",
+      "answer_nl": "Fundus gastricus",
       "image": "GI_100/GI_Fundus_of_the_stomach_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "43"
+      "source_question": "43",
+      "options": {
+        "A": "Fundus gastricus",
+        "B": "Canalis pyloricus",
+        "C": "Ostium cardiacum",
+        "D": "Antrum pyloricum"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI044",
@@ -480,10 +781,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_100/GI_Inferior_vena_cava.jpeg",
       "source_set": "GI_100",
-      "source_question": "44"
+      "source_question": "44",
+      "options": {
+        "A": "Vena hemiazygos",
+        "B": "Vena renalis dextra",
+        "C": "Vena renalis sinistra",
+        "D": "Vena cava inferior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI045",
@@ -491,10 +799,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Cerebrospinal Fluid In The Spinal Canal",
-      "answer_nl": "cerebrospinaal vocht in het wervelkanaal",
+      "answer_nl": "Liquor cerebrospinalis in canali vertebrali",
       "image": "GI_100/GI_Cerebrospinal_Fluid_In_The_Spinal_Canal.jpeg",
       "source_set": "GI_100",
-      "source_question": "45"
+      "source_question": "45",
+      "options": {
+        "A": "Os sacrum",
+        "B": "Processus spinosus",
+        "C": "Liquor cerebrospinalis in canali vertebrali",
+        "D": "Costa XII dextra"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI046",
@@ -502,10 +817,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Prevesical space",
-      "answer_nl": "prevesicale ruimte",
+      "answer_nl": "Spatium retropubicum",
       "image": "GI_100/GI_Prevesical_space.jpeg",
       "source_set": "GI_100",
-      "source_question": "46"
+      "source_question": "46",
+      "options": {
+        "A": "Glandula suprarenalis dextra",
+        "B": "Spatium retropubicum",
+        "C": "Prostata",
+        "D": "Cortex renalis poli superioris dextri"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI047",
@@ -513,10 +835,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Spleen",
-      "answer_nl": "milt",
+      "answer_nl": "Splen",
       "image": "GI_100/GI_Spleen_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "47"
+      "source_question": "47",
+      "options": {
+        "A": "Facies gastrica splenis",
+        "B": "Facies diaphragmatica splenis",
+        "C": "Splen",
+        "D": "Margo superior splenis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI048",
@@ -524,10 +853,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Caecum",
-      "answer_nl": "caecum",
+      "answer_nl": "Caecum",
       "image": "GI_100/GI_Caecum.jpeg",
       "source_set": "GI_100",
-      "source_question": "48"
+      "source_question": "48",
+      "options": {
+        "A": "Colon sigmoideum",
+        "B": "Caecum",
+        "C": "Colon ascendens",
+        "D": "Colon descendens"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI049",
@@ -535,10 +871,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gallbladder fundus",
-      "answer_nl": "fundus van de galblaas",
+      "answer_nl": "Fundus vesicae biliaris",
       "image": "GI_100/GI_Gallbladder_fundus.jpeg",
       "source_set": "GI_100",
-      "source_question": "49"
+      "source_question": "49",
+      "options": {
+        "A": "Fundus vesicae biliaris",
+        "B": "Ductus hepaticus communis",
+        "C": "Musculus sphincter ampullae",
+        "D": "Ductus pancreaticus minor"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI050",
@@ -546,10 +889,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right posterior branch of portal vein",
-      "answer_nl": "rechter posterieure tak van de poortader",
+      "answer_nl": "Ramus posterior venae portae dextrae",
       "image": "GI_100/GI_Right_posterior_branch_of_portal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "50"
+      "source_question": "50",
+      "options": {
+        "A": "Ramus sinister venae portae hepatis",
+        "B": "Vena portae hepatis extrahepatica",
+        "C": "Ramus posterior venae portae dextrae",
+        "D": "Vena portae hepatis intrahepatica"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI051",
@@ -557,10 +907,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Cystic duct",
-      "answer_nl": "ductus cysticus",
+      "answer_nl": "Ductus cysticus",
       "image": "GI_100/GI_Cystic_duct.jpeg",
       "source_set": "GI_100",
-      "source_question": "51"
+      "source_question": "51",
+      "options": {
+        "A": "Vesica biliaris",
+        "B": "Ductus pancreaticus major",
+        "C": "Ductus cysticus",
+        "D": "Ductus hepaticus dexter"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI052",
@@ -568,10 +925,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common bile duct",
-      "answer_nl": "ductus choledochus",
+      "answer_nl": "Ductus choledochus",
       "image": "GI_100/GI_Common_bile_duct.jpeg",
       "source_set": "GI_100",
-      "source_question": "52"
+      "source_question": "52",
+      "options": {
+        "A": "Vesica biliaris",
+        "B": "Ductus pancreaticus minor",
+        "C": "Ductus hepaticus dexter",
+        "D": "Ductus choledochus"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI053",
@@ -579,10 +943,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left suprarenal gland",
-      "answer_nl": "linker bijnier",
+      "answer_nl": "Glandula suprarenalis sinistra",
       "image": "GI_100/GI_Left_suprarenal_gland.jpeg",
       "source_set": "GI_100",
-      "source_question": "53"
+      "source_question": "53",
+      "options": {
+        "A": "Peritoneum parietale dextrum",
+        "B": "Vesicula seminalis sinistra",
+        "C": "Cortex renalis poli superioris dextri",
+        "D": "Glandula suprarenalis sinistra"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI054",
@@ -590,10 +961,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Head of the pancreas",
-      "answer_nl": "caput van de pancreas",
+      "answer_nl": "Caput pancreatis",
       "image": "GI_100/GI_Head_of_the_pancreas.jpeg",
       "source_set": "GI_100",
-      "source_question": "54"
+      "source_question": "54",
+      "options": {
+        "A": "Processus uncinatus pancreatis",
+        "B": "Cauda pancreatis",
+        "C": "Caput pancreatis",
+        "D": "Corpus pancreatis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI055",
@@ -601,10 +979,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending thoracic aorta",
-      "answer_nl": "thoracale aorta descendens",
+      "answer_nl": "Aorta thoracica descendens",
       "image": "GI_100/GI_Descending_thoracic_aorta.jpeg",
       "source_set": "GI_100",
-      "source_question": "55"
+      "source_question": "55",
+      "options": {
+        "A": "Aorta thoracica descendens",
+        "B": "Oesophagus, pars abdominalis",
+        "C": "Trachea",
+        "D": "Impressio bronchialis oesophagi"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI056",
@@ -612,10 +997,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior mesenteric vein",
-      "answer_nl": "vena mesenterica inferior",
+      "answer_nl": "Vena mesenterica inferior",
       "image": "GI_100/GI_Inferior_mesenteric_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "56"
+      "source_question": "56",
+      "options": {
+        "A": "Vena mesenterica inferior",
+        "B": "Vena splenica",
+        "C": "Ramus anterior venae portae dextrae",
+        "D": "Ramus sinister venae portae hepatis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI057",
@@ -623,10 +1015,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic vein",
-      "answer_nl": "vena splenica",
+      "answer_nl": "Vena splenica",
       "image": "GI_100/GI_Splenic_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "57"
+      "source_question": "57",
+      "options": {
+        "A": "Vena gastro-omentalis dextra",
+        "B": "Vena colica media",
+        "C": "Vena splenica",
+        "D": "Ramus anterior venae portae dextrae"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI058",
@@ -634,10 +1033,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Extrahepatic portal vein",
-      "answer_nl": "extrahepatische poortader",
+      "answer_nl": "Vena portae hepatis extrahepatica",
       "image": "GI_100/GI_Extrahepatic_portal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "58"
+      "source_question": "58",
+      "options": {
+        "A": "Vena mesenterica superior",
+        "B": "Vena colica media",
+        "C": "Vena portae hepatis extrahepatica",
+        "D": "Ramus posterior venae portae dextrae"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI059",
@@ -645,10 +1051,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Portal vein confluence",
-      "answer_nl": "confluens van de poortader",
+      "answer_nl": "Confluens venarum portarum",
       "image": "GI_100/GI_Portal_vein_confluence.jpeg",
       "source_set": "GI_100",
-      "source_question": "59"
+      "source_question": "59",
+      "options": {
+        "A": "Ramus posterior venae portae dextrae",
+        "B": "Vena gastro-omentalis dextra",
+        "C": "Ramus anterior venae portae dextrae",
+        "D": "Confluens venarum portarum"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI060",
@@ -656,10 +1069,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Abdominal aorta",
-      "answer_nl": "abdominale aorta",
+      "answer_nl": "Aorta abdominalis",
       "image": "GI_100/GI_Abdominal_aorta_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "60"
+      "source_question": "60",
+      "options": {
+        "A": "Arteria hepatica propria",
+        "B": "Arteria mesenterica superior",
+        "C": "Arteria gastroduodenalis",
+        "D": "Aorta abdominalis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI061",
@@ -667,10 +1087,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Hepatic Segment Of Inferior Vena Cava",
-      "answer_nl": "hepatisch segment van de vena cava inferior",
+      "answer_nl": "Pars hepatica venae cavae inferioris",
       "image": "GI_100/GI_Hepatic_Segment_Of_Inferior_Vena_Cava.jpeg",
       "source_set": "GI_100",
-      "source_question": "61"
+      "source_question": "61",
+      "options": {
+        "A": "Pars hepatica venae cavae inferioris",
+        "B": "Vena renalis dextra",
+        "C": "Vena testicularis/ovarica dextra",
+        "D": "Vena renalis sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI062",
@@ -678,10 +1105,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left common iliac vein",
-      "answer_nl": "linker vena iliaca communis",
+      "answer_nl": "Vena iliaca communis sinistra",
       "image": "GI_100/GI_Left_common_iliac_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "62"
+      "source_question": "62",
+      "options": {
+        "A": "Vena suprarenalis sinistra",
+        "B": "Vena hemiazygos",
+        "C": "Vena iliaca communis sinistra",
+        "D": "Vena cava inferior"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI063",
@@ -689,10 +1123,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_100/GI_Superior_mesenteric_artery_4.jpeg",
       "source_set": "GI_100",
-      "source_question": "63"
+      "source_question": "63",
+      "options": {
+        "A": "Arteria renalis sinistra",
+        "B": "Arteria pancreaticoduodenalis inferior",
+        "C": "Arteria mesenterica superior",
+        "D": "Arteriae lumbales"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI064",
@@ -700,10 +1141,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_100/GI_Inferior_vena_cava_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "64"
+      "source_question": "64",
+      "options": {
+        "A": "Vena cava inferior",
+        "B": "Vena iliaca communis dextra",
+        "C": "Vena iliaca communis sinistra",
+        "D": "Vena azygos"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI065",
@@ -711,10 +1159,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common bile duct",
-      "answer_nl": "ductus choledochus",
+      "answer_nl": "Ductus choledochus",
       "image": "GI_100/GI_Common_bile_duct_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "65"
+      "source_question": "65",
+      "options": {
+        "A": "Vesica biliaris",
+        "B": "Ampulla hepatopancreatica",
+        "C": "Ductus cysticus",
+        "D": "Ductus choledochus"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI066",
@@ -722,10 +1177,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Middle hepatic vein",
-      "answer_nl": "vena hepatica media",
+      "answer_nl": "Vena hepatica media",
       "image": "GI_100/GI_Middle_hepatic_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "66"
+      "source_question": "66",
+      "options": {
+        "A": "Venae hepaticae accessoriae",
+        "B": "Vena phrenica inferior dextra",
+        "C": "Vena hepatica media",
+        "D": "Vena hepatica sinistra"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI067",
@@ -733,10 +1195,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic vein",
-      "answer_nl": "vena splenica",
+      "answer_nl": "Vena splenica",
       "image": "GI_100/GI_Splenic_vein_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "67"
+      "source_question": "67",
+      "options": {
+        "A": "Vena splenica",
+        "B": "Confluens venarum portarum",
+        "C": "Vena portae hepatis extrahepatica",
+        "D": "Vena mesenterica superior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI068",
@@ -744,10 +1213,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right upper pole renal cortex",
-      "answer_nl": "niercortex van de rechter bovenpool",
+      "answer_nl": "Cortex renalis poli superioris dextri",
       "image": "GI_100/GI_Right_upper_pole_renal_cortex.jpeg",
       "source_set": "GI_100",
-      "source_question": "68"
+      "source_question": "68",
+      "options": {
+        "A": "Prostata",
+        "B": "Cortex renalis poli superioris dextri",
+        "C": "Spatium pararenale anterius",
+        "D": "Vesica urinaria"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI069",
@@ -755,10 +1231,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common bile duct",
-      "answer_nl": "ductus choledochus",
+      "answer_nl": "Ductus choledochus",
       "image": "GI_100/GI_Common_bile_duct_3.jpeg",
       "source_set": "GI_100",
-      "source_question": "69"
+      "source_question": "69",
+      "options": {
+        "A": "Musculus sphincter ampullae",
+        "B": "Ductus choledochus",
+        "C": "Ductus pancreaticus minor",
+        "D": "Ductus hepaticus sinister"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI070",
@@ -766,10 +1249,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Uncinate process of pancreas",
-      "answer_nl": "processus uncinatus van de pancreas",
+      "answer_nl": "Processus uncinatus pancreatis",
       "image": "GI_100/GI_Uncinate_process_of_pancreas.jpeg",
       "source_set": "GI_100",
-      "source_question": "70"
+      "source_question": "70",
+      "options": {
+        "A": "Incisura pancreatis",
+        "B": "Processus uncinatus pancreatis",
+        "C": "Collum pancreatis",
+        "D": "Tuber omentale pancreatis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI071",
@@ -777,10 +1267,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_100/GI_Superior_mesenteric_artery_5.jpeg",
       "source_set": "GI_100",
-      "source_question": "71"
+      "source_question": "71",
+      "options": {
+        "A": "Arteria hepatica propria",
+        "B": "Arteria gastrica sinistra",
+        "C": "Truncus coeliacomesentericus",
+        "D": "Arteria mesenterica superior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI072",
@@ -788,10 +1285,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Coeliac artery",
-      "answer_nl": "arteria coeliaca",
+      "answer_nl": "Truncus coeliacus",
       "image": "GI_100/GI_Coeliac_artery.jpeg",
       "source_set": "GI_100",
-      "source_question": "72"
+      "source_question": "72",
+      "options": {
+        "A": "Arteria hepatica dextra aberrans",
+        "B": "Arteria hepatica propria",
+        "C": "Arteria colica media",
+        "D": "Truncus coeliacus"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI073",
@@ -799,10 +1303,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Extrahepatic portal vein",
-      "answer_nl": "extrahepatische poortader",
+      "answer_nl": "Vena portae hepatis extrahepatica",
       "image": "GI_100/GI_Extrahepatic_portal_vein_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "73"
+      "source_question": "73",
+      "options": {
+        "A": "Ramus anterior venae portae dextrae",
+        "B": "Vena portae hepatis extrahepatica",
+        "C": "Vena gastro-omentalis dextra",
+        "D": "Ramus sinister venae portae hepatis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI074",
@@ -810,10 +1321,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common hepatic artery",
-      "answer_nl": "arteria hepatica communis",
+      "answer_nl": "Arteria hepatica communis",
       "image": "GI_100/GI_Common_hepatic_artery.jpeg",
       "source_set": "GI_100",
-      "source_question": "74"
+      "source_question": "74",
+      "options": {
+        "A": "Arteria hepatica communis",
+        "B": "Arteria suprarenalis media",
+        "C": "Arteria phrenica inferior sinistra",
+        "D": "Arteria pancreaticoduodenalis inferior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI075",
@@ -821,10 +1339,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Posterior branch of right portal vein",
-      "answer_nl": "posterieure tak van de rechter poortader",
+      "answer_nl": "Ramus posterior venae portae dextrae",
       "image": "GI_100/GI_Posterior_branch_of_right_portal_vein_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "75"
+      "source_question": "75",
+      "options": {
+        "A": "Ramus venae portae hepatis",
+        "B": "Vena pancreaticoduodenalis superior posterior",
+        "C": "Confluens venarum portarum",
+        "D": "Ramus posterior venae portae dextrae"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI076",
@@ -832,10 +1357,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left tenth posterior rib",
-      "answer_nl": "linker tiende posterieure rib",
+      "answer_nl": "Costa X sinistra, pars posterior",
       "image": "GI_100/GI_Left_tenth_posterior_rib.jpg",
       "source_set": "GI_100",
-      "source_question": "76"
+      "source_question": "76",
+      "options": {
+        "A": "Os sacrum",
+        "B": "Costa X sinistra, pars posterior",
+        "C": "Costa XI dextra",
+        "D": "Textus mollis praevertebralis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI077",
@@ -843,10 +1375,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gastro-oesophageal junction",
-      "answer_nl": "gastro-oesofageale overgang",
+      "answer_nl": "Junctio gastro-oesophagealis",
       "image": "GI_100/GI_Gastro-oesophageal_junction.jpeg",
       "source_set": "GI_100",
-      "source_question": "77"
+      "source_question": "77",
+      "options": {
+        "A": "Paries anterior gastricus",
+        "B": "Junctio gastro-oesophagealis",
+        "C": "Canalis pyloricus",
+        "D": "Plicae gastricae"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI078",
@@ -854,10 +1393,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Lower oesophageal sphincter",
-      "answer_nl": "onderste oesofagussfincter",
+      "answer_nl": "Musculus sphincter oesophagi inferior",
       "image": "GI_100/GI_Lower_oesophageal_sphincter.jpeg",
       "source_set": "GI_100",
-      "source_question": "78"
+      "source_question": "78",
+      "options": {
+        "A": "Fundus gastricus",
+        "B": "Curvatura major gastrica",
+        "C": "Corpus gastricum",
+        "D": "Musculus sphincter oesophagi inferior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI079",
@@ -865,10 +1411,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Cardia of stomach",
-      "answer_nl": "cardia van de maag",
+      "answer_nl": "Cardia gastrica",
       "image": "GI_100/GI_Cardia_of_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "79"
+      "source_question": "79",
+      "options": {
+        "A": "Fundus gastricus",
+        "B": "Incisura angularis",
+        "C": "Cardia gastrica",
+        "D": "Pylorus"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI080",
@@ -876,10 +1429,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Lesser curvature of stomach",
-      "answer_nl": "kleine curvatuur van de maag",
+      "answer_nl": "Curvatura minor gastrica",
       "image": "GI_100/GI_Lesser_curvature_of_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "80"
+      "source_question": "80",
+      "options": {
+        "A": "Pylorus",
+        "B": "Junctio gastro-oesophagealis",
+        "C": "Plica gastrica corporis gastrici",
+        "D": "Curvatura minor gastrica"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI081",
@@ -887,10 +1447,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Pyloric Sphincter Of Stomach",
-      "answer_nl": "pylorussfincter van de maag",
+      "answer_nl": "Musculus sphincter pyloricus",
       "image": "GI_100/GI_Pyloric_Sphincter_Of_Stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "81"
+      "source_question": "81",
+      "options": {
+        "A": "Musculus sphincter pyloricus",
+        "B": "Junctio gastro-oesophagealis",
+        "C": "Corpus gastricum",
+        "D": "Cardia gastrica"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI082",
@@ -898,10 +1465,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "First part of duodenum",
-      "answer_nl": "eerste deel van het duodenum",
+      "answer_nl": "Pars superior duodeni",
       "image": "GI_100/GI_First_part_of_duodenum.jpeg",
       "source_set": "GI_100",
-      "source_question": "82"
+      "source_question": "82",
+      "options": {
+        "A": "Plicae circulares",
+        "B": "Jejunum",
+        "C": "Mesenterium",
+        "D": "Pars superior duodeni"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI083",
@@ -909,10 +1483,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Pylorus of stomach",
-      "answer_nl": "pylorus van de maag",
+      "answer_nl": "Pylorus",
       "image": "GI_100/GI_Pylorus_of_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "83"
+      "source_question": "83",
+      "options": {
+        "A": "Pylorus",
+        "B": "Curvatura minor gastrica",
+        "C": "Corpus gastricum",
+        "D": "Musculus sphincter oesophagi inferior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI084",
@@ -920,10 +1501,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Greater curvature of the stomach",
-      "answer_nl": "grote curvatuur van de maag",
+      "answer_nl": "Curvatura major gastrica",
       "image": "GI_100/GI_Greater_curvature_of_the_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "84"
+      "source_question": "84",
+      "options": {
+        "A": "Ostium pyloricum",
+        "B": "Curvatura major gastrica",
+        "C": "Fundus gastricus",
+        "D": "Canalis pyloricus"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI085",
@@ -931,10 +1519,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gas bubble in stomach",
-      "answer_nl": "gasbel in de maag",
+      "answer_nl": "Bulla gasea gastrica",
       "image": "GI_100/GI_Gas_bubble_in_stomach.jpeg",
       "source_set": "GI_100",
-      "source_question": "85"
+      "source_question": "85",
+      "options": {
+        "A": "Bulla gasea gastrica",
+        "B": "Plica gastrica corporis gastrici",
+        "C": "Musculus sphincter oesophagi inferior",
+        "D": "Pylorus"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI086",
@@ -942,10 +1537,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Ascending colon",
-      "answer_nl": "colon ascendens",
+      "answer_nl": "Colon ascendens",
       "image": "GI_100/GI_Ascending_colon.jpeg",
       "source_set": "GI_100",
-      "source_question": "86"
+      "source_question": "86",
+      "options": {
+        "A": "Colon ascendens",
+        "B": "Rectum",
+        "C": "Appendix vermiformis",
+        "D": "Colon sigmoideum"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI087",
@@ -953,10 +1555,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Thoracic oesophagus",
-      "answer_nl": "thoracale oesofagus",
+      "answer_nl": "Oesophagus, pars thoracica",
       "image": "GI_100/GI_Thoracic_oesophagus.jpeg",
       "source_set": "GI_100",
-      "source_question": "87"
+      "source_question": "87",
+      "options": {
+        "A": "Oesophagus, pars cervicalis",
+        "B": "Aorta thoracica descendens",
+        "C": "Oesophagus, pars thoracica",
+        "D": "Atrium sinistrum"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI088",
@@ -964,10 +1573,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Rectum",
-      "answer_nl": "rectum",
+      "answer_nl": "Rectum",
       "image": "GI_100/GI_Rectum_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "88"
+      "source_question": "88",
+      "options": {
+        "A": "Rectum",
+        "B": "Appendix vermiformis",
+        "C": "Colon descendens",
+        "D": "Flexura coli dextra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI089",
@@ -975,10 +1591,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Anal canal",
-      "answer_nl": "anaalkanaal",
+      "answer_nl": "Canalis analis",
       "image": "GI_100/GI_Anal_canal_3.jpeg",
       "source_set": "GI_100",
-      "source_question": "89"
+      "source_question": "89",
+      "options": {
+        "A": "Colon transversum",
+        "B": "Flexura coli sinistra",
+        "C": "Canalis analis",
+        "D": "Valvae anales"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI090",
@@ -986,10 +1609,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common bile duct",
-      "answer_nl": "ductus choledochus",
+      "answer_nl": "Ductus choledochus",
       "image": "GI_100/GI_Common_bile_duct_4.jpg",
       "source_set": "GI_100",
-      "source_question": "90"
+      "source_question": "90",
+      "options": {
+        "A": "Fundus vesicae biliaris",
+        "B": "Infundibulum vesicae biliaris",
+        "C": "Ductus choledochus",
+        "D": "Ductus biliaris intrahepaticus dexter"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI091",
@@ -997,10 +1627,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Oesophageal impression from left main bronchus",
-      "answer_nl": "oesofageale impressie door de linker hoofdbronchus",
+      "answer_nl": "Impressio bronchialis oesophagi",
       "image": "GI_100/GI_Oesophageal_impression_from_left_main_bronchus.jpeg",
       "source_set": "GI_100",
-      "source_question": "91"
+      "source_question": "91",
+      "options": {
+        "A": "Impressio atrialis oesophagi",
+        "B": "Atrium sinistrum",
+        "C": "Trachea",
+        "D": "Impressio bronchialis oesophagi"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI092",
@@ -1008,10 +1645,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Oesophageal contour from left atrium impression",
-      "answer_nl": "oesofageale contour door impressie van het linker atrium",
+      "answer_nl": "Impressio atrialis oesophagi",
       "image": "GI_100/GI_Oesophageal_contour_from_left_atrium_impression.jpeg",
       "source_set": "GI_100",
-      "source_question": "92"
+      "source_question": "92",
+      "options": {
+        "A": "Impressio aortica oesophagi",
+        "B": "Impressio atrialis oesophagi",
+        "C": "Bronchus principalis sinister",
+        "D": "Atrium sinistrum"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI093",
@@ -1019,10 +1663,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Replaced right hepatic artery",
-      "answer_nl": "vervangende rechter arteria hepatica",
+      "answer_nl": "Arteria hepatica dextra aberrans",
       "image": "GI_100/GI_Replaced_right_hepatic_artery.jpeg",
       "source_set": "GI_100",
-      "source_question": "93"
+      "source_question": "93",
+      "options": {
+        "A": "Arteria hepatica dextra aberrans",
+        "B": "Arteria phrenica inferior sinistra",
+        "C": "Arteria mesenterica inferior",
+        "D": "Arteria mesenterica superior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI094",
@@ -1030,10 +1681,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Coeliac artery",
-      "answer_nl": "arteria coeliaca",
+      "answer_nl": "Truncus coeliacus",
       "image": "GI_100/GI_Coeliac_artery_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "94"
+      "source_question": "94",
+      "options": {
+        "A": "Arteria splenica",
+        "B": "Arteria suprarenalis media",
+        "C": "Truncus coeliacus",
+        "D": "Arteria gastroduodenalis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI095",
@@ -1041,10 +1699,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common hepatic artery",
-      "answer_nl": "arteria hepatica communis",
+      "answer_nl": "Arteria hepatica communis",
       "image": "GI_100/GI_Common_hepatic_artery_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "95"
+      "source_question": "95",
+      "options": {
+        "A": "Arteria hepatica communis",
+        "B": "Arteria splenica",
+        "C": "Truncus coeliacus",
+        "D": "Arteria pancreaticoduodenalis inferior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI096",
@@ -1052,10 +1717,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right gonadal vein",
-      "answer_nl": "rechter gonadale vene",
+      "answer_nl": "Vena testicularis/ovarica dextra",
       "image": "GI_100/GI_Right_gonadal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "96"
+      "source_question": "96",
+      "options": {
+        "A": "Vena testicularis/ovarica dextra",
+        "B": "Vena lumbalis ascendens sinistra",
+        "C": "Duplicatio venae cavae inferioris",
+        "D": "Vena iliaca externa sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI097",
@@ -1063,10 +1735,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic vein",
-      "answer_nl": "vena splenica",
+      "answer_nl": "Vena splenica",
       "image": "GI_100/GI_Splenic_vein_3.jpeg",
       "source_set": "GI_100",
-      "source_question": "97"
+      "source_question": "97",
+      "options": {
+        "A": "Vena splenica",
+        "B": "Vena gastrica sinistra",
+        "C": "Vena gastro-omentalis dextra",
+        "D": "Vena colica media"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI098",
@@ -1074,10 +1753,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Spleen",
-      "answer_nl": "milt",
+      "answer_nl": "Splen",
       "image": "GI_100/GI_Spleen_3.jpeg",
       "source_set": "GI_100",
-      "source_question": "98"
+      "source_question": "98",
+      "options": {
+        "A": "Facies diaphragmatica splenis",
+        "B": "Facies gastrica splenis",
+        "C": "Margo superior splenis",
+        "D": "Splen"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI099",
@@ -1085,10 +1771,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Replaced right hepatic artery",
-      "answer_nl": "vervangende rechter arteria hepatica",
+      "answer_nl": "Arteria hepatica dextra aberrans",
       "image": "GI_100/GI_Replaced_right_hepatic_artery_2.jpeg",
       "source_set": "GI_100",
-      "source_question": "99"
+      "source_question": "99",
+      "options": {
+        "A": "Arteria splenica",
+        "B": "Truncus coeliacus",
+        "C": "Arteria hepatica dextra aberrans",
+        "D": "Arteria renalis dextra"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI100",
@@ -1096,10 +1789,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left portal vein",
-      "answer_nl": "linker poortadertak",
+      "answer_nl": "Ramus sinister venae portae hepatis",
       "image": "GI_100/GI_Left_portal_vein.jpeg",
       "source_set": "GI_100",
-      "source_question": "100"
+      "source_question": "100",
+      "options": {
+        "A": "Vena mesenterica superior",
+        "B": "Vena gastrica sinistra",
+        "C": "Ramus sinister venae portae hepatis",
+        "D": "Vena pancreaticoduodenalis superior posterior"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI101",
@@ -1107,10 +1807,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Thoracic oesophagus",
-      "answer_nl": "thoracale oesofagus",
+      "answer_nl": "Oesophagus, pars thoracica",
       "image": "GI_20/GI_Thoracic_oesophagus.jpeg",
       "source_set": "GI_20",
-      "source_question": "1"
+      "source_question": "1",
+      "options": {
+        "A": "Oesophagus, pars thoracica",
+        "B": "Trachea",
+        "C": "Arcus aortae",
+        "D": "Bronchus principalis sinister"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI102",
@@ -1118,10 +1825,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Caecum",
-      "answer_nl": "caecum",
+      "answer_nl": "Caecum",
       "image": "GI_20/GI_Caecum.jpeg",
       "source_set": "GI_20",
-      "source_question": "2"
+      "source_question": "2",
+      "options": {
+        "A": "Colon descendens",
+        "B": "Appendix vermiformis",
+        "C": "Junctio anorectalis",
+        "D": "Caecum"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI103",
@@ -1129,10 +1843,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic flexure of large bowel",
-      "answer_nl": "flexura lienalis van het colon",
+      "answer_nl": "Flexura coli sinistra",
       "image": "GI_20/GI_Splenic_flexure_of_large_bowel.jpeg",
       "source_set": "GI_20",
-      "source_question": "3"
+      "source_question": "3",
+      "options": {
+        "A": "Junctio anorectalis",
+        "B": "Flexura coli sinistra",
+        "C": "Taeniae coli",
+        "D": "Ostium ileale"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI104",
@@ -1140,10 +1861,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Extrahepatic portal vein",
-      "answer_nl": "extrahepatische poortader",
+      "answer_nl": "Vena portae hepatis extrahepatica",
       "image": "GI_20/GI_Extrahepatic_portal_vein.jpeg",
       "source_set": "GI_20",
-      "source_question": "4"
+      "source_question": "4",
+      "options": {
+        "A": "Vena portae hepatis extrahepatica",
+        "B": "Vena mesenterica inferior",
+        "C": "Vena pancreaticoduodenalis superior posterior",
+        "D": "Vena gastrica sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI105",
@@ -1151,10 +1879,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gallbladder",
-      "answer_nl": "galblaas",
+      "answer_nl": "Vesica biliaris",
       "image": "GI_20/GI_Gallbladder.jpeg",
       "source_set": "GI_20",
-      "source_question": "5"
+      "source_question": "5",
+      "options": {
+        "A": "Ductus hepaticus dexter",
+        "B": "Ampulla hepatopancreatica",
+        "C": "Musculus sphincter ampullae",
+        "D": "Vesica biliaris"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI106",
@@ -1162,10 +1897,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left external iliac artery",
-      "answer_nl": "linker arteria iliaca externa",
+      "answer_nl": "Arteria iliaca externa sinistra",
       "image": "GI_20/GI_Left_external_iliac_artery.jpeg",
       "source_set": "GI_20",
-      "source_question": "6"
+      "source_question": "6",
+      "options": {
+        "A": "Arteria iliaca interna sinistra",
+        "B": "Arteria sacralis mediana",
+        "C": "Arteria iliaca externa sinistra",
+        "D": "Arteria obturatoria sinistra"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI107",
@@ -1173,10 +1915,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic vein",
-      "answer_nl": "vena splenica",
+      "answer_nl": "Vena splenica",
       "image": "GI_20/GI_Splenic_vein.jpeg",
       "source_set": "GI_20",
-      "source_question": "7"
+      "source_question": "7",
+      "options": {
+        "A": "Vena gastro-omentalis dextra",
+        "B": "Vena portae hepatis intrahepatica",
+        "C": "Ramus dexter venae portae hepatis",
+        "D": "Vena splenica"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI108",
@@ -1184,10 +1933,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Rectum",
-      "answer_nl": "rectum",
+      "answer_nl": "Rectum",
       "image": "GI_20/GI_Rectum.jpeg",
       "source_set": "GI_20",
-      "source_question": "8"
+      "source_question": "8",
+      "options": {
+        "A": "Colon transversum",
+        "B": "Rectum",
+        "C": "Valva ileocaecalis",
+        "D": "Taeniae coli"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI109",
@@ -1195,10 +1951,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Main pancreatic duct",
-      "answer_nl": "ductus pancreaticus principalis",
+      "answer_nl": "Ductus pancreaticus major",
       "image": "GI_20/GI_Main_pancreatic_duct.jpeg",
       "source_set": "GI_20",
-      "source_question": "9"
+      "source_question": "9",
+      "options": {
+        "A": "Vesica biliaris",
+        "B": "Ductus pancreaticus major",
+        "C": "Musculus sphincter ampullae",
+        "D": "Ductus cysticus"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI110",
@@ -1206,10 +1969,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Segment seven of liver",
-      "answer_nl": "zevende leversegment",
+      "answer_nl": "Segmentum hepatis VII",
       "image": "GI_20/GI_Segment_seven_of_liver.jpeg",
       "source_set": "GI_20",
-      "source_question": "10"
+      "source_question": "10",
+      "options": {
+        "A": "Segmentum hepatis VII",
+        "B": "Lobus hepatis dexter",
+        "C": "Fissura ligamenti teretis",
+        "D": "Segmentum hepatis V"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI111",
@@ -1217,10 +1987,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal artery",
-      "answer_nl": "linker arteria renalis",
+      "answer_nl": "Arteria renalis sinistra",
       "image": "GI_20/GI_Left_renal_artery.jpeg",
       "source_set": "GI_20",
-      "source_question": "11"
+      "source_question": "11",
+      "options": {
+        "A": "Arteria hepatica propria",
+        "B": "Arteria renalis sinistra",
+        "C": "Arteria hepatica dextra aberrans",
+        "D": "Arteria gastroduodenalis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI112",
@@ -1228,10 +2005,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Segment seven of liver",
-      "answer_nl": "zevende leversegment",
+      "answer_nl": "Segmentum hepatis VII",
       "image": "GI_20/GI_Segment_seven_of_liver_2.jpeg",
       "source_set": "GI_20",
-      "source_question": "12"
+      "source_question": "12",
+      "options": {
+        "A": "Segmentum hepatis III",
+        "B": "Segmentum hepatis VI",
+        "C": "Segmentum hepatis VII",
+        "D": "Lobus quadratus hepatis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI113",
@@ -1239,10 +2023,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_20/GI_Superior_mesenteric_artery.jpeg",
       "source_set": "GI_20",
-      "source_question": "13"
+      "source_question": "13",
+      "options": {
+        "A": "Truncus coeliacus",
+        "B": "Arteria mesenterica superior",
+        "C": "Arteria gastrica dextra",
+        "D": "Arteria suprarenalis media"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI114",
@@ -1250,10 +2041,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Segment seven of liver",
-      "answer_nl": "zevende leversegment",
+      "answer_nl": "Segmentum hepatis VII",
       "image": "GI_20/GI_Segment_seven_of_liver_3.jpeg",
       "source_set": "GI_20",
-      "source_question": "14"
+      "source_question": "14",
+      "options": {
+        "A": "Segmentum hepatis VIII",
+        "B": "Segmentum hepatis V",
+        "C": "Ligamentum teres hepatis",
+        "D": "Segmentum hepatis VII"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI115",
@@ -1261,10 +2059,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Spleen",
-      "answer_nl": "milt",
+      "answer_nl": "Splen",
       "image": "GI_20/GI_Spleen.jpeg",
       "source_set": "GI_20",
-      "source_question": "15"
+      "source_question": "15",
+      "options": {
+        "A": "Splen",
+        "B": "Facies gastrica splenis",
+        "C": "Facies diaphragmatica splenis",
+        "D": "Margo superior splenis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI116",
@@ -1272,10 +2077,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_20/GI_Inferior_vena_cava.jpeg",
       "source_set": "GI_20",
-      "source_question": "16"
+      "source_question": "16",
+      "options": {
+        "A": "Vena iliaca externa sinistra",
+        "B": "Vena iliaca communis sinistra",
+        "C": "Vena cava inferior",
+        "D": "Vena cava superior"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI117",
@@ -1283,10 +2095,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior mesenteric artery",
-      "answer_nl": "arteria mesenterica inferior",
+      "answer_nl": "Arteria mesenterica inferior",
       "image": "GI_20/GI_Inferior_mesenteric_artery.jpeg",
       "source_set": "GI_20",
-      "source_question": "17"
+      "source_question": "17",
+      "options": {
+        "A": "Arteria renalis sinistra",
+        "B": "Arteria colica media",
+        "C": "Aorta abdominalis",
+        "D": "Arteria mesenterica inferior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI118",
@@ -1294,10 +2113,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal artery",
-      "answer_nl": "linker arteria renalis",
+      "answer_nl": "Arteria renalis sinistra",
       "image": "GI_20/GI_Left_renal_artery_2.jpeg",
       "source_set": "GI_20",
-      "source_question": "18"
+      "source_question": "18",
+      "options": {
+        "A": "Aorta abdominalis",
+        "B": "Arteriae lumbales",
+        "C": "Arteria colica media",
+        "D": "Arteria renalis sinistra"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI119",
@@ -1305,10 +2131,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior mesenteric artery",
-      "answer_nl": "arteria mesenterica inferior",
+      "answer_nl": "Arteria mesenterica inferior",
       "image": "GI_20/GI_Inferior_mesenteric_artery_2.jpeg",
       "source_set": "GI_20",
-      "source_question": "19"
+      "source_question": "19",
+      "options": {
+        "A": "Arteria hepatica propria",
+        "B": "Aorta abdominalis",
+        "C": "Truncus coeliacomesentericus",
+        "D": "Arteria mesenterica inferior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI120",
@@ -1316,10 +2149,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Duplication of the inferior vena cava",
-      "answer_nl": "duplicatie van de vena cava inferior",
+      "answer_nl": "Duplicatio venae cavae inferioris",
       "image": "GI_20/GI_Duplication_of_the_inferior_vena_cava.jpeg",
       "source_set": "GI_20",
-      "source_question": "20"
+      "source_question": "20",
+      "options": {
+        "A": "Vena renalis sinistra retroaortica",
+        "B": "Vena hemiazygos",
+        "C": "Duplicatio venae cavae inferioris",
+        "D": "Vena testicularis/ovarica dextra"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI121",
@@ -1327,10 +2167,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Thoracic oesophagus",
-      "answer_nl": "thoracale oesofagus",
+      "answer_nl": "Oesophagus, pars thoracica",
       "image": "GI_30/GI_Thoracic_oesophagus.jpeg",
       "source_set": "GI_30",
-      "source_question": "1"
+      "source_question": "1",
+      "options": {
+        "A": "Trachea",
+        "B": "Oesophagus, pars abdominalis",
+        "C": "Oesophagus, pars thoracica",
+        "D": "Atrium sinistrum"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI122",
@@ -1338,10 +2185,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Terminal Ileum",
-      "answer_nl": "terminale ileum",
+      "answer_nl": "Ileum terminale",
       "image": "GI_30/GI_Terminal_Ileum.jpeg",
       "source_set": "GI_30",
-      "source_question": "2"
+      "source_question": "2",
+      "options": {
+        "A": "Pars horizontalis duodeni",
+        "B": "Bulbus duodeni",
+        "C": "Pars ascendens duodeni",
+        "D": "Ileum terminale"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI123",
@@ -1349,10 +2203,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Abdominal aorta",
-      "answer_nl": "abdominale aorta",
+      "answer_nl": "Aorta abdominalis",
       "image": "GI_30/GI_Abdominal_aorta.jpeg",
       "source_set": "GI_30",
-      "source_question": "3"
+      "source_question": "3",
+      "options": {
+        "A": "Aorta abdominalis",
+        "B": "Arteria hepatica communis",
+        "C": "Arteria gastroduodenalis",
+        "D": "Truncus coeliacomesentericus"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI124",
@@ -1360,10 +2221,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Body of pancreas",
-      "answer_nl": "corpus van de pancreas",
+      "answer_nl": "Corpus pancreatis",
       "image": "GI_30/GI_Body_of_pancreas.jpeg",
       "source_set": "GI_30",
-      "source_question": "4"
+      "source_question": "4",
+      "options": {
+        "A": "Collum pancreatis",
+        "B": "Incisura pancreatis",
+        "C": "Tuber omentale pancreatis",
+        "D": "Corpus pancreatis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI125",
@@ -1371,10 +2239,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left inferior gluteal artery",
-      "answer_nl": "linker arteria glutea inferior",
+      "answer_nl": "Arteria glutea inferior sinistra",
       "image": "GI_30/GI_Left_inferior_gluteal_artery.jpeg",
       "source_set": "GI_30",
-      "source_question": "5"
+      "source_question": "5",
+      "options": {
+        "A": "Arteria sacralis mediana",
+        "B": "Arteria glutea inferior sinistra",
+        "C": "Arteria umbilicalis sinistra",
+        "D": "Arteria glutea superior sinistra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI126",
@@ -1382,10 +2257,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior mesenteric artery",
-      "answer_nl": "arteria mesenterica inferior",
+      "answer_nl": "Arteria mesenterica inferior",
       "image": "GI_30/GI_Inferior_mesenteric_artery.jpeg",
       "source_set": "GI_30",
-      "source_question": "6"
+      "source_question": "6",
+      "options": {
+        "A": "Arteria pancreaticoduodenalis inferior",
+        "B": "Aorta abdominalis",
+        "C": "Arteria hepatica propria",
+        "D": "Arteria mesenterica inferior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI127",
@@ -1393,10 +2275,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left internal iliac artery",
-      "answer_nl": "linker arteria iliaca interna",
+      "answer_nl": "Arteria iliaca interna sinistra",
       "image": "GI_30/GI_Left_internal_iliac_artery.jpeg",
       "source_set": "GI_30",
-      "source_question": "7"
+      "source_question": "7",
+      "options": {
+        "A": "Arteria iliaca communis dextra",
+        "B": "Arteria sacralis mediana",
+        "C": "Arteria iliaca interna sinistra",
+        "D": "Ramus posterior arteriae iliacae internae sinistrae"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI128",
@@ -1404,10 +2293,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_30/GI_Superior_mesenteric_artery.jpeg",
       "source_set": "GI_30",
-      "source_question": "8"
+      "source_question": "8",
+      "options": {
+        "A": "Arteria mesenterica superior",
+        "B": "Arteria gastroduodenalis",
+        "C": "Arteria mesenterica inferior",
+        "D": "Arteria suprarenalis media"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI129",
@@ -1415,10 +2311,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right diaphragmatic crus",
-      "answer_nl": "rechter crus diaphragmaticum",
+      "answer_nl": "Crus dextrum diaphragmatis",
       "image": "GI_30/GI_Right_diaphragmatic_crus.jpeg",
       "source_set": "GI_30",
-      "source_question": "9"
+      "source_question": "9",
+      "options": {
+        "A": "Hemidiaphragma sinistrum",
+        "B": "Centrum tendineum",
+        "C": "Foramen venae cavae",
+        "D": "Crus dextrum diaphragmatis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI130",
@@ -1426,10 +2329,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Spleen",
-      "answer_nl": "milt",
+      "answer_nl": "Splen",
       "image": "GI_30/GI_Spleen.jpeg",
       "source_set": "GI_30",
-      "source_question": "10"
+      "source_question": "10",
+      "options": {
+        "A": "Facies diaphragmatica splenis",
+        "B": "Splen",
+        "C": "Margo superior splenis",
+        "D": "Facies gastrica splenis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI131",
@@ -1437,10 +2347,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_30/GI_Inferior_vena_cava.jpeg",
       "source_set": "GI_30",
-      "source_question": "11"
+      "source_question": "11",
+      "options": {
+        "A": "Vena testicularis/ovarica dextra",
+        "B": "Vena cava inferior",
+        "C": "Vena renalis sinistra",
+        "D": "Vena iliaca externa sinistra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI132",
@@ -1448,10 +2365,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right common iliac artery",
-      "answer_nl": "rechter arteria iliaca communis",
+      "answer_nl": "Arteria iliaca communis dextra",
       "image": "GI_30/GI_Right_common_iliac_artery.jpeg",
       "source_set": "GI_30",
-      "source_question": "12"
+      "source_question": "12",
+      "options": {
+        "A": "Arteria iliaca interna sinistra",
+        "B": "Arteria iliaca communis dextra",
+        "C": "Arteria iliaca communis sinistra",
+        "D": "Arteria umbilicalis sinistra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI133",
@@ -1459,10 +2383,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left common iliac artery",
-      "answer_nl": "linker arteria iliaca communis",
+      "answer_nl": "Arteria iliaca communis sinistra",
       "image": "GI_30/GI_Left_common_iliac_artery.jpeg",
       "source_set": "GI_30",
-      "source_question": "13"
+      "source_question": "13",
+      "options": {
+        "A": "Arteria iliaca communis dextra",
+        "B": "Arteria obturatoria sinistra",
+        "C": "Arteria iliaca communis sinistra",
+        "D": "Arteria iliaca interna sinistra"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI134",
@@ -1470,10 +2401,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right main branch of portal vein",
-      "answer_nl": "rechter hoofdstam van de poortader",
+      "answer_nl": "Ramus dexter venae portae hepatis",
       "image": "GI_30/GI_Right_main_branch_of_portal_vein.jpeg",
       "source_set": "GI_30",
-      "source_question": "14"
+      "source_question": "14",
+      "options": {
+        "A": "Ramus dexter venae portae hepatis",
+        "B": "Vena mesenterica superior",
+        "C": "Vena splenica",
+        "D": "Vena gastro-omentalis dextra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI135",
@@ -1481,10 +2419,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right hemidiaphragm",
-      "answer_nl": "rechter hemidiafragma",
+      "answer_nl": "Hemidiaphragma dextrum",
       "image": "GI_30/GI_Right_hemidiaphragm.jpeg",
       "source_set": "GI_30",
-      "source_question": "15"
+      "source_question": "15",
+      "options": {
+        "A": "Hemidiaphragma dextrum",
+        "B": "Centrum tendineum",
+        "C": "Ligamentum arcuatum medianum",
+        "D": "Foramen venae cavae"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI136",
@@ -1492,10 +2437,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Abdominal aorta",
-      "answer_nl": "abdominale aorta",
+      "answer_nl": "Aorta abdominalis",
       "image": "GI_30/GI_Abdominal_aorta_2.jpeg",
       "source_set": "GI_30",
-      "source_question": "16"
+      "source_question": "16",
+      "options": {
+        "A": "Truncus coeliacus",
+        "B": "Arteria mesenterica superior",
+        "C": "Arteria pancreaticoduodenalis inferior",
+        "D": "Aorta abdominalis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI137",
@@ -1503,10 +2455,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal vein",
-      "answer_nl": "linker vena renalis",
+      "answer_nl": "Vena renalis sinistra",
       "image": "GI_30/GI_Left_renal_vein.jpeg",
       "source_set": "GI_30",
-      "source_question": "17"
+      "source_question": "17",
+      "options": {
+        "A": "Vena testicularis/ovarica sinistra",
+        "B": "Duplicatio venae cavae inferioris",
+        "C": "Vena renalis sinistra",
+        "D": "Transpositio venae cavae inferioris"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI138",
@@ -1514,10 +2473,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gallbladder",
-      "answer_nl": "galblaas",
+      "answer_nl": "Vesica biliaris",
       "image": "GI_30/GI_Gallbladder.jpeg",
       "source_set": "GI_30",
-      "source_question": "18"
+      "source_question": "18",
+      "options": {
+        "A": "Vesica biliaris",
+        "B": "Ductus hepaticus dexter",
+        "C": "Musculus sphincter ampullae",
+        "D": "Ductus pancreaticus major"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI139",
@@ -1525,10 +2491,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Extrahepatic portal vein",
-      "answer_nl": "extrahepatische poortader",
+      "answer_nl": "Vena portae hepatis extrahepatica",
       "image": "GI_30/GI_Extrahepatic_portal_vein.jpeg",
       "source_set": "GI_30",
-      "source_question": "19"
+      "source_question": "19",
+      "options": {
+        "A": "Ramus anterior venae portae dextrae",
+        "B": "Ramus dexter venae portae hepatis",
+        "C": "Vena pancreaticoduodenalis superior posterior",
+        "D": "Vena portae hepatis extrahepatica"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI140",
@@ -1536,10 +2509,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Fundus of stomach",
-      "answer_nl": "fundus van de maag",
+      "answer_nl": "Fundus gastricus",
       "image": "GI_30/GI_Fundus_of_stomach.jpeg",
       "source_set": "GI_30",
-      "source_question": "20"
+      "source_question": "20",
+      "options": {
+        "A": "Bulla gasea gastrica",
+        "B": "Fundus gastricus",
+        "C": "Plicae gastricae",
+        "D": "Musculus sphincter oesophagi inferior"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI141",
@@ -1547,10 +2527,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending portion of duodenum",
-      "answer_nl": "dalend deel van het duodenum",
+      "answer_nl": "Pars descendens duodeni",
       "image": "GI_30/GI_Descending_portion_of_duodenum.jpeg",
       "source_set": "GI_30",
-      "source_question": "21"
+      "source_question": "21",
+      "options": {
+        "A": "Pars descendens duodeni",
+        "B": "Pars horizontalis duodeni",
+        "C": "Mesenterium",
+        "D": "Pars superior duodeni"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI142",
@@ -1558,10 +2545,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending portion of duodenum",
-      "answer_nl": "dalend deel van het duodenum",
+      "answer_nl": "Pars descendens duodeni",
       "image": "GI_30/GI_Descending_portion_of_duodenum_2.jpeg",
       "source_set": "GI_30",
-      "source_question": "22"
+      "source_question": "22",
+      "options": {
+        "A": "Pars descendens duodeni",
+        "B": "Mesenterium",
+        "C": "Ansae intestini tenuis",
+        "D": "Flexura duodenojejunalis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI143",
@@ -1569,10 +2563,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Antrum Of Stomach",
-      "answer_nl": "antrum van de maag",
+      "answer_nl": "Antrum pyloricum",
       "image": "GI_30/GI_Antrum_Of_Stomach.jpeg",
       "source_set": "GI_30",
-      "source_question": "23"
+      "source_question": "23",
+      "options": {
+        "A": "Paries anterior gastricus",
+        "B": "Plica gastrica corporis gastrici",
+        "C": "Antrum pyloricum",
+        "D": "Bulla gasea gastrica"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI144",
@@ -1580,10 +2581,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending colon",
-      "answer_nl": "colon descendens",
+      "answer_nl": "Colon descendens",
       "image": "GI_30/GI_Descending_colon.jpeg",
       "source_set": "GI_30",
-      "source_question": "24"
+      "source_question": "24",
+      "options": {
+        "A": "Valvae anales",
+        "B": "Colon descendens",
+        "C": "Caecum",
+        "D": "Taeniae coli"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI145",
@@ -1591,10 +2599,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Prevertebral Soft Tissue",
-      "answer_nl": "prevertecale weke delen",
+      "answer_nl": "Textus mollis praevertebralis",
       "image": "GI_30/GI_Prevertebral_Soft_Tissue.jpeg",
       "source_set": "GI_30",
-      "source_question": "25"
+      "source_question": "25",
+      "options": {
+        "A": "Costa XII dextra",
+        "B": "Processus transversus",
+        "C": "Textus mollis praevertebralis",
+        "D": "Corpus vertebrae sacralis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI146",
@@ -1602,10 +2617,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Urinary bladder",
-      "answer_nl": "urineblaas",
+      "answer_nl": "Vesica urinaria",
       "image": "GI_30/GI_Urinary_bladder.jpeg",
       "source_set": "GI_30",
-      "source_question": "26"
+      "source_question": "26",
+      "options": {
+        "A": "Peritoneum parietale dextrum",
+        "B": "Uterus",
+        "C": "Vesica urinaria",
+        "D": "Spatium pararenale anterius"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI147",
@@ -1613,10 +2635,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Oesophageal contour from aortic arch impression",
-      "answer_nl": "oesofageale contour door impressie van de aortaboog",
+      "answer_nl": "Impressio aortica oesophagi",
       "image": "GI_30/GI_Oesophageal_contour_from_aortic_arch_impression.jpeg",
       "source_set": "GI_30",
-      "source_question": "27"
+      "source_question": "27",
+      "options": {
+        "A": "Impressio aortica oesophagi",
+        "B": "Aorta thoracica descendens",
+        "C": "Impressio atrialis oesophagi",
+        "D": "Bronchus principalis sinister"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI148",
@@ -1624,10 +2653,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic artery",
-      "answer_nl": "arteria splenica",
+      "answer_nl": "Arteria splenica",
       "image": "GI_30/GI_Splenic_artery.jpeg",
       "source_set": "GI_30",
-      "source_question": "28"
+      "source_question": "28",
+      "options": {
+        "A": "Arteria suprarenalis media",
+        "B": "Arteria gastrica sinistra",
+        "C": "Arteria hepatica dextra aberrans",
+        "D": "Arteria splenica"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI149",
@@ -1635,10 +2671,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Retroaortic left renal vein",
-      "answer_nl": "retroaortale linker vena renalis",
+      "answer_nl": "Vena renalis sinistra retroaortica",
       "image": "GI_30/GI_Retroaortic_left_renal_vein.jpeg",
       "source_set": "GI_30",
-      "source_question": "29"
+      "source_question": "29",
+      "options": {
+        "A": "Vena iliaca externa sinistra",
+        "B": "Vena iliaca communis sinistra",
+        "C": "Vena renalis sinistra retroaortica",
+        "D": "Duplicatio venae cavae inferioris"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI150",
@@ -1646,10 +2689,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Duplication of the inferior vena cava",
-      "answer_nl": "duplicatie van de vena cava inferior",
+      "answer_nl": "Duplicatio venae cavae inferioris",
       "image": "GI_30/GI_Duplication_of_the_inferior_vena_cava.jpeg",
       "source_set": "GI_30",
-      "source_question": "30"
+      "source_question": "30",
+      "options": {
+        "A": "Vena hemiazygos",
+        "B": "Duplicatio venae cavae inferioris",
+        "C": "Vena azygos",
+        "D": "Vena renalis dextra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI151",
@@ -1657,10 +2707,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gallbladder",
-      "answer_nl": "galblaas",
+      "answer_nl": "Vesica biliaris",
       "image": "GI_98/GI_Gallbladder.jpeg",
       "source_set": "GI_98",
-      "source_question": "1"
+      "source_question": "1",
+      "options": {
+        "A": "Musculus sphincter ampullae",
+        "B": "Ductus choledochus",
+        "C": "Ductus pancreaticus major",
+        "D": "Vesica biliaris"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI152",
@@ -1668,10 +2725,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Thoracic oesophagus",
-      "answer_nl": "thoracale oesofagus",
+      "answer_nl": "Oesophagus, pars thoracica",
       "image": "GI_98/GI_Thoracic_oesophagus.jpeg",
       "source_set": "GI_98",
-      "source_question": "2"
+      "source_question": "2",
+      "options": {
+        "A": "Bronchus principalis sinister",
+        "B": "Oesophagus, pars thoracica",
+        "C": "Oesophagus, pars cervicalis",
+        "D": "Impressio bronchialis oesophagi"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI153",
@@ -1679,10 +2743,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Small intestine loops",
-      "answer_nl": "darmlissen van de dunne darm",
+      "answer_nl": "Ansae intestini tenuis",
       "image": "GI_98/GI_Small_intestine_loops.jpeg",
       "source_set": "GI_98",
-      "source_question": "3"
+      "source_question": "3",
+      "options": {
+        "A": "Flexura duodenojejunalis",
+        "B": "Pars descendens duodeni",
+        "C": "Ansae intestini tenuis",
+        "D": "Ileum terminale"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI154",
@@ -1690,10 +2761,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left external oblique",
-      "answer_nl": "linker musculus obliquus externus abdominis",
+      "answer_nl": "Musculus obliquus externus abdominis sinister",
       "image": "GI_98/GI_Left_external_oblique.jpeg",
       "source_set": "GI_98",
-      "source_question": "4"
+      "source_question": "4",
+      "options": {
+        "A": "Musculus rectus abdominis sinister",
+        "B": "Musculus obliquus externus abdominis dexter",
+        "C": "Linea arcuata",
+        "D": "Musculus obliquus externus abdominis sinister"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI155",
@@ -1701,10 +2779,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left internal oblique",
-      "answer_nl": "linker musculus obliquus internus abdominis",
+      "answer_nl": "Musculus obliquus internus abdominis sinister",
       "image": "GI_98/GI_Left_internal_oblique.jpeg",
       "source_set": "GI_98",
-      "source_question": "5"
+      "source_question": "5",
+      "options": {
+        "A": "Musculus obliquus internus abdominis sinister",
+        "B": "Musculus transversus abdominis dexter",
+        "C": "Musculus iliacus sinister",
+        "D": "Musculus transversus abdominis sinister"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI156",
@@ -1712,10 +2797,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Small Bowel Mesenteric Vessels",
-      "answer_nl": "mesenteriale vaten van de dunne darm",
+      "answer_nl": "Vasa mesenterica intestini tenuis",
       "image": "GI_98/GI_Small_Bowel_Mesenteric_Vessels.jpeg",
       "source_set": "GI_98",
-      "source_question": "6"
+      "source_question": "6",
+      "options": {
+        "A": "Bulbus duodeni",
+        "B": "Vasa mesenterica intestini tenuis",
+        "C": "Pars descendens duodeni",
+        "D": "Jejunum"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI157",
@@ -1723,10 +2815,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Greater curvature of stomach",
-      "answer_nl": "grote curvatuur van de maag",
+      "answer_nl": "Curvatura major gastrica",
       "image": "GI_98/GI_Greater_curvature_of_stomach.jpeg",
       "source_set": "GI_98",
-      "source_question": "7"
+      "source_question": "7",
+      "options": {
+        "A": "Plicae gastricae",
+        "B": "Incisura angularis",
+        "C": "Curvatura major gastrica",
+        "D": "Cardia gastrica"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI158",
@@ -1734,10 +2833,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Hilum Of The Spleen",
-      "answer_nl": "hilum van de milt",
+      "answer_nl": "Hilum splenicum",
       "image": "GI_98/GI_Hilum_Of_The_Spleen.jpeg",
       "source_set": "GI_98",
-      "source_question": "8"
+      "source_question": "8",
+      "options": {
+        "A": "Facies gastrica splenis",
+        "B": "Facies diaphragmatica splenis",
+        "C": "Margo superior splenis",
+        "D": "Hilum splenicum"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI159",
@@ -1745,10 +2851,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Head of pancreas",
-      "answer_nl": "caput van de pancreas",
+      "answer_nl": "Caput pancreatis",
       "image": "GI_98/GI_Head_of_pancreas.jpeg",
       "source_set": "GI_98",
-      "source_question": "9"
+      "source_question": "9",
+      "options": {
+        "A": "Incisura pancreatis",
+        "B": "Cauda pancreatis",
+        "C": "Caput pancreatis",
+        "D": "Tuber omentale pancreatis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI160",
@@ -1756,10 +2869,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Falciform ligament of the liver",
-      "answer_nl": "ligamentum falciforme van de lever",
+      "answer_nl": "Ligamentum falciforme hepatis",
       "image": "GI_98/GI_Falciform_ligament_of_the_liver.jpeg",
       "source_set": "GI_98",
-      "source_question": "10"
+      "source_question": "10",
+      "options": {
+        "A": "Ligamentum falciforme hepatis",
+        "B": "Segmentum hepatis III",
+        "C": "Segmentum hepatis II",
+        "D": "Lobus hepatis sinister"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI161",
@@ -1767,10 +2887,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Hilum Of The Spleen",
-      "answer_nl": "hilum van de milt",
+      "answer_nl": "Hilum splenicum",
       "image": "GI_98/GI_Hilum_Of_The_Spleen_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "11"
+      "source_question": "11",
+      "options": {
+        "A": "Margo superior splenis",
+        "B": "Hilum splenicum",
+        "C": "Facies diaphragmatica splenis",
+        "D": "Facies gastrica splenis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI162",
@@ -1778,10 +2905,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_98/GI_Inferior_vena_cava.jpeg",
       "source_set": "GI_98",
-      "source_question": "12"
+      "source_question": "12",
+      "options": {
+        "A": "Vena testicularis/ovarica dextra",
+        "B": "Vena iliaca communis dextra",
+        "C": "Vena cava inferior",
+        "D": "Vena renalis sinistra retroaortica"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI163",
@@ -1789,10 +2923,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Tail of pancreas",
-      "answer_nl": "cauda van de pancreas",
+      "answer_nl": "Cauda pancreatis",
       "image": "GI_98/GI_Tail_of_pancreas.jpeg",
       "source_set": "GI_98",
-      "source_question": "13"
+      "source_question": "13",
+      "options": {
+        "A": "Processus uncinatus pancreatis",
+        "B": "Facies posterior pancreatis",
+        "C": "Cauda pancreatis",
+        "D": "Tuber omentale pancreatis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI164",
@@ -1800,10 +2941,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Hilum Of The Spleen",
-      "answer_nl": "hilum van de milt",
+      "answer_nl": "Hilum splenicum",
       "image": "GI_98/GI_Hilum_Of_The_Spleen_3.jpeg",
       "source_set": "GI_98",
-      "source_question": "14"
+      "source_question": "14",
+      "options": {
+        "A": "Hilum splenicum",
+        "B": "Facies diaphragmatica splenis",
+        "C": "Margo superior splenis",
+        "D": "Facies gastrica splenis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI165",
@@ -1811,10 +2959,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right external oblique",
-      "answer_nl": "rechter musculus obliquus externus abdominis",
+      "answer_nl": "Musculus obliquus externus abdominis dexter",
       "image": "GI_98/GI_Right_external_oblique.jpeg",
       "source_set": "GI_98",
-      "source_question": "15"
+      "source_question": "15",
+      "options": {
+        "A": "Musculus obliquus externus abdominis dexter",
+        "B": "Musculus transversus abdominis sinister",
+        "C": "Musculus rectus abdominis sinister",
+        "D": "Fascia transversalis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI166",
@@ -1822,10 +2977,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Hilum Of The Spleen",
-      "answer_nl": "hilum van de milt",
+      "answer_nl": "Hilum splenicum",
       "image": "GI_98/GI_Hilum_Of_The_Spleen_4.jpeg",
       "source_set": "GI_98",
-      "source_question": "16"
+      "source_question": "16",
+      "options": {
+        "A": "Facies gastrica splenis",
+        "B": "Facies diaphragmatica splenis",
+        "C": "Hilum splenicum",
+        "D": "Margo superior splenis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI167",
@@ -1833,10 +2995,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Urinary bladder",
-      "answer_nl": "urineblaas",
+      "answer_nl": "Vesica urinaria",
       "image": "GI_98/GI_Urinary_bladder.jpeg",
       "source_set": "GI_98",
-      "source_question": "17"
+      "source_question": "17",
+      "options": {
+        "A": "Fossa ischioanalis dextra",
+        "B": "Vesica urinaria",
+        "C": "Ligamentum rectouterinum sinistrum",
+        "D": "Vesicula seminalis sinistra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI168",
@@ -1844,10 +3013,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right inguinal canal",
-      "answer_nl": "rechter canalis inguinalis",
+      "answer_nl": "Canalis inguinalis dexter",
       "image": "GI_98/GI_Right_inguinal_canal.jpeg",
       "source_set": "GI_98",
-      "source_question": "18"
+      "source_question": "18",
+      "options": {
+        "A": "Canalis inguinalis dexter",
+        "B": "Ligamentum inguinale dextrum",
+        "C": "Musculus iliacus sinister",
+        "D": "Musculus transversus abdominis dexter"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI169",
@@ -1855,10 +3031,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Transverse colon",
-      "answer_nl": "colon transversum",
+      "answer_nl": "Colon transversum",
       "image": "GI_98/GI_Transverse_colon.jpeg",
       "source_set": "GI_98",
-      "source_question": "19"
+      "source_question": "19",
+      "options": {
+        "A": "Appendices omentales",
+        "B": "Flexura coli dextra",
+        "C": "Taeniae coli",
+        "D": "Colon transversum"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI170",
@@ -1866,10 +3049,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Horizontal portion of duodenum",
-      "answer_nl": "horizontaal deel van het duodenum",
+      "answer_nl": "Pars horizontalis duodeni",
       "image": "GI_98/GI_Horizontal_portion_of_duodenum.jpeg",
       "source_set": "GI_98",
-      "source_question": "20"
+      "source_question": "20",
+      "options": {
+        "A": "Pars horizontalis duodeni",
+        "B": "Pars ascendens duodeni",
+        "C": "Flexura duodenojejunalis",
+        "D": "Bulbus duodeni"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI171",
@@ -1877,10 +3067,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left psoas major",
-      "answer_nl": "linker musculus psoas major",
+      "answer_nl": "Musculus psoas major sinister",
       "image": "GI_98/GI_Left_psoas_major.jpeg",
       "source_set": "GI_98",
-      "source_question": "21"
+      "source_question": "21",
+      "options": {
+        "A": "Musculus iliacus sinister",
+        "B": "Fascia transversalis",
+        "C": "Musculus psoas major sinister",
+        "D": "Musculus rectus abdominis dexter"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI172",
@@ -1888,10 +3085,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Transverse colon",
-      "answer_nl": "colon transversum",
+      "answer_nl": "Colon transversum",
       "image": "GI_98/GI_Transverse_colon_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "22"
+      "source_question": "22",
+      "options": {
+        "A": "Colon descendens",
+        "B": "Flexura coli sinistra",
+        "C": "Taeniae coli",
+        "D": "Colon transversum"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI173",
@@ -1899,10 +3103,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Tail of pancreas",
-      "answer_nl": "cauda van de pancreas",
+      "answer_nl": "Cauda pancreatis",
       "image": "GI_98/GI_Tail_of_pancreas_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "23"
+      "source_question": "23",
+      "options": {
+        "A": "Caput pancreatis",
+        "B": "Facies posterior pancreatis",
+        "C": "Cauda pancreatis",
+        "D": "Incisura pancreatis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI174",
@@ -1910,10 +3121,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Transverse colon",
-      "answer_nl": "colon transversum",
+      "answer_nl": "Colon transversum",
       "image": "GI_98/GI_Transverse_colon_3.jpeg",
       "source_set": "GI_98",
-      "source_question": "24"
+      "source_question": "24",
+      "options": {
+        "A": "Taeniae coli",
+        "B": "Valvae anales",
+        "C": "Flexura coli sinistra",
+        "D": "Colon transversum"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI175",
@@ -1921,10 +3139,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left psoas minor",
-      "answer_nl": "linker musculus psoas minor",
+      "answer_nl": "Musculus psoas minor sinister",
       "image": "GI_98/GI_Left_psoas_minor.jpeg",
       "source_set": "GI_98",
-      "source_question": "25"
+      "source_question": "25",
+      "options": {
+        "A": "Musculus quadratus lumborum sinister",
+        "B": "Musculus psoas minor sinister",
+        "C": "Canalis inguinalis dexter",
+        "D": "Vagina musculi recti abdominis posterior dextra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI176",
@@ -1932,10 +3157,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left psoas minor",
-      "answer_nl": "linker musculus psoas minor",
+      "answer_nl": "Musculus psoas minor sinister",
       "image": "GI_98/GI_Left_psoas_minor_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "26"
+      "source_question": "26",
+      "options": {
+        "A": "Musculus quadratus lumborum sinister",
+        "B": "Musculus obliquus externus abdominis dexter",
+        "C": "Musculus rectus abdominis sinister",
+        "D": "Musculus psoas minor sinister"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI177",
@@ -1943,10 +3175,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Coeliac artery",
-      "answer_nl": "arteria coeliaca",
+      "answer_nl": "Truncus coeliacus",
       "image": "GI_98/GI_Coeliac_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "27"
+      "source_question": "27",
+      "options": {
+        "A": "Arteria gastrica sinistra",
+        "B": "Truncus coeliacus",
+        "C": "Arteriae lumbales",
+        "D": "Arteria gastrica dextra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI178",
@@ -1954,10 +3193,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior Mesenteric Artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_98/GI_Superior_Mesenteric_Artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "30"
+      "source_question": "30",
+      "options": {
+        "A": "Arteria suprarenalis media",
+        "B": "Arteria hepatica dextra aberrans",
+        "C": "Arteria renalis dextra",
+        "D": "Arteria mesenterica superior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI179",
@@ -1965,10 +3211,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal vein",
-      "answer_nl": "linker vena renalis",
+      "answer_nl": "Vena renalis sinistra",
       "image": "GI_98/GI_Left_renal_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "31"
+      "source_question": "31",
+      "options": {
+        "A": "Vena renalis sinistra",
+        "B": "Vena azygos",
+        "C": "Vena cava inferior",
+        "D": "Vena lumbalis ascendens sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI180",
@@ -1976,10 +3229,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_98/GI_Superior_mesenteric_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "32"
+      "source_question": "32",
+      "options": {
+        "A": "Arteria hepatica propria",
+        "B": "Arteria colica media",
+        "C": "Arteria mesenterica superior",
+        "D": "Arteria phrenica inferior sinistra"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI181",
@@ -1987,10 +3247,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic artery",
-      "answer_nl": "arteria splenica",
+      "answer_nl": "Arteria splenica",
       "image": "GI_98/GI_Splenic_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "33"
+      "source_question": "33",
+      "options": {
+        "A": "Arteria hepatica dextra aberrans",
+        "B": "Arteria splenica",
+        "C": "Truncus coeliacus",
+        "D": "Arteria gastrica dextra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI182",
@@ -1998,10 +3265,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic artery",
-      "answer_nl": "arteria splenica",
+      "answer_nl": "Arteria splenica",
       "image": "GI_98/GI_Splenic_artery_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "34"
+      "source_question": "34",
+      "options": {
+        "A": "Arteria gastroduodenalis",
+        "B": "Arteria splenica",
+        "C": "Arteria gastrica dextra",
+        "D": "Aorta abdominalis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI183",
@@ -2009,10 +3283,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common coeliacomesenteric trunk",
-      "answer_nl": "truncus coeliacomesentericus",
+      "answer_nl": "Truncus coeliacomesentericus",
       "image": "GI_98/GI_Common_coeliacomesenteric_trunk.jpeg",
       "source_set": "GI_98",
-      "source_question": "35"
+      "source_question": "35",
+      "options": {
+        "A": "Truncus coeliacomesentericus",
+        "B": "Aorta abdominalis",
+        "C": "Arteria colica media",
+        "D": "Arteria splenica"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI184",
@@ -2020,10 +3301,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Rugal Folds Of Stomach",
-      "answer_nl": "rugae van de maag",
+      "answer_nl": "Plicae gastricae",
       "image": "GI_98/GI_Rugal_Folds_Of_Stomach.jpeg",
       "source_set": "GI_98",
-      "source_question": "36"
+      "source_question": "36",
+      "options": {
+        "A": "Corpus gastricum",
+        "B": "Musculus sphincter pyloricus",
+        "C": "Plicae gastricae",
+        "D": "Musculus sphincter oesophagi inferior"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI185",
@@ -2031,10 +3319,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Gallbladder fundus",
-      "answer_nl": "fundus van de galblaas",
+      "answer_nl": "Fundus vesicae biliaris",
       "image": "GI_98/GI_Gallbladder_fundus.jpeg",
       "source_set": "GI_98",
-      "source_question": "37"
+      "source_question": "37",
+      "options": {
+        "A": "Fundus vesicae biliaris",
+        "B": "Ampulla hepatopancreatica",
+        "C": "Ductus cysticus",
+        "D": "Ductus pancreaticus major"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI186",
@@ -2042,10 +3337,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Ligamentum teres hepatis",
-      "answer_nl": "ligamentum teres hepatis",
+      "answer_nl": "Ligamentum teres hepatis",
       "image": "GI_98/GI_Ligamentum_teres_hepatis.jpeg",
       "source_set": "GI_98",
-      "source_question": "38"
+      "source_question": "38",
+      "options": {
+        "A": "Ligamentum teres hepatis",
+        "B": "Segmentum hepatis VII",
+        "C": "Segmentum hepatis III",
+        "D": "Lobus hepatis dexter"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI187",
@@ -2053,10 +3355,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending colon",
-      "answer_nl": "colon descendens",
+      "answer_nl": "Colon descendens",
       "image": "GI_98/GI_Descending_colon.jpeg",
       "source_set": "GI_98",
-      "source_question": "39"
+      "source_question": "39",
+      "options": {
+        "A": "Colon descendens",
+        "B": "Ostium ileale",
+        "C": "Appendix vermiformis",
+        "D": "Rectum"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI188",
@@ -2064,10 +3373,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Perirectal space",
-      "answer_nl": "perirectale ruimte",
+      "answer_nl": "Spatium perirectale",
       "image": "GI_98/GI_Perirectal_space.jpeg",
       "source_set": "GI_98",
-      "source_question": "40"
+      "source_question": "40",
+      "options": {
+        "A": "Glandula suprarenalis sinistra",
+        "B": "Spatium retropubicum",
+        "C": "Peritoneum parietale dextrum",
+        "D": "Spatium perirectale"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI189",
@@ -2075,10 +3391,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left hepatic duct",
-      "answer_nl": "ductus hepaticus sinister",
+      "answer_nl": "Ductus hepaticus sinister",
       "image": "GI_98/GI_Left_hepatic_duct.jpeg",
       "source_set": "GI_98",
-      "source_question": "41"
+      "source_question": "41",
+      "options": {
+        "A": "Ductus pancreaticus minor",
+        "B": "Ductus hepaticus sinister",
+        "C": "Ampulla hepatopancreatica",
+        "D": "Corpus vesicae biliaris"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI190",
@@ -2086,10 +3409,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right intrahepatic bile duct",
-      "answer_nl": "rechter intrahepatische galweg",
+      "answer_nl": "Ductus biliaris intrahepaticus dexter",
       "image": "GI_98/GI_Right_intrahepatic_bile_duct.jpeg",
       "source_set": "GI_98",
-      "source_question": "42"
+      "source_question": "42",
+      "options": {
+        "A": "Ductus biliaris intrahepaticus dexter",
+        "B": "Ductus cysticus",
+        "C": "Collum vesicae biliaris",
+        "D": "Infundibulum vesicae biliaris"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI191",
@@ -2097,10 +3427,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Lumbar intervertebral disc",
-      "answer_nl": "lumbale tussenwervelschijf",
+      "answer_nl": "Discus intervertebralis lumbalis",
       "image": "GI_98/GI_Lumbar_intervertebral_disc.jpeg",
       "source_set": "GI_98",
-      "source_question": "43"
+      "source_question": "43",
+      "options": {
+        "A": "Discus intervertebralis lumbalis",
+        "B": "Costa XII dextra",
+        "C": "Corpus vertebrae lumbalis",
+        "D": "Processus spinosus"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI192",
@@ -2108,10 +3445,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Lower Pole Of The Spleen",
-      "answer_nl": "onderpool van de milt",
+      "answer_nl": "Extremitas inferior splenis",
       "image": "GI_98/GI_Lower_Pole_Of_The_Spleen.jpeg",
       "source_set": "GI_98",
-      "source_question": "44"
+      "source_question": "44",
+      "options": {
+        "A": "Margo superior splenis",
+        "B": "Extremitas inferior splenis",
+        "C": "Facies diaphragmatica splenis",
+        "D": "Facies gastrica splenis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI193",
@@ -2119,10 +3463,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Segment 6 of right hepatic lobe",
-      "answer_nl": "segment 6 van de rechter leverkwab",
+      "answer_nl": "Segmentum hepatis VI",
       "image": "GI_98/GI_Segment_6_of_right_hepatic_lobe.jpeg",
       "source_set": "GI_98",
-      "source_question": "45"
+      "source_question": "45",
+      "options": {
+        "A": "Segmentum hepatis VI",
+        "B": "Lobus quadratus hepatis",
+        "C": "Lobus Riedeli hepatis",
+        "D": "Segmentum hepatis III"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI194",
@@ -2130,10 +3481,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Intrahepatic portal vein",
-      "answer_nl": "intrahepatische poortader",
+      "answer_nl": "Vena portae hepatis intrahepatica",
       "image": "GI_98/GI_Intrahepatic_portal_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "46"
+      "source_question": "46",
+      "options": {
+        "A": "Vena gastro-omentalis dextra",
+        "B": "Vena portae hepatis intrahepatica",
+        "C": "Vena mesenterica superior",
+        "D": "Ramus posterior venae portae dextrae"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI195",
@@ -2141,10 +3499,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right diaphragmatic crus",
-      "answer_nl": "rechter crus diaphragmaticum",
+      "answer_nl": "Crus dextrum diaphragmatis",
       "image": "GI_98/GI_Right_diaphragmatic_crus.jpeg",
       "source_set": "GI_98",
-      "source_question": "47"
+      "source_question": "47",
+      "options": {
+        "A": "Hemidiaphragma sinistrum",
+        "B": "Hiatus oesophageus",
+        "C": "Foramen venae cavae",
+        "D": "Crus dextrum diaphragmatis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI196",
@@ -2152,10 +3517,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left rectus abdominis",
-      "answer_nl": "linker musculus rectus abdominis",
+      "answer_nl": "Musculus rectus abdominis sinister",
       "image": "GI_98/GI_Left_rectus_abdominis.jpeg",
       "source_set": "GI_98",
-      "source_question": "48"
+      "source_question": "48",
+      "options": {
+        "A": "Musculus rectus abdominis dexter",
+        "B": "Linea arcuata",
+        "C": "Musculus rectus abdominis sinister",
+        "D": "Musculus obliquus externus abdominis sinister"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI197",
@@ -2163,10 +3535,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right linea semilunaris",
-      "answer_nl": "rechter linea semilunaris",
+      "answer_nl": "Linea semilunaris dextra",
       "image": "GI_98/GI_Right_linea_semilunaris.jpeg",
       "source_set": "GI_98",
-      "source_question": "49"
+      "source_question": "49",
+      "options": {
+        "A": "Linea semilunaris dextra",
+        "B": "Musculus transversus abdominis sinister",
+        "C": "Musculus quadratus lumborum sinister",
+        "D": "Musculus rectus abdominis sinister"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI198",
@@ -2174,10 +3553,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Sacral vertebral body",
-      "answer_nl": "corpus van een sacrale wervel",
+      "answer_nl": "Corpus vertebrae sacralis",
       "image": "GI_98/GI_Sacral_vertebral_body.jpeg",
       "source_set": "GI_98",
-      "source_question": "50"
+      "source_question": "50",
+      "options": {
+        "A": "Corpus vertebrae lumbalis",
+        "B": "Processus spinosus",
+        "C": "Corpus vertebrae sacralis",
+        "D": "Liquor cerebrospinalis in canali vertebrali"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI199",
@@ -2185,10 +3571,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Ascending colon",
-      "answer_nl": "colon ascendens",
+      "answer_nl": "Colon ascendens",
       "image": "GI_98/GI_Ascending_colon.jpeg",
       "source_set": "GI_98",
-      "source_question": "51"
+      "source_question": "51",
+      "options": {
+        "A": "Colon ascendens",
+        "B": "Ampulla recti",
+        "C": "Colon transversum",
+        "D": "Valva ileocaecalis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI200",
@@ -2196,10 +3589,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Fundus of stomach",
-      "answer_nl": "fundus van de maag",
+      "answer_nl": "Fundus gastricus",
       "image": "GI_98/GI_Fundus_of_stomach.jpeg",
       "source_set": "GI_98",
-      "source_question": "52"
+      "source_question": "52",
+      "options": {
+        "A": "Curvatura major gastrica",
+        "B": "Incisura angularis",
+        "C": "Cardia gastrica",
+        "D": "Fundus gastricus"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI201",
@@ -2207,10 +3607,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left uterosacral ligament",
-      "answer_nl": "linker ligamentum uterosacrale",
+      "answer_nl": "Ligamentum rectouterinum sinistrum",
       "image": "GI_98/GI_Left_uterosacral_ligament.jpeg",
       "source_set": "GI_98",
-      "source_question": "53"
+      "source_question": "53",
+      "options": {
+        "A": "Ligamentum rectouterinum sinistrum",
+        "B": "Vesicula seminalis sinistra",
+        "C": "Spatium perirectale",
+        "D": "Peritoneum parietale dextrum"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI202",
@@ -2218,10 +3625,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Extrahepatic portal vein",
-      "answer_nl": "extrahepatische poortader",
+      "answer_nl": "Vena portae hepatis extrahepatica",
       "image": "GI_98/GI_Extrahepatic_portal_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "54"
+      "source_question": "54",
+      "options": {
+        "A": "Vena mesenterica superior",
+        "B": "Vena gastrica sinistra",
+        "C": "Vena portae hepatis extrahepatica",
+        "D": "Ramus anterior venae portae dextrae"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI203",
@@ -2229,10 +3643,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right peritoneal lining",
-      "answer_nl": "rechter peritoneale bekleding",
+      "answer_nl": "Peritoneum parietale dextrum",
       "image": "GI_98/GI_Right_peritoneal_lining.jpeg",
       "source_set": "GI_98",
-      "source_question": "55"
+      "source_question": "55",
+      "options": {
+        "A": "Glandula suprarenalis dextra",
+        "B": "Peritoneum parietale dextrum",
+        "C": "Uterus",
+        "D": "Vesicula seminalis sinistra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI204",
@@ -2240,10 +3661,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right Upper Pole Renal Cortex",
-      "answer_nl": "niercortex van de rechter bovenpool",
+      "answer_nl": "Cortex renalis poli superioris dextri",
       "image": "GI_98/GI_Right_Upper_Pole_Renal_Cortex.jpeg",
       "source_set": "GI_98",
-      "source_question": "56"
+      "source_question": "56",
+      "options": {
+        "A": "Spatium pararenale anterius",
+        "B": "Vesicula seminalis sinistra",
+        "C": "Fossa ischioanalis dextra",
+        "D": "Cortex renalis poli superioris dextri"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI205",
@@ -2251,10 +3679,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Tail of the pancreas",
-      "answer_nl": "cauda van de pancreas",
+      "answer_nl": "Cauda pancreatis",
       "image": "GI_98/GI_Tail_of_the_pancreas.jpeg",
       "source_set": "GI_98",
-      "source_question": "57"
+      "source_question": "57",
+      "options": {
+        "A": "Corpus pancreatis",
+        "B": "Facies posterior pancreatis",
+        "C": "Cauda pancreatis",
+        "D": "Processus uncinatus pancreatis"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI206",
@@ -2262,10 +3697,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Body of the pancreas",
-      "answer_nl": "corpus van de pancreas",
+      "answer_nl": "Corpus pancreatis",
       "image": "GI_98/GI_Body_of_the_pancreas.jpeg",
       "source_set": "GI_98",
-      "source_question": "58"
+      "source_question": "58",
+      "options": {
+        "A": "Collum pancreatis",
+        "B": "Corpus pancreatis",
+        "C": "Facies posterior pancreatis",
+        "D": "Caput pancreatis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI207",
@@ -2273,10 +3715,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Descending portion of duodenum",
-      "answer_nl": "dalend deel van het duodenum",
+      "answer_nl": "Pars descendens duodeni",
       "image": "GI_98/GI_Descending_portion_of_duodenum.jpeg",
       "source_set": "GI_98",
-      "source_question": "59"
+      "source_question": "59",
+      "options": {
+        "A": "Pars superior duodeni",
+        "B": "Pars descendens duodeni",
+        "C": "Pars ascendens duodeni",
+        "D": "Jejunum"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI208",
@@ -2284,10 +3733,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal artery",
-      "answer_nl": "linker arteria renalis",
+      "answer_nl": "Arteria renalis sinistra",
       "image": "GI_98/GI_Left_renal_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "60"
+      "source_question": "60",
+      "options": {
+        "A": "Arteria mesenterica inferior",
+        "B": "Arteria renalis sinistra",
+        "C": "Arteriae lumbales",
+        "D": "Arteria splenica"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI209",
@@ -2295,10 +3751,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left gonadal vein",
-      "answer_nl": "linker gonadale vene",
+      "answer_nl": "Vena testicularis/ovarica sinistra",
       "image": "GI_98/GI_Left_gonadal_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "61"
+      "source_question": "61",
+      "options": {
+        "A": "Vena testicularis/ovarica dextra",
+        "B": "Vena suprarenalis sinistra",
+        "C": "Vena testicularis/ovarica sinistra",
+        "D": "Vena hemiazygos"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI210",
@@ -2306,10 +3769,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal vein",
-      "answer_nl": "linker vena renalis",
+      "answer_nl": "Vena renalis sinistra",
       "image": "GI_98/GI_Left_renal_vein_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "62"
+      "source_question": "62",
+      "options": {
+        "A": "Vena renalis dextra",
+        "B": "Vena renalis sinistra",
+        "C": "Transpositio venae cavae inferioris",
+        "D": "Vena iliaca communis dextra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI211",
@@ -2317,10 +3787,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right common iliac artery",
-      "answer_nl": "rechter arteria iliaca communis",
+      "answer_nl": "Arteria iliaca communis dextra",
       "image": "GI_98/GI_Right_common_iliac_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "63"
+      "source_question": "63",
+      "options": {
+        "A": "Arteria iliaca communis dextra",
+        "B": "Arteria sacralis mediana",
+        "C": "Arteria pudenda interna sinistra",
+        "D": "Arteria glutea inferior sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI212",
@@ -2328,10 +3805,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_98/GI_Inferior_vena_cava_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "64"
+      "source_question": "64",
+      "options": {
+        "A": "Vena renalis sinistra",
+        "B": "Vena hemiazygos",
+        "C": "Vena suprarenalis sinistra",
+        "D": "Vena cava inferior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI213",
@@ -2339,10 +3823,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal vein",
-      "answer_nl": "linker vena renalis",
+      "answer_nl": "Vena renalis sinistra",
       "image": "GI_98/GI_Left_renal_vein_3.jpeg",
       "source_set": "GI_98",
-      "source_question": "65"
+      "source_question": "65",
+      "options": {
+        "A": "Vena azygos",
+        "B": "Vena renalis sinistra",
+        "C": "Vena hemiazygos",
+        "D": "Vena iliaca externa sinistra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI214",
@@ -2350,10 +3841,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric vein",
-      "answer_nl": "vena mesenterica superior",
+      "answer_nl": "Vena mesenterica superior",
       "image": "GI_98/GI_Superior_mesenteric_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "66"
+      "source_question": "66",
+      "options": {
+        "A": "Ramus anterior venae portae dextrae",
+        "B": "Ramus dexter venae portae hepatis",
+        "C": "Vena mesenterica superior",
+        "D": "Vena pancreaticoduodenalis superior posterior"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI215",
@@ -2361,10 +3859,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right hepatic vein",
-      "answer_nl": "rechter vena hepatica",
+      "answer_nl": "Vena hepatica dextra",
       "image": "GI_98/GI_Right_hepatic_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "67"
+      "source_question": "67",
+      "options": {
+        "A": "Ostium venae hepaticae dextrae",
+        "B": "Vena hepatica media",
+        "C": "Vena phrenica inferior dextra",
+        "D": "Vena hepatica dextra"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI216",
@@ -2372,10 +3877,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left hepatic vein",
-      "answer_nl": "linker vena hepatica",
+      "answer_nl": "Vena hepatica sinistra",
       "image": "GI_98/GI_Left_hepatic_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "68"
+      "source_question": "68",
+      "options": {
+        "A": "Vena hepatica media",
+        "B": "Vena hepatica sinistra",
+        "C": "Venae hepaticae accessoriae",
+        "D": "Vena phrenica inferior dextra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI217",
@@ -2383,10 +3895,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Hepatic portal vein branch",
-      "answer_nl": "tak van de vena portae hepatis",
+      "answer_nl": "Ramus venae portae hepatis",
       "image": "GI_98/GI_Hepatic_portal_vein_branch.jpeg",
       "source_set": "GI_98",
-      "source_question": "69"
+      "source_question": "69",
+      "options": {
+        "A": "Ramus venae portae hepatis",
+        "B": "Vena mesenterica superior",
+        "C": "Ramus anterior venae portae dextrae",
+        "D": "Vena mesenterica inferior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI218",
@@ -2394,10 +3913,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Portal vein confluence",
-      "answer_nl": "confluens van de poortader",
+      "answer_nl": "Confluens venarum portarum",
       "image": "GI_98/GI_Portal_vein_confluence.jpeg",
       "source_set": "GI_98",
-      "source_question": "70"
+      "source_question": "70",
+      "options": {
+        "A": "Confluens venarum portarum",
+        "B": "Ramus anterior venae portae dextrae",
+        "C": "Vena mesenterica superior",
+        "D": "Ramus sinister venae portae hepatis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI219",
@@ -2405,10 +3931,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left lobe of liver",
-      "answer_nl": "linker leverkwab",
+      "answer_nl": "Lobus hepatis sinister",
       "image": "GI_98/GI_Left_lobe_of_liver.jpeg",
       "source_set": "GI_98",
-      "source_question": "71"
+      "source_question": "71",
+      "options": {
+        "A": "Lobus Riedeli hepatis",
+        "B": "Segmentum hepatis II",
+        "C": "Segmentum hepatis V",
+        "D": "Lobus hepatis sinister"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI220",
@@ -2416,10 +3949,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_98/GI_Inferior_vena_cava_3.jpeg",
       "source_set": "GI_98",
-      "source_question": "72"
+      "source_question": "72",
+      "options": {
+        "A": "Vena renalis sinistra retroaortica",
+        "B": "Vena cava superior",
+        "C": "Vena lumbalis ascendens sinistra",
+        "D": "Vena cava inferior"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI221",
@@ -2427,10 +3967,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Extrahepatic portal vein",
-      "answer_nl": "extrahepatische poortader",
+      "answer_nl": "Vena portae hepatis extrahepatica",
       "image": "GI_98/GI_Extrahepatic_portal_vein_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "73"
+      "source_question": "73",
+      "options": {
+        "A": "Ramus sinister venae portae hepatis",
+        "B": "Vena gastro-omentalis dextra",
+        "C": "Vena portae hepatis extrahepatica",
+        "D": "Vena colica media"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI222",
@@ -2438,10 +3985,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal artery",
-      "answer_nl": "linker arteria renalis",
+      "answer_nl": "Arteria renalis sinistra",
       "image": "GI_98/GI_Left_renal_artery_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "74"
+      "source_question": "74",
+      "options": {
+        "A": "Arteria phrenica inferior sinistra",
+        "B": "Arteria renalis sinistra",
+        "C": "Arteria mesenterica inferior",
+        "D": "Arteria renalis dextra"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI223",
@@ -2449,10 +4003,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left renal artery",
-      "answer_nl": "linker arteria renalis",
+      "answer_nl": "Arteria renalis sinistra",
       "image": "GI_98/GI_Left_renal_artery_3.jpeg",
       "source_set": "GI_98",
-      "source_question": "75"
+      "source_question": "75",
+      "options": {
+        "A": "Arteria gastrica sinistra",
+        "B": "Arteria renalis sinistra",
+        "C": "Truncus coeliacomesentericus",
+        "D": "Arteria gastroduodenalis"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI224",
@@ -2460,10 +4021,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common bile duct",
-      "answer_nl": "ductus choledochus",
+      "answer_nl": "Ductus choledochus",
       "image": "GI_98/GI_Common_bile_duct.jpeg",
       "source_set": "GI_98",
-      "source_question": "76"
+      "source_question": "76",
+      "options": {
+        "A": "Ductus choledochus",
+        "B": "Corpus vesicae biliaris",
+        "C": "Fundus vesicae biliaris",
+        "D": "Ductus hepaticus dexter"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI225",
@@ -2471,10 +4039,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Superior mesenteric artery",
-      "answer_nl": "arteria mesenterica superior",
+      "answer_nl": "Arteria mesenterica superior",
       "image": "GI_98/GI_Superior_mesenteric_artery_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "77"
+      "source_question": "77",
+      "options": {
+        "A": "Arteria mesenterica inferior",
+        "B": "Arteria mesenterica superior",
+        "C": "Arteria hepatica communis",
+        "D": "Arteria suprarenalis media"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI226",
@@ -2482,10 +4057,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Caudate lobe of liver",
-      "answer_nl": "caudatuskwab van de lever",
+      "answer_nl": "Lobus caudatus hepatis",
       "image": "GI_98/GI_Caudate_lobe_of_liver.jpeg",
       "source_set": "GI_98",
-      "source_question": "78"
+      "source_question": "78",
+      "options": {
+        "A": "Lobus Riedeli hepatis",
+        "B": "Segmentum hepatis IV",
+        "C": "Lobus caudatus hepatis",
+        "D": "Lobus hepatis dexter"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI227",
@@ -2493,10 +4075,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left hepatic vein",
-      "answer_nl": "linker vena hepatica",
+      "answer_nl": "Vena hepatica sinistra",
       "image": "GI_98/GI_Left_hepatic_vein_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "79"
+      "source_question": "79",
+      "options": {
+        "A": "Vena hepatica sinistra",
+        "B": "Vena phrenica inferior dextra",
+        "C": "Ostium venae hepaticae dextrae",
+        "D": "Vena hepatica media"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI228",
@@ -2504,10 +4093,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Abdominal aorta",
-      "answer_nl": "abdominale aorta",
+      "answer_nl": "Aorta abdominalis",
       "image": "GI_98/GI_Abdominal_aorta.jpeg",
       "source_set": "GI_98",
-      "source_question": "80"
+      "source_question": "80",
+      "options": {
+        "A": "Arteria gastrica dextra",
+        "B": "Arteriae lumbales",
+        "C": "Aorta abdominalis",
+        "D": "Truncus coeliacomesentericus"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI229",
@@ -2515,10 +4111,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Oesophageal contour from aortic arch impression",
-      "answer_nl": "oesofageale contour door impressie van de aortaboog",
+      "answer_nl": "Impressio aortica oesophagi",
       "image": "GI_98/GI_Oesophageal_contour_from_aortic_arch_impression.jpeg",
       "source_set": "GI_98",
-      "source_question": "81"
+      "source_question": "81",
+      "options": {
+        "A": "Oesophagus, pars abdominalis",
+        "B": "Aorta thoracica descendens",
+        "C": "Arcus aortae",
+        "D": "Impressio aortica oesophagi"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI230",
@@ -2526,10 +4129,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Rugal Fold In Body Of Stomach",
-      "answer_nl": "maagplooi in het corpus van de maag",
+      "answer_nl": "Plica gastrica corporis gastrici",
       "image": "GI_98/GI_Rugal_Fold_In_Body_Of_Stomach.jpeg",
       "source_set": "GI_98",
-      "source_question": "82"
+      "source_question": "82",
+      "options": {
+        "A": "Fundus gastricus",
+        "B": "Cardia gastrica",
+        "C": "Plica gastrica corporis gastrici",
+        "D": "Pylorus"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI231",
@@ -2537,10 +4147,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Horizontal portion of duodenum",
-      "answer_nl": "horizontaal deel van het duodenum",
+      "answer_nl": "Pars horizontalis duodeni",
       "image": "GI_98/GI_Horizontal_portion_of_duodenum_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "83"
+      "source_question": "83",
+      "options": {
+        "A": "Pars ascendens duodeni",
+        "B": "Ansae intestini tenuis",
+        "C": "Ileum terminale",
+        "D": "Pars horizontalis duodeni"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI232",
@@ -2548,10 +4165,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Greater curvature of stomach",
-      "answer_nl": "grote curvatuur van de maag",
+      "answer_nl": "Curvatura major gastrica",
       "image": "GI_98/GI_Greater_curvature_of_stomach_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "84"
+      "source_question": "84",
+      "options": {
+        "A": "Musculus sphincter oesophagi inferior",
+        "B": "Curvatura major gastrica",
+        "C": "Cardia gastrica",
+        "D": "Plicae gastricae"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI233",
@@ -2559,10 +4183,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Transverse colon haustral folds",
-      "answer_nl": "haustra van het colon transversum",
+      "answer_nl": "Haustra coli transversi",
       "image": "GI_98/GI_Transverse_colon_haustral_folds.jpeg",
       "source_set": "GI_98",
-      "source_question": "85"
+      "source_question": "85",
+      "options": {
+        "A": "Valva ileocaecalis",
+        "B": "Haustra coli transversi",
+        "C": "Junctio anorectalis",
+        "D": "Colon transversum"
+      },
+      "correct_choice": "B"
     },
     {
       "id": "GI234",
@@ -2570,10 +4201,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Oesophageal contour from aortic arch impression",
-      "answer_nl": "oesofageale contour door impressie van de aortaboog",
+      "answer_nl": "Impressio aortica oesophagi",
       "image": "GI_98/GI_Oesophageal_contour_from_aortic_arch_impression_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "86"
+      "source_question": "86",
+      "options": {
+        "A": "Oesophagus, pars abdominalis",
+        "B": "Impressio diaphragmatica",
+        "C": "Impressio aortica oesophagi",
+        "D": "Impressio bronchialis oesophagi"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI235",
@@ -2581,10 +4219,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior mesenteric artery",
-      "answer_nl": "arteria mesenterica inferior",
+      "answer_nl": "Arteria mesenterica inferior",
       "image": "GI_98/GI_Inferior_mesenteric_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "87"
+      "source_question": "87",
+      "options": {
+        "A": "Arteria mesenterica inferior",
+        "B": "Arteria phrenica inferior sinistra",
+        "C": "Arteria splenica",
+        "D": "Truncus coeliacomesentericus"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI236",
@@ -2592,10 +4237,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Inferior vena cava",
-      "answer_nl": "vena cava inferior",
+      "answer_nl": "Vena cava inferior",
       "image": "GI_98/GI_Inferior_vena_cava_4.jpeg",
       "source_set": "GI_98",
-      "source_question": "88"
+      "source_question": "88",
+      "options": {
+        "A": "Vena cava inferior",
+        "B": "Vena iliaca communis sinistra",
+        "C": "Vena hemiazygos",
+        "D": "Vena suprarenalis sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI237",
@@ -2603,10 +4255,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Lumbar arteries",
-      "answer_nl": "lumbale arteriën",
+      "answer_nl": "Arteriae lumbales",
       "image": "GI_98/GI_Lumbar_arteries.jpeg",
       "source_set": "GI_98",
-      "source_question": "89"
+      "source_question": "89",
+      "options": {
+        "A": "Arteria hepatica communis",
+        "B": "Arteria mesenterica superior",
+        "C": "Arteria hepatica dextra aberrans",
+        "D": "Arteriae lumbales"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI238",
@@ -2614,10 +4273,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic artery",
-      "answer_nl": "arteria splenica",
+      "answer_nl": "Arteria splenica",
       "image": "GI_98/GI_Splenic_artery_3.jpeg",
       "source_set": "GI_98",
-      "source_question": "90"
+      "source_question": "90",
+      "options": {
+        "A": "Arteria mesenterica inferior",
+        "B": "Arteria suprarenalis media",
+        "C": "Arteria colica media",
+        "D": "Arteria splenica"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI239",
@@ -2625,10 +4291,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left gastric artery",
-      "answer_nl": "arteria gastrica sinistra",
+      "answer_nl": "Arteria gastrica sinistra",
       "image": "GI_98/GI_Left_gastric_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "91"
+      "source_question": "91",
+      "options": {
+        "A": "Arteria gastrica sinistra",
+        "B": "Arteria mesenterica inferior",
+        "C": "Arteria hepatica communis",
+        "D": "Arteria gastroduodenalis"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI240",
@@ -2636,10 +4309,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Coeliac trunk",
-      "answer_nl": "truncus coeliacus",
+      "answer_nl": "Truncus coeliacus",
       "image": "GI_98/GI_Coeliac_trunk.jpeg",
       "source_set": "GI_98",
-      "source_question": "92"
+      "source_question": "92",
+      "options": {
+        "A": "Truncus coeliacus",
+        "B": "Arteria splenica",
+        "C": "Arteria colica media",
+        "D": "Arteria hepatica dextra aberrans"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI241",
@@ -2647,10 +4327,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Common hepatic artery",
-      "answer_nl": "arteria hepatica communis",
+      "answer_nl": "Arteria hepatica communis",
       "image": "GI_98/GI_Common_hepatic_artery.jpeg",
       "source_set": "GI_98",
-      "source_question": "93"
+      "source_question": "93",
+      "options": {
+        "A": "Arteria renalis sinistra",
+        "B": "Truncus coeliacomesentericus",
+        "C": "Aorta abdominalis",
+        "D": "Arteria hepatica communis"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI242",
@@ -2658,10 +4345,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Splenic artery",
-      "answer_nl": "arteria splenica",
+      "answer_nl": "Arteria splenica",
       "image": "GI_98/GI_Splenic_artery_4.jpeg",
       "source_set": "GI_98",
-      "source_question": "94"
+      "source_question": "94",
+      "options": {
+        "A": "Truncus coeliacomesentericus",
+        "B": "Arteria gastrica dextra",
+        "C": "Arteria splenica",
+        "D": "Arteria mesenterica superior"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI243",
@@ -2669,10 +4363,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right hepatic vein",
-      "answer_nl": "rechter vena hepatica",
+      "answer_nl": "Vena hepatica dextra",
       "image": "GI_98/GI_Right_hepatic_vein_2.jpeg",
       "source_set": "GI_98",
-      "source_question": "95"
+      "source_question": "95",
+      "options": {
+        "A": "Vena hepatica dextra",
+        "B": "Ostium venae hepaticae dextrae",
+        "C": "Vena phrenica inferior dextra",
+        "D": "Vena hepatica sinistra"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI244",
@@ -2680,10 +4381,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Linea alba",
-      "answer_nl": "linea alba",
+      "answer_nl": "Linea alba",
       "image": "GI_98/GI_Linea_alba.jpeg",
       "source_set": "GI_98",
-      "source_question": "96"
+      "source_question": "96",
+      "options": {
+        "A": "Fascia transversalis",
+        "B": "Linea semilunaris dextra",
+        "C": "Musculus obliquus internus abdominis sinister",
+        "D": "Linea alba"
+      },
+      "correct_choice": "D"
     },
     {
       "id": "GI245",
@@ -2691,10 +4399,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Right posterior rectus sheath",
-      "answer_nl": "rechter posterieure rectusschede",
+      "answer_nl": "Vagina musculi recti abdominis posterior dextra",
       "image": "GI_98/GI_Right_posterior_rectus_sheath.jpeg",
       "source_set": "GI_98",
-      "source_question": "97"
+      "source_question": "97",
+      "options": {
+        "A": "Musculus quadratus lumborum sinister",
+        "B": "Musculus psoas major sinister",
+        "C": "Vagina musculi recti abdominis posterior dextra",
+        "D": "Ligamentum inguinale dextrum"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI246",
@@ -2702,10 +4417,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Left transversus abdominis",
-      "answer_nl": "linker musculus transversus abdominis",
+      "answer_nl": "Musculus transversus abdominis sinister",
       "image": "GI_98/GI_Left_transversus_abdominis.jpeg",
       "source_set": "GI_98",
-      "source_question": "98"
+      "source_question": "98",
+      "options": {
+        "A": "Fascia transversalis",
+        "B": "Musculus obliquus internus abdominis sinister",
+        "C": "Musculus transversus abdominis sinister",
+        "D": "Linea arcuata"
+      },
+      "correct_choice": "C"
     },
     {
       "id": "GI247",
@@ -2713,10 +4435,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Retroaortic left renal vein",
-      "answer_nl": "retroaortale linker vena renalis",
+      "answer_nl": "Vena renalis sinistra retroaortica",
       "image": "GI_98/GI_Retroaortic_left_renal_vein.jpeg",
       "source_set": "GI_98",
-      "source_question": "99"
+      "source_question": "99",
+      "options": {
+        "A": "Vena renalis sinistra retroaortica",
+        "B": "Vena hemiazygos",
+        "C": "Vena cava inferior",
+        "D": "Vena cava superior"
+      },
+      "correct_choice": "A"
     },
     {
       "id": "GI248",
@@ -2724,10 +4453,17 @@
       "question": "Which anatomical structure is indicated?",
       "question_nl": "Welke anatomische structuur is aangeduid?",
       "answer": "Transposition of inferior vena cava",
-      "answer_nl": "transpositie van de vena cava inferior",
+      "answer_nl": "Transpositio venae cavae inferioris",
       "image": "GI_98/GI_Transposition_of_inferior_vena_cava.jpeg",
       "source_set": "GI_98",
-      "source_question": "100"
+      "source_question": "100",
+      "options": {
+        "A": "Vena iliaca communis dextra",
+        "B": "Transpositio venae cavae inferioris",
+        "C": "Vena testicularis/ovarica dextra",
+        "D": "Vena renalis sinistra"
+      },
+      "correct_choice": "B"
     }
   ]
 }

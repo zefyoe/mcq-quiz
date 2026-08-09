@@ -2573,11 +2573,7 @@ def anatomy_subgroup_setup(subgroup):
     selected_pool = normalize_quiz_pool(request.args.get("pool"))
     available_count = pool_counts[selected_pool]
     suggested_count = get_question_limit(request.args.get("count"), available_count)
-    selected_format = (
-        "flashcard"
-        if subgroup_key in {"cardiothoracic", "gastrointestinal"}
-        else normalize_study_format(request.args.get("format"))
-    )
+    selected_format = normalize_study_format(request.args.get("format"))
 
     return render_template(
         "anatomy_quiz_setup.html",
@@ -2925,17 +2921,6 @@ def quiz(category):
 
     if category not in categories:
         return redirect(url_for("home"))
-    if (
-        request.method == "GET"
-        and normalize_category(category) == normalize_category(ANATOMY_CATEGORY)
-        and normalize_anatomy_subgroup(request.args.get("subgroup")) in {
-            "cardiothoracic",
-            "gastrointestinal",
-        }
-    ):
-        flashcard_args = request.args.to_dict(flat=True)
-        flashcard_args.pop("format", None)
-        return redirect(url_for("flashcards", category=category, **flashcard_args))
     if request.method == "GET" and normalize_study_format(request.args.get("format")) == "flashcard":
         flashcard_args = request.args.to_dict(flat=True)
         flashcard_args.pop("format", None)

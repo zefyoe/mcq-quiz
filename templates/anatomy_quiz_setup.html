@@ -55,23 +55,6 @@
         {% if pool_counts["all"] > 0 %}
           <form method="get" action="{{ url_for('quiz', category='Anatomy') }}" class="quiz-setup-form">
             <input type="hidden" name="subgroup" value="{{ subgroup_key }}">
-            {% if subgroup_key in ["cardiothoracic", "gastrointestinal"] %}
-              <input type="hidden" name="format" value="flashcard">
-              <div class="study-format-block flashcard-only-block">
-                <div class="quiz-setup-group-heading">
-                  <p class="quiz-count-label">{{ "Studiemethode" if language == "nl" else "Study method" }}</p>
-                  <span>{{ ("Deze anatomie is voorlopig uitsluitend beschikbaar als Anki-flashcard." if language == "nl" else "This anatomy section is currently available as Anki flashcards only.") }}</span>
-                </div>
-                <div class="study-format-toggle">
-                  <div class="study-format-option is-selected">
-                    <span>
-                      <strong>{{ "Anki-flashcards" if language == "nl" else "Anki flashcards" }}</strong>
-                      <small>{{ "Open vraag, toon het antwoord en beoordeel jezelf." if language == "nl" else "Recall the structure, reveal the answer and rate yourself." }}</small>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            {% else %}
             <div class="study-format-block">
               <div class="quiz-setup-group-heading">
                 <p class="quiz-count-label">{{ "Studiemethode" if language == "nl" else "Study method" }}</p>
@@ -111,7 +94,6 @@
                 {% endfor %}
               </div>
             </div>
-            {% endif %}
             <div class="quiz-pool-group">
               <div class="quiz-setup-group-heading">
                 <p class="quiz-count-label">{{ "Studiedoel" if language == "nl" else "Study focus" }}</p>
