@@ -10,3 +10,4 @@ work/
 exports/*.apkg
 static/images/cardiothoracic/*.zip
 static/images/GI_*.zip
+static/optimized_images/

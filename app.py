@@ -285,6 +285,24 @@ def capitalize_initial(value: str) -> str:
     return value
 
 
+@lru_cache(maxsize=4096)
+def optimized_image_url(image_url: str | None) -> str | None:
+    """Use the build-time WebP derivative when it exists, otherwise keep the source."""
+    if not image_url or not image_url.startswith("/static/images/"):
+        return image_url
+
+    relative_path = image_url.removeprefix("/static/images/")
+    optimized_path = os.path.join(
+        app.static_folder,
+        "optimized_images",
+        f"{relative_path}.webp",
+    )
+    if not os.path.isfile(optimized_path):
+        return image_url
+
+    return f"/static/optimized_images/{relative_path}.webp"
+
+
 def normalize_category(s: str) -> str:
     return (s or "").strip().lower()
 
@@ -681,6 +699,15 @@ def merge_question_lists(*question_lists: list[dict]) -> list[dict]:
                 continue
             seen_keys.add(dedupe_key)
             normalized_question = dict(question)
+            for image_key in ("image_url", "answer_image_url"):
+                normalized_question[image_key] = optimized_image_url(
+                    normalized_question.get(image_key)
+                )
+            for image_key in ("image_urls", "answer_image_urls"):
+                normalized_question[image_key] = [
+                    optimized_image_url(image_url)
+                    for image_url in normalized_question.get(image_key, [])
+                ]
             for answer_key in ("A", "B", "C", "D"):
                 normalized_question[answer_key] = capitalize_initial(
                     normalized_question.get(answer_key, "")
