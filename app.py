@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from functools import lru_cache
 from urllib.parse import urlparse
 
-from flask import Flask, abort, jsonify, render_template, request, session, redirect, url_for
+from flask import Flask, abort, g, jsonify, render_template, request, session, redirect, url_for
 from flask_login import (
     LoginManager,
     current_user,
@@ -711,6 +711,10 @@ def apply_static_question_override(question: dict) -> dict:
 
 
 def get_categories() -> list[str]:
+    cached_categories = getattr(g, "_categories", None)
+    if cached_categories is not None:
+        return cached_categories
+
     cats = set()
     has_anatomy = False
 
@@ -736,7 +740,9 @@ def get_categories() -> list[str]:
     if has_anatomy:
         cats.add(ANATOMY_CATEGORY)
 
-    return sorted(category for category in cats if normalize_category(category) not in DISABLED_CATEGORIES)
+    result = sorted(category for category in cats if normalize_category(category) not in DISABLED_CATEGORIES)
+    g._categories = result
+    return result
 
 
 def get_questions_for_category(category: str, subgroup: str | None = None) -> list[dict]:
@@ -763,7 +769,15 @@ def get_questions_for_category(category: str, subgroup: str | None = None) -> li
 
 
 def get_all_anatomy_questions() -> list[dict]:
-    db_qs = Question.query.all()
+    cached_questions = getattr(g, "_all_anatomy_questions", None)
+    if cached_questions is not None:
+        return cached_questions
+
+    db_qs = (
+        Question.query
+        .filter(func.lower(func.trim(Question.category)).like("anatomy%"))
+        .all()
+    )
     db_questions = [
         db_question_to_dict(q)
         for q in db_qs
@@ -778,13 +792,15 @@ def get_all_anatomy_questions() -> list[dict]:
     cardiothoracic_questions = load_cardiothoracic_questions()
     gastrointestinal_questions = load_gastrointestinal_anatomy_questions()
 
-    return merge_question_lists(
+    result = merge_question_lists(
         db_questions,
         static_questions,
         runtime_image_questions,
         cardiothoracic_questions,
         gastrointestinal_questions,
     )
+    g._all_anatomy_questions = result
+    return result
 
 
 def get_questions_for_anatomy_subgroup(subgroup: str | None) -> list[dict]:
@@ -1168,18 +1184,24 @@ def normalize_quiz_mode(mode: str | None) -> str:
 
 
 def get_all_questions() -> list[dict]:
+    cached_questions = getattr(g, "_all_questions", None)
+    if cached_questions is not None:
+        return cached_questions
+
     db_questions = [db_question_to_dict(q) for q in Question.query.all()]
     static_questions = list(questions)
     runtime_image_questions = build_runtime_image_questions(ANATOMY_CATEGORY)
     cardiothoracic_questions = load_cardiothoracic_questions()
     gastrointestinal_questions = load_gastrointestinal_anatomy_questions()
-    return merge_question_lists(
+    result = merge_question_lists(
         db_questions,
         static_questions,
         runtime_image_questions,
         cardiothoracic_questions,
         gastrointestinal_questions,
     )
+    g._all_questions = result
+    return result
 
 
 def get_questions_by_ids(question_ids: list[str]) -> list[dict]:

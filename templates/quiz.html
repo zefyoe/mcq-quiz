@@ -150,6 +150,7 @@
                   <img
                     data-src="{{ q['image_url'] }}"
                     {% if loop.first %}src="{{ q['image_url'] }}" fetchpriority="high"{% else %}fetchpriority="low"{% endif %}
+                    loading="{{ 'eager' if loop.first else 'lazy' }}"
                     decoding="async"
                     data-question-image
                     alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}"

@@ -129,6 +129,7 @@
                     <img
                       data-src="{{ image_url }}"
                       {% if loop.first and preload_card_images %}src="{{ image_url }}" fetchpriority="high"{% else %}fetchpriority="low"{% endif %}
+                      loading="{{ 'eager' if loop.first and preload_card_images else 'lazy' }}"
                       decoding="async"
                       data-question-image
                       alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }} {{ loop.index }}"
