@@ -240,49 +240,65 @@ body {
 }
 
 .toggle-password {
-  width: 52px;
+  width: 54px;
   height: 52px;
   padding: 0;
-  border: 1px solid #dbe2ea;
+  border: 2px solid #b8c5d6;
   border-radius: 14px;
-  background: #fff;
-  color: #334155;
+  background: #f8fbff;
+  color: #183b72;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
 .toggle-password svg {
-  width: 20px;
-  height: 20px;
+  width: 23px;
+  height: 23px;
   fill: none;
-  stroke: #475569;
-  stroke-width: 1.8;
+  stroke: #183b72;
+  stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .toggle-password:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: #183b72;
+  background: #eaf2ff;
+}
+
+.toggle-password:focus-visible {
+  outline: none;
+  border-color: #183b72;
+  box-shadow: 0 0 0 4px rgba(24, 59, 114, 0.18);
 }
 
 .password-strength {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #64748b;
-  font-size: 12px;
+  min-height: 20px;
+  padding: 8px 10px;
+  border: 1px solid #d5dfec;
+  border-radius: 10px;
+  background: #f8fbff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .strength-bars {
   display: flex;
-  gap: 3px;
+  gap: 4px;
 }
 
 .strength-bars span {
-  width: 30px;
-  height: 4px;
+  width: 34px;
+  height: 6px;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: #cbd5e1;
   transition: background 160ms ease;
 }
 
