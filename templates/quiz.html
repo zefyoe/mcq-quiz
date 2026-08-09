@@ -97,7 +97,7 @@
             <div class="quiz-header-tools">
               <div class="study-method-switch" aria-label="{{ 'Studiemethode' if language == 'nl' else 'Study method' }}">
                 <span class="active">MCQ</span>
-                <a href="{{ switch_to_flashcard_url }}">{{ "Anki" if language == "nl" else "Anki" }}</a>
+                <a href="{{ switch_to_flashcard_url }}" data-study-method-switch>{{ "Anki" if language == "nl" else "Anki" }}</a>
               </div>
               {% if quiz_mode == 'exam' %}
                 <div class="quiz-timer-box">
@@ -262,6 +262,7 @@
       const focusModeButton = document.getElementById("focusModeButton");
       const savedAnswers = new Set();
       const quizRunId = {{ quiz_run_id|tojson }};
+      const initialQuestionId = {{ initial_qid|default('')|tojson }};
       const storageKey = `quizAnswers:${currentUserId}:${isAdmin ? "admin" : "student"}:${quizRunId}`;
       const attemptStartedAtKey = `${storageKey}:attemptStartedAt`;
       let attemptStartedAt = Number(localStorage.getItem(attemptStartedAtKey));
@@ -292,6 +293,16 @@
         marked: {{ ("Gemarkeerd" if language == "nl" else "Marked")|tojson }},
         markFailed: {{ ("De markering kon niet worden opgeslagen." if language == "nl" else "Could not save this marker.")|tojson }}
       };
+      const studyMethodSwitch = document.querySelector("[data-study-method-switch]");
+
+      studyMethodSwitch?.addEventListener("click", (event) => {
+        const panel = panels[currentIndex];
+        if (!panel) return;
+        event.preventDefault();
+        const target = new URL(studyMethodSwitch.href, window.location.href);
+        target.searchParams.set("current_qid", panel.dataset.qid);
+        window.location.href = target.toString();
+      });
 
       function formatElapsedTime(totalSeconds) {
         const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
@@ -759,7 +770,10 @@
 
       hydrateSavedAnswers();
       panels.forEach((_, index) => updateSavedState(index));
-      showQuestion(0);
+      const initialIndex = Array.from(panels).findIndex(
+        (panel) => panel.dataset.qid === initialQuestionId
+      );
+      showQuestion(initialIndex >= 0 ? initialIndex : 0);
       startExamTimer();
     </script>
   </body>

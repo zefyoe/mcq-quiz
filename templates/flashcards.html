@@ -84,7 +84,7 @@
           </div>
           {% if switch_to_mcq_url %}
             <div class="study-method-switch">
-              <a href="{{ switch_to_mcq_url }}">MCQ</a>
+              <a href="{{ switch_to_mcq_url }}" data-study-method-switch>MCQ</a>
               <span class="active">Anki</span>
             </div>
           {% endif %}
@@ -296,6 +296,7 @@
       const subgroup = {{ subgroup|tojson }};
       const currentUserId = {{ current_user.id|tojson }};
       const quizRunId = {{ quiz_run_id|tojson }};
+      const initialQuestionId = {{ initial_qid|default('')|tojson }};
       const autoCompleteOnLastRating = {{ (auto_complete_on_last_rating|default(false))|tojson }};
       const storageKey = `flashcardSession:${currentUserId}:${quizRunId}`;
       const startedAtKey = `${storageKey}:startedAt`;
@@ -305,6 +306,7 @@
       let preloadTimer = null;
       let answerPreloadTimer = null;
       let completionStarted = false;
+      const studyMethodSwitch = document.querySelector("[data-study-method-switch]");
 
       if (!startedAt) {
         startedAt = Date.now();
@@ -628,6 +630,15 @@
         }
       });
 
+      studyMethodSwitch?.addEventListener("click", (event) => {
+        const panel = flashcardPanels[currentIndex];
+        if (!panel) return;
+        event.preventDefault();
+        const target = new URL(studyMethodSwitch.href, window.location.href);
+        target.searchParams.set("current_qid", panel.dataset.qid);
+        window.location.href = target.toString();
+      });
+
       flashcardNavButtons.forEach((button) => {
         button.addEventListener("click", () => showCard(Number(button.dataset.flashcardNav)));
       });
@@ -646,7 +657,10 @@
       });
 
       updateProgress();
-      showCard(0);
+      const initialIndex = flashcardPanels.findIndex(
+        (panel) => panel.dataset.qid === initialQuestionId
+      );
+      showCard(initialIndex >= 0 ? initialIndex : 0);
     </script>
   </body>
 </html>

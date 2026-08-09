@@ -1793,6 +1793,7 @@ def render_quiz_page(
     back_url: str,
     quiz_mode: str,
     form_action: str | None = None,
+    initial_qid: str | None = None,
 ):
     display_questions = [localize_question_for_display(q) for q in selected]
     questions_by_id = {q["ID"]: q for q in display_questions}
@@ -1821,6 +1822,7 @@ def render_quiz_page(
         back_url=back_url,
         quiz_mode=normalize_quiz_mode(quiz_mode),
         quiz_run_id=session.get("quiz_run_id") or "quiz",
+        initial_qid=initial_qid,
         switch_to_flashcard_url=url_for(
             "flashcards",
             category=session.get("category") or ANATOMY_CATEGORY,
@@ -2814,6 +2816,7 @@ def flashcards(category):
         ),
         back_url=back_url,
         quiz_run_id=session.get("quiz_run_id") or "flashcards",
+        initial_qid=request.args.get("current_qid"),
         switch_to_mcq_url=url_for(
             "quiz",
             category=category,
@@ -2980,6 +2983,7 @@ def quiz(category):
                     order=order,
                     back_url=back_url,
                     quiz_mode=normalize_quiz_mode(session.get("quiz_mode")),
+                    initial_qid=request.args.get("current_qid"),
                 )
 
         if subgroup:
