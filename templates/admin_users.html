@@ -41,6 +41,7 @@
             <div>Role</div>
             <div>Registered</div>
             <div>Last login</div>
+            <div></div>
           </div>
           {% for user in users %}
             <div class="admin-user-row">
@@ -50,6 +51,13 @@
               <div>{{ "Admin" if user.is_admin else "Student" }}</div>
               <div>{{ user.created_at.strftime("%d/%m/%Y %H:%M") if user.created_at else "—" }}</div>
               <div>{{ user.last_login_at.strftime("%d/%m/%Y %H:%M") if user.last_login_at else "Not logged in yet" }}</div>
+              <div>
+                {% if user.id in deletable_user_ids %}
+                  <form method="post" action="{{ url_for('admin_delete_user', user_id=user.id) }}" onsubmit="return confirm('Remove this user and all linked progress?');">
+                    <button type="submit" class="admin-delete-button">Remove</button>
+                  </form>
+                {% endif %}
+              </div>
             </div>
           {% else %}
             <div class="admin-table-empty">No users registered yet.</div>

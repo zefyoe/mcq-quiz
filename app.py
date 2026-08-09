@@ -94,6 +94,11 @@ db.init_app(app)
 AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
 STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
 ADMIN_EMAIL = "y@bymed.be"
+ACCOUNT_CLEANUP_EMAILS = frozenset({
+    "zwszketn@immenseignite.info",
+    "vqnywgut@immenseignite.info",
+    "hxrmrynn@immenseignite.info",
+})
 LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "0").strip() == "1"
 AUTH_SCHEMA_READY = False
 ANATOMY_CATEGORY = "Anatomy"
@@ -3165,7 +3170,28 @@ def admin_users():
         "admin_users.html",
         users=users,
         login_events=login_events,
+        deletable_user_ids={
+            user.id for user in users
+            if (user.email or "").strip().lower() in ACCOUNT_CLEANUP_EMAILS
+        },
     )
+
+
+@app.post("/admin/users/<int:user_id>/delete")
+def admin_delete_user(user_id):
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404)
+    if (user.email or "").strip().lower() not in ACCOUNT_CLEANUP_EMAILS:
+        abort(403)
+
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for("admin_users"))
 
 
 @app.route("/admin/database")
