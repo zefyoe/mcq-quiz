@@ -43,6 +43,10 @@
           </div>
           <div class="progress-bar"><div class="progress-bar-fill" id="flashcardProgressFill"></div></div>
         </div>
+        <div class="session-save-status" id="flashcardSaveStatus" role="status" aria-live="polite">
+          <span class="session-save-dot" aria-hidden="true"></span>
+          <span data-session-save-label>{{ "Automatisch opgeslagen" if language == "nl" else "Saved automatically" }}</span>
+        </div>
 
         <div class="flashcard-trays">
           {% for rating_key, rating in ratings.items() %}
@@ -290,6 +294,8 @@
       const finishButton = document.getElementById("finishFlashcards");
       const progressText = document.getElementById("flashcardProgress");
       const progressFill = document.getElementById("flashcardProgressFill");
+      const flashcardSaveStatus = document.getElementById("flashcardSaveStatus");
+      const flashcardSaveStatusLabel = flashcardSaveStatus?.querySelector("[data-session-save-label]");
       const completionForm = document.getElementById("flashcardCompleteForm");
       const ratingsInput = document.getElementById("flashcardRatingsJson");
       const durationInput = document.getElementById("flashcardDurationSeconds");
@@ -300,6 +306,7 @@
       const initialQuestionId = {{ initial_qid|default('')|tojson }};
       const autoCompleteOnLastRating = {{ (auto_complete_on_last_rating|default(false))|tojson }};
       const storageKey = `flashcardSession:${currentUserId}:${quizRunId}`;
+      const progressStorageKey = `${storageKey}:progress`;
       const startedAtKey = `${storageKey}:startedAt`;
       let startedAt = Number(localStorage.getItem(startedAtKey));
       let currentIndex = 0;
@@ -308,6 +315,10 @@
       let answerPreloadTimer = null;
       let completionStarted = false;
       const studyMethodSwitch = document.querySelector("[data-study-method-switch]");
+      const imageText = {
+        loaded: {{ ("Afbeelding geladen" if language == "nl" else "Image loaded")|tojson }},
+        failed: {{ ("Afbeelding kon niet laden" if language == "nl" else "Image could not load")|tojson }},
+      };
 
       if (!startedAt) {
         startedAt = Date.now();
@@ -317,6 +328,30 @@
         sessionRatings = JSON.parse(localStorage.getItem(storageKey) || "{}");
       } catch {
         sessionRatings = {};
+      }
+
+      function setSessionSaveStatus(state = "saved") {
+        if (!flashcardSaveStatus || !flashcardSaveStatusLabel) return;
+        flashcardSaveStatus.dataset.state = state;
+        flashcardSaveStatusLabel.textContent = state === "offline"
+          ? {{ ("Offline: voortgang blijft op dit apparaat beschikbaar." if language == "nl" else "Offline: progress remains available on this device.")|tojson }}
+          : {{ ("Automatisch opgeslagen" if language == "nl" else "Saved automatically")|tojson }};
+      }
+
+      function loadFlashcardProgress() {
+        try {
+          return JSON.parse(localStorage.getItem(progressStorageKey) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function persistFlashcardProgress() {
+        localStorage.setItem(progressStorageKey, JSON.stringify({
+          currentQid: flashcardPanels[currentIndex]?.dataset.qid || initialQuestionId || "",
+          savedAt: Date.now(),
+        }));
+        setSessionSaveStatus(navigator.onLine === false ? "offline" : "saved");
       }
 
       function updateProgress() {
@@ -342,6 +377,7 @@
         durationInput.value = String(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
         localStorage.removeItem(storageKey);
         localStorage.removeItem(startedAtKey);
+        localStorage.removeItem(progressStorageKey);
         completionForm.submit();
       }
 
@@ -476,6 +512,8 @@
           image.dataset.loaded = "true";
           image.dataset.loading = "false";
           frame?.classList.remove("is-loading", "has-error");
+          const label = frame?.querySelector(".image-loading-label");
+          if (label) label.textContent = imageText.loaded;
           arrangeCoreImage(image);
         };
         const markFailed = () => {
@@ -483,6 +521,8 @@
           image.removeAttribute("src");
           frame?.classList.remove("is-loading");
           frame?.classList.add("has-error");
+          const label = frame?.querySelector(".image-loading-label");
+          if (label) label.textContent = imageText.failed;
           if (retryButton) retryButton.hidden = false;
         };
 
@@ -536,6 +576,7 @@
         flashcardNavButtons[index]?.classList.add("active");
         flashcardNavButtons[index]?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
         currentIndex = index;
+        persistFlashcardProgress();
         previousButton.disabled = index === 0;
         nextButton.disabled = index === flashcardPanels.length - 1;
         loadQuestionImage(index);
@@ -577,6 +618,7 @@
           if (!response.ok) throw new Error(payload.error || "Could not save rating.");
           sessionRatings[qid] = rating;
           localStorage.setItem(storageKey, JSON.stringify(sessionRatings));
+          persistFlashcardProgress();
           moveQuestionId(qid, rating);
           Object.entries(payload.counts || {}).forEach(([key, count]) => {
             const countElement = document.querySelector(`[data-rating-count="${key}"]`);
@@ -658,10 +700,14 @@
       });
 
       updateProgress();
+      const savedFlashcardProgress = loadFlashcardProgress();
       const initialIndex = flashcardPanels.findIndex(
-        (panel) => panel.dataset.qid === initialQuestionId
+        (panel) => panel.dataset.qid === (initialQuestionId || savedFlashcardProgress.currentQid)
       );
       showCard(initialIndex >= 0 ? initialIndex : 0);
+      window.addEventListener("beforeunload", persistFlashcardProgress);
+      window.addEventListener("online", () => setSessionSaveStatus("saved"));
+      window.addEventListener("offline", () => setSessionSaveStatus("offline"));
     </script>
   </body>
 </html>

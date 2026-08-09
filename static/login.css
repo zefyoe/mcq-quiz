@@ -4,8 +4,8 @@
   --panel-border: rgba(255, 255, 255, 0.35);
   --text: #0f172a;
   --muted: #475569;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
+  --primary: #183b72;
+  --primary-hover: #122e5c;
   --error-bg: #fee2e2;
   --error-text: #b91c1c;
   --shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
@@ -60,7 +60,7 @@ body {
   min-height: 100vh;
   background-color: #0b1220;
   background-image:
-    radial-gradient(circle at 18% 20%, rgba(79, 70, 229, 0.26), transparent 38%),
+    radial-gradient(circle at 18% 20%, rgba(45, 91, 155, 0.28), transparent 38%),
     linear-gradient(135deg, #08111f 0%, #18223a 52%, #0b1220 100%);
   background-size: cover;
   background-position: center;
@@ -213,7 +213,7 @@ body {
 
 .login-form input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+  box-shadow: 0 0 0 4px rgba(24, 59, 114, 0.14);
 }
 
 .login-form input.has-error {
@@ -433,5 +433,50 @@ body {
   .password-wrap {
     grid-template-columns: 1fr 82px;
     gap: 8px;
+  }
+}
+
+.login-card {
+  animation: login-card-enter 420ms ease both;
+}
+
+.login-button,
+.toggle-password {
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.login-button:hover { transform: translateY(-1px); }
+
+.field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.field-error::before {
+  content: "!";
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+@keyframes login-card-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

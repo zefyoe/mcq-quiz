@@ -4,6 +4,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+# Local previews should show the real site, not the maintenance page.
+# Must be set before importing app, which reads PUBLIC_SITE_MODE at import time.
+os.environ.setdefault("PUBLIC_SITE_MODE", "active")
+
 from app import app
 
 if __name__ == "__main__":

@@ -10,14 +10,27 @@
   <body>
     <div class="dashboard-shell">
       <aside class="dashboard-sidebar">
-        <a href="{{ url_for('home') }}" class="dashboard-sidebar-brand">
-          <div class="dashboard-brand-mark" aria-label="Radius">R</div>
-          <div>
-            <div class="dashboard-brand-title">Radius</div>
-            <div class="dashboard-brand-subtitle">{{ tr("Anatomy QBank") }}</div>
-          </div>
-        </a>
+        <div class="dashboard-sidebar-top">
+          <a href="{{ url_for('home') }}" class="dashboard-sidebar-brand">
+            <div class="dashboard-brand-mark" aria-label="Radius">R</div>
+            <div>
+              <div class="dashboard-brand-title">Radius</div>
+              <div class="dashboard-brand-subtitle">{{ tr("Anatomy QBank") }}</div>
+            </div>
+          </a>
+          <button
+            type="button"
+            class="dashboard-nav-toggle"
+            id="dashboardNavToggle"
+            aria-controls="dashboardNavPanel"
+            aria-expanded="false"
+            aria-label="{{ 'Menu openen' if language == 'nl' else 'Open menu' }}"
+          >
+            <span class="dashboard-nav-toggle-bars" aria-hidden="true"></span>
+          </button>
+        </div>
 
+        <div class="dashboard-sidebar-collapsible" id="dashboardNavPanel">
         <div class="dashboard-user">
           <div class="dashboard-user-label">{{ tr("Signed in") }}</div>
           <div class="dashboard-user-name">{{ current_user.name or current_user.email }}</div>
@@ -41,6 +54,7 @@
           {% endif %}
           <a href="{{ url_for('logout') }}" class="dashboard-nav-link dashboard-nav-link-muted">{{ tr("Log out") }}</a>
         </nav>
+        </div>
       </aside>
 
       <main class="dashboard-main">
@@ -160,6 +174,7 @@
               </div>
             {% else %}
               <p class="score-trend-empty">{{ "Voltooi een toets om je scoreontwikkeling te volgen." if language == "nl" else "Complete a test to start tracking your score development." }}</p>
+              <a href="{{ url_for('anatomy_sections') }}" class="empty-state-action">{{ "Start je eerste toets" if language == "nl" else "Start your first test" }}</a>
             {% endif %}
           </article>
         </section>
@@ -311,5 +326,23 @@
       </main>
     </div>
     {% include "_site_footer.html" %}
+    <script>
+      (function () {
+        const toggle = document.getElementById("dashboardNavToggle");
+        const panel = document.getElementById("dashboardNavPanel");
+        if (!toggle || !panel) return;
+
+        const labels = {
+          open: {{ ('Menu openen' if language == 'nl' else 'Open menu')|tojson }},
+          close: {{ ('Menu sluiten' if language == 'nl' else 'Close menu')|tojson }},
+        };
+
+        toggle.addEventListener("click", () => {
+          const isOpen = document.body.classList.toggle("dashboard-nav-open");
+          toggle.setAttribute("aria-expanded", String(isOpen));
+          toggle.setAttribute("aria-label", isOpen ? labels.close : labels.open);
+        });
+      })();
+    </script>
   </body>
 </html>

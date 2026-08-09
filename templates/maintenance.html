@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="nl">
+<html lang="{{ language }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Rady | Tijdelijk offline</title>
+    <title>Radius | {{ "Tijdelijk offline" if language == "nl" else "Temporarily offline" }}</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -11,12 +11,29 @@
     <main class="maintenance-card" role="main">
       <div class="maintenance-mark" aria-hidden="true">R</div>
       <p class="eyebrow">BYMED BV</p>
-      <h1>De website is tijdelijk offline</h1>
+      <h1>{{ "De website is tijdelijk offline" if language == "nl" else "The site is temporarily offline" }}</h1>
       <p>
-        We voeren momenteel onderhoud uit aan Rady en CORE Radiology.
-        Probeer later opnieuw.
+        {% if language == "nl" %}
+          We voeren momenteel onderhoud uit aan Radius en CORE Radius.
+          Je account en je voortgang blijven bewaard.
+        {% else %}
+          We are currently performing maintenance on Radius and CORE Radius.
+          Your account and your progress are safe.
+        {% endif %}
       </p>
-      <small>© 2026 Bymed BV. Alle rechten voorbehouden.</small>
+      {% if maintenance_until %}
+        <p class="maintenance-eta">
+          {{ "Verwacht weer online:" if language == "nl" else "Expected back online:" }}
+          <strong>{{ maintenance_until }}</strong>
+        </p>
+      {% endif %}
+      {% if support_email %}
+        <p class="maintenance-contact">
+          {{ "Vragen? Mail ons via" if language == "nl" else "Questions? Email us at" }}
+          <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+        </p>
+      {% endif %}
+      <small>&copy; 2026 Bymed BV. {{ "Alle rechten voorbehouden." if language == "nl" else "All rights reserved." }}</small>
     </main>
   </body>
 </html>

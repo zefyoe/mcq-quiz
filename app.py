@@ -14,6 +14,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
+from flask_compress import Compress
 from sqlalchemy import func, inspect, text
 from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
@@ -80,6 +81,19 @@ if database_uri.startswith("postgresql+psycopg://"):
 
 if os.environ.get("RENDER") or os.environ.get("FLASK_ENV") == "production":
     app.config["SESSION_COOKIE_SECURE"] = True
+
+# Compress dynamic HTML. WhiteNoise serves /static/ before Flask sees it and
+# handles its own encoding, so this mainly targets quiz pages, which inline
+# every question and run into the hundreds of KB uncompressed.
+app.config["COMPRESS_MIMETYPES"] = [
+    "text/html",
+    "text/css",
+    "text/xml",
+    "application/json",
+    "application/javascript",
+]
+app.config["COMPRESS_MIN_SIZE"] = 1024
+Compress(app)
 
 app.wsgi_app = WhiteNoise(
     app.wsgi_app,
@@ -215,6 +229,10 @@ LABRALIS_REQUIRED_TERMS = (
     ("bony bankart", "bankart"),
 )
 SITE_OFFLINE = os.environ.get("PUBLIC_SITE_MODE", "active").strip().lower() == "offline"
+# Shown on the maintenance page. MAINTENANCE_UNTIL is free text (e.g. "9 aug, 18:00");
+# leave it unset to omit the "expected back online" line entirely.
+MAINTENANCE_SUPPORT_EMAIL = os.environ.get("MAINTENANCE_SUPPORT_EMAIL", "y@bymed.be").strip()
+MAINTENANCE_UNTIL = os.environ.get("MAINTENANCE_UNTIL", "").strip()
 
 
 # -------------------------
@@ -229,7 +247,11 @@ login_manager.init_app(app)
 @app.before_request
 def route_core_domain():
     if SITE_OFFLINE and request.endpoint != "health" and not request.path.startswith("/static/"):
-        return render_template("maintenance.html"), 503
+        return render_template(
+            "maintenance.html",
+            support_email=MAINTENANCE_SUPPORT_EMAIL,
+            maintenance_until=MAINTENANCE_UNTIL,
+        ), 503
     ensure_auth_schema_ready()
     hostname = request.host.split(":", 1)[0].lower()
     if hostname == "core.bymed.be" and request.path == "/":
@@ -3618,7 +3640,7 @@ def register():
             db.session.commit()
             record_login_event(user)
             login_user(user)
-            return redirect(url_for("home"))
+            return redirect(url_for("registration_success"))
 
     return render_template(
         "register.html",
@@ -3626,6 +3648,12 @@ def register():
         errors=field_errors,
         form_data=form_data,
     )
+
+
+@app.route("/registration-success")
+@login_required
+def registration_success():
+    return render_template("registration_success.html")
 
 
 @app.route("/logout")

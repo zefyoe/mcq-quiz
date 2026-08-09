@@ -2,6 +2,218 @@
   box-sizing: border-box;
 }
 
+/* Premium interaction layer */
+.session-save-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 18px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.session-save-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.11);
+}
+
+.session-save-status[data-state="offline"] { color: #9a3412; }
+.session-save-status[data-state="offline"] .session-save-dot {
+  background: #ea580c;
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.11);
+}
+
+.empty-state-action {
+  display: inline-flex;
+  margin-top: 14px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  background: #edf3fb;
+  color: #183b72;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.empty-state-action:hover { background: #e1ebf8; transform: translateY(-1px); }
+
+.question-image-wrapper .flashcard-image-status,
+.flashcard-image-status {
+  z-index: 3;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.question-image-wrapper .flashcard-image-status { background: rgba(15, 23, 42, 0.78); }
+
+.image-loading-label {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.question-image-wrapper .image-loading-label { color: #f8fafc; }
+
+.registration-success-page {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background: radial-gradient(circle at 80% 10%, rgba(45, 91, 155, 0.1), transparent 30%), #f4f7fb;
+}
+
+.registration-success-main {
+  width: min(680px, calc(100% - 32px));
+  flex: 1;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  padding: 48px 0;
+}
+
+.registration-success-card {
+  width: 100%;
+  padding: clamp(28px, 6vw, 58px);
+  text-align: center;
+  animation: premium-enter 420ms ease both;
+}
+
+.success-mark {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: #e8f7ef;
+  color: #15803d;
+  font-size: 2rem;
+  font-weight: 900;
+  box-shadow: 0 0 0 9px #f2fbf6;
+  animation: success-pop 520ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.registration-success-card h1 {
+  margin: 0;
+  color: #172033;
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+}
+
+.registration-success-text {
+  max-width: 480px;
+  margin: 16px auto 0;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.registration-success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.registration-success-note { margin: 22px 0 0; color: #94a3b8; font-size: 0.82rem; }
+
+.quiz-main,
+.quiz-sidebar,
+.flashcard-workspace,
+.flashcard-sidebar,
+.result-summary,
+.flashcard-result-hero { animation: premium-enter 360ms ease both; }
+
+.question-panel.active,
+.flashcard-panel.active { animation: question-enter 240ms ease both; }
+
+@keyframes premium-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes question-enter {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes success-pop {
+  from { opacity: 0; transform: scale(0.72); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 700px) {
+  .question-nav {
+    display: flex;
+    grid-template-columns: none;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 10px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .question-nav::-webkit-scrollbar,
+  .flashcard-question-nav::-webkit-scrollbar { display: none; }
+
+  .question-nav-item {
+    min-width: 44px;
+    min-height: 44px;
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    touch-action: manipulation;
+  }
+
+  .flashcard-question-nav {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    padding: 10px 14px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .flashcard-question-nav button {
+    width: 42px;
+    height: 42px;
+    scroll-snap-align: center;
+    touch-action: manipulation;
+  }
+
+  .quiz-bottom-bar,
+  .flashcard-bottom-bar { gap: 8px; }
+
+  .quiz-bottom-bar button,
+  .flashcard-bottom-bar button { min-height: 44px; touch-action: manipulation; }
+
+  .registration-success-actions { flex-direction: column; }
+  .registration-success-actions a { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -1341,8 +1553,16 @@ body {
 
 /* Responsive */
 @media (max-width: 1100px) {
+  /* minmax(0, 1fr) + min-width:0 stop the grid track from sizing itself to the
+     full 50-button question nav, which otherwise forces the page ~2600px wide
+     and breaks the nav's intended horizontal scroll strip on phones. */
   .quiz-page {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quiz-sidebar,
+  .quiz-main {
+    min-width: 0;
   }
 
   .quiz-sidebar {
@@ -4412,6 +4632,21 @@ body {
   line-height: 1.65;
 }
 
+.maintenance-card .maintenance-eta,
+.maintenance-card .maintenance-contact {
+  margin: -14px auto 18px;
+  font-size: 0.9rem;
+}
+
+.maintenance-card .maintenance-contact {
+  margin-bottom: 28px;
+}
+
+.maintenance-card .maintenance-contact a {
+  color: #183b72;
+  font-weight: 700;
+}
+
 .maintenance-card small {
   color: #8493a0;
   font-size: 0.75rem;
@@ -5351,5 +5586,197 @@ a.product-category-row:hover {
 
   .smart-review-metrics div:first-child {
     border-top: 0;
+  }
+}
+
+/* Keep loading feedback visible after the base image rules. */
+.image-loading-label {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.question-image-wrapper .image-loading-label { color: #f8fafc; }
+
+@media (max-width: 700px) {
+  .question-nav {
+    display: flex;
+    grid-template-columns: none;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 10px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .question-nav::-webkit-scrollbar,
+  .flashcard-question-nav::-webkit-scrollbar { display: none; }
+
+  .question-nav-item {
+    min-width: 44px;
+    min-height: 44px;
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    touch-action: manipulation;
+  }
+
+  .flashcard-question-nav {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    padding: 10px 14px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .flashcard-question-nav button {
+    width: 42px;
+    height: 42px;
+    scroll-snap-align: center;
+    touch-action: manipulation;
+  }
+
+  .quiz-bottom-bar button,
+  .flashcard-bottom-bar button { min-height: 44px; touch-action: manipulation; }
+}
+
+.quiz-shortcut-hint {
+  margin: 14px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.quiz-shortcut-hint kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 6px;
+  border: 1px solid #cbd5e1;
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #334155;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Touch devices have no keyboard to hint at. */
+@media (hover: none) and (pointer: coarse) {
+  .quiz-shortcut-hint { display: none; }
+}
+
+/* Mobile dashboard navigation.
+   On desktop the sidebar is always open and the toggle is hidden; below 700px
+   the nav collapses behind a hamburger so content is not pushed off-screen. */
+.dashboard-sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-nav-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dashboard-nav-toggle-bars,
+.dashboard-nav-toggle-bars::before,
+.dashboard-nav-toggle-bars::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  margin: 0 auto;
+  border-radius: 2px;
+  background: #ffffff;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.dashboard-nav-toggle-bars {
+  position: relative;
+}
+
+.dashboard-nav-toggle-bars::before,
+.dashboard-nav-toggle-bars::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.dashboard-nav-toggle-bars::before { top: -6px; }
+.dashboard-nav-toggle-bars::after { top: 6px; }
+
+.dashboard-sidebar-collapsible {
+  display: grid;
+  align-content: start;
+  gap: 28px;
+}
+
+/* Matches the 1100px breakpoint where .dashboard-shell stops being a two-column
+   grid and the sidebar stacks above the content — that is exactly when the nav
+   starts eating vertical space and needs to collapse. */
+@media (max-width: 1100px) {
+  .dashboard-sidebar {
+    gap: 0;
+  }
+
+  .dashboard-nav-toggle {
+    display: block;
+  }
+
+  .dashboard-sidebar-collapsible {
+    display: none;
+    gap: 16px;
+    padding-top: 16px;
+  }
+
+  body.dashboard-nav-open .dashboard-sidebar-collapsible {
+    display: grid;
+  }
+
+  body.dashboard-nav-open .dashboard-nav-toggle-bars {
+    background: transparent;
+  }
+
+  body.dashboard-nav-open .dashboard-nav-toggle-bars::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
+
+  body.dashboard-nav-open .dashboard-nav-toggle-bars::after {
+    top: 0;
+    transform: rotate(-45deg);
+  }
+
+  .dashboard-nav-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-nav-toggle-bars,
+  .dashboard-nav-toggle-bars::before,
+  .dashboard-nav-toggle-bars::after {
+    transition: none;
   }
 }

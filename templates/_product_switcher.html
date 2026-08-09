@@ -4,14 +4,14 @@
     href="{{ url_for('switch_product', product_key='anatomy') }}"
     class="product-option {% if selected_product != 'core' %}active{% endif %}"
   >
-    <span>A</span>
-    Anatomy
+    <span aria-hidden="true">A</span>
+    {{ "Anatomie" if language == "nl" else "Anatomy" }}
   </a>
   <a
     href="{{ url_for('switch_product', product_key='core') }}"
     class="product-option {% if selected_product == 'core' %}active{% endif %}"
   >
-    <span>C</span>
+    <span aria-hidden="true">C</span>
     CORE
   </a>
 </nav>

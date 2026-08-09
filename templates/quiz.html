@@ -47,6 +47,10 @@
             <div class="progress-bar-fill" id="progressBarFill"></div>
           </div>
         </div>
+        <div class="session-save-status" id="quizSaveStatus" role="status" aria-live="polite">
+          <span class="session-save-dot" aria-hidden="true"></span>
+          <span data-session-save-label>{{ "Automatisch opgeslagen" if language == "nl" else "Saved automatically" }}</span>
+        </div>
 
         <div class="question-nav" id="questionNav">
           {% for qid in order %}
@@ -239,6 +243,17 @@
             <button type="button" class="secondary-btn" id="nextBtn">{{ tr("Next") }}</button>
             <button type="submit" class="submit-btn" id="submitQuizBtn">{{ tr("Submit Quiz") }}</button>
           </div>
+          {% if not (current_user.is_authenticated and current_user.is_admin) %}
+            <p class="quiz-shortcut-hint">
+              {% if language == "nl" %}
+                Sneltoetsen: <kbd>A</kbd>–<kbd>D</kbd> of <kbd>1</kbd>–<kbd>4</kbd> kiezen &middot;
+                <kbd>Enter</kbd> opslaan &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> wisselen van vraag
+              {% else %}
+                Shortcuts: <kbd>A</kbd>–<kbd>D</kbd> or <kbd>1</kbd>–<kbd>4</kbd> to choose &middot;
+                <kbd>Enter</kbd> to save &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> to change question
+              {% endif %}
+            </p>
+          {% endif %}
         </form>
       </section>
     </main>
@@ -258,6 +273,8 @@
       const submitQuizBtn = document.getElementById("submitQuizBtn");
       const progressText = document.getElementById("progressText");
       const progressBarFill = document.getElementById("progressBarFill");
+      const quizSaveStatus = document.getElementById("quizSaveStatus");
+      const quizSaveStatusLabel = quizSaveStatus?.querySelector("[data-session-save-label]");
       const quizTimer = document.getElementById("quizTimer");
       const durationSeconds = document.getElementById("durationSeconds");
       const focusModeButton = document.getElementById("focusModeButton");
@@ -265,6 +282,7 @@
       const quizRunId = {{ quiz_run_id|tojson }};
       const initialQuestionId = {{ initial_qid|default('')|tojson }};
       const storageKey = `quizAnswers:${currentUserId}:${isAdmin ? "admin" : "student"}:${quizRunId}`;
+      const progressStorageKey = `${storageKey}:progress`;
       const attemptStartedAtKey = `${storageKey}:attemptStartedAt`;
       let attemptStartedAt = Number(localStorage.getItem(attemptStartedAtKey));
       if (!attemptStartedAt) {
@@ -367,6 +385,66 @@
         }
       }
 
+      function setSessionSaveStatus(state = "saved") {
+        if (!quizSaveStatus || !quizSaveStatusLabel) return;
+        quizSaveStatus.dataset.state = state;
+        quizSaveStatusLabel.textContent = state === "offline"
+          ? {{ ("Offline: voortgang blijft op dit apparaat beschikbaar." if language == "nl" else "Offline: progress remains available on this device.")|tojson }}
+          : {{ ("Automatisch opgeslagen" if language == "nl" else "Saved automatically")|tojson }};
+      }
+
+      function loadQuizProgress() {
+        try {
+          return JSON.parse(localStorage.getItem(progressStorageKey) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function persistQuizProgress() {
+        const draftAnswers = {};
+        panels.forEach((panel) => {
+          const qid = panel.dataset.qid;
+          if (!qid) return;
+          if (isAdmin) {
+            draftAnswers[qid] = {
+              a: panel.querySelector('[data-answer-input="a"]')?.value || "",
+              b: panel.querySelector('[data-answer-input="b"]')?.value || "",
+              c: panel.querySelector('[data-answer-input="c"]')?.value || "",
+              d: panel.querySelector('[data-answer-input="d"]')?.value || "",
+              correct_choice: panel.querySelector("[data-correct-choice]:checked")?.value || "",
+            };
+          } else {
+            draftAnswers[qid] = panel.querySelector("[data-student-choice]:checked")?.value || "";
+          }
+        });
+        localStorage.setItem(progressStorageKey, JSON.stringify({
+          currentQid: panels[currentIndex]?.dataset.qid || initialQuestionId || "",
+          draftAnswers,
+          savedAt: Date.now(),
+        }));
+        setSessionSaveStatus(navigator.onLine === false ? "offline" : "saved");
+      }
+
+      function hydrateQuizDraft(progress) {
+        const drafts = progress?.draftAnswers || {};
+        panels.forEach((panel) => {
+          const draft = drafts[panel.dataset.qid];
+          if (!draft || panel.dataset.saved === "true") return;
+          if (isAdmin && typeof draft === "object") {
+            ["a", "b", "c", "d"].forEach((key) => {
+              const input = panel.querySelector(`[data-answer-input="${key}"]`);
+              if (input && draft[key]) input.value = draft[key];
+            });
+            if (draft.correct_choice) {
+              panel.querySelector(`[data-correct-choice][value="${draft.correct_choice}"]`)?.click();
+            }
+          } else if (typeof draft === "string" && draft) {
+            panel.querySelector(`[data-student-choice][value="${draft}"]`)?.click();
+          }
+        });
+      }
+
       function persistSavedAnswers() {
         const payload = {};
 
@@ -397,6 +475,7 @@
         });
 
         localStorage.setItem(storageKey, JSON.stringify(payload));
+        persistQuizProgress();
       }
 
       function hydrateSavedAnswers() {
@@ -451,12 +530,16 @@
           image.dataset.loaded = "true";
           image.dataset.loading = "false";
           frame?.classList.remove("is-loading", "has-error");
+          const label = frame?.querySelector(".image-loading-label");
+          if (label) label.textContent = {{ ("Afbeelding geladen" if language == "nl" else "Image loaded")|tojson }};
         };
         const markFailed = () => {
           image.dataset.loading = "false";
           image.removeAttribute("src");
           frame?.classList.remove("is-loading");
           frame?.classList.add("has-error");
+          const label = frame?.querySelector(".image-loading-label");
+          if (label) label.textContent = {{ ("Afbeelding kon niet laden" if language == "nl" else "Image could not load")|tojson }};
           if (retryButton) retryButton.hidden = false;
         };
 
@@ -571,6 +654,7 @@
         if (activeNav) activeNav.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
 
         currentIndex = index;
+        persistQuizProgress();
         prevBtn.disabled = currentIndex === 0;
         nextBtn.disabled = currentIndex === panels.length - 1;
         loadQuestionImage(index);
@@ -684,6 +768,60 @@
         }
       });
 
+      // Keyboard shortcuts, mirroring the flashcard view: A-D / 1-4 to choose,
+      // Enter to save, arrow keys to move between questions.
+      const CHOICE_KEYS = {
+        a: "A", b: "B", c: "C", d: "D",
+        1: "A", 2: "B", 3: "C", 4: "D",
+      };
+
+      document.addEventListener("keydown", (event) => {
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+        const target = event.target;
+        const isTextEntry = target instanceof HTMLElement
+          && (target.matches("input:not([type=radio]), textarea, select") || target.isContentEditable);
+        if (isTextEntry) return;
+
+        const panel = getPanel(currentIndex);
+        if (!panel) return;
+
+        if (event.key === "ArrowLeft") {
+          if (currentIndex > 0) {
+            event.preventDefault();
+            showQuestion(currentIndex - 1);
+          }
+          return;
+        }
+
+        if (event.key === "ArrowRight") {
+          if (currentIndex < panels.length - 1) {
+            event.preventDefault();
+            showQuestion(currentIndex + 1);
+          }
+          return;
+        }
+
+        if (event.key === "Enter") {
+          const saveButton = panel.querySelector("[data-save-answer]");
+          if (saveButton && !saveButton.disabled) {
+            event.preventDefault();
+            saveButton.click();
+          }
+          return;
+        }
+
+        const letter = CHOICE_KEYS[event.key.toLowerCase()];
+        if (!letter) return;
+
+        const choice = panel.querySelector(`[data-student-choice][value="${letter}"]`);
+        if (!choice || choice.disabled) return;
+
+        event.preventDefault();
+        choice.click();
+        choice.closest(".student-option-card")?.scrollIntoView({block: "nearest"});
+      });
+
       panels.forEach((panel) => {
         const index = Number(panel.dataset.questionIndex);
         const saveButton = panel.querySelector("[data-save-answer]");
@@ -733,6 +871,8 @@
 
         answerInputs.forEach((answerInput) => {
           if (!answerInput) return;
+          answerInput.addEventListener("input", persistQuizProgress);
+          answerInput.addEventListener("change", persistQuizProgress);
           answerInput.addEventListener("keydown", async (event) => {
             if (event.key === "Enter") {
               event.preventDefault();
@@ -747,6 +887,7 @@
         persistSavedAnswers();
         durationSeconds.value = String(Math.max(0, Math.floor((Date.now() - attemptStartedAt) / 1000)));
         localStorage.removeItem(attemptStartedAtKey);
+        localStorage.removeItem(progressStorageKey);
         if (quizMode === "exam" && quizTimer && !isAdmin) {
           localStorage.removeItem(`${storageKey}:timerStartedAt`);
         }
@@ -770,12 +911,20 @@
       }
 
       hydrateSavedAnswers();
+      const savedQuizProgress = loadQuizProgress();
+      hydrateQuizDraft(savedQuizProgress);
       panels.forEach((_, index) => updateSavedState(index));
       const initialIndex = Array.from(panels).findIndex(
-        (panel) => panel.dataset.qid === initialQuestionId
+        (panel) => panel.dataset.qid === (initialQuestionId || savedQuizProgress.currentQid)
       );
       showQuestion(initialIndex >= 0 ? initialIndex : 0);
       startExamTimer();
+      window.addEventListener("beforeunload", () => {
+        persistSavedAnswers();
+        persistQuizProgress();
+      });
+      window.addEventListener("online", () => setSessionSaveStatus("saved"));
+      window.addEventListener("offline", () => setSessionSaveStatus("offline"));
     </script>
   </body>
 </html>
