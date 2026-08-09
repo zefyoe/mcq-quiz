@@ -95,6 +95,7 @@ AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
 STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
 ADMIN_EMAIL = "y@bymed.be"
 LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "0").strip() == "1"
+AUTH_SCHEMA_READY = False
 ANATOMY_CATEGORY = "Anatomy"
 ANATOMY_SUBGROUPS = {
     "msk": {
@@ -224,6 +225,7 @@ login_manager.init_app(app)
 def route_core_domain():
     if SITE_OFFLINE and request.endpoint != "health" and not request.path.startswith("/static/"):
         return render_template("maintenance.html"), 503
+    ensure_auth_schema_ready()
     hostname = request.host.split(":", 1)[0].lower()
     if hostname == "core.bymed.be" and request.path == "/":
         return redirect(url_for("core_home"))
@@ -556,7 +558,17 @@ def ensure_user_profile_schema():
 def ensure_login_event_schema():
     """Create the additive login-history table when a first login needs it."""
     if "login_event" not in inspect(db.engine).get_table_names():
-        db.create_all()
+        LoginEvent.__table__.create(bind=db.engine, checkfirst=True)
+
+
+def ensure_auth_schema_ready() -> None:
+    """Apply the small additive auth migration before protected requests."""
+    global AUTH_SCHEMA_READY
+    if AUTH_SCHEMA_READY:
+        return
+    ensure_user_profile_schema()
+    ensure_login_event_schema()
+    AUTH_SCHEMA_READY = True
 
 
 def record_login_event(user: User) -> None:
