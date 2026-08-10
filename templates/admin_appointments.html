@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Afsprakenplanner</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v=asset_version) }}">
+  </head>
+  <body class="appointments-page">
+    <header class="admin-topbar appointment-topbar">
+      <div class="admin-topbar-inner">
+        <a class="appointment-brand" href="{{ url_for('admin_home') }}">Radius <span>Private Practice</span></a>
+        <div class="admin-topbar-actions">
+          <div class="admin-topbar-badge">Afsprakenplanner</div>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('admin_home') }}">Admin</a>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('logout') }}">Uitloggen</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="appointment-shell">
+      <section class="appointment-hero">
+        <div>
+          <p class="appointment-eyebrow">PRIVATE RADIOLOGY PRACTICE</p>
+          <h1>Afsprakenplanner</h1>
+          <p>Een eerste interne versie van de agenda. Elk beschikbaar blok duurt één uur.</p>
+        </div>
+        <div class="appointment-hero-note">
+          <span class="appointment-note-dot"></span>
+          Alleen zichtbaar voor de beheerder
+        </div>
+      </section>
+
+      {% if error %}
+        <div class="appointment-alert appointment-alert-error" role="alert">{{ error }}</div>
+      {% endif %}
+      {% if success %}
+        <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
+      {% endif %}
+
+      <section class="appointment-dashboard" aria-label="Weekagenda">
+        <aside class="appointment-sidebar">
+          <div class="appointment-side-heading">
+            <p class="appointment-eyebrow">AGENDA</p>
+            <h2>Plan een onderzoek</h2>
+            <p>Kies een datum om naar de juiste week te gaan. Klik vervolgens op een vrij tijdstip.</p>
+          </div>
+
+          <form class="appointment-date-form" method="get" action="{{ url_for('admin_appointments') }}">
+            <label for="appointment-date">Ga naar datum</label>
+            <input id="appointment-date" name="date" type="date" value="{{ selected_date }}" required>
+            <button type="submit">Toon week</button>
+          </form>
+
+          <div class="appointment-stats" aria-label="Overzicht deze week">
+            <div>
+              <span>Ingepland</span>
+              <strong>{{ booked_count }}</strong>
+            </div>
+            <div>
+              <span>Beschikbaar</span>
+              <strong>{{ available_count }}</strong>
+            </div>
+          </div>
+
+          <div class="appointment-legend" aria-label="Legenda">
+            <span><i class="legend-available"></i> Beschikbaar</span>
+            <span><i class="legend-booked"></i> Ingepland</span>
+          </div>
+
+          <div class="appointment-preview-note">
+            <strong>Pilotversie</strong>
+            <p>De publieke patiëntomgeving staat nog niet open. Je kunt de afsprakenflow hier eerst veilig beoordelen.</p>
+          </div>
+        </aside>
+
+        <section class="appointment-calendar-card">
+          <div class="appointment-calendar-toolbar">
+            <div>
+              <p class="appointment-eyebrow">WEEKOVERZICHT</p>
+              <h2>{{ week_start.strftime('%d/%m/%Y') }} - {{ (week_end - timedelta(days=1)).strftime('%d/%m/%Y') }}</h2>
+            </div>
+            <div class="appointment-week-actions">
+              <a href="{{ url_for('admin_appointments', date=(week_start - timedelta(days=7)).isoformat()) }}" aria-label="Vorige week">Vorige week</a>
+              <a class="appointment-today-link" href="{{ url_for('admin_appointments') }}">Vandaag</a>
+              <a href="{{ url_for('admin_appointments', date=(week_start + timedelta(days=7)).isoformat()) }}" aria-label="Volgende week">Volgende week</a>
+            </div>
+          </div>
+
+          <div class="appointment-calendar-scroll">
+            <div class="appointment-calendar-grid">
+              <div class="appointment-time-column appointment-grid-head">Tijd</div>
+              {% for day in days %}
+                <div class="appointment-day-header{% if day.date == today %} is-today{% endif %}">
+                  <span>{{ day.short_label }}</span>
+                  <strong>{{ day.date.strftime('%d') }}</strong>
+                  <small>{{ day.day_name }}</small>
+                </div>
+              {% endfor %}
+
+              {% for hour in range(8, 21) %}
+                <div class="appointment-time-column">{{ '%02d:00'|format(hour) }}</div>
+                {% for day in days %}
+                  {% set slot = day.slots[hour - 8] %}
+                  {% if slot.appointment %}
+                    <article class="appointment-slot appointment-slot-booked" aria-label="Ingeplande afspraak {{ slot.starts_at.strftime('%A %d %B om %H:%M') }}">
+                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(hours=1)).strftime('%H:%M') }}</span>
+                      <strong>{{ slot.appointment.patient_name }}</strong>
+                      <span>{{ slot.appointment.appointment_type }}</span>
+                      <details>
+                        <summary>Details</summary>
+                        <p>{{ slot.appointment.patient_email }}</p>
+                        {% if slot.appointment.patient_phone %}<p>{{ slot.appointment.patient_phone }}</p>{% endif %}
+                        {% if slot.appointment.notes %}<p>{{ slot.appointment.notes }}</p>{% endif %}
+                        <form method="post" action="{{ url_for('admin_cancel_appointment', appointment_id=slot.appointment.id) }}" onsubmit="return confirm('Deze afspraak annuleren en dit uur opnieuw vrijgeven?');">
+                          <input type="hidden" name="week_date" value="{{ selected_date }}">
+                          <button type="submit" class="appointment-cancel-button">Annuleer afspraak</button>
+                        </form>
+                      </details>
+                    </article>
+                  {% else %}
+                    <button
+                      class="appointment-slot appointment-slot-available"
+                      type="button"
+                      data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}"
+                      data-slot-label="{{ day.day_name|capitalize }} {{ day.date.strftime('%d/%m') }}, {{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(hours=1)).strftime('%H:%M') }}"
+                    >
+                      <span>Vrij</span>
+                      <small>{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(hours=1)).strftime('%H:%M') }}</small>
+                    </button>
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="appointment-modal" id="appointment-modal" hidden>
+      <div class="appointment-modal-backdrop" data-close-modal></div>
+      <section class="appointment-modal-card" role="dialog" aria-modal="true" aria-labelledby="appointment-modal-title">
+        <button class="appointment-modal-close" type="button" aria-label="Sluiten" data-close-modal>&times;</button>
+        <p class="appointment-eyebrow">NIEUWE AFSPRAAK</p>
+        <h2 id="appointment-modal-title">Plan een afspraak</h2>
+        <p class="appointment-selected-slot" id="appointment-selected-slot"></p>
+
+        <form method="post" action="{{ url_for('admin_book_appointment') }}" class="appointment-booking-form">
+          <input type="hidden" name="slot_start" id="appointment-slot-start">
+          <input type="hidden" name="week_date" value="{{ selected_date }}">
+          <label>
+            Naam patiënt
+            <input name="patient_name" type="text" autocomplete="name" required maxlength="255">
+          </label>
+          <label>
+            E-mail patiënt
+            <input name="patient_email" type="email" autocomplete="email" required maxlength="255">
+          </label>
+          <label>
+            Telefoonnummer <span>optioneel</span>
+            <input name="patient_phone" type="tel" autocomplete="tel" maxlength="80">
+          </label>
+          <label>
+            Type afspraak
+            <select name="appointment_type">
+              {% for appointment_type in appointment_types %}
+                <option value="{{ appointment_type }}">{{ appointment_type }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>
+            Interne notitie <span>optioneel</span>
+            <textarea name="notes" rows="3" maxlength="2000" placeholder="Bijvoorbeeld: verwijsbrief ontvangen"></textarea>
+          </label>
+          <button type="submit" class="appointment-submit-button">Afspraak vastleggen</button>
+        </form>
+      </section>
+    </div>
+
+    <script>
+      (() => {
+        const modal = document.getElementById('appointment-modal');
+        const slotInput = document.getElementById('appointment-slot-start');
+        const selectedSlot = document.getElementById('appointment-selected-slot');
+        const firstInput = modal.querySelector('input[name="patient_name"]');
+
+        const closeModal = () => {
+          modal.hidden = true;
+          document.body.classList.remove('appointment-modal-open');
+        };
+
+        document.querySelectorAll('[data-slot]').forEach((button) => {
+          button.addEventListener('click', () => {
+            slotInput.value = button.dataset.slot;
+            selectedSlot.textContent = button.dataset.slotLabel;
+            modal.hidden = false;
+            document.body.classList.add('appointment-modal-open');
+            window.setTimeout(() => firstInput.focus(), 0);
+          });
+        });
+
+        document.querySelectorAll('[data-close-modal]').forEach((button) => {
+          button.addEventListener('click', closeModal);
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !modal.hidden) closeModal();
+        });
+      })();
+    </script>
+  </body>
+</html>

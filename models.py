@@ -31,6 +31,20 @@ class LoginEvent(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
     logged_in_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
+
+class Appointment(db.Model):
+    """A booked one-hour appointment in the private-practice agenda."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    starts_at = db.Column(db.DateTime, nullable=False, unique=True, index=True)
+    patient_name = db.Column(db.String(255), nullable=False)
+    patient_email = db.Column(db.String(255), nullable=False)
+    patient_phone = db.Column(db.String(80), nullable=True)
+    appointment_type = db.Column(db.String(120), nullable=False, default="Consultatie")
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

@@ -2,7 +2,7 @@ import os
 import random
 import re
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from urllib.parse import urlparse
 
@@ -28,7 +28,7 @@ from localization import (
     latinize_anatomy_term,
     translate_ui,
 )
-from models import LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from models import Appointment, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -115,6 +115,7 @@ ACCOUNT_CLEANUP_EMAILS = frozenset({
 })
 LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "0").strip() == "1"
 AUTH_SCHEMA_READY = False
+APPOINTMENT_SCHEMA_READY = False
 ANATOMY_CATEGORY = "Anatomy"
 ANATOMY_SUBGROUPS = {
     "msk": {
@@ -586,6 +587,16 @@ def ensure_login_event_schema():
     """Create the additive login-history table when a first login needs it."""
     if "login_event" not in inspect(db.engine).get_table_names():
         LoginEvent.__table__.create(bind=db.engine, checkfirst=True)
+
+
+def ensure_appointment_schema() -> None:
+    """Create the standalone appointment table before its admin module is used."""
+    global APPOINTMENT_SCHEMA_READY
+    if APPOINTMENT_SCHEMA_READY:
+        return
+
+    Appointment.__table__.create(bind=db.engine, checkfirst=True)
+    APPOINTMENT_SCHEMA_READY = True
 
 
 def ensure_auth_schema_ready() -> None:
@@ -3172,6 +3183,185 @@ def admin_home():
         question_count=question_count,
         user_count=db.session.query(func.count(User.id)).scalar() or 0,
     )
+
+
+def get_appointment_week_start(raw_date: str | None = None) -> date:
+    """Return the Monday for a date selected in the appointment calendar."""
+    try:
+        selected_date = datetime.strptime(raw_date or "", "%Y-%m-%d").date()
+    except ValueError:
+        selected_date = datetime.now().date()
+    return selected_date - timedelta(days=selected_date.weekday())
+
+
+def build_appointment_slot_grid(week_start: date, appointments: list[Appointment]) -> list[dict]:
+    appointments_by_start = {appointment.starts_at: appointment for appointment in appointments}
+    day_labels = ("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo")
+    day_names = (
+        "maandag", "dinsdag", "woensdag", "donderdag",
+        "vrijdag", "zaterdag", "zondag",
+    )
+    days = []
+    for offset, (short_label, day_name) in enumerate(zip(day_labels, day_names)):
+        day = week_start + timedelta(days=offset)
+        slots = []
+        for hour in range(8, 21):
+            starts_at = datetime.combine(day, time(hour=hour))
+            slots.append({
+                "starts_at": starts_at,
+                "appointment": appointments_by_start.get(starts_at),
+            })
+        days.append({
+            "date": day,
+            "short_label": short_label,
+            "day_name": day_name,
+            "slots": slots,
+        })
+    return days
+
+
+def parse_appointment_slot(raw_slot: str | None) -> datetime | None:
+    try:
+        starts_at = datetime.fromisoformat(raw_slot or "")
+    except (TypeError, ValueError):
+        return None
+
+    if (
+        starts_at.minute != 0
+        or starts_at.second != 0
+        or starts_at.microsecond != 0
+        or starts_at.hour not in range(8, 21)
+    ):
+        return None
+    return starts_at
+
+
+@app.route("/admin/appointments")
+def admin_appointments():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    ensure_appointment_schema()
+    requested_date = request.args.get("date")
+    week_start = get_appointment_week_start(requested_date)
+    week_end = week_start + timedelta(days=7)
+    appointments = (
+        Appointment.query
+        .filter(
+            Appointment.starts_at >= datetime.combine(week_start, time.min),
+            Appointment.starts_at < datetime.combine(week_end, time.min),
+        )
+        .order_by(Appointment.starts_at.asc())
+        .all()
+    )
+    return render_template(
+        "admin_appointments.html",
+        week_start=week_start,
+        week_end=week_end,
+        selected_date=(requested_date or week_start.isoformat()),
+        today=datetime.now().date(),
+        timedelta=timedelta,
+        days=build_appointment_slot_grid(week_start, appointments),
+        booked_count=len(appointments),
+        available_count=91 - len(appointments),
+        appointment_types=(
+            "Consultatie",
+            "Eerste consultatie",
+            "Echografie",
+            "CT",
+            "MRI",
+            "Radiografie",
+            "Opvolging",
+        ),
+        error=(request.args.get("error") or "").strip(),
+        success=(request.args.get("success") or "").strip(),
+    )
+
+
+@app.post("/admin/appointments/book")
+def admin_book_appointment():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    ensure_appointment_schema()
+    starts_at = parse_appointment_slot(request.form.get("slot_start"))
+    week_date = (request.form.get("week_date") or "").strip()
+    patient_name = (request.form.get("patient_name") or "").strip()
+    patient_email = (request.form.get("patient_email") or "").strip().lower()
+    patient_phone = (request.form.get("patient_phone") or "").strip()
+    appointment_type = (request.form.get("appointment_type") or "Consultatie").strip()
+    notes = (request.form.get("notes") or "").strip()
+
+    if not starts_at or not patient_name or not patient_email:
+        return redirect(url_for(
+            "admin_appointments",
+            date=week_date,
+            error="Kies een geldig tijdstip en vul naam en e-mailadres in.",
+        ))
+    if "@" not in patient_email:
+        return redirect(url_for(
+            "admin_appointments",
+            date=week_date,
+            error="Vul een geldig e-mailadres in.",
+        ))
+    if Appointment.query.filter_by(starts_at=starts_at).first():
+        return redirect(url_for(
+            "admin_appointments",
+            date=week_date,
+            error="Dit tijdstip is net ingenomen. Kies een ander beschikbaar uur.",
+        ))
+
+    appointment = Appointment(
+        starts_at=starts_at,
+        patient_name=patient_name,
+        patient_email=patient_email,
+        patient_phone=patient_phone or None,
+        appointment_type=appointment_type[:120] or "Consultatie",
+        notes=notes or None,
+    )
+    try:
+        db.session.add(appointment)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return redirect(url_for(
+            "admin_appointments",
+            date=week_date,
+            error="Dit tijdstip kon niet worden vastgelegd. Probeer opnieuw.",
+        ))
+
+    return redirect(url_for(
+        "admin_appointments",
+        date=week_date,
+        success="De afspraak is ingepland.",
+    ))
+
+
+@app.post("/admin/appointments/<int:appointment_id>/cancel")
+def admin_cancel_appointment(appointment_id):
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    ensure_appointment_schema()
+    appointment = db.session.get(Appointment, appointment_id)
+    week_date = (request.form.get("week_date") or "").strip()
+    if appointment is None:
+        return redirect(url_for(
+            "admin_appointments",
+            date=week_date,
+            error="Deze afspraak bestaat niet meer.",
+        ))
+
+    db.session.delete(appointment)
+    db.session.commit()
+    return redirect(url_for(
+        "admin_appointments",
+        date=week_date,
+        success="De afspraak is geannuleerd en het tijdstip is opnieuw beschikbaar.",
+    ))
 
 
 @app.route("/admin/users")
