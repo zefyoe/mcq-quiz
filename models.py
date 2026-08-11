@@ -33,7 +33,7 @@ class LoginEvent(db.Model):
 
 
 class Appointment(db.Model):
-    """A booked one-hour appointment in the private-practice agenda."""
+    """A booked ultrasound appointment in the private-practice agenda."""
 
     id = db.Column(db.Integer, primary_key=True)
     starts_at = db.Column(db.DateTime, nullable=False, unique=True, index=True)
@@ -42,6 +42,9 @@ class Appointment(db.Model):
     patient_phone = db.Column(db.String(80), nullable=True)
     appointment_type = db.Column(db.String(120), nullable=False, default="Consultatie")
     notes = db.Column(db.Text, nullable=True)
+    prescription_filename = db.Column(db.String(255), nullable=True)
+    prescription_mimetype = db.Column(db.String(120), nullable=True)
+    prescription_data = db.Column(db.LargeBinary, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 

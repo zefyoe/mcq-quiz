@@ -51,7 +51,7 @@
           {% if current_user.is_authenticated and current_user.is_admin %}
             <a href="{{ url_for('admin_home') }}" class="dashboard-nav-link">Admin</a>
             <a href="{{ url_for('admin_database') }}" class="dashboard-nav-link">Database</a>
-            <a href="{{ url_for('admin_appointments') }}" class="dashboard-nav-link">Afsprakenplanner</a>
+            <a href="{{ url_for('admin_appointments') }}" class="dashboard-nav-link dashboard-nav-link-appointments">Afsprakenplanner</a>
           {% endif %}
           <a href="{{ url_for('logout') }}" class="dashboard-nav-link dashboard-nav-link-muted">{{ tr("Log out") }}</a>
         </nav>

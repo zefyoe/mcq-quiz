@@ -4,6 +4,7 @@ import re
 import json
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
+from io import BytesIO
 from urllib.parse import urlparse
 
 from flask import Flask, abort, g, jsonify, render_template, request, session, redirect, url_for
@@ -18,6 +19,7 @@ from flask_compress import Compress
 from sqlalchemy import func, inspect, text
 from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
+from PIL import Image, UnidentifiedImageError
 
 from core_radiology import get_core_section, get_core_sections, load_core_section
 from cardiothoracic import load_cardiothoracic_questions
@@ -116,6 +118,57 @@ ACCOUNT_CLEANUP_EMAILS = frozenset({
 LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "0").strip() == "1"
 AUTH_SCHEMA_READY = False
 APPOINTMENT_SCHEMA_READY = False
+APPOINTMENT_SLOT_MINUTES = 15
+APPOINTMENT_OPENING_HOUR = 8
+APPOINTMENT_CLOSING_HOUR = 21
+APPOINTMENT_SLOTS_PER_DAY = (
+    (APPOINTMENT_CLOSING_HOUR - APPOINTMENT_OPENING_HOUR) * 60
+) // APPOINTMENT_SLOT_MINUTES
+MAX_PRESCRIPTION_UPLOAD_BYTES = 10 * 1024 * 1024
+PRESCRIPTION_FILE_TYPES = {
+    ".pdf": ("application/pdf", None),
+    ".jpg": ("image/jpeg", "JPEG"),
+    ".jpeg": ("image/jpeg", "JPEG"),
+    ".png": ("image/png", "PNG"),
+    ".webp": ("image/webp", "WEBP"),
+}
+ULTRASOUND_APPOINTMENT_GROUPS = (
+    ("Buik en urinewegen", (
+        "Echografie abdomen volledig",
+        "Echografie bovenbuik (lever, galblaas, pancreas, milt)",
+        "Echografie nieren en blaas",
+        "Echografie lies / hernia",
+        "Echografie bekken",
+        "Echografie scrotum / testis",
+    )),
+    ("Hals en oppervlakkige structuren", (
+        "Echografie hals en schildklier",
+        "Echografie speekselklieren",
+        "Echografie lymfeklieren",
+        "Echografie weke delen / palpabele zwelling",
+    )),
+    ("Bewegingsapparaat", (
+        "Echografie schouder",
+        "Echografie elleboog, pols of hand",
+        "Echografie heup of knie",
+        "Echografie enkel of voet",
+        "Echografie spier of pees",
+    )),
+    ("Borsten en bloedvaten", (
+        "Echografie borst(en)",
+        "Doppler-echografie venen benen",
+        "Doppler-echografie arteriën benen",
+        "Doppler-echografie halsslagaders",
+    )),
+    ("Overig", (
+        "Andere echografie (te preciseren)",
+    )),
+)
+ULTRASOUND_APPOINTMENT_TYPES = frozenset(
+    appointment_type
+    for _, appointment_types in ULTRASOUND_APPOINTMENT_GROUPS
+    for appointment_type in appointment_types
+)
 ANATOMY_CATEGORY = "Anatomy"
 ANATOMY_SUBGROUPS = {
     "msk": {
@@ -210,6 +263,7 @@ LABRALIS_CASE = {
     "volume_url": "/static/core/labralis/case01__sequelen-van-posterieure-glenohumerale-luxatie-klein-reversed-hill-sachs-letsel-en-reversed-bony-bankart-letsel.nii.gz",
     "prompt_nl": "Bekijk de scrollbare CT-schouderarthro en formuleer de meest waarschijnlijke diagnose.",
     "prompt_en": "Review the scrollable CT shoulder arthrogram and formulate the most likely diagnosis.",
+    "volume_cache_key": "labralis-20260810-2",
     "processing_stats": (
         ("Origineel DICOM", "~113 MB"),
         ("Na 2,5 mm webverwerking", "3,5 MB"),
@@ -595,7 +649,26 @@ def ensure_appointment_schema() -> None:
     if APPOINTMENT_SCHEMA_READY:
         return
 
-    Appointment.__table__.create(bind=db.engine, checkfirst=True)
+    inspector = inspect(db.engine)
+    if "appointment" not in inspector.get_table_names():
+        Appointment.__table__.create(bind=db.engine, checkfirst=True)
+        APPOINTMENT_SCHEMA_READY = True
+        return
+
+    column_names = {column["name"] for column in inspector.get_columns("appointment")}
+    binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
+    statements = []
+    if "prescription_filename" not in column_names:
+        statements.append("ALTER TABLE appointment ADD COLUMN prescription_filename VARCHAR(255)")
+    if "prescription_mimetype" not in column_names:
+        statements.append("ALTER TABLE appointment ADD COLUMN prescription_mimetype VARCHAR(120)")
+    if "prescription_data" not in column_names:
+        statements.append(f"ALTER TABLE appointment ADD COLUMN prescription_data {binary_type}")
+
+    for statement in statements:
+        db.session.execute(text(statement))
+    if statements:
+        db.session.commit()
     APPOINTMENT_SCHEMA_READY = True
 
 
@@ -3194,7 +3267,11 @@ def get_appointment_week_start(raw_date: str | None = None) -> date:
     return selected_date - timedelta(days=selected_date.weekday())
 
 
-def build_appointment_slot_grid(week_start: date, appointments: list[Appointment]) -> list[dict]:
+def build_appointment_slot_grid(
+    week_start: date,
+    appointments: list[Appointment],
+) -> tuple[list[dict], list[dict]]:
+    """Build the seven-day calendar in 15-minute appointment blocks."""
     appointments_by_start = {appointment.starts_at: appointment for appointment in appointments}
     day_labels = ("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo")
     day_names = (
@@ -3204,20 +3281,33 @@ def build_appointment_slot_grid(week_start: date, appointments: list[Appointment
     days = []
     for offset, (short_label, day_name) in enumerate(zip(day_labels, day_names)):
         day = week_start + timedelta(days=offset)
-        slots = []
-        for hour in range(8, 21):
-            starts_at = datetime.combine(day, time(hour=hour))
-            slots.append({
-                "starts_at": starts_at,
-                "appointment": appointments_by_start.get(starts_at),
-            })
         days.append({
             "date": day,
             "short_label": short_label,
             "day_name": day_name,
+        })
+
+    slot_rows = []
+    for slot_index in range(APPOINTMENT_SLOTS_PER_DAY):
+        minutes_from_midnight = (
+            APPOINTMENT_OPENING_HOUR * 60
+            + slot_index * APPOINTMENT_SLOT_MINUTES
+        )
+        hour, minute = divmod(minutes_from_midnight, 60)
+        slots = []
+        for day in days:
+            starts_at = datetime.combine(day["date"], time(hour=hour, minute=minute))
+            slots.append({
+                "starts_at": starts_at,
+                "appointment": appointments_by_start.get(starts_at),
+                "day_name": day["day_name"],
+            })
+        slot_rows.append({
+            "time_label": f"{hour:02d}:{minute:02d}",
             "slots": slots,
         })
-    return days
+
+    return days, slot_rows
 
 
 def parse_appointment_slot(raw_slot: str | None) -> datetime | None:
@@ -3227,13 +3317,58 @@ def parse_appointment_slot(raw_slot: str | None) -> datetime | None:
         return None
 
     if (
-        starts_at.minute != 0
+        starts_at.tzinfo is not None
+        or starts_at.minute not in range(0, 60, APPOINTMENT_SLOT_MINUTES)
         or starts_at.second != 0
         or starts_at.microsecond != 0
-        or starts_at.hour not in range(8, 21)
+        or starts_at.hour not in range(
+            APPOINTMENT_OPENING_HOUR,
+            APPOINTMENT_CLOSING_HOUR,
+        )
     ):
         return None
     return starts_at
+
+
+def read_prescription_upload() -> tuple[str, str, bytes]:
+    """Validate one private prescription upload before storing it in the database."""
+    upload_fields = ("prescription_file", "prescription_photo")
+    uploads = [
+        request.files.get(field)
+        for field in upload_fields
+        if request.files.get(field) and request.files.get(field).filename
+    ]
+    if len(uploads) != 1:
+        raise ValueError("Laad precies een voorschrift op: een PDF of een foto.")
+
+    uploaded_file = uploads[0]
+    filename = secure_filename(uploaded_file.filename or "")
+    extension = os.path.splitext(filename)[1].lower()
+    allowed_file_type = PRESCRIPTION_FILE_TYPES.get(extension)
+    if not filename or not allowed_file_type:
+        raise ValueError("Gebruik een PDF, JPG, PNG of WEBP voor het voorschrift.")
+
+    data = uploaded_file.read(MAX_PRESCRIPTION_UPLOAD_BYTES + 1)
+    if not data:
+        raise ValueError("Het opgeladen voorschrift is leeg.")
+    if len(data) > MAX_PRESCRIPTION_UPLOAD_BYTES:
+        raise ValueError("Het voorschrift mag maximaal 10 MB groot zijn.")
+
+    mimetype, expected_image_format = allowed_file_type
+    if extension == ".pdf":
+        if not data.startswith(b"%PDF-"):
+            raise ValueError("Het opgeladen bestand is geen geldige PDF.")
+    else:
+        try:
+            with Image.open(BytesIO(data)) as image:
+                image_format = image.format
+                image.verify()
+        except (UnidentifiedImageError, OSError, SyntaxError):
+            raise ValueError("De foto van het voorschrift kon niet worden gelezen.") from None
+        if image_format != expected_image_format:
+            raise ValueError("Het bestandstype komt niet overeen met de gekozen foto.")
+
+    return filename, mimetype, data
 
 
 @app.route("/admin/appointments")
@@ -3255,6 +3390,7 @@ def admin_appointments():
         .order_by(Appointment.starts_at.asc())
         .all()
     )
+    days, slot_rows = build_appointment_slot_grid(week_start, appointments)
     return render_template(
         "admin_appointments.html",
         week_start=week_start,
@@ -3262,18 +3398,12 @@ def admin_appointments():
         selected_date=(requested_date or week_start.isoformat()),
         today=datetime.now().date(),
         timedelta=timedelta,
-        days=build_appointment_slot_grid(week_start, appointments),
+        days=days,
+        slot_rows=slot_rows,
         booked_count=len(appointments),
-        available_count=91 - len(appointments),
-        appointment_types=(
-            "Consultatie",
-            "Eerste consultatie",
-            "Echografie",
-            "CT",
-            "MRI",
-            "Radiografie",
-            "Opvolging",
-        ),
+        available_count=(7 * APPOINTMENT_SLOTS_PER_DAY) - len(appointments),
+        appointment_groups=ULTRASOUND_APPOINTMENT_GROUPS,
+        slot_duration_minutes=APPOINTMENT_SLOT_MINUTES,
         error=(request.args.get("error") or "").strip(),
         success=(request.args.get("success") or "").strip(),
     )
@@ -3291,7 +3421,7 @@ def admin_book_appointment():
     patient_name = (request.form.get("patient_name") or "").strip()
     patient_email = (request.form.get("patient_email") or "").strip().lower()
     patient_phone = (request.form.get("patient_phone") or "").strip()
-    appointment_type = (request.form.get("appointment_type") or "Consultatie").strip()
+    appointment_type = (request.form.get("appointment_type") or "").strip()
     notes = (request.form.get("notes") or "").strip()
 
     if not starts_at or not patient_name or not patient_email:
@@ -3306,11 +3436,25 @@ def admin_book_appointment():
             date=week_date,
             error="Vul een geldig e-mailadres in.",
         ))
+    if appointment_type not in ULTRASOUND_APPOINTMENT_TYPES:
+        return redirect(url_for(
+            "admin_appointments",
+            date=week_date,
+            error="Kies een echografieonderzoek uit de lijst.",
+        ))
+    try:
+        prescription_filename, prescription_mimetype, prescription_data = read_prescription_upload()
+    except ValueError as error:
+        return redirect(url_for(
+            "admin_appointments",
+            date=week_date,
+            error=str(error),
+        ))
     if Appointment.query.filter_by(starts_at=starts_at).first():
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
-            error="Dit tijdstip is net ingenomen. Kies een ander beschikbaar uur.",
+            error="Dit tijdstip is net ingenomen. Kies een ander beschikbaar kwartier.",
         ))
 
     appointment = Appointment(
@@ -3318,8 +3462,11 @@ def admin_book_appointment():
         patient_name=patient_name,
         patient_email=patient_email,
         patient_phone=patient_phone or None,
-        appointment_type=appointment_type[:120] or "Consultatie",
+        appointment_type=appointment_type,
         notes=notes or None,
+        prescription_filename=prescription_filename,
+        prescription_mimetype=prescription_mimetype,
+        prescription_data=prescription_data,
     )
     try:
         db.session.add(appointment)
@@ -3335,8 +3482,33 @@ def admin_book_appointment():
     return redirect(url_for(
         "admin_appointments",
         date=week_date,
-        success="De afspraak is ingepland.",
+        success="De echografieafspraak is ingepland.",
     ))
+
+
+@app.get("/admin/appointments/<int:appointment_id>/prescription")
+def admin_download_appointment_prescription(appointment_id):
+    """Return a prescription only to an authenticated administrator."""
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    ensure_appointment_schema()
+    appointment = db.session.get(Appointment, appointment_id)
+    if appointment is None or not appointment.prescription_data:
+        abort(404)
+
+    filename = secure_filename(
+        appointment.prescription_filename or f"voorschrift-{appointment.id}"
+    )
+    response = app.response_class(
+        appointment.prescription_data,
+        mimetype=appointment.prescription_mimetype or "application/octet-stream",
+    )
+    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response.headers["Cache-Control"] = "private, no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 @app.post("/admin/appointments/<int:appointment_id>/cancel")

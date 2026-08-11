@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CORE LABRALIS beta</title>
     {% include "_favicon.html" %}
-    <link rel="preload" as="fetch" href="{{ case.volume_url }}" crossorigin>
+    <link rel="preload" as="fetch" href="{{ case.volume_url }}?v={{ case.volume_cache_key }}" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
   <body class="core-product core-pacs-product">
@@ -54,7 +54,10 @@
               aria-label="{{ 'Scrollbare CT-viewer' if language == 'nl' else 'Scrollable CT viewer' }}"
             ></canvas>
             <div class="core-labralis-loading" id="labralisLoading">
-              {{ "CT-volume laden..." if language == "nl" else "Loading CT volume..." }}
+              <span id="labralisLoadingMessage">{{ "CT-volume laden..." if language == "nl" else "Loading CT volume..." }}</span>
+              <button type="button" id="labralisRetryLoad" hidden>
+                {{ "Opnieuw proberen" if language == "nl" else "Try again" }}
+              </button>
             </div>
             <div class="core-labralis-viewer-hud">
               <span id="labralisToolStatus">{{ "Bezig met scrollen" if language == "nl" else "Scroll mode" }}</span>
@@ -138,9 +141,12 @@
       import { Niivue } from "https://unpkg.com/@niivue/niivue@0.57.0/dist/index.js";
 
       const volumeUrl = {{ case.volume_url|tojson }};
+      const volumeCacheKey = {{ case.volume_cache_key|tojson }};
       const caseFilename = {{ case.filename|tojson }};
       const checkUrl = {{ url_for("check_core_labralis_answer")|tojson }};
       const loading = document.getElementById("labralisLoading");
+      const loadingMessage = document.getElementById("labralisLoadingMessage");
+      const retryLoadButton = document.getElementById("labralisRetryLoad");
       const viewer = document.getElementById("labralisViewer");
       const sliceSlider = document.getElementById("labralisSliceSlider");
       const sliceLabel = document.getElementById("labralisSliceLabel");
@@ -177,7 +183,9 @@
         incorrect: {{ ("Nog niet volledig." if language == "nl" else "Not quite yet.")|tojson }},
         rightAnswer: {{ ("Juiste antwoord:" if language == "nl" else "Correct answer:")|tojson }},
         failed: {{ ("Het antwoord kon niet worden nagekeken." if language == "nl" else "Could not check the answer.")|tojson }},
+        viewerLoading: {{ ("CT-volume laden..." if language == "nl" else "Loading CT volume...")|tojson }},
         viewerFailed: {{ ("CT-volume kon niet worden geladen." if language == "nl" else "Could not load CT volume.")|tojson }},
+        viewerRetry: {{ ("Opnieuw proberen" if language == "nl" else "Try again")|tojson }},
         scrolling: {{ ("Bezig met scrollen" if language == "nl" else "Scroll mode")|tojson }},
         windowing: {{ ("Window level actief" if language == "nl" else "Window level active")|tojson }},
       };
@@ -343,18 +351,62 @@
         });
       }
 
-      async function initializeViewer() {
+      function buildVolumeUrl(forceFresh = false) {
+        const requestUrl = new URL(volumeUrl, window.location.origin);
+        requestUrl.searchParams.set("v", volumeCacheKey);
+        if (forceFresh) {
+          requestUrl.searchParams.set("retry", String(Date.now()));
+        }
+        return requestUrl.href;
+      }
+
+      function showLoadingState(message, showRetry = false) {
+        loading.hidden = false;
+        loading.classList.toggle("has-error", showRetry);
+        loadingMessage.textContent = message;
+        retryLoadButton.hidden = !showRetry;
+        retryLoadButton.textContent = text.viewerRetry;
+      }
+
+      async function loadVolumeWithRetry(forceFresh = false) {
+        const urls = forceFresh
+          ? [buildVolumeUrl(true)]
+          : [buildVolumeUrl(false), buildVolumeUrl(true)];
+        let lastError = null;
+
+        for (let index = 0; index < urls.length; index += 1) {
+          try {
+            if (index > 0 && Array.isArray(niivue.volumes)) {
+              niivue.volumes.length = 0;
+            }
+            await niivue.loadVolumes([{ url: urls[index], name: caseFilename }]);
+            if (!niivue.volumes?.[0]) {
+              throw new Error("The CT volume returned no image data.");
+            }
+            return;
+          } catch (error) {
+            lastError = error;
+            console.warn("LABRALIS CT volume attempt failed", { index, error });
+          }
+        }
+        throw lastError || new Error("The CT volume could not be loaded.");
+      }
+
+      async function initializeViewer(forceFresh = false) {
+        showLoadingState(text.viewerLoading);
         try {
-          niivue = new Niivue({
-            isResizeCanvas: true,
-            dragAndDropEnabled: false,
-          });
-          await niivue.attachTo("labralisViewer");
-          niivue.setCrosshairWidth(0);
-          niivue.setCrosshairColor([1, 0, 0, 0]);
-          niivue.setIsOrientationTextVisible(false);
-          niivue.setSliceType(niivue.sliceTypeAxial);
-          await niivue.loadVolumes([{ url: volumeUrl, name: caseFilename }]);
+          if (!niivue) {
+            niivue = new Niivue({
+              isResizeCanvas: true,
+              dragAndDropEnabled: false,
+            });
+            await niivue.attachTo("labralisViewer");
+            niivue.setCrosshairWidth(0);
+            niivue.setCrosshairColor([1, 0, 0, 0]);
+            niivue.setIsOrientationTextVisible(false);
+            niivue.setSliceType(niivue.sliceTypeAxial);
+          }
+          await loadVolumeWithRetry(forceFresh);
           sliceCount = getAxialSliceCount(niivue);
           sliceSlider.max = String(sliceCount);
           sliceSlider.disabled = sliceCount <= 1;
@@ -362,8 +414,8 @@
           initializeWindowControls();
           loading.hidden = true;
         } catch (error) {
-          loading.textContent = text.viewerFailed;
-          loading.classList.add("has-error");
+          console.error("LABRALIS CT volume could not be loaded", error);
+          showLoadingState(text.viewerFailed, true);
         }
       }
 
@@ -428,6 +480,10 @@
       resetButton.addEventListener("click", () => {
         applyWindowPreset("auto");
         setActiveTool("scroll");
+      });
+
+      retryLoadButton.addEventListener("click", () => {
+        initializeViewer(true);
       });
 
       viewer.addEventListener("pointerdown", (event) => {

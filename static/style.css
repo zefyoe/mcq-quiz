@@ -2527,10 +2527,14 @@ body {
   inset: 0;
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 24px;
   background: rgba(5, 8, 13, 0.72);
   color: #d8e6ec;
   font-size: 0.86rem;
   font-weight: 800;
+  text-align: center;
 }
 
 .core-labralis-loading[hidden] {
@@ -2539,6 +2543,23 @@ body {
 
 .core-labralis-loading.has-error {
   color: #ffd2d2;
+}
+
+.core-labralis-loading button {
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 220, 220, 0.58);
+  border-radius: 7px;
+  color: #fff;
+  background: rgba(141, 36, 47, 0.85);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.core-labralis-loading button:hover {
+  background: #b43140;
 }
 
 .core-labralis-hint {
@@ -3089,6 +3110,10 @@ body {
 
 .core-image-grid.panel-count-3 {
   grid-template-columns: 1fr;
+}
+
+.core-answer-image-grid {
+  margin-inline: auto;
 }
 
 .core-image-tile {
@@ -4845,6 +4870,19 @@ body {
   margin-top: 10px;
 }
 
+.dashboard-nav-link-appointments {
+  margin-top: 8px;
+  border: 1px solid rgba(126, 205, 179, 0.42);
+  color: #f4fffb;
+  background: linear-gradient(135deg, #1b715d, #23866e);
+  box-shadow: 0 8px 18px rgba(9, 38, 48, 0.2);
+}
+
+.dashboard-nav-link-appointments:hover {
+  color: white;
+  background: linear-gradient(135deg, #155c4c, #1d765f);
+}
+
 .dashboard-main {
   background: #eef1f5;
   padding: 18px;
@@ -5529,6 +5567,10 @@ a.product-category-row:hover {
   }
 
   .dashboard-nav-link-muted {
+    margin-top: 0;
+  }
+
+  .dashboard-nav-link-appointments {
     margin-top: 0;
   }
 

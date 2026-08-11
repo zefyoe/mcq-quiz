@@ -472,8 +472,15 @@
         const panels = detectCoreImagePanels(image);
         const source = image.currentSrc || image.src;
         const sourceWidth = image.naturalWidth;
+        const isAnswerImage = image.matches("[data-answer-image]");
         const grid = document.createElement("div");
         grid.className = `core-image-grid panel-count-${panels.length}`;
+        if (isAnswerImage) {
+          // Answer crops are commonly smaller than question images. Avoid a
+          // large upscale that makes annotations and fine radiology detail soft.
+          grid.classList.add("core-answer-image-grid");
+          grid.style.maxWidth = `${Math.min(Math.round(sourceWidth * 1.2), 860)}px`;
+        }
 
         panels.forEach((panel, index) => {
           const tile = document.createElement("div");

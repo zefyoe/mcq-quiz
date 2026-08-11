@@ -25,7 +25,7 @@
         <div>
           <p class="appointment-eyebrow">PRIVATE RADIOLOGY PRACTICE</p>
           <h1>Afsprakenplanner</h1>
-          <p>Een eerste interne versie van de agenda. Elk beschikbaar blok duurt één uur.</p>
+          <p>Een eerste interne versie van de agenda. Elk beschikbaar blok duurt 15 minuten en is uitsluitend voor echografieonderzoeken.</p>
         </div>
         <div class="appointment-hero-note">
           <span class="appointment-note-dot"></span>
@@ -45,7 +45,7 @@
           <div class="appointment-side-heading">
             <p class="appointment-eyebrow">AGENDA</p>
             <h2>Plan een onderzoek</h2>
-            <p>Kies een datum om naar de juiste week te gaan. Klik vervolgens op een vrij tijdstip.</p>
+            <p>Kies een datum om naar de juiste week te gaan. Klik vervolgens op een vrij kwartier.</p>
           </div>
 
           <form class="appointment-date-form" method="get" action="{{ url_for('admin_appointments') }}">
@@ -100,13 +100,12 @@
                 </div>
               {% endfor %}
 
-              {% for hour in range(8, 21) %}
-                <div class="appointment-time-column">{{ '%02d:00'|format(hour) }}</div>
-                {% for day in days %}
-                  {% set slot = day.slots[hour - 8] %}
+              {% for row in slot_rows %}
+                <div class="appointment-time-column">{{ row.time_label }}</div>
+                {% for slot in row.slots %}
                   {% if slot.appointment %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="Ingeplande afspraak {{ slot.starts_at.strftime('%A %d %B om %H:%M') }}">
-                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(hours=1)).strftime('%H:%M') }}</span>
+                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(minutes=slot_duration_minutes)).strftime('%H:%M') }}</span>
                       <strong>{{ slot.appointment.patient_name }}</strong>
                       <span>{{ slot.appointment.appointment_type }}</span>
                       <details>
@@ -114,7 +113,10 @@
                         <p>{{ slot.appointment.patient_email }}</p>
                         {% if slot.appointment.patient_phone %}<p>{{ slot.appointment.patient_phone }}</p>{% endif %}
                         {% if slot.appointment.notes %}<p>{{ slot.appointment.notes }}</p>{% endif %}
-                        <form method="post" action="{{ url_for('admin_cancel_appointment', appointment_id=slot.appointment.id) }}" onsubmit="return confirm('Deze afspraak annuleren en dit uur opnieuw vrijgeven?');">
+                        {% if slot.appointment.prescription_filename %}
+                          <p><a class="appointment-prescription-link" href="{{ url_for('admin_download_appointment_prescription', appointment_id=slot.appointment.id) }}">Voorschrift downloaden</a></p>
+                        {% endif %}
+                        <form method="post" action="{{ url_for('admin_cancel_appointment', appointment_id=slot.appointment.id) }}" onsubmit="return confirm('Deze afspraak annuleren en dit kwartier opnieuw vrijgeven?');">
                           <input type="hidden" name="week_date" value="{{ selected_date }}">
                           <button type="submit" class="appointment-cancel-button">Annuleer afspraak</button>
                         </form>
@@ -125,10 +127,10 @@
                       class="appointment-slot appointment-slot-available"
                       type="button"
                       data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}"
-                      data-slot-label="{{ day.day_name|capitalize }} {{ day.date.strftime('%d/%m') }}, {{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(hours=1)).strftime('%H:%M') }}"
+                      data-slot-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m') }}, {{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(minutes=slot_duration_minutes)).strftime('%H:%M') }}"
                     >
                       <span>Vrij</span>
-                      <small>{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(hours=1)).strftime('%H:%M') }}</small>
+                      <small>{{ slot.starts_at.strftime('%H:%M') }}</small>
                     </button>
                   {% endif %}
                 {% endfor %}
@@ -147,7 +149,7 @@
         <h2 id="appointment-modal-title">Plan een afspraak</h2>
         <p class="appointment-selected-slot" id="appointment-selected-slot"></p>
 
-        <form method="post" action="{{ url_for('admin_book_appointment') }}" class="appointment-booking-form">
+        <form method="post" action="{{ url_for('admin_book_appointment') }}" class="appointment-booking-form" enctype="multipart/form-data">
           <input type="hidden" name="slot_start" id="appointment-slot-start">
           <input type="hidden" name="week_date" value="{{ selected_date }}">
           <label>
@@ -162,14 +164,38 @@
             Telefoonnummer <span>optioneel</span>
             <input name="patient_phone" type="tel" autocomplete="tel" maxlength="80">
           </label>
-          <label>
-            Type afspraak
-            <select name="appointment_type">
-              {% for appointment_type in appointment_types %}
-                <option value="{{ appointment_type }}">{{ appointment_type }}</option>
+          <label class="appointment-exam-field">
+            Gewenst echografieonderzoek
+            <select name="appointment_type" size="8" required aria-describedby="appointment-exam-help">
+              <option value="" selected disabled>Kies een echografieonderzoek</option>
+              {% for group_name, appointment_types in appointment_groups %}
+                <optgroup label="{{ group_name }}">
+                  {% for appointment_type in appointment_types %}
+                    <option value="{{ appointment_type }}">{{ appointment_type }}</option>
+                  {% endfor %}
+                </optgroup>
               {% endfor %}
             </select>
+            <span id="appointment-exam-help" class="appointment-field-help">Scroll door de lijst en kies het gewenste onderzoek.</span>
           </label>
+          <section class="appointment-prescription-section" aria-labelledby="appointment-prescription-title">
+            <div>
+              <p class="appointment-prescription-title" id="appointment-prescription-title">Voorschrift vereist</p>
+              <p class="appointment-prescription-copy">Laad het voorschrift als PDF op of neem een leesbare foto. Maximaal 10 MB.</p>
+            </div>
+            <div class="appointment-upload-options">
+              <div class="appointment-upload-choice">
+                <input class="appointment-upload-input" id="appointment-prescription-file" name="prescription_file" type="file" accept=".pdf,image/jpeg,image/png,image/webp" data-prescription-input>
+                <label for="appointment-prescription-file">Voorschrift opladen</label>
+                <span class="appointment-upload-status" data-upload-status="file">PDF, JPG, PNG of WEBP</span>
+              </div>
+              <div class="appointment-upload-choice">
+                <input class="appointment-upload-input" id="appointment-prescription-photo" name="prescription_photo" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" data-prescription-input>
+                <label for="appointment-prescription-photo">Foto van voorschrift</label>
+                <span class="appointment-upload-status" data-upload-status="photo">Gebruik de camera</span>
+              </div>
+            </div>
+          </section>
           <label>
             Interne notitie <span>optioneel</span>
             <textarea name="notes" rows="3" maxlength="2000" placeholder="Bijvoorbeeld: verwijsbrief ontvangen"></textarea>
@@ -185,6 +211,7 @@
         const slotInput = document.getElementById('appointment-slot-start');
         const selectedSlot = document.getElementById('appointment-selected-slot');
         const firstInput = modal.querySelector('input[name="patient_name"]');
+        const prescriptionInputs = [...modal.querySelectorAll('[data-prescription-input]')];
 
         const closeModal = () => {
           modal.hidden = true;
@@ -207,6 +234,17 @@
 
         document.addEventListener('keydown', (event) => {
           if (event.key === 'Escape' && !modal.hidden) closeModal();
+        });
+
+        prescriptionInputs.forEach((input) => {
+          input.addEventListener('change', () => {
+            if (!input.files || !input.files.length) return;
+            prescriptionInputs
+              .filter((otherInput) => otherInput !== input)
+              .forEach((otherInput) => { otherInput.value = ''; });
+            const status = modal.querySelector(`[data-upload-status="${input.id.includes('photo') ? 'photo' : 'file'}"]`);
+            if (status) status.textContent = input.files[0].name;
+          });
         });
       })();
     </script>
