@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
   <body class="core-product">
+    <header class="core-empty-topbar">
+      <a href="{{ url_for('core_home') }}">CORE Radius</a>
+      <a href="{{ url_for('logout') }}" class="core-empty-logout">{{ tr("Log out") }}</a>
+    </header>
     <main class="core-empty-page">
       <section class="core-panel">
         <span class="core-brand-mark">C</span>

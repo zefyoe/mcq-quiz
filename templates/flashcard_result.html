@@ -17,6 +17,7 @@
           {% include "_product_switcher.html" %}
           {% include "_language_switcher.html" %}
           <a href="{{ home_url }}" class="topbar-link topbar-home">{{ tr("Home") }}</a>
+          <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
         </div>
       </div>
     </header>

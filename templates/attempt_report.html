@@ -11,6 +11,7 @@
     <header class="report-toolbar">
       <a href="{{ url_for('core_history') if summary.category == 'CORE Radiology' else url_for('previous_tests') }}" class="secondary-btn">{{ "Terug" if language == "nl" else "Back" }}</a>
       <button type="button" class="primary-btn" onclick="window.print()">{{ "Opslaan als PDF" if language == "nl" else "Save as PDF" }}</button>
+      <a href="{{ url_for('logout') }}" class="report-logout-link">{{ tr("Log out") }}</a>
     </header>
 
     <main class="report-sheet">

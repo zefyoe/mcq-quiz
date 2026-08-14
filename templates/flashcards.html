@@ -286,6 +286,33 @@
     </main>
     {% include "_site_footer.html" %}
 
+    {% if product == "core" %}
+      <div class="leave-test-modal" id="leaveTestModal" hidden>
+        <div class="leave-test-modal-backdrop" data-dismiss-leave-test-modal></div>
+        <section
+          class="leave-test-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="leaveTestTitle"
+          aria-describedby="leaveTestDescription"
+        >
+          <p class="eyebrow">{{ "LOPENDE TOETS" if language == "nl" else "ACTIVE SESSION" }}</p>
+          <h2 id="leaveTestTitle">{{ "Wil je de test verlaten?" if language == "nl" else "Leave this test?" }}</h2>
+          <p id="leaveTestDescription">
+            {{ "Je voortgang blijft opgeslagen, maar je verlaat deze lopende testsessie." if language == "nl" else "Your progress is saved, but you will leave this active test session." }}
+          </p>
+          <div class="leave-test-actions">
+            <button type="button" class="secondary-btn" data-stay-in-test autofocus>
+              {{ "Blijf in de test" if language == "nl" else "Stay in test" }}
+            </button>
+            <button type="button" class="leave-test-confirm" data-confirm-leave-test>
+              {{ "Verlaat test" if language == "nl" else "Leave test" }}
+            </button>
+          </div>
+        </section>
+      </div>
+    {% endif %}
+
     <script>
       const flashcardPanels = Array.from(document.querySelectorAll("[data-flashcard-panel]"));
       const flashcardNavButtons = Array.from(document.querySelectorAll("[data-flashcard-nav]"));
@@ -305,6 +332,9 @@
       const quizRunId = {{ quiz_run_id|tojson }};
       const initialQuestionId = {{ initial_qid|default('')|tojson }};
       const autoCompleteOnLastRating = {{ (auto_complete_on_last_rating|default(false))|tojson }};
+      const leaveTestModal = document.getElementById("leaveTestModal");
+      const stayInTestButton = leaveTestModal?.querySelector("[data-stay-in-test]");
+      const confirmLeaveTestButton = leaveTestModal?.querySelector("[data-confirm-leave-test]");
       const storageKey = `flashcardSession:${currentUserId}:${quizRunId}`;
       const progressStorageKey = `${storageKey}:progress`;
       const startedAtKey = `${storageKey}:startedAt`;
@@ -314,6 +344,8 @@
       let preloadTimer = null;
       let answerPreloadTimer = null;
       let completionStarted = false;
+      let pendingLeave = null;
+      let leaveConfirmed = false;
       const studyMethodSwitch = document.querySelector("[data-study-method-switch]");
       const imageText = {
         loaded: {{ ("Afbeelding geladen" if language == "nl" else "Image loaded")|tojson }},
@@ -379,6 +411,69 @@
         localStorage.removeItem(startedAtKey);
         localStorage.removeItem(progressStorageKey);
         completionForm.submit();
+      }
+
+      function openLeaveTestModal(leaveRequest) {
+        if (!leaveTestModal || completionStarted || leaveConfirmed) return;
+        pendingLeave = leaveRequest;
+        leaveTestModal.hidden = false;
+        document.body.classList.add("leave-test-modal-open");
+        window.requestAnimationFrame(() => stayInTestButton?.focus());
+      }
+
+      function closeLeaveTestModal() {
+        if (!leaveTestModal) return;
+        pendingLeave = null;
+        leaveTestModal.hidden = true;
+        document.body.classList.remove("leave-test-modal-open");
+      }
+
+      function shouldProtectLink(link, event) {
+        if (!leaveTestModal || completionStarted || leaveConfirmed) return false;
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+        if (link.target && link.target !== "_self") return false;
+        if (link.hasAttribute("download")) return false;
+
+        const destination = new URL(link.href, window.location.href);
+        if (destination.origin !== window.location.origin) return false;
+        return destination.href !== window.location.href;
+      }
+
+      function enableCoreLeaveGuard() {
+        if (!leaveTestModal) return;
+
+        history.pushState({coreFlashcardLeaveGuard: true}, "", window.location.href);
+
+        document.addEventListener("click", (event) => {
+          const link = event.target.closest("a[href]");
+          if (!link || !shouldProtectLink(link, event)) return;
+          event.preventDefault();
+          openLeaveTestModal({type: "link", url: link.href});
+        });
+
+        window.addEventListener("popstate", () => {
+          if (completionStarted || leaveConfirmed) return;
+          history.pushState({coreFlashcardLeaveGuard: true}, "", window.location.href);
+          openLeaveTestModal({type: "history"});
+        });
+
+        leaveTestModal.querySelectorAll("[data-dismiss-leave-test-modal], [data-stay-in-test]").forEach((element) => {
+          element.addEventListener("click", closeLeaveTestModal);
+        });
+        confirmLeaveTestButton?.addEventListener("click", () => {
+          if (!pendingLeave) return;
+          const leaveRequest = pendingLeave;
+          leaveConfirmed = true;
+          closeLeaveTestModal();
+          if (leaveRequest.type === "history") {
+            history.back();
+            return;
+          }
+          window.location.assign(leaveRequest.url);
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && !leaveTestModal.hidden) closeLeaveTestModal();
+        });
       }
 
       function findContentRuns(length, hasContent, minimumSize) {
@@ -712,6 +807,7 @@
         (panel) => panel.dataset.qid === (initialQuestionId || savedFlashcardProgress.currentQid)
       );
       showCard(initialIndex >= 0 ? initialIndex : 0);
+      enableCoreLeaveGuard();
       window.addEventListener("beforeunload", persistFlashcardProgress);
       window.addEventListener("online", () => setSessionSaveStatus("saved"));
       window.addEventListener("offline", () => setSessionSaveStatus("offline"));

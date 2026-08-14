@@ -129,7 +129,7 @@
       "source_pdf_question_page": 28,
       "source_pdf_answer_page": 29,
       "label": "Case 7",
-      "history": "Unknown",
+      "history": "Stiffness and neck pain",
       "diagnosis": "Ankylosing spondylitis",
       "question_images": [
         "musculoskeletal_007_q_0.png"
@@ -305,7 +305,7 @@
       "source_pdf_question_page": 46,
       "source_pdf_answer_page": 47,
       "label": "Case 16",
-      "history": "Arthritis",
+      "history": "Chronic diffuse joint pain in a patient with a hereditary disorder present since a young age",
       "diagnosis": "Hemochromatosis",
       "question_images": [
         "musculoskeletal_016_q_0.png"
@@ -400,7 +400,7 @@
       "source_pdf_question_page": 56,
       "source_pdf_answer_page": 57,
       "label": "Case 21",
-      "history": "Routine chest radiograph",
+      "history": "Routine chest radiograph in a patient with severe diabetes and foot complaints",
       "diagnosis": "Neuropathic arthropathy of the left shoulder secondary to",
       "question_images": [
         "musculoskeletal_021_q_0.png",
@@ -752,7 +752,7 @@
       "source_pdf_question_page": 92,
       "source_pdf_answer_page": 93,
       "label": "Case 38",
-      "history": "16-year-old with ankle pain s/p fall",
+      "history": "16-year-old boy with ankle pain after trauma/fall",
       "diagnosis": "Fibroxanthoma",
       "question_images": [
         "musculoskeletal_038_q_0.png"
@@ -883,7 +883,7 @@
       "source_pdf_question_page": 104,
       "source_pdf_answer_page": 105,
       "label": "Case 44",
-      "history": "Diffuse bone pain",
+      "history": "Diffuse bone pain in a patient with known lung cancer",
       "diagnosis": "Hypertrophic osteoarthropathy (lung cancer)",
       "question_images": [
         "musculoskeletal_044_q_0.png",
@@ -2013,7 +2013,7 @@
       "source_pdf_answer_page": 215,
       "label": "Case 97",
       "history": "46-year-old woman with chronic radicular back pain",
-      "diagnosis": "Spondylolysis and spondylolisthesis L5/S1 due to pars",
+      "diagnosis": "L5/S1 spondylolisthesis caused by spondylolysis",
       "question_images": [
         "musculoskeletal_097_q_0.png",
         "musculoskeletal_097_q_1.png",
@@ -2562,7 +2562,7 @@
       "source_pdf_answer_page": 273,
       "label": "Case 124",
       "history": "Young woman with recent onset of bilateral hip pain",
-      "diagnosis": "Transient bone marrow edema syndrome of the hips",
+      "diagnosis": "Bone marrow edema syndrome",
       "question_images": [
         "musculoskeletal_124_q_0.png",
         "musculoskeletal_124_q_1.png"
@@ -2723,7 +2723,7 @@
       "source_pdf_question_page": 288,
       "source_pdf_answer_page": 289,
       "label": "Case 132",
-      "history": "45-year-old woman weighing 94 lbs with hip pain and malaise",
+      "history": "45-year-old woman weighing 43 kg with hip pain and malaise",
       "diagnosis": "Anorexia nervosa (chronic malnutrition and marrow changes)",
       "question_images": [
         "musculoskeletal_132_q_0.png",

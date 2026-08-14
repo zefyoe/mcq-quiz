@@ -16,6 +16,7 @@
         {% set active_product = "core" %}
         {% include "_product_switcher.html" %}
         {% include "_language_switcher.html" %}
+        <a href="{{ url_for('logout') }}">{{ tr("Log out") }}</a>
       </div>
     </header>
 
@@ -40,26 +41,63 @@
             {% set pool_labels = {
               "all": ("Alle vragen" if language == "nl" else "All cases"),
               "unseen": ("Ongeziene vragen" if language == "nl" else "Unseen cases"),
-              "due": ("Slimme herhaling" if language == "nl" else "Smart review"),
-              "very_difficult": ("Zeer moeilijk" if language == "nl" else "Very difficult"),
-              "difficult": ("Moeilijk" if language == "nl" else "Difficult"),
-              "easy": ("Gemakkelijk" if language == "nl" else "Easy"),
-              "very_easy": ("Zeer gemakkelijk" if language == "nl" else "Very easy")
+              "due": ("Slimme herhaling" if language == "nl" else "Smart review")
             } %}
-            {% for pool_key, count in pool_counts.items() %}
+            {% for pool_key in ("all", "unseen", "due") %}
+              {% set count = pool_counts[pool_key] %}
               <label class="core-pool-card {% if count == 0 %}empty{% endif %}">
                 <input
                   type="radio"
                   name="pool"
                   value="{{ pool_key }}"
                   data-count="{{ count }}"
-                  {% if selected_pool == pool_key %}checked{% endif %}
+                  {% if not selected_ratings and selected_pool == pool_key %}checked{% endif %}
                   {% if count == 0 %}disabled{% endif %}
                 >
                 <span><strong>{{ pool_labels[pool_key] }}</strong><small>{{ count }} {{ "vragen" if language == "nl" else "cases" }}</small></span>
               </label>
             {% endfor %}
           </div>
+          <section class="core-review-combiner" aria-labelledby="core-rating-filter-title">
+            <div class="core-review-combiner-heading">
+              <div>
+                <p class="eyebrow">{{ "GERICHT HERHALEN" if language == "nl" else "TARGETED REVIEW" }}</p>
+                <h3 id="core-rating-filter-title">{{ "Combineer moeilijkheidsbakken" if language == "nl" else "Combine difficulty buckets" }}</h3>
+              </div>
+              <span>{{ "Kies één of meer" if language == "nl" else "Choose one or more" }}</span>
+            </div>
+            <p>{{ "Bijvoorbeeld: herhaal Moeilijk en Zeer moeilijk samen in één reeks." if language == "nl" else "For example: review Difficult and Very difficult together in one deck." }}</p>
+            <div class="core-rating-filter-grid">
+              {% for rating_key, rating in ratings.items() %}
+                {% set count = pool_counts[rating_key] %}
+                <label class="core-pool-card core-rating-filter-card {% if count == 0 %}empty{% endif %}">
+                  <input
+                    type="checkbox"
+                    name="rating"
+                    value="{{ rating_key }}"
+                    data-count="{{ count }}"
+                    {% if rating_key in selected_ratings %}checked{% endif %}
+                    {% if count == 0 %}disabled{% endif %}
+                  >
+                  <span>
+                    <strong>
+                      {% if language == "nl" %}
+                        {{ {
+                          "very_difficult": "Zeer moeilijk",
+                          "difficult": "Moeilijk",
+                          "easy": "Gemakkelijk",
+                          "very_easy": "Zeer gemakkelijk"
+                        }[rating_key] }}
+                      {% else %}
+                        {{ rating.label }}
+                      {% endif %}
+                    </strong>
+                    <small>{{ count }} {{ "vragen" if language == "nl" else "cases" }}</small>
+                  </span>
+                </label>
+              {% endfor %}
+            </div>
+          </section>
         </section>
 
         <section class="core-panel core-count-panel">
@@ -77,6 +115,7 @@
 
     <script>
       const poolInputs = document.querySelectorAll('input[name="pool"]');
+      const ratingInputs = document.querySelectorAll('input[name="rating"]');
       const countInput = document.getElementById("count");
       const availableText = document.getElementById("coreAvailableCount");
       const startButton = document.getElementById("coreStartButton");
@@ -84,6 +123,18 @@
       const suffix = {{ ("beschikbaar" if language == "nl" else "available")|tojson }};
 
       function updatePool() {
+        const selectedRatings = [...ratingInputs].filter((input) => input.checked);
+        if (selectedRatings.length) {
+          const count = selectedRatings.reduce(
+            (total, input) => total + Number(input.dataset.count || 0),
+            0,
+          );
+          countInput.max = String(Math.min(count, maximum));
+          countInput.value = String(Math.max(1, Math.min(Number(countInput.value || 1), count, maximum)));
+          startButton.disabled = count === 0;
+          availableText.textContent = `${count} ${suffix}`;
+          return;
+        }
         const selected = document.querySelector('input[name="pool"]:checked');
         if (!selected) return;
         const count = Number(selected.dataset.count || 0);
@@ -93,7 +144,19 @@
         availableText.textContent = `${count} ${suffix}`;
       }
 
-      poolInputs.forEach((input) => input.addEventListener("change", updatePool));
+      poolInputs.forEach((input) => input.addEventListener("change", () => {
+        ratingInputs.forEach((ratingInput) => { ratingInput.checked = false; });
+        updatePool();
+      }));
+      ratingInputs.forEach((input) => input.addEventListener("change", () => {
+        if (input.checked) {
+          poolInputs.forEach((poolInput) => { poolInput.checked = false; });
+        } else if (![...ratingInputs].some((ratingInput) => ratingInput.checked)) {
+          const allPool = document.querySelector('input[name="pool"][value="all"]');
+          if (allPool && !allPool.disabled) allPool.checked = true;
+        }
+        updatePool();
+      }));
       updatePool();
     </script>
   </body>

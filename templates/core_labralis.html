@@ -17,6 +17,7 @@
         {% set active_product = "core" %}
         {% include "_product_switcher.html" %}
         {% include "_language_switcher.html" %}
+        <a href="{{ url_for('logout') }}">{{ tr("Log out") }}</a>
       </div>
     </header>
 

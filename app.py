@@ -8,6 +8,7 @@ from io import BytesIO
 from urllib.parse import urlparse
 
 from flask import Flask, abort, g, jsonify, render_template, request, session, redirect, url_for
+from flask.sessions import SecureCookieSessionInterface
 from flask_login import (
     LoginManager,
     current_user,
@@ -56,7 +57,19 @@ def build_database_uri() -> str:
     return uri
 
 
+class BymedSessionInterface(SecureCookieSessionInterface):
+    """Share authenticated sessions between the Anatomy and CORE subdomains."""
+
+    def get_cookie_domain(self, app):
+        hostname = request.host.split(":", 1)[0].lower()
+        if hostname == "bymed.be" or hostname.endswith(".bymed.be"):
+            return ".bymed.be"
+        # Keep localhost and the Render preview domain isolated from production.
+        return None
+
+
 app = Flask(__name__)
+app.session_interface = BymedSessionInterface()
 database_uri = build_database_uri()
 app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -329,7 +342,12 @@ def switch_product(product_key):
     destination = destinations.get(product_key)
     if not destination:
         abort(404)
-    return redirect(destination)
+    # Reissue the current signed session for .bymed.be before moving to the
+    # other product subdomain. This also upgrades existing host-only cookies.
+    session.modified = True
+    response = redirect(destination)
+    response.delete_cookie(app.config["SESSION_COOKIE_NAME"], path="/")
+    return response
 
 
 @login_manager.user_loader
@@ -1042,6 +1060,22 @@ def normalize_flashcard_rating(rating: str | None) -> str | None:
     return value if value in FLASHCARD_RATINGS else None
 
 
+def normalize_flashcard_rating_filters(ratings) -> tuple[str, ...]:
+    """Return a stable, duplicate-free selection of Anki rating buckets."""
+    if isinstance(ratings, str):
+        ratings = [ratings]
+    normalized = {
+        rating_key
+        for rating in (ratings or [])
+        if (rating_key := normalize_flashcard_rating(rating))
+    }
+    return tuple(
+        rating_key
+        for rating_key in FLASHCARD_RATINGS
+        if rating_key in normalized
+    )
+
+
 def get_user_progress_by_key(user_id: int) -> dict[str, QuestionProgress]:
     return {
         progress.question_key: progress
@@ -1103,6 +1137,26 @@ def filter_questions_for_flashcard_rating(
         question for question in question_list
         if progress_by_key.get(get_question_key(question))
         and progress_by_key[get_question_key(question)].flashcard_rating == rating_key
+    ]
+
+
+def filter_questions_for_flashcard_ratings(
+    question_list: list[dict],
+    user_id: int,
+    ratings,
+    progress_by_key: dict[str, QuestionProgress] | None = None,
+) -> list[dict]:
+    """Combine selected personal flashcard buckets into one review session."""
+    rating_keys = normalize_flashcard_rating_filters(ratings)
+    if not rating_keys:
+        return list(question_list)
+    if progress_by_key is None:
+        progress_by_key = get_user_progress_by_key(user_id)
+    return [
+        question for question in question_list
+        if (
+            progress := progress_by_key.get(get_question_key(question))
+        ) and progress.flashcard_rating in rating_keys
     ]
 
 
@@ -2463,13 +2517,27 @@ def core_section_setup(section_key):
         normalize_flashcard_rating(request.args.get("pool"))
         or normalize_category(request.args.get("pool"))
     )
-    selected_pool = requested_pool if requested_pool in pool_counts else "all"
-    available_count = pool_counts[selected_pool]
+    selected_ratings = normalize_flashcard_rating_filters(request.args.getlist("rating"))
+    # Keep older one-bucket retest links working while the setup uses checkboxes.
+    if not selected_ratings and requested_pool in FLASHCARD_RATINGS:
+        selected_ratings = (requested_pool,)
+    selected_pool = requested_pool if requested_pool in {"all", "unseen", "due"} else "all"
+    available_count = (
+        len(filter_questions_for_flashcard_ratings(
+            questions,
+            current_user.id,
+            selected_ratings,
+            progress_by_key,
+        ))
+        if selected_ratings
+        else pool_counts[selected_pool]
+    )
     return render_template(
         "core_section_setup.html",
         section=section,
         pool_counts=pool_counts,
         selected_pool=selected_pool,
+        selected_ratings=selected_ratings,
         available_count=available_count,
         suggested_count=get_question_limit(request.args.get("count"), available_count),
         max_questions=MAX_QUIZ_QUESTIONS,
@@ -2579,25 +2647,31 @@ def core_study(section_key):
             retest_urls=retest_urls,
         )
 
-    pool = (
+    requested_pool = (
         normalize_flashcard_rating(request.args.get("pool"))
         or normalize_category(request.args.get("pool"))
     )
+    selected_ratings = normalize_flashcard_rating_filters(request.args.getlist("rating"))
+    # Old retest URLs use ?pool=very_difficult; retain that route as a one-bucket selection.
+    if not selected_ratings and requested_pool in FLASHCARD_RATINGS:
+        selected_ratings = (requested_pool,)
     progress_by_key = get_user_progress_by_key(current_user.id)
-    if pool in FLASHCARD_RATINGS:
-        selected = filter_questions_for_flashcard_rating(
+    if selected_ratings:
+        selected = filter_questions_for_flashcard_ratings(
             all_questions,
             current_user.id,
-            pool,
+            selected_ratings,
             progress_by_key,
         )
-    elif pool in {"due", "unseen"}:
+        pool = "ratings:" + ",".join(selected_ratings)
+    elif requested_pool in {"due", "unseen"}:
         selected = filter_questions_for_pool(
             all_questions,
             current_user.id,
-            pool,
+            requested_pool,
             progress_by_key,
         )
+        pool = requested_pool
     else:
         pool = "all"
         selected = list(all_questions)
