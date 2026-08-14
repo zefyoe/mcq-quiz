@@ -27,7 +27,7 @@
         <p class="eyebrow">{{ "SESSIE VOLTOOID" if language == "nl" else "SESSION COMPLETE" }}</p>
         <h1>{{ category }}</h1>
         <p>
-          {{ total }} {{ "vragen zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken." if language == "nl" else "questions were rated and saved to your personal difficulty buckets." }}
+          {{ total }} {{ "cases zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken." if language == "nl" and product == "core" else "vragen zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken." if language == "nl" else "questions were rated and saved to your personal difficulty buckets." }}
         </p>
         <div class="flashcard-result-actions">
           <a href="{{ new_session_url }}" class="primary-btn">{{ "Nieuwe flashcardreeks" if language == "nl" else "New flashcard session" }}</a>
@@ -39,6 +39,7 @@
       <section class="flashcard-result-grid">
         {% for rating_key, rating in ratings.items() %}
           <article class="card flashcard-result-bucket result-{{ rating_key }}">
+            <span class="flashcard-result-session-label">{{ "Deze sessie" if language == "nl" else "This session" }}</span>
             <span class="flashcard-result-count">{{ session_rating_counts[rating_key] }}</span>
             <h2>
               {% if language == "nl" %}
@@ -52,25 +53,85 @@
                 {{ rating.label }}
               {% endif %}
             </h2>
-            <p>
-              {% if rating_counts[rating_key] %}
-                {{ rating_counts[rating_key] }} {{ "vragen staan nu totaal in deze bak." if language == "nl" else "questions are now stored in this bucket." }}
-              {% else %}
-                {{ "Geen vragen in deze bak tijdens deze sessie." if language == "nl" else "No questions entered this bucket in this session." }}
-              {% endif %}
-            </p>
             {% if rating_counts[rating_key] %}
               <a
                 href="{{ retest_urls[rating_key] }}"
-                class="secondary-btn"
+                class="flashcard-result-total-link"
               >
-                {{ "Deze opnieuw oefenen" if language == "nl" else "Study these again" }}
+                <span>{{ "Beschikbaar in deze categorie" if language == "nl" else "Available in this category" }}</span>
+                <strong>{{ rating_counts[rating_key] }} {{ "cases" if product == "core" else "vragen" if language == "nl" else "questions" }}</strong>
+                <small>{{ "Klik om deze categorie te herhalen" if language == "nl" else "Click to review this category" }}</small>
               </a>
+            {% else %}
+              <div class="flashcard-result-total-link is-empty">
+                <span>{{ "Beschikbaar in deze categorie" if language == "nl" else "Available in this category" }}</span>
+                <strong>0 {{ "cases" if product == "core" else "vragen" if language == "nl" else "questions" }}</strong>
+              </div>
             {% endif %}
           </article>
         {% endfor %}
       </section>
+
+      {% if product == "core" %}
+        <section class="card core-result-review-combiner" aria-labelledby="combinedReviewTitle">
+          <div class="core-result-review-header">
+            <div>
+              <p class="eyebrow">{{ "GERICHT HERHALEN" if language == "nl" else "TARGETED REVIEW" }}</p>
+              <h2 id="combinedReviewTitle">{{ "Combineer moeilijkheidsgraden" if language == "nl" else "Combine difficulty levels" }}</h2>
+              <p>{{ "Selecteer één of meer bakken voor één gezamenlijke herhalingsreeks binnen dit onderwerp." if language == "nl" else "Select one or more buckets for one combined review deck within this topic." }}</p>
+            </div>
+            <span id="combinedReviewCount">{{ "Kies categorieën" if language == "nl" else "Choose categories" }}</span>
+          </div>
+          <form method="get" action="{{ url_for('core_study', section_key=subgroup) }}" class="core-result-review-form">
+            <div class="core-result-review-options">
+              {% for rating_key, rating in ratings.items() %}
+                {% set count = rating_counts[rating_key] %}
+                <label class="core-result-review-option result-{{ rating_key }} {% if not count %}is-empty{% endif %}">
+                  <input type="checkbox" name="rating" value="{{ rating_key }}" data-rating-count="{{ count }}" {% if not count %}disabled{% endif %}>
+                  <span>
+                    <strong>
+                      {% if language == "nl" %}
+                        {{ {
+                          "very_difficult": "Zeer moeilijk",
+                          "difficult": "Moeilijk",
+                          "easy": "Gemakkelijk",
+                          "very_easy": "Zeer gemakkelijk"
+                        }[rating_key] }}
+                      {% else %}
+                        {{ rating.label }}
+                      {% endif %}
+                    </strong>
+                    <small>{{ count }} {{ "cases" if language == "nl" else "cases" }}</small>
+                  </span>
+                </label>
+              {% endfor %}
+            </div>
+            <button type="submit" class="core-primary-button" id="combinedReviewStart" disabled>
+              {{ "Geselecteerde cases herhalen" if language == "nl" else "Review selected cases" }}
+            </button>
+          </form>
+        </section>
+      {% endif %}
     </main>
     {% include "_site_footer.html" %}
+    {% if product == "core" %}
+      <script>
+        const combinedRatingInputs = Array.from(document.querySelectorAll("[data-rating-count]"));
+        const combinedReviewCount = document.getElementById("combinedReviewCount");
+        const combinedReviewStart = document.getElementById("combinedReviewStart");
+
+        function updateCombinedReview() {
+          const selected = combinedRatingInputs.filter((input) => input.checked);
+          const count = selected.reduce((total, input) => total + Number(input.dataset.ratingCount || 0), 0);
+          combinedReviewStart.disabled = count === 0;
+          combinedReviewCount.textContent = count
+            ? `${count} {{ "cases geselecteerd" if language == "nl" else "cases selected" }}`
+            : {{ ("Kies categorieën" if language == "nl" else "Choose categories")|tojson }};
+        }
+
+        combinedRatingInputs.forEach((input) => input.addEventListener("change", updateCombinedReview));
+        updateCombinedReview();
+      </script>
+    {% endif %}
   </body>
 </html>
