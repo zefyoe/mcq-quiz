@@ -440,7 +440,7 @@
       "source_pdf_question_page": 60,
       "source_pdf_answer_page": 61,
       "label": "Case 23",
-      "history": "Bilateral hand pain and swelling with skin disease",
+      "history": "Bilateral hand pain and swelling with skin disease and respiratory symptoms",
       "diagnosis": "Sarcoid",
       "question_images": [
         "musculoskeletal_023_q_0.png"
@@ -1020,7 +1020,7 @@
       "source_pdf_question_page": 116,
       "source_pdf_answer_page": 117,
       "label": "Case 50",
-      "history": "None",
+      "history": "70-year-old man with shin pain and difficulty walking",
       "diagnosis": "Paget's disease",
       "question_images": [
         "musculoskeletal_050_q_0.png",
@@ -2643,7 +2643,7 @@
       "source_pdf_question_page": 280,
       "source_pdf_answer_page": 281,
       "label": "Case 128",
-      "history": "Left femoral and back pain in a 59-year-old woman",
+      "history": "Left femoral and back pain in a 59-year-old woman with malnutrition",
       "diagnosis": "Osteomalacia",
       "question_images": [
         "musculoskeletal_128_q_0.png",
