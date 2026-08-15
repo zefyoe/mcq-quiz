@@ -491,7 +491,7 @@
       "id": "CORE-CH-026",
       "source_note_id": "1784379790882",
       "label": "Case 026",
-      "history": "16-year-old girl with asthma presents with this CT.",
+      "history": "16-year-old girl with asthma undergoes CT.",
       "diagnosis": "Congenital Cystic Adenomatoid Malformation",
       "question_images": [
         "cic026_q1.jpg",
@@ -631,7 +631,7 @@
       "id": "CORE-CH-033",
       "source_note_id": "1784379790896",
       "label": "Case 033",
-      "history": "33-year-old man presenting with shortness of breath presents to the Emergency Department and receives this radiograph.",
+      "history": "33-year-old man presents to the Emergency Department with shortness of breath and undergoes chest radiography.",
       "diagnosis": "Intrathoracic Goiter",
       "question_images": [
         "cic033_q1.jpg",
@@ -1477,7 +1477,7 @@
       "id": "CORE-CH-074",
       "source_note_id": "1784379790978",
       "label": "Case 074",
-      "history": "44-year-old woman presents with a tender, palpable mass.",
+      "history": "44-year-old woman presents with a tender, palpable mass on the left.",
       "diagnosis": "Brachial Plexus Mass (Left Axillary Schwannoma Arising from Lateral Cord of the Brachial Plexus and the Musculocutaneous Nerve)",
       "question_images": [
         "cic074_q1.jpg",
@@ -1667,7 +1667,7 @@
       "id": "CORE-CH-083",
       "source_note_id": "1784379790996",
       "label": "Case 083",
-      "history": "19-year-old girl with new-onset wheezing and hemoptysis. She has a history of right knee sarcoma resected 2 years ago.",
+      "history": "19-year-old girl with new-onset wheezing and hemoptysis. She has a history of right femoral osteosarcoma resected 2 years ago.",
       "diagnosis": "Solitary Pulmonary Metastasis (from Osteosarcoma)",
       "question_images": [
         "cic083_q1.jpg",
@@ -1726,7 +1726,7 @@
       "id": "CORE-CH-086",
       "source_note_id": "1784379791002",
       "label": "Case 086",
-      "history": "51-year-old man with a nonproductive cough. He has also noted an unintentional 13-pound weight loss during the past few months.",
+      "history": "51-year-old man with a nonproductive cough and an unintentional 6 kg weight loss over the past few months.",
       "diagnosis": "Squamous Cell Carcinoma of the Lung",
       "question_images": [
         "cic086_q1.jpg",
@@ -1829,7 +1829,7 @@
       "id": "CORE-CH-091",
       "source_note_id": "1784379791012",
       "label": "Case 091",
-      "history": "55-year-old woman presents with 1 month of dyspnea. She receives a radiograph (Fig. 91.1) followed by CT (Figs. 91.3 and 91.4).",
+      "history": "55-year-old woman presents with 1 month of dyspnea. She receives a radiograph followed by CT.",
       "diagnosis": "Organizing Pneumonia",
       "question_images": [
         "cic091_q1.jpg",
@@ -1891,7 +1891,7 @@
       "id": "CORE-CH-094",
       "source_note_id": "1784379791018",
       "label": "Case 094",
-      "history": "41-year-old man presents with basilar consolidation.",
+      "history": "41-year-old man presents with basilar consolidations.",
       "diagnosis": "Lipoid Pneumonia",
       "question_images": [
         "cic094_q1.jpg",
