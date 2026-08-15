@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Betalingen | Radius Admin</title>
+    {% include "_favicon.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_payments.css') }}" />
+  </head>
+  <body class="payments-page">
+    <header class="admin-topbar payments-topbar">
+      <div class="admin-topbar-inner">
+        <a class="payments-brand" href="{{ url_for('admin_home') }}">Radius <span>Admin</span></a>
+        <div class="admin-topbar-actions">
+          <div class="admin-topbar-badge">Betalingen</div>
+          <div class="admin-topbar-badge admin-role-badge">ADMIN ROLE</div>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('admin_home') }}">Admin</a>
+          <a class="admin-link-button admin-topbar-link" href="{{ url_for('logout') }}">Uitloggen</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="payments-shell">
+      <section class="payments-hero">
+        <div>
+          <p class="payments-eyebrow">BETALINGEN · VOORBEREIDING</p>
+          <h1>Toegangstarieven voor Radius</h1>
+          <p>De leeromgeving blijft voorlopig gratis. Deze pagina is alleen zichtbaar voor de beheerder en bereidt de Stripe-lancering voor binnen ongeveer zes maanden.</p>
+        </div>
+        <div class="launch-status {{ 'launch-status-live' if payments_enabled else '' }}">
+          <span class="status-dot"></span>
+          {{ 'Betalingen actief' if payments_enabled else 'Gratis toegang actief' }}
+        </div>
+      </section>
+
+      {% if payment_status == 'success' %}
+        <div class="payment-notice payment-success">Stripe bevestigde de betaling. Toegangsbeheer wordt bij de publieke lancering gekoppeld aan deze transactie.</div>
+      {% elif payment_status == 'cancelled' %}
+        <div class="payment-notice payment-cancelled">De Stripe Checkout is geannuleerd. Er is geen betaling uitgevoerd.</div>
+      {% endif %}
+
+      <section class="payment-plan-grid" aria-label="Toekomstige tarieven">
+        {% for plan_key, plan in plans.items() %}
+          <article class="payment-plan {{ 'payment-plan-featured' if plan_key == 'six-months' else '' }}">
+            {% if plan_key == 'six-months' %}<span class="plan-chip">Beste waarde</span>{% endif %}
+            <p class="plan-duration">{{ plan.duration }}</p>
+            <h2>{{ plan.display_price }}</h2>
+            <p class="plan-description">{{ plan.description }}</p>
+            <div class="plan-rule"></div>
+            <p class="plan-detail">Eenmalige betaling in CHF</p>
+            {% if payments_enabled and stripe_configured %}
+              <form method="post" action="{{ url_for('admin_create_payment_checkout', plan_key=plan_key) }}">
+                <button type="submit" class="payment-action">Stripe Checkout openen</button>
+              </form>
+            {% else %}
+              <button type="button" class="payment-action payment-action-disabled" disabled>Nog niet beschikbaar</button>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </section>
+
+      <section class="stripe-setup-card">
+        <div>
+          <p class="payments-eyebrow">STRIPE-STATUS</p>
+          <h2>Veilige koppeling met Stripe</h2>
+          <p>De geheime Stripe-sleutel wordt uitsluitend als Render-omgevingsvariabele bewaard en verschijnt nooit in de broncode.</p>
+        </div>
+        <dl class="stripe-status-list">
+          <div><dt>Stripe SDK</dt><dd>{{ 'Beschikbaar' if stripe_configured else 'Nog niet geconfigureerd' }}</dd></div>
+          <div><dt>Publieke verkoop</dt><dd>{{ 'Actief' if payments_enabled else 'Uitgeschakeld' }}</dd></div>
+          <div><dt>Huidige toegang</dt><dd>Gratis</dd></div>
+        </dl>
+      </section>
+    </main>
+  </body>
+</html>

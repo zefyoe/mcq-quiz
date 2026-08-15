@@ -22,6 +22,11 @@ from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
 
+try:
+    import stripe
+except ImportError:  # Keep the application runnable until the payment package is installed.
+    stripe = None
+
 from core_radiology import get_core_section, get_core_sections, load_core_section
 from cardiothoracic import load_cardiothoracic_questions
 from gastrointestinal_anatomy import load_gastrointestinal_anatomy_questions
@@ -123,6 +128,24 @@ db.init_app(app)
 AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
 STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
 ADMIN_EMAIL = "y@bymed.be"
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+STRIPE_PAYMENTS_ENABLED = os.environ.get("STRIPE_PAYMENTS_ENABLED", "0").strip() == "1"
+PAYMENT_PLANS = {
+    "three-months": {
+        "name": "3 maanden toegang",
+        "description": "Volledige toegang tot Radius gedurende 3 maanden.",
+        "amount": 3900,
+        "display_price": "CHF 39",
+        "duration": "3 maanden",
+    },
+    "six-months": {
+        "name": "6 maanden toegang",
+        "description": "Volledige toegang tot Radius gedurende 6 maanden.",
+        "amount": 6900,
+        "display_price": "CHF 69",
+        "duration": "6 maanden",
+    },
+}
 ACCOUNT_CLEANUP_EMAILS = frozenset({
     "zwszketn@immenseignite.info",
     "vqnywgut@immenseignite.info",
@@ -3330,6 +3353,65 @@ def admin_home():
         question_count=question_count,
         user_count=db.session.query(func.count(User.id)).scalar() or 0,
     )
+
+
+@app.route("/admin/payments")
+def admin_payments():
+    """Show the private payment launch page for the sole administrator."""
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    return render_template(
+        "admin_payments.html",
+        plans=PAYMENT_PLANS,
+        payments_enabled=STRIPE_PAYMENTS_ENABLED,
+        stripe_configured=bool(stripe and STRIPE_SECRET_KEY),
+        payment_status=request.args.get("payment"),
+    )
+
+
+@app.post("/admin/payments/checkout/<plan_key>")
+def admin_create_payment_checkout(plan_key: str):
+    """Create an admin-only Stripe Checkout session once payments are launched."""
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+
+    plan = PAYMENT_PLANS.get(plan_key)
+    if not plan:
+        abort(404)
+    if not STRIPE_PAYMENTS_ENABLED or not stripe or not STRIPE_SECRET_KEY:
+        abort(404)
+
+    stripe.api_key = STRIPE_SECRET_KEY
+    checkout_session = stripe.checkout.Session.create(
+        mode="payment",
+        customer_email=current_user.email,
+        line_items=[{
+            "price_data": {
+                "currency": "chf",
+                "product_data": {
+                    "name": plan["name"],
+                    "description": plan["description"],
+                },
+                "unit_amount": plan["amount"],
+            },
+            "quantity": 1,
+        }],
+        metadata={
+            "product": "radius",
+            "plan_key": plan_key,
+            "duration": plan["duration"],
+            "admin_user_id": str(current_user.id),
+        },
+        success_url=(
+            url_for("admin_payments", _external=True)
+            + "?payment=success&session_id={CHECKOUT_SESSION_ID}"
+        ),
+        cancel_url=url_for("admin_payments", payment="cancelled", _external=True),
+    )
+    return redirect(checkout_session.url, code=303)
 
 
 def get_appointment_week_start(raw_date: str | None = None) -> date:

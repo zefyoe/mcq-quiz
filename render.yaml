@@ -16,6 +16,8 @@ services:
           property: connectionString
       - key: RUN_STARTUP_MIGRATIONS
         value: "1"
+      - key: STRIPE_PAYMENTS_ENABLED
+        value: "1"
 
 databases:
   - name: mcq-quiz-db
