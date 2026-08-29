@@ -127,7 +127,11 @@ db.init_app(app)
 
 AUTO_IMAGE_CATEGORY = os.environ.get("AUTO_IMAGE_CATEGORY", "Anatomy")
 STANDARD_IMAGE_PROMPT = "Which anatomical structure is depicted?"
-ADMIN_EMAIL = "y@bymed.be"
+ADMIN_EMAILS = frozenset({
+    "y@bymed.be",
+    "ybahkani@gmail.com",
+})
+CORE_ACCESS_EMAILS = ADMIN_EMAILS
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
 STRIPE_PAYMENTS_ENABLED = os.environ.get("STRIPE_PAYMENTS_ENABLED", "0").strip() == "1"
 PAYMENT_PLANS = {
@@ -344,6 +348,11 @@ def route_core_domain():
             maintenance_until=MAINTENANCE_UNTIL,
         ), 503
     ensure_auth_schema_ready()
+    if current_user.is_authenticated:
+        sync_user_admin_flag(current_user)
+        if request.path == "/core" or request.path.startswith("/core/"):
+            if not user_has_core_access(current_user):
+                abort(403)
     hostname = request.host.split(":", 1)[0].lower()
     if hostname == "core.bymed.be" and request.path == "/":
         return redirect(url_for("core_home"))
@@ -365,6 +374,8 @@ def switch_product(product_key):
     destination = destinations.get(product_key)
     if not destination:
         abort(404)
+    if product_key == "core" and not user_has_core_access(current_user):
+        abort(403)
     # Reissue the current signed session for .bymed.be before moving to the
     # other product subdomain. This also upgrades existing host-only cookies.
     session.modified = True
@@ -522,6 +533,7 @@ def inject_language_helpers():
         "tr": tr,
         "localize_quiz_title": localize_quiz_title,
         "asset_version": app.config["STATIC_ASSET_VERSION"],
+        "can_access_core": user_has_core_access(current_user),
     }
 
 
@@ -582,7 +594,15 @@ def get_quiz_display_title(category: str, subgroup: str | None = None) -> str:
 
 
 def is_admin_email(email: str) -> bool:
-    return (email or "").strip().lower() == ADMIN_EMAIL
+    return (email or "").strip().lower() in ADMIN_EMAILS
+
+
+def user_has_core_access(user: User | None) -> bool:
+    return bool(
+        user
+        and user.is_authenticated
+        and (getattr(user, "email", "") or "").strip().lower() in CORE_ACCESS_EMAILS
+    )
 
 
 def user_has_admin_access(user: User | None) -> bool:
@@ -602,11 +622,12 @@ def sync_user_admin_flag(user: User | None) -> bool:
     return False
 
 
-def enforce_single_admin_account():
+def enforce_admin_accounts():
+    normalized_email = func.lower(func.trim(User.email))
     promoted = (
         User.query
         .filter(
-            func.lower(func.trim(User.email)) == ADMIN_EMAIL,
+            normalized_email.in_(ADMIN_EMAILS),
             User.is_admin.is_not(True),
         )
         .update({User.is_admin: True}, synchronize_session=False)
@@ -614,7 +635,7 @@ def enforce_single_admin_account():
     demoted = (
         User.query
         .filter(
-            func.lower(func.trim(User.email)) != ADMIN_EMAIL,
+            normalized_email.notin_(ADMIN_EMAILS),
             User.is_admin.is_(True),
         )
         .update({User.is_admin: False}, synchronize_session=False)
@@ -720,6 +741,7 @@ def ensure_auth_schema_ready() -> None:
         return
     ensure_user_profile_schema()
     ensure_login_event_schema()
+    enforce_admin_accounts()
     AUTH_SCHEMA_READY = True
 
 
@@ -2773,6 +2795,12 @@ def previous_tests():
         .order_by(QuizAttempt.created_at.desc())
         .all()
     )
+    if not user_has_core_access(current_user):
+        attempts = [
+            attempt
+            for attempt in attempts
+            if normalize_category(attempt.category) != "core radiology"
+        ]
     attempt_summaries = [build_attempt_summary(attempt) for attempt in attempts]
     return render_template("previous_tests.html", attempts=attempt_summaries)
 
@@ -2837,6 +2865,11 @@ def attempt_report(attempt_id):
     attempt = QuizAttempt.query.filter_by(id=attempt_id, user_id=current_user.id).first()
     if not attempt:
         abort(404)
+    if (
+        normalize_category(attempt.category) == "core radiology"
+        and not user_has_core_access(current_user)
+    ):
+        abort(403)
     summary = build_attempt_summary(attempt)
     return render_template(
         "attempt_report.html",
@@ -3133,6 +3166,11 @@ def retake_previous_test(attempt_id):
     attempt = QuizAttempt.query.filter_by(id=attempt_id, user_id=current_user.id).first()
     if not attempt:
         abort(404)
+    if (
+        normalize_category(attempt.category) == "core radiology"
+        and not user_has_core_access(current_user)
+    ):
+        abort(403)
 
     order = parse_question_ids(attempt.question_ids_json)
     if not order:
@@ -4195,7 +4233,7 @@ def initialize_database_schema():
         ensure_user_profile_schema()
         ensure_question_progress_schema()
         ensure_performance_indexes()
-        enforce_single_admin_account()
+        enforce_admin_accounts()
         db.engine.dispose()
 
 

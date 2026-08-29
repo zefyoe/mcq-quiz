@@ -656,7 +656,13 @@ with app.app_context():
         is_admin=True,
     )
     admin.set_password("strong-password")
-    db.session.add_all([student, admin])
+    second_admin = User(
+        name="Second Test Admin",
+        university="VUB",
+        email="ybahkani@gmail.com",
+    )
+    second_admin.set_password("strong-password")
+    db.session.add_all([student, admin, second_admin])
     db.session.commit()
     student_id = student.id
 
@@ -668,12 +674,12 @@ response = client.post(
 )
 assert_ok(response, "student login")
 assert b'class="product-switcher"' in response.data
-assert b"/switch-product/core" in response.data
+assert b"/switch-product/core" not in response.data
 with client.session_transaction() as language_session:
     language_session["language"] = "en"
 response = client.get("/switch-product/core")
-assert response.status_code == 302
-assert response.headers["Location"] == "https://core.bymed.be/core"
+assert response.status_code == 403
+assert client.get("/core").status_code == 403
 response = client.get("/switch-product/anatomy")
 assert response.status_code == 302
 assert response.headers["Location"] == "https://bymed.be/"
@@ -821,6 +827,17 @@ assert b"Anki-flashcards" in client.get("/anatomy/mixed?format=flashcard").data
 assert b"Toon antwoord" in client.get("/flashcards/Anatomy?subgroup=mixed&resume=1").data
 with client.session_transaction() as language_session:
     language_session["language"] = "en"
+
+client.get("/logout")
+response = client.post(
+    "/login",
+    data={"email": "ybahkani@gmail.com", "password": "strong-password"},
+    follow_redirects=True,
+)
+assert_ok(response, "second admin login")
+assert b"/switch-product/core" in response.data
+with app.app_context():
+    assert User.query.filter_by(email="ybahkani@gmail.com").one().is_admin is True
 
 response = client.get("/core")
 assert_ok(response, "CORE dashboard")

@@ -44,10 +44,12 @@
           <a href="{{ url_for('previous_tests') }}" class="dashboard-nav-link">{{ tr("Previous Tests") }}</a>
           <a href="{{ url_for('anatomy_sections') }}" class="dashboard-nav-link">{{ tr("New Anatomy Quiz") }}</a>
           <a href="{{ url_for('profile') }}" class="dashboard-nav-link">{{ "Profiel" if language == "nl" else "Profile" }}</a>
-          <a href="{{ url_for('core_home') }}" class="dashboard-nav-link dashboard-nav-link-core">
-            <span>CORE Radius</span>
-            <small>core.bymed.be</small>
-          </a>
+          {% if can_access_core %}
+            <a href="{{ url_for('core_home') }}" class="dashboard-nav-link dashboard-nav-link-core">
+              <span>CORE Radius</span>
+              <small>core.bymed.be</small>
+            </a>
+          {% endif %}
           {% if current_user.is_authenticated and current_user.is_admin %}
             <a href="{{ url_for('admin_home') }}" class="dashboard-nav-link">Admin</a>
             <a href="{{ url_for('admin_database') }}" class="dashboard-nav-link">Database</a>
