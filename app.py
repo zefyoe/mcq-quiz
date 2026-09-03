@@ -155,7 +155,7 @@ ACCOUNT_CLEANUP_EMAILS = frozenset({
     "vqnywgut@immenseignite.info",
     "hxrmrynn@immenseignite.info",
 })
-LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "0").strip() == "1"
+LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "1").strip() == "1"
 AUTH_SCHEMA_READY = False
 APPOINTMENT_SCHEMA_READY = False
 APPOINTMENT_SLOT_MINUTES = 15
