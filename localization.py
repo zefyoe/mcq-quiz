@@ -426,14 +426,20 @@ def frenchize_anatomy_term(text: str) -> str:
     for side in ("right", "left"):
         prefix = f"{side} "
         if normalized.startswith(prefix):
-            base = frenchize_anatomy_term(cleaned[len(prefix):])
-            if base.casefold() != cleaned[len(prefix):].casefold():
+            base_source = cleaned[len(prefix):]
+            base_key = base_source.casefold()
+            base = SOURCED_FRENCH_TERMS.get(base_key)
+            if not base:
+                base = FRENCH_TERMS_BY_COMPACT_KEY.get(
+                    re.sub(r"[^a-z0-9]", "", base_key)
+                )
+            if base:
                 return _capitalize_initial(_french_side_suffix(side, base))
             break
 
-    # Never expose a Latin fallback in the French interface. Unmatched terms
-    # remain in their source language until a sourced French name is added.
-    return _capitalize_initial(cleaned)
+    # Keep the verified Latin terminology as the fallback whenever Wikipedia
+    # or Wikidata has no suitable French anatomical name.
+    return latinize_anatomy_term(cleaned, language="nl")
 
 
 def latinize_anatomy_term(text: str, language: str = "nl") -> str:

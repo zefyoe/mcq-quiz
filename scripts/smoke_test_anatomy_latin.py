@@ -67,6 +67,20 @@ try:
         assert localized_fr["C"] == "Tête fémorale"
         assert localized_fr["D"] == "Col fémoral"
 
+        fallback_fr = localize_question_for_display({
+            "Category": "Anatomy - Genito-Urinary",
+            "Vraag": "Which anatomical structure is depicted?",
+            "A": "anterior wall of urinary bladder",
+            "B": "cerebral aqueduct of sylvius",
+            "C": "tunica albuginea",
+            "D": "interlobar vein of kidney",
+        })
+
+        assert fallback_fr["A"] == "Paries anterior vesicae urinariae"
+        assert fallback_fr["B"] == "Aqueductus mesencephali"
+        assert fallback_fr["C"] == "Tunica albuginea testis"
+        assert fallback_fr["D"] == "Vena interlobaris renis"
+
     assert len(SOURCED_LATIN_TERMS) == len(SOURCED_LATIN_SOURCES)
     assert len(SOURCED_LATIN_TERMS) >= 450
     assert SOURCED_LATIN_TERMS["femoral artery"] == "Arteria femoralis"
