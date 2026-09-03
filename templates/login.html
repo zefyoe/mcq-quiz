@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login • Bymed</title>
+  <title>{{ tr("Login") }} • Bymed</title>
   {% include "_favicon.html" %}
   <link rel="preload" as="image" href="{{ url_for('static', filename='images/login-rx-background.jpg') }}" fetchpriority="high">
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css', v=asset_version) }}">
@@ -28,8 +28,8 @@
       <section class="login-panel">
         <div class="login-card">
           <div class="login-header">
-            <h2>{{ "Inloggen" if language == "nl" else "Sign in" }}</h2>
-            <p>{{ "Gebruik je account om verder te gaan." if language == "nl" else "Use your account to continue." }}</p>
+            <h2>{{ l10n("Inloggen", "Sign in", "Se connecter") }}</h2>
+            <p>{{ l10n("Gebruik je account om verder te gaan.", "Use your account to continue.", "Utilisez votre compte pour continuer.") }}</p>
           </div>
 
           <form method="post" class="login-form">
@@ -45,7 +45,7 @@
               <label for="password">{{ tr("Password") }}</label>
               <div class="password-wrap">
                 <input id="password" name="password" type="password" placeholder="{{ tr('Password') }}" required class="{% if errors and errors.get('password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('password') else 'false' }}">
-                <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="{{ 'Wachtwoord tonen' if language == 'nl' else 'Show password' }}" aria-pressed="false">
+                <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="{{ l10n('Wachtwoord tonen', 'Show password', 'Afficher le mot de passe') }}" aria-pressed="false">
                   <svg viewBox="0 0 24 24" aria-hidden="true" style="display:block;width:24px;height:24px;fill:none;stroke:#183b72;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
                 </button>
               </div>
@@ -56,8 +56,8 @@
           </form>
 
           <p style="margin-top:18px; text-align:center; font-size:14px;">
-            {{ "Heb je nog geen account?" if language == "nl" else "Don't have an account?" }}
-            <a href="{{ url_for('register') }}" style="font-weight:600;">{{ "Account aanmaken" if language == "nl" else "Create account" }}</a>
+            {{ l10n("Heb je nog geen account?", "Don't have an account?", "Vous n’avez pas encore de compte ?") }}
+            <a href="{{ url_for('register') }}" style="font-weight:600;">{{ l10n("Account aanmaken", "Create account", "Créer un compte") }}</a>
           </p>
 
         </div>
@@ -72,11 +72,11 @@
       if (input.type === "password") {
         input.type = "text";
         btn.setAttribute("aria-pressed", "true");
-        btn.setAttribute("aria-label", {{ ("Wachtwoord verbergen" if language == "nl" else "Hide password")|tojson }});
+        btn.setAttribute("aria-label", {{ l10n("Wachtwoord verbergen", "Hide password", "Masquer le mot de passe")|tojson }});
       } else {
         input.type = "password";
         btn.setAttribute("aria-pressed", "false");
-        btn.setAttribute("aria-label", {{ ("Wachtwoord tonen" if language == "nl" else "Show password")|tojson }});
+        btn.setAttribute("aria-label", {{ l10n("Wachtwoord tonen", "Show password", "Afficher le mot de passe")|tojson }});
       }
     }
   </script>

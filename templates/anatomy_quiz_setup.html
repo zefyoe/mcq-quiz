@@ -43,11 +43,13 @@
               <span id="availableCountText">
                 {% if language == "nl" %}
                   Nu beschikbaar: {{ available_count }} vragen.
+                {% elif language == "fr" %}
+                  Disponible maintenant : {{ available_count }} question{{ '' if available_count == 1 else 's' }}.
                 {% else %}
                   Available now: {{ available_count }} question{{ '' if available_count == 1 else 's' }}.
                 {% endif %}
               </span>
-              {{ "Maximaal" if language == "nl" else "Maximum per quiz:" }} {{ max_quiz_questions }}.
+              {{ l10n("Maximaal", "Maximum per quiz:", "Maximum par quiz :") }} {{ max_quiz_questions }}.
             </p>
           </div>
         </div>
@@ -57,22 +59,22 @@
             <input type="hidden" name="subgroup" value="{{ subgroup_key }}">
             <div class="study-format-block">
               <div class="quiz-setup-group-heading">
-                <p class="quiz-count-label">{{ "Studiemethode" if language == "nl" else "Study method" }}</p>
-                <span>{{ "Wissel later met één klik tussen beide methodes." if language == "nl" else "Switch between both methods later with one click." }}</span>
+                <p class="quiz-count-label">{{ l10n("Studiemethode", "Study method", "Méthode d’étude") }}</p>
+                <span>{{ l10n("Wissel later met één klik tussen beide methodes.", "Switch between both methods later with one click.", "Vous pourrez passer d’une méthode à l’autre en un clic.") }}</span>
               </div>
               <div class="study-format-toggle">
                 <label class="study-format-option">
                   <input type="radio" name="format" value="mcq" {% if selected_format == "mcq" %}checked{% endif %}>
                   <span>
                     <strong>MCQ</strong>
-                    <small>{{ "Meerkeuze met directe feedback of examenmodus" if language == "nl" else "Multiple choice with feedback or exam mode" }}</small>
+                    <small>{{ l10n("Meerkeuze met directe feedback of examenmodus", "Multiple choice with feedback or exam mode", "Questions à choix multiple avec retour immédiat ou mode examen") }}</small>
                   </span>
                 </label>
                 <label class="study-format-option">
                   <input type="radio" name="format" value="flashcard" {% if selected_format == "flashcard" %}checked{% endif %}>
                   <span>
-                    <strong>{{ "Anki-flashcards" if language == "nl" else "Anki flashcards" }}</strong>
-                    <small>{{ "Open vraag, toon antwoord en beoordeel jezelf" if language == "nl" else "Open recall, reveal the answer and rate yourself" }}</small>
+                    <strong>Flashcards</strong>
+                    <small>{{ l10n("Open vraag, toon antwoord en beoordeel jezelf", "Open recall, reveal the answer and rate yourself", "Rappel libre, affichage de la réponse et autoévaluation") }}</small>
                   </span>
                 </label>
               </div>
@@ -87,6 +89,13 @@
                         "easy": "Gemakkelijk",
                         "very_easy": "Zeer gemakkelijk"
                       }[rating_key] }}
+                    {% elif language == "fr" %}
+                      {{ {
+                        "very_difficult": "Très difficile",
+                        "difficult": "Difficile",
+                        "easy": "Facile",
+                        "very_easy": "Très facile"
+                      }[rating_key] }}
                     {% else %}
                       {{ rating.label }}
                     {% endif %}
@@ -96,8 +105,8 @@
             </div>
             <div class="quiz-pool-group">
               <div class="quiz-setup-group-heading">
-                <p class="quiz-count-label">{{ "Studiedoel" if language == "nl" else "Study focus" }}</p>
-                <span>{{ "Kies welke vragen je nu wilt oefenen." if language == "nl" else "Choose which questions you want to practise now." }}</span>
+                <p class="quiz-count-label">{{ l10n("Studiedoel", "Study focus", "Objectif d’étude") }}</p>
+                <span>{{ l10n("Kies welke vragen je nu wilt oefenen.", "Choose which questions you want to practise now.", "Choisissez les questions que vous souhaitez étudier maintenant.") }}</span>
               </div>
               <div class="quiz-pool-grid">
                 {% for pool_key, pool in quiz_pools.items() %}
@@ -121,6 +130,14 @@
                             "unseen": "Ongeziene vragen",
                             "marked": "Gemarkeerd"
                           }[pool_key] }}
+                        {% elif language == "fr" %}
+                          {{ {
+                            "all": "Toutes les questions",
+                            "due": "Révision intelligente",
+                            "incorrect": "Réponses précédemment incorrectes",
+                            "unseen": "Nouvelles questions",
+                            "marked": "Questions marquées"
+                          }[pool_key] }}
                         {% else %}
                           {{ pool.label }}
                         {% endif %}
@@ -135,6 +152,14 @@
                           "incorrect": "Vragen die je eerder minstens één keer fout had.",
                           "unseen": "Alleen vragen die je nog niet hebt beantwoord.",
                           "marked": "Vragen die je zelf hebt bewaard voor later."
+                        }[pool_key] }}
+                      {% elif language == "fr" %}
+                        {{ {
+                          "all": "Une sélection aléatoire dans cette section.",
+                          "due": "Questions prêtes pour une nouvelle révision.",
+                          "incorrect": "Questions auxquelles vous avez déjà répondu incorrectement.",
+                          "unseen": "Uniquement les questions auxquelles vous n’avez pas encore répondu.",
+                          "marked": "Questions que vous avez enregistrées pour plus tard."
                         }[pool_key] }}
                       {% else %}
                         {{ pool.description }}
@@ -169,6 +194,8 @@
                   <span class="quiz-mode-description">
                     {% if language == "nl" %}
                       {{ "Toon na elk opgeslagen antwoord meteen het juiste antwoord." if mode_key == "test" else "Ga na het opslaan automatisch door en toon een timer." }}
+                    {% elif language == "fr" %}
+                      {{ "Affichez la bonne réponse immédiatement après chaque réponse enregistrée." if mode_key == "test" else "Passez automatiquement à la question suivante après l’enregistrement et affichez un chronomètre." }}
                     {% else %}
                       {{ mode.description }}
                     {% endif %}
@@ -199,7 +226,7 @@
       const mcqModeOptions = document.getElementById("mcqModeOptions");
       const flashcardBucketPreview = document.getElementById("flashcardBucketPreview");
       const maxPerQuiz = {{ max_quiz_questions }};
-      const isDutch = {{ (language == "nl")|tojson }};
+      const currentLanguage = {{ language|tojson }};
 
       function updatePoolAvailability() {
         const selected = document.querySelector('input[name="pool"]:checked');
@@ -210,9 +237,11 @@
         countInput.disabled = available === 0;
         startButton.disabled = available === 0;
         if (countText) {
-          countText.textContent = isDutch
+          countText.textContent = currentLanguage === "nl"
             ? `Nu beschikbaar: ${available} vragen.`
-            : `Available now: ${available} question${available === 1 ? "" : "s"}.`;
+            : currentLanguage === "fr"
+              ? `Disponible maintenant : ${available} question${available === 1 ? "" : "s"}.`
+              : `Available now: ${available} question${available === 1 ? "" : "s"}.`;
         }
       }
 
@@ -223,8 +252,8 @@
         if (flashcardBucketPreview) flashcardBucketPreview.hidden = !isFlashcard;
         if (startButton) {
           startButton.textContent = isFlashcard
-            ? (isDutch ? "Start flashcards" : "Start flashcards")
-            : (isDutch ? "Start quiz" : "Start quiz");
+            ? (currentLanguage === "fr" ? "Commencer les flashcards" : currentLanguage === "nl" ? "Flashcards starten" : "Start flashcards")
+            : (currentLanguage === "fr" ? "Commencer le quiz" : currentLanguage === "nl" ? "Quiz starten" : "Start quiz");
         }
       }
 

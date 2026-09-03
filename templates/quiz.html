@@ -35,13 +35,13 @@
         <div class="quiz-sidebar-header">
           <p class="eyebrow">{{ tr("Current quiz") }}</p>
           <h2>{{ category }}</h2>
-          <p class="small-muted">{{ order|length }} {{ "vragen" if language == "nl" else "questions" }}</p>
+          <p class="small-muted">{{ order|length }} {{ l10n("vragen", "questions", "questions") }}</p>
         </div>
 
         <div class="progress-box">
           <div class="progress-label-row">
             <span>{{ tr("Progress") }}</span>
-            <span id="progressText">0 / {{ order|length }} {{ "opgeslagen" if language == "nl" else "saved" }}</span>
+            <span id="progressText">0 / {{ order|length }} {{ l10n("opgeslagen", "saved", "enregistrées") }}</span>
           </div>
           <div class="progress-bar">
             <div class="progress-bar-fill" id="progressBarFill"></div>
@@ -49,7 +49,7 @@
         </div>
         <div class="session-save-status" id="quizSaveStatus" role="status" aria-live="polite">
           <span class="session-save-dot" aria-hidden="true"></span>
-          <span data-session-save-label>{{ "Automatisch opgeslagen" if language == "nl" else "Saved automatically" }}</span>
+          <span data-session-save-label>{{ l10n("Automatisch opgeslagen", "Saved automatically", "Enregistré automatiquement") }}</span>
         </div>
 
         <div class="question-nav" id="questionNav">
@@ -66,9 +66,9 @@
         </div>
 
         <div class="question-nav-legend">
-          <span><i class="legend-current"></i>{{ "Huidig" if language == "nl" else "Current" }}</span>
-          <span><i class="legend-answered"></i>{{ "Beantwoord" if language == "nl" else "Answered" }}</span>
-          <span><i class="legend-marked"></i>{{ "Gemarkeerd" if language == "nl" else "Marked" }}</span>
+          <span><i class="legend-current"></i>{{ l10n("Huidig", "Current", "En cours") }}</span>
+          <span><i class="legend-answered"></i>{{ l10n("Beantwoord", "Answered", "Répondue") }}</span>
+          <span><i class="legend-marked"></i>{{ l10n("Gemarkeerd", "Marked", "Marquée") }}</span>
         </div>
 
         <div class="sidebar-actions">
@@ -82,7 +82,7 @@
             <p class="eyebrow">{{ tr("Medical quiz") }}</p>
             <h1>Quiz: <span class="codepill">{{ category }}</span></h1>
             <p class="small-muted">
-              {{ "Modus" if language == "nl" else "Mode" }}:
+              {{ l10n("Modus", "Mode", "Mode") }} :
               <strong>{{ tr('Exam Phase') if quiz_mode == 'exam' else tr('Test Phase') }}</strong>
             </p>
             <p class="small-muted">
@@ -99,9 +99,9 @@
           </div>
           {% if not current_user.is_admin %}
             <div class="quiz-header-tools">
-              <div class="study-method-switch" aria-label="{{ 'Studiemethode' if language == 'nl' else 'Study method' }}">
+              <div class="study-method-switch" aria-label="{{ l10n('Studiemethode', 'Study method', 'Méthode d’étude') }}">
                 <span class="active">MCQ</span>
-                <a href="{{ switch_to_flashcard_url }}" data-study-method-switch>{{ "Anki" if language == "nl" else "Anki" }}</a>
+                <a href="{{ switch_to_flashcard_url }}" data-study-method-switch>Flashcards</a>
               </div>
               {% if quiz_mode == 'exam' %}
                 <div class="quiz-timer-box">
@@ -110,7 +110,7 @@
                 </div>
               {% endif %}
               <button type="button" class="focus-mode-button" id="focusModeButton" aria-pressed="false">
-                {{ "Focusmodus" if language == "nl" else "Focus mode" }}
+                {{ l10n("Focusmodus", "Focus mode", "Mode concentration") }}
               </button>
             </div>
           {% endif %}
@@ -141,7 +141,7 @@
                       data-mark-question
                       aria-pressed="{{ 'true' if marked_by_id[qid] else 'false' }}"
                     >
-                      {{ "Gemarkeerd" if language == "nl" and marked_by_id[qid] else "Markeren" if language == "nl" else "Marked" if marked_by_id[qid] else "Mark for review" }}
+                      {{ l10n("Gemarkeerd" if marked_by_id[qid] else "Markeren", "Marked" if marked_by_id[qid] else "Mark for review", "Marquée" if marked_by_id[qid] else "Marquer pour révision") }}
                     </button>
                   {% endif %}
                   <div class="question-status" id="status-{{ loop.index0 }}">{{ tr("Not saved") }}</div>
@@ -157,13 +157,13 @@
                     loading="{{ 'eager' if loop.first else 'lazy' }}"
                     decoding="async"
                     data-question-image
-                    alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }}"
+                    alt="{{ l10n('Vraagafbeelding', 'Question image', 'Image de la question') }}"
                     class="question-image"
                   >
                   <div class="flashcard-image-status" aria-live="polite">
-                    <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
+                    <span class="image-loading-label">{{ l10n("Afbeelding laden", "Loading image", "Chargement de l’image") }}</span>
                     <button type="button" data-retry-image hidden>
-                      {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                      {{ l10n("Opnieuw proberen", "Retry image", "Réessayer") }}
                     </button>
                   </div>
                 </div>
@@ -171,12 +171,12 @@
 
               <p class="question-help">
                 {% if current_user.is_authenticated and current_user.is_admin %}
-                  {{ "Vul de antwoordkeuzes in, selecteer het juiste antwoord en klik daarna op" if language == "nl" else "Fill in the answer choices below, pick the single correct answer, then click" }}
+                  {{ l10n("Vul de antwoordkeuzes in, selecteer het juiste antwoord en klik daarna op", "Fill in the answer choices below, pick the single correct answer, then click", "Complétez les choix ci-dessous, sélectionnez la bonne réponse, puis cliquez sur") }}
                   <strong>{{ tr("Save answer") }}</strong>.
                 {% else %}
-                  {{ "Kies hieronder één antwoord en klik daarna op" if language == "nl" else "Choose one answer below, then click" }}
+                  {{ l10n("Kies hieronder één antwoord en klik daarna op", "Choose one answer below, then click", "Choisissez une réponse ci-dessous, puis cliquez sur") }}
                   <strong>{{ tr("Save answer") }}</strong>.
-                  {{ "Na het opslaan wordt het antwoord vergrendeld." if language == "nl" else "Once saved, the answer is locked." }}
+                  {{ l10n("Na het opslaan wordt het antwoord vergrendeld.", "Once saved, the answer is locked.", "Une fois enregistrée, la réponse est verrouillée.") }}
                 {% endif %}
               </p>
 
@@ -198,7 +198,7 @@
                           type="text"
                           class="answer-input"
                           data-answer-input="{{ letter|lower }}"
-                          placeholder="{{ 'Typ hier je antwoord' if language == 'nl' else 'Type your answer here' }}"
+                          placeholder="{{ l10n('Typ hier je antwoord', 'Type your answer here', 'Saisissez votre réponse') }}"
                           autocomplete="off"
                           value="{{ q[letter] }}"
                         >
@@ -226,7 +226,7 @@
                 </button>
                 {% if current_user.is_authenticated and current_user.is_admin %}
                   <button type="button" class="secondary-btn edit-answer-btn" data-edit-answer style="display: none;">
-                    {{ "Bewerken" if language == "nl" else "Edit" }}
+                    {{ l10n("Bewerken", "Edit", "Modifier") }}
                   </button>
                 {% endif %}
               </div>
@@ -248,6 +248,9 @@
               {% if language == "nl" %}
                 Sneltoetsen: <kbd>A</kbd>–<kbd>D</kbd> of <kbd>1</kbd>–<kbd>4</kbd> kiezen &middot;
                 <kbd>Enter</kbd> opslaan &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> wisselen van vraag
+              {% elif language == "fr" %}
+                Raccourcis : <kbd>A</kbd>–<kbd>D</kbd> ou <kbd>1</kbd>–<kbd>4</kbd> pour choisir &middot;
+                <kbd>Entrée</kbd> pour enregistrer &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> pour changer de question
               {% else %}
                 Shortcuts: <kbd>A</kbd>–<kbd>D</kbd> or <kbd>1</kbd>–<kbd>4</kbd> to choose &middot;
                 <kbd>Enter</kbd> to save &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> to change question
@@ -299,18 +302,18 @@
         rightAnswer: {{ tr("Right answer:")|tojson }},
         saved: {{ tr("Saved")|tojson }},
         savedLocked: {{ tr("Saved and locked")|tojson }},
-        answerLocked: {{ ("Antwoord opgeslagen. Deze keuze is nu vergrendeld." if language == "nl" else "Answer saved. This response is now locked.")|tojson }},
+        answerLocked: {{ l10n("Antwoord opgeslagen. Deze keuze is nu vergrendeld.", "Answer saved. This response is now locked.", "Réponse enregistrée. Ce choix est maintenant verrouillé.")|tojson }},
         saveAnswer: {{ tr("Save answer")|tojson }},
         notSaved: {{ tr("Not saved")|tojson }},
-        savedProgress: {{ ("opgeslagen" if language == "nl" else "saved")|tojson }},
-        chooseAnswer: {{ ("Kies een antwoord voordat je opslaat." if language == "nl" else "Please choose an answer before saving.")|tojson }},
-        typeAnswer: {{ ("Vul minimaal één antwoord in voordat je opslaat." if language == "nl" else "Please type at least one answer before saving.")|tojson }},
-        chooseCorrect: {{ ("Selecteer welk antwoord juist is." if language == "nl" else "Please choose which answer is correct.")|tojson }},
-        saving: {{ ("Opslaan..." if language == "nl" else "Saving...")|tojson }},
-        saveFailed: {{ ("Het antwoord kon niet worden opgeslagen." if language == "nl" else "Could not save answer.")|tojson }},
-        mark: {{ ("Markeren" if language == "nl" else "Mark for review")|tojson }},
-        marked: {{ ("Gemarkeerd" if language == "nl" else "Marked")|tojson }},
-        markFailed: {{ ("De markering kon niet worden opgeslagen." if language == "nl" else "Could not save this marker.")|tojson }}
+        savedProgress: {{ l10n("opgeslagen", "saved", "enregistrées")|tojson }},
+        chooseAnswer: {{ l10n("Kies een antwoord voordat je opslaat.", "Please choose an answer before saving.", "Choisissez une réponse avant de l’enregistrer.")|tojson }},
+        typeAnswer: {{ l10n("Vul minimaal één antwoord in voordat je opslaat.", "Please type at least one answer before saving.", "Saisissez au moins une réponse avant l’enregistrement.")|tojson }},
+        chooseCorrect: {{ l10n("Selecteer welk antwoord juist is.", "Please choose which answer is correct.", "Sélectionnez la bonne réponse.")|tojson }},
+        saving: {{ l10n("Opslaan...", "Saving...", "Enregistrement...")|tojson }},
+        saveFailed: {{ l10n("Het antwoord kon niet worden opgeslagen.", "Could not save answer.", "Impossible d’enregistrer la réponse.")|tojson }},
+        mark: {{ l10n("Markeren", "Mark for review", "Marquer pour révision")|tojson }},
+        marked: {{ l10n("Gemarkeerd", "Marked", "Marquée")|tojson }},
+        markFailed: {{ l10n("De markering kon niet worden opgeslagen.", "Could not save this marker.", "Impossible d’enregistrer ce marqueur.")|tojson }}
       };
       const studyMethodSwitch = document.querySelector("[data-study-method-switch]");
 
@@ -389,8 +392,8 @@
         if (!quizSaveStatus || !quizSaveStatusLabel) return;
         quizSaveStatus.dataset.state = state;
         quizSaveStatusLabel.textContent = state === "offline"
-          ? {{ ("Offline: voortgang blijft op dit apparaat beschikbaar." if language == "nl" else "Offline: progress remains available on this device.")|tojson }}
-          : {{ ("Automatisch opgeslagen" if language == "nl" else "Saved automatically")|tojson }};
+          ? {{ l10n("Offline: voortgang blijft op dit apparaat beschikbaar.", "Offline: progress remains available on this device.", "Hors ligne : votre progression reste disponible sur cet appareil.")|tojson }}
+          : {{ l10n("Automatisch opgeslagen", "Saved automatically", "Enregistré automatiquement")|tojson }};
       }
 
       function loadQuizProgress() {
@@ -531,7 +534,7 @@
           image.dataset.loading = "false";
           frame?.classList.remove("is-loading", "has-error");
           const label = frame?.querySelector(".image-loading-label");
-          if (label) label.textContent = {{ ("Afbeelding geladen" if language == "nl" else "Image loaded")|tojson }};
+          if (label) label.textContent = {{ l10n("Afbeelding geladen", "Image loaded", "Image chargée")|tojson }};
         };
         const markFailed = () => {
           image.dataset.loading = "false";
@@ -539,7 +542,7 @@
           frame?.classList.remove("is-loading");
           frame?.classList.add("has-error");
           const label = frame?.querySelector(".image-loading-label");
-          if (label) label.textContent = {{ ("Afbeelding kon niet laden" if language == "nl" else "Image could not load")|tojson }};
+          if (label) label.textContent = {{ l10n("Afbeelding kon niet laden", "Image could not load", "Impossible de charger l’image")|tojson }};
           if (retryButton) retryButton.hidden = false;
         };
 
@@ -900,8 +903,8 @@
           focusModeButton.classList.toggle("is-active", enabled);
           focusModeButton.setAttribute("aria-pressed", String(enabled));
           focusModeButton.textContent = enabled
-            ? {{ ("Focus verlaten" if language == "nl" else "Exit focus")|tojson }}
-            : {{ ("Focusmodus" if language == "nl" else "Focus mode")|tojson }};
+            ? {{ l10n("Focus verlaten", "Exit focus", "Quitter le mode concentration")|tojson }}
+            : {{ l10n("Focusmodus", "Focus mode", "Mode concentration")|tojson }};
           localStorage.setItem(focusStorageKey, enabled ? "1" : "0");
         };
         setFocusMode(localStorage.getItem(focusStorageKey) === "1");

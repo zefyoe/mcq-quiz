@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ "Toetsrapport" if language == "nl" else "Test report" }} | Radius</title>
+    <title>{{ l10n("Toetsrapport", "Test report", "Rapport de test") }} | Radius</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
   <body class="report-body">
     <header class="report-toolbar">
-      <a href="{{ url_for('core_history') if summary.category == 'CORE Radiology' else url_for('previous_tests') }}" class="secondary-btn">{{ "Terug" if language == "nl" else "Back" }}</a>
-      <button type="button" class="primary-btn" onclick="window.print()">{{ "Opslaan als PDF" if language == "nl" else "Save as PDF" }}</button>
+      <a href="{{ url_for('core_history') if summary.category == 'CORE Radiology' else url_for('previous_tests') }}" class="secondary-btn">{{ l10n("Terug", "Back", "Retour") }}</a>
+      <button type="button" class="primary-btn" onclick="window.print()">{{ l10n("Opslaan als PDF", "Save as PDF", "Enregistrer en PDF") }}</button>
       <a href="{{ url_for('logout') }}" class="report-logout-link">{{ tr("Log out") }}</a>
     </header>
 
@@ -22,7 +22,7 @@
             {% if summary.category == "CORE Radiology" %}
               {{ "Persoonlijk radiologierapport" if language == "nl" else "Personal radiology report" }}
             {% else %}
-              {{ "Persoonlijk anatomierapport" if language == "nl" else "Personal anatomy report" }}
+              {{ l10n("Persoonlijk anatomierapport", "Personal anatomy report", "Rapport personnel d’anatomie") }}
             {% endif %}
           </p>
         </div>
@@ -33,23 +33,23 @@
       </header>
 
       <section class="report-title">
-        <p class="eyebrow">{{ "TOETSRESULTAAT" if language == "nl" else "TEST RESULT" }}</p>
+        <p class="eyebrow">{{ l10n("TOETSRESULTAAT", "TEST RESULT", "RÉSULTAT DU TEST") }}</p>
         <h1>{{ localize_quiz_title(summary.title) }}</h1>
         <p>{{ attempt.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
       </section>
 
       <section class="report-metrics">
         <div>
-          <span>{{ "Vlot beheerst" if language == "nl" and summary.study_format == "flashcard" else "Comfortable" if summary.study_format == "flashcard" else "Score" }}</span>
+          <span>{{ l10n("Vlot beheerst", "Comfortable", "Maîtrisées") if summary.study_format == "flashcard" else "Score" }}</span>
           <strong>{{ summary.score }}/{{ summary.total_questions }}</strong>
         </div>
-        <div><span>{{ "Zelfvertrouwen" if language == "nl" and summary.study_format == "flashcard" else "Confidence" if summary.study_format == "flashcard" else "Percentage" }}</span><strong>{{ summary.percent }}%</strong></div>
+        <div><span>{{ l10n("Zelfvertrouwen", "Confidence", "Confiance") if summary.study_format == "flashcard" else "Percentage" }}</span><strong>{{ summary.percent }}%</strong></div>
         <div>
-          <span>{{ "Methode" if language == "nl" else "Method" }}</span>
-          <strong>{{ "Anki Flashcards" if summary.study_format == "flashcard" else tr("Exam Phase") if summary.quiz_mode == "exam" else tr("Test Phase") }}</strong>
+          <span>{{ l10n("Methode", "Method", "Méthode") }}</span>
+          <strong>{{ "Flashcards" if summary.study_format == "flashcard" else tr("Exam Phase") if summary.quiz_mode == "exam" else tr("Test Phase") }}</strong>
         </div>
         <div>
-          <span>{{ "Duur" if language == "nl" else "Duration" }}</span>
+          <span>{{ l10n("Duur", "Duration", "Durée") }}</span>
           <strong>
             {% if summary.duration_seconds %}
               {{ (summary.duration_seconds // 60) }}m {{ (summary.duration_seconds % 60) }}s
@@ -59,7 +59,7 @@
       </section>
 
       <section class="report-review">
-        <h2>{{ "Vragenoverzicht" if language == "nl" else "Question review" }}</h2>
+        <h2>{{ l10n("Vragenoverzicht", "Question review", "Révision des questions") }}</h2>
         {% if results %}
           {% for result in results %}
             <article class="report-question">
@@ -67,21 +67,21 @@
               <div>
                 <h3>{{ result["Vraag"] }}</h3>
                 {% if result.get("image_url") %}
-                  <img class="report-case-image" src="{{ result['image_url'] }}" loading="lazy" decoding="async" alt="{{ 'Casebeeld' if language == 'nl' else 'Case image' }}">
+                  <img class="report-case-image" src="{{ result['image_url'] }}" loading="lazy" decoding="async" alt="{{ l10n('Casebeeld', 'Case image', 'Image du cas') }}">
                 {% endif %}
                 <p><b>{{ tr("Your answer:") }}</b> {{ result["user"]|join(", ") if result["user"] else "—" }}</p>
                 <p><b>{{ tr("Correct answer:") }}</b> {{ result["correct_texts"]|join(", ") if result["correct_texts"] else result["correct"]|join(", ") }}</p>
                 {% if result.get("answer_image_url") %}
-                  <img class="report-case-image report-answer-image" src="{{ result['answer_image_url'] }}" loading="lazy" decoding="async" alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }}">
+                  <img class="report-case-image report-answer-image" src="{{ result['answer_image_url'] }}" loading="lazy" decoding="async" alt="{{ l10n('Antwoordbeeld', 'Answer image', 'Image de la réponse') }}">
                 {% endif %}
               </div>
               {% if summary.study_format == "flashcard" %}
                 <span class="badge flashcard-report-rating">
                   {{ {
-                    "very_difficult": "Zeer moeilijk" if language == "nl" else "Very difficult",
-                    "difficult": "Moeilijk" if language == "nl" else "Difficult",
-                    "easy": "Gemakkelijk" if language == "nl" else "Easy",
-                    "very_easy": "Zeer gemakkelijk" if language == "nl" else "Very easy"
+                    "very_difficult": l10n("Zeer moeilijk", "Very difficult", "Très difficile"),
+                    "difficult": l10n("Moeilijk", "Difficult", "Difficile"),
+                    "easy": l10n("Gemakkelijk", "Easy", "Facile"),
+                    "very_easy": l10n("Zeer gemakkelijk", "Very easy", "Très facile")
                   }.get(result.get("flashcard_rating"), "—") }}
                 </span>
               {% else %}
@@ -90,13 +90,13 @@
             </article>
           {% endfor %}
         {% else %}
-          <p class="report-legacy-note">{{ "Voor oudere toetsen is alleen de totaalscore beschikbaar." if language == "nl" else "Only the total score is available for older tests." }}</p>
+          <p class="report-legacy-note">{{ l10n("Voor oudere toetsen is alleen de totaalscore beschikbaar.", "Only the total score is available for older tests.", "Pour les anciens tests, seul le score total est disponible.") }}</p>
         {% endif %}
       </section>
 
       <footer class="report-footer">
-        <span>{{ "CORE Radius" if summary.category == "CORE Radiology" else "Radius Anatomy QBank" }}</span>
-        <span>{{ "Gegenereerd op" if language == "nl" else "Generated on" }} {{ attempt.created_at.strftime('%d/%m/%Y') }}</span>
+        <span>{{ "CORE Radius" if summary.category == "CORE Radiology" else l10n("Radius Anatomie-vragenbank", "Radius Anatomy QBank", "Banque de questions d’anatomie Radius") }}</span>
+        <span>{{ l10n("Gegenereerd op", "Generated on", "Généré le") }} {{ attempt.created_at.strftime('%d/%m/%Y') }}</span>
       </footer>
     </main>
     {% include "_site_footer.html" %}

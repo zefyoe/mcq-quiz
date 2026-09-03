@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Anatomy Sections</title>
+    <title>Radius | {{ tr("Anatomy sections") }}</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -29,7 +29,7 @@
           <p class="eyebrow">{{ tr("Anatomy sections") }}</p>
           <h1>{{ tr("Choose an anatomy subgroup") }}</h1>
           <p class="hero-subtitle">
-            {{ "Start met een gerichte anatomiesectie of kies Gemengd voor willekeurige vragen uit alle anatomiegroepen." if language == "nl" else "Start with a focused anatomy block or use mixed mode to randomize from all anatomy questions." }}
+            {{ l10n("Start met een gerichte anatomiesectie of kies Gemengd voor willekeurige vragen uit alle anatomiegroepen.", "Start with a focused anatomy block or use mixed mode to randomize from all anatomy questions.", "Commencez par une section anatomique ciblée ou choisissez le mode Mixte pour sélectionner des questions dans toutes les sections.") }}
           </p>
         </div>
       </section>
@@ -40,7 +40,7 @@
             <p class="eyebrow">{{ tr("Start anatomy quiz") }}</p>
             <h2>{{ tr("Select a subgroup") }}</h2>
             <p class="section-subtitle">
-              {{ "Kies een anatomische sectie om je quiz in te stellen." if language == "nl" else "Choose an anatomy section to configure your quiz." }}
+              {{ l10n("Kies een anatomische sectie om je quiz in te stellen.", "Choose an anatomy section to configure your quiz.", "Choisissez une section anatomique pour configurer votre quiz.") }}
             </p>
           </div>
         </div>
@@ -58,7 +58,7 @@
               <span class="category-icon">{{ "MX" if subgroup.key == "mixed" else "GU" if subgroup.key == "genito-urinary" else "HN" if subgroup.key == "head-and-neck" else "CT" if subgroup.key == "cardiothoracic" else "GI" if subgroup.key == "gastrointestinal" else "MS" }}</span>
               <span class="category-name">{{ tr(subgroup.label) }}</span>
               <span class="category-desc">{{ tr(subgroup.description) }}</span>
-              <span class="category-count">{{ subgroup.count }} {{ "vragen" if language == "nl" else "questions" }}</span>
+              <span class="category-count">{{ subgroup.count }} {{ l10n("vragen", "questions", "questions") }}</span>
             </a>
           {% endfor %}
         </div>

@@ -51,6 +51,22 @@ try:
         assert localized["C"] == "Caput femoris"
         assert localized["D"] == "Collum femoris"
 
+        session["language"] = "fr"
+        localized_fr = localize_question_for_display({
+            "Category": "Anatomy - MSK",
+            "Vraag": "Which anatomical structure is depicted?",
+            "A": "femoral artery",
+            "B": "common femoral vein",
+            "C": "femoral head",
+            "D": "femoral neck",
+        })
+
+        assert localized_fr["Vraag"] == "Quelle structure anatomique est représentée ?"
+        assert localized_fr["A"] == "Arteria femoralis"
+        assert localized_fr["B"] == "Vena femoralis communis"
+        assert localized_fr["C"] == "Caput femoris"
+        assert localized_fr["D"] == "Collum femoris"
+
     assert len(SOURCED_LATIN_TERMS) == len(SOURCED_LATIN_SOURCES)
     assert len(SOURCED_LATIN_TERMS) >= 450
     assert SOURCED_LATIN_TERMS["femoral artery"] == "Arteria femoralis"

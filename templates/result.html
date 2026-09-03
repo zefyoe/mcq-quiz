@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ "Resultaten" if language == "nl" else "Results" }} - {{ category }}</title>
+    <title>{{ l10n("Resultaten", "Results", "Résultats") }} - {{ category }}</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -13,7 +13,7 @@
       <div class="topbar-inner">
         <a href="{{ url_for('home') }}" class="brand brand-link">Radius</a>
         <div class="topbar-actions">
-          <div class="topbar-badge">{{ "Resultaten" if language == "nl" else "Results" }}</div>
+          <div class="topbar-badge">{{ l10n("Resultaten", "Results", "Résultats") }}</div>
           {% if current_user.is_authenticated and current_user.is_admin %}
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
@@ -46,7 +46,7 @@
 
           <p class="result-feedback">
             {% if percent >= 80 %}
-              {{ "Uitstekende prestatie" if language == "nl" else "Excellent performance" }}
+              {{ l10n("Uitstekende prestatie", "Excellent performance", "Excellente performance") }}
             {% elif percent >= 60 %}
               {{ tr("Good job — keep practicing") }}
             {% else %}
@@ -59,7 +59,7 @@
           <a href="{{ back_url }}" class="primary-btn">{{ tr("New Quiz") }}</a>
           <a href="{{ url_for('previous_tests') }}" class="secondary-btn">{{ tr("My Previous Tests") }}</a>
           {% if attempt_id %}
-            <a href="{{ url_for('attempt_report', attempt_id=attempt_id) }}" class="secondary-btn">{{ "Rapport / PDF" if language == "nl" else "Report / PDF" }}</a>
+            <a href="{{ url_for('attempt_report', attempt_id=attempt_id) }}" class="secondary-btn">{{ l10n("Rapport / PDF", "Report / PDF", "Rapport / PDF") }}</a>
             <a href="{{ url_for('retake_previous_test', attempt_id=attempt_id) }}" class="secondary-btn">{{ tr("Retake This Test") }}</a>
           {% endif %}
         </div>
@@ -69,7 +69,7 @@
       <section class="card review-section">
         <div class="section-header">
           <h2>{{ tr("Review Questions") }}</h2>
-          <p class="section-subtitle">{{ "Bekijk welke antwoorden juist en onjuist waren." if language == "nl" else "See what you got right and wrong" }}</p>
+          <p class="section-subtitle">{{ l10n("Bekijk welke antwoorden juist en onjuist waren.", "See what you got right and wrong", "Consultez vos réponses correctes et incorrectes.") }}</p>
         </div>
 
         {% for r in results %}

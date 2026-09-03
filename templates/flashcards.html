@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ "Flashcards" if language == "nl" else "Flashcards" }} - {{ category }}</title>
+    <title>Flashcards - {{ category }}</title>
     {% include "_favicon.html" %}
     {% if order %}
       {% set first_question = questions_by_id.get(order[0]) %}
@@ -18,7 +18,7 @@
       <div class="topbar-inner">
         <a href="{{ home_url }}" class="brand brand-link">{{ product_name or "Radius" }}</a>
         <div class="topbar-actions">
-          <div class="topbar-badge">{{ product_label or "Anki Flashcards" }}</div>
+          <div class="topbar-badge">{{ product_label or "Flashcards" }}</div>
           <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
           {% set active_product = product|default("anatomy") %}
           {% include "_product_switcher.html" %}
@@ -31,9 +31,9 @@
     <main class="flashcard-page">
       <aside class="flashcard-sidebar card">
         <div>
-          <p class="eyebrow">{{ "ACTIEVE REEKS" if language == "nl" else "ACTIVE DECK" }}</p>
+          <p class="eyebrow">{{ l10n("ACTIEVE REEKS", "ACTIVE DECK", "SÉRIE ACTIVE") }}</p>
           <h2>{{ category }}</h2>
-          <p class="small-muted">{{ order|length }} {{ "open vragen" if language == "nl" else "open-recall questions" }}</p>
+          <p class="small-muted">{{ order|length }} {{ l10n("open vragen", "open-recall questions", "questions de rappel libre") }}</p>
         </div>
 
         <div class="progress-box">
@@ -45,7 +45,7 @@
         </div>
         <div class="session-save-status" id="flashcardSaveStatus" role="status" aria-live="polite">
           <span class="session-save-dot" aria-hidden="true"></span>
-          <span data-session-save-label>{{ "Automatisch opgeslagen" if language == "nl" else "Saved automatically" }}</span>
+          <span data-session-save-label>{{ l10n("Automatisch opgeslagen", "Saved automatically", "Enregistré automatiquement") }}</span>
         </div>
 
         <div class="flashcard-trays">
@@ -59,6 +59,13 @@
                       "difficult": "Moeilijk",
                       "easy": "Gemakkelijk",
                       "very_easy": "Zeer gemakkelijk"
+                    }[rating_key] }}
+                  {% elif language == "fr" %}
+                    {{ {
+                      "very_difficult": "Très difficile",
+                      "difficult": "Difficile",
+                      "easy": "Facile",
+                      "very_easy": "Très facile"
                     }[rating_key] }}
                   {% else %}
                     {{ rating.label }}
@@ -83,13 +90,13 @@
       <section class="flashcard-workspace card">
         <header class="flashcard-workspace-header">
           <div>
-            <p class="eyebrow">{{ "OPEN HERHALING" if language == "nl" else "OPEN RECALL" }}</p>
-            <h1>{{ "Denk eerst zelf aan het antwoord" if language == "nl" else "Recall the answer before revealing it" }}</h1>
+            <p class="eyebrow">{{ l10n("OPEN HERHALING", "OPEN RECALL", "RAPPEL LIBRE") }}</p>
+            <h1>{{ l10n("Denk eerst zelf aan het antwoord", "Recall the answer before revealing it", "Trouvez la réponse avant de l’afficher") }}</h1>
           </div>
           {% if switch_to_mcq_url %}
             <div class="study-method-switch">
               <a href="{{ switch_to_mcq_url }}" data-study-method-switch>MCQ</a>
-              <span class="active">Anki</span>
+              <span class="active">Flashcards</span>
             </div>
           {% endif %}
         </header>
@@ -115,13 +122,13 @@
                   · {{ qid }}
                 </strong>
               {% else %}
-                <strong>{{ "Vraag-ID" if language == "nl" else "Question ID" }}: {{ qid[3:] if qid.startswith("IMG") else qid }}</strong>
+                <strong>{{ l10n("Vraag-ID", "Question ID", "ID de la question") }} : {{ qid[3:] if qid.startswith("IMG") else qid }}</strong>
               {% endif %}
             </div>
             <h2>{{ question.get("Vraag_nl", question["Vraag"]) if language == "nl" and question.get("Vraag_nl") else question["Vraag"] }}</h2>
 
             <button type="button" class="flashcard-reveal-button" data-reveal-answer>
-              {{ "Toon antwoord" if language == "nl" else "Show answer" }}
+              {{ l10n("Toon antwoord", "Show answer", "Afficher la réponse") }}
             </button>
 
             {% set question_image_urls = question.get("image_urls") or ([question["image_url"]] if question.get("image_url") else []) %}
@@ -136,12 +143,12 @@
                       loading="{{ 'eager' if loop.first and preload_card_images else 'lazy' }}"
                       decoding="async"
                       data-question-image
-                      alt="{{ 'Vraagafbeelding' if language == 'nl' else 'Question image' }} {{ loop.index }}"
+                      alt="{{ l10n('Vraagafbeelding', 'Question image', 'Image de la question') }} {{ loop.index }}"
                     >
                     <div class="flashcard-image-status" aria-live="polite">
-                      <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
+                      <span class="image-loading-label">{{ l10n("Afbeelding laden", "Loading image", "Chargement de l’image") }}</span>
                       <button type="button" data-retry-image hidden>
-                        {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                        {{ l10n("Opnieuw proberen", "Retry image", "Réessayer") }}
                       </button>
                     </div>
                     <span class="core-image-copyright">© UZ Brussel Radiologie</span>
@@ -151,7 +158,7 @@
             {% endif %}
 
             <div class="flashcard-answer" data-flashcard-answer hidden>
-              <p>{{ "JUISTE ANTWOORD" if language == "nl" else "CORRECT ANSWER" }}</p>
+              <p>{{ l10n("JUISTE ANTWOORD", "CORRECT ANSWER", "BONNE RÉPONSE") }}</p>
               <h3>
                 {% if language == "nl" and question.get("Correct_nl") %}
                   {{ (question.get("Correct_nl") or correct_answers_by_id[qid])|join(", ") }}
@@ -169,12 +176,12 @@
                         fetchpriority="high"
                         decoding="async"
                         data-answer-image
-                        alt="{{ 'Antwoordbeeld' if language == 'nl' else 'Answer image' }} {{ loop.index }}"
+                        alt="{{ l10n('Antwoordbeeld', 'Answer image', 'Image de la réponse') }} {{ loop.index }}"
                       >
                       <div class="flashcard-image-status" aria-live="polite">
-                        <span class="image-loading-label">{{ "Afbeelding laden" if language == "nl" else "Loading image" }}</span>
+                        <span class="image-loading-label">{{ l10n("Afbeelding laden", "Loading image", "Chargement de l’image") }}</span>
                         <button type="button" data-retry-image hidden>
-                          {{ "Opnieuw proberen" if language == "nl" else "Retry image" }}
+                          {{ l10n("Opnieuw proberen", "Retry image", "Réessayer") }}
                         </button>
                       </div>
                       <span class="core-image-copyright">© UZ Brussel Radiologie</span>
@@ -183,7 +190,7 @@
                 </div>
               {% endif %}
               <div class="flashcard-rating-prompt">
-                {{ "Hoe goed kende je dit antwoord?" if language == "nl" else "How well did you know this answer?" }}
+                {{ l10n("Hoe goed kende je dit antwoord?", "How well did you know this answer?", "Dans quelle mesure connaissiez-vous cette réponse ?") }}
               </div>
               <div class="flashcard-rating-grid flashcard-rating-grid-top">
                 {% for rating_key, rating in ratings.items() %}
@@ -195,6 +202,13 @@
                         "difficult": "Moeilijk",
                         "easy": "Gemakkelijk",
                         "very_easy": "Zeer gemakkelijk"
+                      }[rating_key] }}
+                    {% elif language == "fr" %}
+                      {{ {
+                        "very_difficult": "Très difficile",
+                        "difficult": "Difficile",
+                        "easy": "Facile",
+                        "very_easy": "Très facile"
                       }[rating_key] }}
                     {% else %}
                       {{ rating.label }}
@@ -278,7 +292,7 @@
             <button type="button" class="secondary-btn" id="flashcardPrevious">{{ tr("Previous") }}</button>
             <button type="button" class="secondary-btn" id="flashcardNext">{{ tr("Next") }}</button>
             <button type="button" class="primary-btn" id="finishFlashcards" disabled>
-              {{ "Sessie afronden" if language == "nl" else "Finish session" }}
+              {{ l10n("Sessie afronden", "Finish session", "Terminer la session") }}
             </button>
           </div>
         </form>
@@ -348,8 +362,8 @@
       let leaveConfirmed = false;
       const studyMethodSwitch = document.querySelector("[data-study-method-switch]");
       const imageText = {
-        loaded: {{ ("Afbeelding geladen" if language == "nl" else "Image loaded")|tojson }},
-        failed: {{ ("Afbeelding kon niet laden" if language == "nl" else "Image could not load")|tojson }},
+        loaded: {{ l10n("Afbeelding geladen", "Image loaded", "Image chargée")|tojson }},
+        failed: {{ l10n("Afbeelding kon niet laden", "Image could not load", "Impossible de charger l’image")|tojson }},
       };
 
       if (!startedAt) {
@@ -366,8 +380,8 @@
         if (!flashcardSaveStatus || !flashcardSaveStatusLabel) return;
         flashcardSaveStatus.dataset.state = state;
         flashcardSaveStatusLabel.textContent = state === "offline"
-          ? {{ ("Offline: voortgang blijft op dit apparaat beschikbaar." if language == "nl" else "Offline: progress remains available on this device.")|tojson }}
-          : {{ ("Automatisch opgeslagen" if language == "nl" else "Saved automatically")|tojson }};
+          ? {{ l10n("Offline: voortgang blijft op dit apparaat beschikbaar.", "Offline: progress remains available on this device.", "Hors ligne : votre progression reste disponible sur cet appareil.")|tojson }}
+          : {{ l10n("Automatisch opgeslagen", "Saved automatically", "Enregistré automatiquement")|tojson }};
       }
 
       function loadFlashcardProgress() {

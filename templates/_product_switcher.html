@@ -1,11 +1,11 @@
 {% set selected_product = active_product|default(product|default("anatomy")) %}
-<nav class="product-switcher" aria-label="{{ 'Product kiezen' if language == 'nl' else 'Choose product' }}">
+<nav class="product-switcher" aria-label="{{ l10n('Product kiezen', 'Choose product', 'Choisir un produit') }}">
   <a
     href="{{ url_for('switch_product', product_key='anatomy') }}"
     class="product-option {% if selected_product != 'core' %}active{% endif %}"
   >
     <span aria-hidden="true">A</span>
-    {{ "Anatomie" if language == "nl" else "Anatomy" }}
+    {{ l10n("Anatomie", "Anatomy", "Anatomie") }}
   </a>
   {% if can_access_core %}
     <a

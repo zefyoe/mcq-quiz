@@ -17,7 +17,7 @@
             <div class="topbar-badge admin-role-badge">ADMIN ROLE</div>
           {% endif %}
           <a href="{{ home_url|default(url_for('home')) }}" class="topbar-link">{{ tr("Home") }}</a>
-          <a href="{{ url_for('profile') }}" class="topbar-link">{{ "Profiel" if language == "nl" else "Profile" }}</a>
+          <a href="{{ url_for('profile') }}" class="topbar-link">{{ l10n("Profiel", "Profile", "Profil") }}</a>
           <a href="{{ url_for('logout') }}" class="topbar-logout">{{ tr("Log out") }}</a>
           {% include "_language_switcher.html" %}
         </div>
@@ -30,7 +30,7 @@
           <p class="eyebrow">{{ tr("Your history") }}</p>
           <h1>{{ ("CORE Radius - Geschiedenis" if language == "nl" else "CORE Radius history") if product == "core" else tr("My Previous Tests") }}</h1>
           <p class="hero-subtitle">
-            {{ "Bekijk je opgeslagen resultaten en maak exact dezelfde reeks vragen opnieuw wanneer je wilt." if language == "nl" else "Review your saved quiz results and retake the exact same question set whenever you want." }}
+            {{ l10n("Bekijk je opgeslagen resultaten en maak exact dezelfde reeks vragen opnieuw wanneer je wilt.", "Review your saved quiz results and retake the exact same question set whenever you want.", "Consultez vos résultats enregistrés et recommencez exactement la même série de questions quand vous le souhaitez.") }}
           </p>
         </div>
       </section>
@@ -38,9 +38,9 @@
       <section class="card quiz-section">
         <div class="section-header">
           <div>
-            <p class="eyebrow">{{ "Opgeslagen pogingen" if language == "nl" else "Saved attempts" }}</p>
+            <p class="eyebrow">{{ l10n("Opgeslagen pogingen", "Saved attempts", "Tentatives enregistrées") }}</p>
             <h2>{{ tr("Test History") }}</h2>
-            <p class="section-subtitle">{{ "Elke voltooide quiz wordt per gebruiker opgeslagen met score en percentage." if language == "nl" else "Each completed quiz is stored per user with its score and percentage." }}</p>
+            <p class="section-subtitle">{{ l10n("Elke voltooide quiz wordt per gebruiker opgeslagen met score en percentage.", "Each completed quiz is stored per user with its score and percentage.", "Chaque quiz terminé est enregistré avec son score et son pourcentage.") }}</p>
           </div>
         </div>
 
@@ -53,9 +53,9 @@
                   <p class="history-meta">
                     {{ attempt.created_at.strftime('%d %b %Y %H:%M') }} •
                     {% if attempt.study_format == "flashcard" %}
-                      Anki •
-                      {{ attempt.rating_counts.very_difficult }} {{ "zeer moeilijk" if language == "nl" else "very difficult" }} •
-                      {{ attempt.rating_counts.easy + attempt.rating_counts.very_easy }} {{ "vlot" if language == "nl" else "comfortable" }}
+                      Flashcards •
+                      {{ attempt.rating_counts.very_difficult }} {{ l10n("zeer moeilijk", "very difficult", "très difficiles") }} •
+                      {{ attempt.rating_counts.easy + attempt.rating_counts.very_easy }} {{ l10n("vlot", "comfortable", "maîtrisées") }}
                     {% else %}
                       {{ attempt.score }}/{{ attempt.total_questions }} •
                       {{ attempt.percent }}%
@@ -66,16 +66,16 @@
                   </p>
                 </div>
                 <div class="history-card-actions">
-                  <a href="{{ url_for('attempt_report', attempt_id=attempt.id) }}" class="secondary-btn">{{ "Rapport" if language == "nl" else "Report" }}</a>
+                  <a href="{{ url_for('attempt_report', attempt_id=attempt.id) }}" class="secondary-btn">{{ l10n("Rapport", "Report", "Rapport") }}</a>
                   <a href="{{ url_for('retake_previous_test', attempt_id=attempt.id) }}" class="primary-btn">
-                    {{ "Flashcards opnieuw" if language == "nl" and attempt.study_format == "flashcard" else "Study again" if attempt.study_format == "flashcard" else tr("Retake This Test") }}
+                    {{ l10n("Flashcards opnieuw", "Study again", "Réviser à nouveau") if attempt.study_format == "flashcard" else tr("Retake This Test") }}
                   </a>
                 </div>
               </article>
             {% endfor %}
           </div>
         {% else %}
-          <div class="tip-box">{{ "Je hebt nog geen toetsen voltooid." if language == "nl" else "You have not completed any tests yet." }}</div>
+          <div class="tip-box">{{ l10n("Je hebt nog geen toetsen voltooid.", "You have not completed any tests yet.", "Vous n’avez encore terminé aucun test.") }}</div>
         {% endif %}
       </section>
     </main>

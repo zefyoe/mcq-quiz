@@ -2,12 +2,14 @@
   <div class="site-footer-inner">
     <div>
       <strong>Bymed BV</strong>
-      <span>© 2026 Bymed BV. {{ "Alle rechten voorbehouden." if language == "nl" else "All rights reserved." }}</span>
-      <span>{{ "Alle beelden zijn eigendom van UZ Brussel dienst Radiologie." if language == "nl" else "All images are property of UZ Brussel Department of Radiology." }}</span>
+      <span>© 2026 Bymed BV. {{ l10n("Alle rechten voorbehouden.", "All rights reserved.", "Tous droits réservés.") }}</span>
+      <span>{{ l10n("Alle beelden zijn eigendom van UZ Brussel dienst Radiologie.", "All images are property of UZ Brussel Department of Radiology.", "Toutes les images sont la propriété du service de radiologie de l’UZ Brussel.") }}</span>
     </div>
     <p>
       {% if language == "nl" %}
         Dit platform is uitsluitend bedoeld voor medisch onderwijs en vervangt geen professioneel medisch advies, diagnose of behandeling. Ongeoorloofde reproductie, verspreiding of commercieel gebruik is verboden.
+      {% elif language == "fr" %}
+        Cette plateforme est exclusivement destinée à l’enseignement médical et ne remplace aucun avis, diagnostic ou traitement médical professionnel. Toute reproduction, diffusion ou utilisation commerciale non autorisée est interdite.
       {% else %}
         This platform is intended solely for medical education and does not replace professional medical advice, diagnosis, or treatment. Unauthorized reproduction, distribution, or commercial use is prohibited.
       {% endif %}

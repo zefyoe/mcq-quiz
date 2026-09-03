@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ "Account aangemaakt" if language == "nl" else "Account created" }} | Radius</title>
+    <title>{{ l10n("Account aangemaakt", "Account created", "Compte créé") }} | Radius</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -21,17 +21,17 @@
     <main class="registration-success-main">
       <section class="card registration-success-card" aria-labelledby="registration-success-title">
         <div class="success-mark" aria-hidden="true">✓</div>
-        <p class="eyebrow">{{ "REGISTRATIE VOLTOOID" if language == "nl" else "REGISTRATION COMPLETE" }}</p>
-        <h1 id="registration-success-title">{{ "Je account is klaar." if language == "nl" else "Your account is ready." }}</h1>
+        <p class="eyebrow">{{ l10n("REGISTRATIE VOLTOOID", "REGISTRATION COMPLETE", "INSCRIPTION TERMINÉE") }}</p>
+        <h1 id="registration-success-title">{{ l10n("Je account is klaar.", "Your account is ready.", "Votre compte est prêt.") }}</h1>
         <p class="registration-success-text">
-          {{ "Welkom bij Radius. Start met een gerichte anatomiequiz en bouw je persoonlijke voortgang op." if language == "nl" else "Welcome to Radius. Start a focused anatomy quiz and build your personal progress." }}
+          {{ l10n("Welkom bij Radius. Start met een gerichte anatomiequiz en bouw je persoonlijke voortgang op.", "Welcome to Radius. Start a focused anatomy quiz and build your personal progress.", "Bienvenue sur Radius. Commencez un quiz d’anatomie ciblé et suivez votre progression personnelle.") }}
         </p>
         <div class="registration-success-actions">
-          <a href="{{ url_for('anatomy_sections') }}" class="primary-btn">{{ "Start anatomiequiz" if language == "nl" else "Start anatomy quiz" }}</a>
-          <a href="{{ url_for('home') }}" class="secondary-btn">{{ "Naar dashboard" if language == "nl" else "Go to dashboard" }}</a>
+          <a href="{{ url_for('anatomy_sections') }}" class="primary-btn">{{ l10n("Start anatomiequiz", "Start anatomy quiz", "Commencer le quiz d’anatomie") }}</a>
+          <a href="{{ url_for('home') }}" class="secondary-btn">{{ l10n("Naar dashboard", "Go to dashboard", "Accéder au tableau de bord") }}</a>
         </div>
         <p class="registration-success-note">
-          {{ "Je voortgang wordt automatisch opgeslagen op dit apparaat." if language == "nl" else "Your progress is saved automatically on this device." }}
+          {{ l10n("Je voortgang wordt automatisch opgeslagen op dit apparaat.", "Your progress is saved automatically on this device.", "Votre progression est automatiquement enregistrée sur cet appareil.") }}
         </p>
       </section>
     </main>

@@ -18,6 +18,8 @@ services:
         value: "1"
       - key: STRIPE_PAYMENTS_ENABLED
         value: "1"
+      - key: ENABLE_LANGUAGE_SWITCHER
+        value: "1"
 
 databases:
   - name: mcq-quiz-db

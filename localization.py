@@ -12,7 +12,7 @@ except ImportError:
     SOURCED_LATIN_TERMS = {}
 
 
-SUPPORTED_LANGUAGES = {"en", "nl"}
+SUPPORTED_LANGUAGES = {"en", "fr", "nl"}
 DEFAULT_LANGUAGE = "nl"
 
 
@@ -132,6 +132,122 @@ DUTCH_TRANSLATIONS = {
 }
 
 
+FRENCH_TRANSLATIONS = {
+    "Anatomy": "Anatomie",
+    "Anatomy QBank": "Banque de questions d’anatomie",
+    "Anatomy Quiz": "Quiz d’anatomie",
+    "Anatomy sections": "Sections d’anatomie",
+    "Anatomy Dashboard": "Tableau de bord d’anatomie",
+    "ADMIN ROLE": "RÔLE ADMIN",
+    "Back": "Retour",
+    "Choose an anatomy subgroup": "Choisissez une section anatomique",
+    "Choose how many questions to include in this quiz.": "Choisissez le nombre de questions à inclure dans ce quiz.",
+    "Cardiothoracic": "Cardiothoracique",
+    "Cardiothoracic anatomy": "Anatomie cardiothoracique",
+    "Gastrointestinal": "Gastro-intestinal",
+    "Gastrointestinal anatomy": "Anatomie gastro-intestinale",
+    "Choose one answer below, then click Save answer. Once saved, the answer is locked.": "Choisissez une réponse ci-dessous, puis cliquez sur Enregistrer la réponse. Une fois enregistrée, la réponse est verrouillée.",
+    "Choose A, B, C, or D and save to move to the next question. You can still go back before submitting.": "Choisissez A, B, C ou D et enregistrez votre réponse pour passer à la question suivante. Vous pouvez encore revenir en arrière avant l’envoi.",
+    "Choose A, B, C, or D, save your answer, and see the correct answer immediately.": "Choisissez A, B, C ou D, enregistrez votre réponse et affichez immédiatement la bonne réponse.",
+    "Completed": "Terminé",
+    "Complete quizzes consistently to build a streak.": "Effectuez régulièrement des quiz pour maintenir votre série.",
+    "Continue Learning": "Continuer l’apprentissage",
+    "Correct": "Correct",
+    "Correct answer:": "Bonne réponse :",
+    "Current quiz": "Quiz en cours",
+    "Dashboard": "Tableau de bord",
+    "Define the A/B/C/D choices, pick the correct one, and save to lock it in.": "Définissez les choix A/B/C/D, sélectionnez la bonne réponse et enregistrez-la.",
+    "Email": "E-mail",
+    "Exam Phase": "Mode examen",
+    "Focused review": "Révision ciblée",
+    "Genito-Urinary": "Urogénital",
+    "Genito-urinary anatomy": "Anatomie de l’appareil urogénital",
+    "Good job — keep practicing": "Bon travail — continuez à vous entraîner",
+    "Head and Neck": "Tête et cou",
+    "Head and neck anatomy": "Anatomie de la tête et du cou",
+    "History": "Historique",
+    "Home": "Accueil",
+    "How many questions do you want?": "Combien de questions souhaitez-vous ?",
+    "Incorrect": "Incorrect",
+    "Last Activity": "Dernière activité",
+    "Last Quiz": "Dernier quiz",
+    "Log out": "Se déconnecter",
+    "Login": "Se connecter",
+    "Medical quiz": "Quiz médical",
+    "Mixed": "Mixte",
+    "Mixed Difficulty": "Difficulté mixte",
+    "Musculoskeletal anatomy": "Anatomie musculosquelettique",
+    "My Previous Tests": "Mes tests précédents",
+    "Name": "Nom",
+    "Needs improvement — review carefully": "À améliorer — révisez attentivement",
+    "New Anatomy Quiz": "Nouveau quiz d’anatomie",
+    "New Quiz": "Nouveau quiz",
+    "Next": "Suivant",
+    "No correct answer available.": "Aucune bonne réponse disponible.",
+    "No previous anatomy tests yet.": "Aucun test d’anatomie précédent.",
+    "No questions found.": "Aucune question trouvée.",
+    "No questions found in this subgroup yet.": "Aucune question n’est encore disponible dans cette section.",
+    "No score yet": "Aucun score",
+    "Not saved": "Non enregistré",
+    "Number of questions": "Nombre de questions",
+    "Open Anatomy": "Ouvrir l’anatomie",
+    "Open the anatomy subgroups and begin a new session.": "Ouvrez les sections anatomiques et commencez une nouvelle session.",
+    "Password": "Mot de passe",
+    "Previous": "Précédent",
+    "Previous Tests": "Tests précédents",
+    "Progress": "Progression",
+    "Question": "Question",
+    "Question count": "Nombre de questions",
+    "Question Score": "Score aux questions",
+    "QBank Usage": "Questions disponibles",
+    "Quiz completed": "Quiz terminé",
+    "Quiz Mode": "Mode du quiz",
+    "Quiz phase": "Mode du quiz",
+    "Quiz setup": "Configuration du quiz",
+    "Randomized from all anatomy groups": "Sélection aléatoire dans toutes les sections anatomiques",
+    "Register": "Créer un compte",
+    "Retake Last Test": "Refaire le dernier test",
+    "Retake This Test": "Refaire ce test",
+    "Review History": "Consulter l’historique",
+    "Review Questions": "Revoir les questions",
+    "Review Retakes": "Tests à refaire",
+    "Right answer:": "Bonne réponse :",
+    "Save answer": "Enregistrer la réponse",
+    "Saved": "Enregistré",
+    "Saved and locked": "Enregistré et verrouillé",
+    "Score": "Score",
+    "Select a subgroup": "Sélectionnez une section",
+    "Signed in": "Connecté",
+    "Start Anatomy Quiz": "Commencer le quiz d’anatomie",
+    "Start anatomy quiz": "Commencer le quiz d’anatomie",
+    "Start First Quiz": "Commencer le premier quiz",
+    "Start Now": "Commencer",
+    "Start Quiz": "Commencer le quiz",
+    "Study Planner": "Planificateur d’étude",
+    "Submit Quiz": "Envoyer le quiz",
+    "Test Count": "Nombre de tests",
+    "Test History": "Historique des tests",
+    "Test Phase": "Mode entraînement",
+    "Timed Exam Mode": "Mode examen chronométré",
+    "Timer": "Chronomètre",
+    "University": "Université",
+    "View All Tests": "Voir tous les tests",
+    "Welcome": "Bienvenue",
+    "Which anatomical structure is depicted?": "Quelle structure anatomique est représentée ?",
+    "Your answer:": "Votre réponse :",
+    "Your history": "Votre historique",
+    "Your learning journey starts here.": "Votre parcours d’apprentissage commence ici.",
+    "Your private medical question bank.": "Votre banque privée de questions médicales.",
+    "Incorrect email or password.": "Adresse e-mail ou mot de passe incorrect.",
+    "Name is required.": "Le nom est obligatoire.",
+    "University is required.": "L’université est obligatoire.",
+    "Email is required.": "L’adresse e-mail est obligatoire.",
+    "Password must be at least 8 characters.": "Le mot de passe doit contenir au moins 8 caractères.",
+    "Passwords do not match.": "Les mots de passe ne correspondent pas.",
+    "An account with that email already exists.": "Un compte associé à cette adresse e-mail existe déjà.",
+}
+
+
 LATIN_EXACT = {
     "acromioclavicular joint": "Articulatio acromioclavicularis",
     "anatomical neck of humerus": "Collum anatomicum humeri",
@@ -216,9 +332,11 @@ ALREADY_LATIN = {
 
 
 def translate_ui(text: str, language: str) -> str:
-    if language != "nl":
-        return text
-    return DUTCH_TRANSLATIONS.get(text, text)
+    translations = {
+        "nl": DUTCH_TRANSLATIONS,
+        "fr": FRENCH_TRANSLATIONS,
+    }.get(language)
+    return translations.get(text, text) if translations else text
 
 
 def _clean_term(text: str) -> str:
@@ -254,7 +372,7 @@ def _side_suffix(side: str, latin_term: str) -> str:
     return f"{latin_term} {adjective}"
 
 
-def latinize_anatomy_term(text: str) -> str:
+def latinize_anatomy_term(text: str, language: str = "nl") -> str:
     cleaned = _clean_term(text)
     if not cleaned:
         return cleaned
@@ -263,9 +381,10 @@ def latinize_anatomy_term(text: str) -> str:
     if normalized.startswith("attachment of "):
         attached_structure = cleaned[len("attachment of "):].strip()
         attached_structure = re.sub(r"^(the|a|an)\s+", "", attached_structure, flags=re.IGNORECASE)
-        translated_structure = latinize_anatomy_term(attached_structure)
+        translated_structure = latinize_anatomy_term(attached_structure, language=language)
+        attachment_prefix = "Insertion de" if language == "fr" else "Aanhechting van"
         return _capitalize_initial(
-            f"Aanhechting van {_lowercase_initial(translated_structure)}"
+            f"{attachment_prefix} {_lowercase_initial(translated_structure)}"
         )
 
     if normalized in FILLED_LATIN_TERMS:

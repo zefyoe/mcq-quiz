@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Register • Bymed</title>
+  <title>{{ tr("Register") }} • Bymed</title>
   {% include "_favicon.html" %}
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css', v=asset_version) }}">
 </head>
@@ -15,10 +15,10 @@
       <section class="login-hero">
         <div class="login-hero-overlay"></div>
         <div class="login-hero-content">
-          <p class="eyebrow">Anatomy QBank</p>
-          <h1>{{ "Account aanmaken" if language == "nl" else "Create account" }}</h1>
+          <p class="eyebrow">{{ tr("Anatomy QBank") }}</p>
+          <h1>{{ l10n("Account aanmaken", "Create account", "Créer un compte") }}</h1>
           <p class="hero-text">
-            {{ "Registreer je met je e-mailadres om toegang te krijgen tot het platform." if language == "nl" else "Register with your email address to access the platform." }}
+            {{ l10n("Registreer je met je e-mailadres om toegang te krijgen tot het platform.", "Register with your email address to access the platform.", "Inscrivez-vous avec votre adresse e-mail pour accéder à la plateforme.") }}
           </p>
         </div>
       </section>
@@ -27,20 +27,20 @@
         <div class="login-card">
           <div class="login-header">
             <h2>{{ tr("Register") }}</h2>
-            <p>{{ "Maak je account aan om verder te gaan." if language == "nl" else "Create your account to continue." }}</p>
-            <p class="required-hint">{{ "* Verplicht veld" if language == "nl" else "* Required field" }}</p>
+            <p>{{ l10n("Maak je account aan om verder te gaan.", "Create your account to continue.", "Créez votre compte pour continuer.") }}</p>
+            <p class="required-hint">{{ l10n("* Verplicht veld", "* Required field", "* Champ obligatoire") }}</p>
           </div>
 
           <form method="post" class="login-form">
             <div class="form-field">
               <label for="name">{{ tr("Name") }} <span class="required-marker">*</span></label>
-              <input id="name" name="name" type="text" placeholder="{{ 'Je volledige naam' if language == 'nl' else 'Your full name' }}" value="{{ form_data.name if form_data else '' }}" required class="{% if errors and errors.get('name') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('name') else 'false' }}">
+              <input id="name" name="name" type="text" placeholder="{{ l10n('Je volledige naam', 'Your full name', 'Votre nom complet') }}" value="{{ form_data.name if form_data else '' }}" required class="{% if errors and errors.get('name') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('name') else 'false' }}">
               {% if errors and errors.get('name') %}<p class="field-error">{{ errors.get('name') }}</p>{% endif %}
             </div>
 
             <div class="form-field">
               <label for="university">{{ tr("University") }} <span class="required-marker">*</span></label>
-              <input id="university" name="university" type="text" placeholder="{{ 'Je universiteit' if language == 'nl' else 'Your university' }}" value="{{ form_data.university if form_data else '' }}" required class="{% if errors and errors.get('university') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('university') else 'false' }}">
+              <input id="university" name="university" type="text" placeholder="{{ l10n('Je universiteit', 'Your university', 'Votre université') }}" value="{{ form_data.university if form_data else '' }}" required class="{% if errors and errors.get('university') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('university') else 'false' }}">
               {% if errors and errors.get('university') %}<p class="field-error">{{ errors.get('university') }}</p>{% endif %}
             </div>
 
@@ -53,35 +53,35 @@
             <div class="form-field">
               <label for="password">{{ tr("Password") }} <span class="required-marker">*</span></label>
               <div class="password-wrap">
-                <input id="password" name="password" type="password" placeholder="{{ 'Minimaal 8 tekens' if language == 'nl' else 'At least 8 characters' }}" required class="{% if errors and errors.get('password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('password') else 'false' }}" autocomplete="new-password">
-                <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="{{ 'Wachtwoord tonen' if language == 'nl' else 'Show password' }}" aria-pressed="false">
+                <input id="password" name="password" type="password" placeholder="{{ l10n('Minimaal 8 tekens', 'At least 8 characters', 'Au moins 8 caractères') }}" required class="{% if errors and errors.get('password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('password') else 'false' }}" autocomplete="new-password">
+                <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="{{ l10n('Wachtwoord tonen', 'Show password', 'Afficher le mot de passe') }}" aria-pressed="false">
                   <svg viewBox="0 0 24 24" aria-hidden="true" style="display:block;width:24px;height:24px;fill:none;stroke:#183b72;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
                 </button>
               </div>
               <div class="password-strength" data-password-strength aria-live="polite">
                 <div class="strength-bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-                <span data-password-strength-label>{{ 'Voer een wachtwoord in' if language == 'nl' else 'Enter a password' }}</span>
+                <span data-password-strength-label>{{ l10n('Voer een wachtwoord in', 'Enter a password', 'Saisissez un mot de passe') }}</span>
               </div>
               {% if errors and errors.get('password') %}<p class="field-error">{{ errors.get('password') }}</p>{% endif %}
             </div>
 
             <div class="form-field">
-              <label for="confirm_password">{{ "Wachtwoord bevestigen" if language == "nl" else "Confirm password" }} <span class="required-marker">*</span></label>
+              <label for="confirm_password">{{ l10n("Wachtwoord bevestigen", "Confirm password", "Confirmer le mot de passe") }} <span class="required-marker">*</span></label>
               <div class="password-wrap">
-                <input id="confirm_password" name="confirm_password" type="password" placeholder="{{ 'Herhaal je wachtwoord' if language == 'nl' else 'Repeat password' }}" required class="{% if errors and errors.get('confirm_password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('confirm_password') else 'false' }}" autocomplete="new-password">
-                <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', this)" aria-label="{{ 'Wachtwoord tonen' if language == 'nl' else 'Show password' }}" aria-pressed="false">
+                <input id="confirm_password" name="confirm_password" type="password" placeholder="{{ l10n('Herhaal je wachtwoord', 'Repeat password', 'Répétez votre mot de passe') }}" required class="{% if errors and errors.get('confirm_password') %}has-error{% endif %}" aria-invalid="{{ 'true' if errors and errors.get('confirm_password') else 'false' }}" autocomplete="new-password">
+                <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', this)" aria-label="{{ l10n('Wachtwoord tonen', 'Show password', 'Afficher le mot de passe') }}" aria-pressed="false">
                   <svg viewBox="0 0 24 24" aria-hidden="true" style="display:block;width:24px;height:24px;fill:none;stroke:#183b72;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
                 </button>
               </div>
               {% if errors and errors.get('confirm_password') %}<p class="field-error">{{ errors.get('confirm_password') }}</p>{% endif %}
             </div>
 
-            <button type="submit" class="login-button">{{ "Account aanmaken" if language == "nl" else "Create account" }}</button>
+            <button type="submit" class="login-button">{{ l10n("Account aanmaken", "Create account", "Créer un compte") }}</button>
           </form>
 
           <p style="margin-top:16px; text-align:center;">
-            {{ "Heb je al een account?" if language == "nl" else "Already have an account?" }}
-            <a href="{{ url_for('login') }}">{{ "Inloggen" if language == "nl" else "Sign in" }}</a>
+            {{ l10n("Heb je al een account?", "Already have an account?", "Vous avez déjà un compte ?") }}
+            <a href="{{ url_for('login') }}">{{ l10n("Inloggen", "Sign in", "Se connecter") }}</a>
           </p>
         </div>
       </section>
@@ -95,8 +95,8 @@
     input.type = visible ? "text" : "password";
     button.setAttribute("aria-pressed", String(visible));
     button.setAttribute("aria-label", visible
-      ? {{ ("Wachtwoord verbergen" if language == "nl" else "Hide password")|tojson }}
-      : {{ ("Wachtwoord tonen" if language == "nl" else "Show password")|tojson }});
+      ? {{ l10n("Wachtwoord verbergen", "Hide password", "Masquer le mot de passe")|tojson }}
+      : {{ l10n("Wachtwoord tonen", "Show password", "Afficher le mot de passe")|tojson }});
   }
 
   const passwordInput = document.getElementById("password");
@@ -104,7 +104,7 @@
   if (passwordInput && strength) {
     const bars = [...strength.querySelectorAll(".strength-bars span")];
     const label = strength.querySelector("[data-password-strength-label]");
-    const labels = {{ (["Voer een wachtwoord in", "Zwak", "Matig", "Sterk", "Zeer sterk"] if language == "nl" else ["Enter a password", "Weak", "Fair", "Strong", "Very strong"])|tojson }};
+    const labels = {{ l10n(["Voer een wachtwoord in", "Zwak", "Matig", "Sterk", "Zeer sterk"], ["Enter a password", "Weak", "Fair", "Strong", "Very strong"], ["Saisissez un mot de passe", "Faible", "Moyen", "Fort", "Très fort"])|tojson }};
     passwordInput.addEventListener("input", () => {
       const value = passwordInput.value;
       let score = 0;

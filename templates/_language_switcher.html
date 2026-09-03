@@ -1,5 +1,5 @@
 {% if language_switcher_enabled %}
-<div class="language-switcher" aria-label="Language">
+<div class="language-switcher" aria-label="{{ l10n('Taal', 'Language', 'Langue') }}">
   <a
     href="{{ url_for('set_language', language_code='en', next=language_switch_target|default(request.full_path)) }}"
     class="language-option language-option-en-disabled {% if language == 'en' %}active{% endif %}"
@@ -12,5 +12,10 @@
     class="language-option {% if language == 'nl' %}active{% endif %}"
     lang="nl"
   >NL</a>
+  <a
+    href="{{ url_for('set_language', language_code='fr', next=language_switch_target|default(request.full_path)) }}"
+    class="language-option {% if language == 'fr' %}active{% endif %}"
+    lang="fr"
+  >FR</a>
 </div>
 {% endif %}

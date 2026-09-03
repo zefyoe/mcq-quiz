@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ "Flashcards voltooid" if language == "nl" else "Flashcards complete" }} | Radius</title>
+    <title>{{ l10n("Flashcards voltooid", "Flashcards complete", "Flashcards terminées") }} | Radius</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
   </head>
@@ -12,7 +12,7 @@
       <div class="topbar-inner">
         <a href="{{ home_url }}" class="brand brand-link">{{ "CORE Radius" if product == "core" else "Radius" }}</a>
         <div class="topbar-actions">
-          <div class="topbar-badge">Anki Flashcards</div>
+          <div class="topbar-badge">Flashcards</div>
           {% set active_product = product|default("anatomy") %}
           {% include "_product_switcher.html" %}
           {% include "_language_switcher.html" %}
@@ -24,14 +24,18 @@
 
     <main class="flashcard-result-page">
       <section class="card flashcard-result-hero">
-        <p class="eyebrow">{{ "SESSIE VOLTOOID" if language == "nl" else "SESSION COMPLETE" }}</p>
+        <p class="eyebrow">{{ l10n("SESSIE VOLTOOID", "SESSION COMPLETE", "SESSION TERMINÉE") }}</p>
         <h1>{{ category }}</h1>
         <p>
-          {{ total }} {{ "cases zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken." if language == "nl" and product == "core" else "vragen zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken." if language == "nl" else "questions were rated and saved to your personal difficulty buckets." }}
+          {% if product == "core" %}
+            {{ total }} {{ l10n("cases zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken.", "cases were rated and saved to your personal difficulty buckets.", "cas ont été évalués et enregistrés dans vos catégories personnelles de difficulté.") }}
+          {% else %}
+            {{ total }} {{ l10n("vragen zijn beoordeeld en opgeslagen in je persoonlijke moeilijkheidsbakken.", "questions were rated and saved to your personal difficulty buckets.", "questions ont été évaluées et enregistrées dans vos catégories personnelles de difficulté.") }}
+          {% endif %}
         </p>
         <div class="flashcard-result-actions">
-          <a href="{{ new_session_url }}" class="primary-btn">{{ "Nieuwe flashcardreeks" if language == "nl" else "New flashcard session" }}</a>
-          <a href="{{ url_for('attempt_report', attempt_id=attempt_id) }}" class="secondary-btn">{{ "Rapport" if language == "nl" else "Report" }}</a>
+          <a href="{{ new_session_url }}" class="primary-btn">{{ l10n("Nieuwe flashcardreeks", "New flashcard session", "Nouvelle série de flashcards") }}</a>
+          <a href="{{ url_for('attempt_report', attempt_id=attempt_id) }}" class="secondary-btn">{{ l10n("Rapport", "Report", "Rapport") }}</a>
           <a href="{{ history_url }}" class="secondary-btn">{{ tr("My Previous Tests") }}</a>
         </div>
       </section>
@@ -39,7 +43,7 @@
       <section class="flashcard-result-grid">
         {% for rating_key, rating in ratings.items() %}
           <article class="card flashcard-result-bucket result-{{ rating_key }}">
-            <span class="flashcard-result-session-label">{{ "Deze sessie" if language == "nl" else "This session" }}</span>
+            <span class="flashcard-result-session-label">{{ l10n("Deze sessie", "This session", "Cette session") }}</span>
             <span class="flashcard-result-count">{{ session_rating_counts[rating_key] }}</span>
             <h2>
               {% if language == "nl" %}
@@ -48,6 +52,13 @@
                   "difficult": "Moeilijk",
                   "easy": "Gemakkelijk",
                   "very_easy": "Zeer gemakkelijk"
+                }[rating_key] }}
+              {% elif language == "fr" %}
+                {{ {
+                  "very_difficult": "Très difficile",
+                  "difficult": "Difficile",
+                  "easy": "Facile",
+                  "very_easy": "Très facile"
                 }[rating_key] }}
               {% else %}
                 {{ rating.label }}
@@ -58,14 +69,14 @@
                 href="{{ retest_urls[rating_key] }}"
                 class="flashcard-result-total-link"
               >
-                <span>{{ "Beschikbaar in deze categorie" if language == "nl" else "Available in this category" }}</span>
-                <strong>{{ rating_counts[rating_key] }} {{ "cases" if product == "core" else "vragen" if language == "nl" else "questions" }}</strong>
-                <small>{{ "Klik om deze categorie te herhalen" if language == "nl" else "Click to review this category" }}</small>
+                <span>{{ l10n("Beschikbaar in deze categorie", "Available in this category", "Disponible dans cette catégorie") }}</span>
+                <strong>{{ rating_counts[rating_key] }} {{ "cases" if product == "core" else l10n("vragen", "questions", "questions") }}</strong>
+                <small>{{ l10n("Klik om deze categorie te herhalen", "Click to review this category", "Cliquez pour réviser cette catégorie") }}</small>
               </a>
             {% else %}
               <div class="flashcard-result-total-link is-empty">
-                <span>{{ "Beschikbaar in deze categorie" if language == "nl" else "Available in this category" }}</span>
-                <strong>0 {{ "cases" if product == "core" else "vragen" if language == "nl" else "questions" }}</strong>
+                <span>{{ l10n("Beschikbaar in deze categorie", "Available in this category", "Disponible dans cette catégorie") }}</span>
+                <strong>0 {{ "cases" if product == "core" else l10n("vragen", "questions", "questions") }}</strong>
               </div>
             {% endif %}
           </article>

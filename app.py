@@ -455,19 +455,28 @@ def tr(text: str) -> str:
     return translate_ui(text, get_current_language())
 
 
+def l10n(nl, en, fr):
+    return {
+        "nl": nl,
+        "fr": fr,
+    }.get(get_current_language(), en)
+
+
 def localize_quiz_title(title: str) -> str:
     title = (title or "").replace("CORE Radiology", "CORE Radius")
     title = title.replace("Rady", "Radius")
-    if get_current_language() != "nl":
+    language = get_current_language()
+    if language not in {"nl", "fr"}:
         return title
 
-    for section in get_core_sections():
-        english_label = section.get("label")
-        dutch_label = section.get("label_nl")
-        if english_label and dutch_label:
-            title = title.replace(english_label, dutch_label)
+    if language == "nl":
+        for section in get_core_sections():
+            english_label = section.get("label")
+            dutch_label = section.get("label_nl")
+            if english_label and dutch_label:
+                title = title.replace(english_label, dutch_label)
 
-    replacements = {
+    replacements = ({
         "Anatomy - MSK": "Anatomie - MSK",
         "Anatomy - Genito-Urinary": "Anatomie - Urogenitaal",
         "Anatomy - Head and Neck": "Anatomie - Hoofd en hals",
@@ -475,49 +484,75 @@ def localize_quiz_title(title: str) -> str:
         "Anatomy - Gastrointestinal": "Anatomie - Gastro-intestinaal",
         "Anatomy - Mixed": "Anatomie - Gemengd",
         "Anatomy": "Anatomie",
-    }
-    return replacements.get(title, translate_ui(title, "nl"))
+    } if language == "nl" else {
+        "Anatomy - MSK": "Anatomie - MSK",
+        "Anatomy - Genito-Urinary": "Anatomie - Urogénital",
+        "Anatomy - Head and Neck": "Anatomie - Tête et cou",
+        "Anatomy - Cardiothoracic": "Anatomie - Cardiothoracique",
+        "Anatomy - Gastrointestinal": "Anatomie - Gastro-intestinal",
+        "Anatomy - Mixed": "Anatomie - Mixte",
+        "Anatomy": "Anatomie",
+    })
+    return replacements.get(title, translate_ui(title, language))
 
 
 def localize_question_for_display(question: dict) -> dict:
     localized = dict(question)
+    language = get_current_language()
     if (
-        get_current_language() != "nl"
+        language not in {"nl", "fr"}
         or not is_anatomy_category_name(question.get("Category"))
     ):
         return localized
 
     prompt = question.get("Vraag") or ""
-    localized["Vraag"] = question.get("Vraag_nl") or translate_ui(prompt, "nl")
+    localized["Vraag"] = (
+        question.get(f"Vraag_{language}")
+        or translate_ui(prompt, language)
+    )
     for key in ("A", "B", "C", "D"):
-        localized[key] = latinize_anatomy_term(question.get(key) or "")
+        localized[key] = latinize_anatomy_term(question.get(key) or "", language=language)
     if question.get("structure_title"):
-        localized["structure_title"] = latinize_anatomy_term(question["structure_title"])
+        localized["structure_title"] = latinize_anatomy_term(
+            question["structure_title"],
+            language=language,
+        )
     return localized
 
 
 def localize_quiz_results(results: list[dict]) -> list[dict]:
-    if get_current_language() != "nl":
+    language = get_current_language()
+    if language not in {"nl", "fr"}:
         return results
 
     localized_results = []
     for result in results:
         localized = dict(result)
-        localized["Vraag"] = translate_ui(result.get("Vraag") or "", "nl")
+        localized["Vraag"] = translate_ui(result.get("Vraag") or "", language)
         flashcard_rating = normalize_flashcard_rating(result.get("flashcard_rating"))
         if flashcard_rating:
-            localized["user"] = [{
-                "very_difficult": "Zeer moeilijk",
-                "difficult": "Moeilijk",
-                "easy": "Gemakkelijk",
-                "very_easy": "Zeer gemakkelijk",
-            }[flashcard_rating]]
+            rating_labels = {
+                "nl": {
+                    "very_difficult": "Zeer moeilijk",
+                    "difficult": "Moeilijk",
+                    "easy": "Gemakkelijk",
+                    "very_easy": "Zeer gemakkelijk",
+                },
+                "fr": {
+                    "very_difficult": "Très difficile",
+                    "difficult": "Difficile",
+                    "easy": "Facile",
+                    "very_easy": "Très facile",
+                },
+            }
+            localized["user"] = [rating_labels[language][flashcard_rating]]
         if is_anatomy_category_name(result.get("Category")):
             localized["correct_texts"] = [
-                latinize_anatomy_term(answer) for answer in result.get("correct_texts", [])
+                latinize_anatomy_term(answer, language=language)
+                for answer in result.get("correct_texts", [])
             ]
             localized["options"] = {
-                key: latinize_anatomy_term(value)
+                key: latinize_anatomy_term(value, language=language)
                 for key, value in result.get("options", {}).items()
             }
         localized_results.append(localized)
@@ -530,6 +565,7 @@ def inject_language_helpers():
         "language": get_current_language(),
         "language_switcher_enabled": LANGUAGE_SWITCHER_ENABLED,
         "tr": tr,
+        "l10n": l10n,
         "localize_quiz_title": localize_quiz_title,
         "asset_version": app.config["STATIC_ASSET_VERSION"],
         "can_access_core": user_has_core_access(current_user),
@@ -2817,15 +2853,31 @@ def profile():
             new_password = request.form.get("new_password") or ""
             confirm_password = request.form.get("confirm_password") or ""
             if not current_user.check_password(current_password):
-                error = "Het huidige wachtwoord is niet correct." if get_current_language() == "nl" else "The current password is incorrect."
+                error = l10n(
+                    "Het huidige wachtwoord is niet correct.",
+                    "The current password is incorrect.",
+                    "Le mot de passe actuel est incorrect.",
+                )
             elif len(new_password) < 8:
-                error = "Het nieuwe wachtwoord moet minimaal 8 tekens bevatten." if get_current_language() == "nl" else "The new password must contain at least 8 characters."
+                error = l10n(
+                    "Het nieuwe wachtwoord moet minimaal 8 tekens bevatten.",
+                    "The new password must contain at least 8 characters.",
+                    "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+                )
             elif new_password != confirm_password:
-                error = "De nieuwe wachtwoorden komen niet overeen." if get_current_language() == "nl" else "The new passwords do not match."
+                error = l10n(
+                    "De nieuwe wachtwoorden komen niet overeen.",
+                    "The new passwords do not match.",
+                    "Les nouveaux mots de passe ne correspondent pas.",
+                )
             else:
                 current_user.set_password(new_password)
                 db.session.commit()
-                message = "Wachtwoord veilig bijgewerkt." if get_current_language() == "nl" else "Password updated securely."
+                message = l10n(
+                    "Wachtwoord veilig bijgewerkt.",
+                    "Password updated securely.",
+                    "Mot de passe mis à jour en toute sécurité.",
+                )
         else:
             name = (request.form.get("name") or "").strip()
             university = (request.form.get("university") or "").strip()
@@ -2835,17 +2887,33 @@ def profile():
                 daily_goal = 20
 
             if not name or not university:
-                error = "Naam en universiteit zijn verplicht." if get_current_language() == "nl" else "Name and university are required."
+                error = l10n(
+                    "Naam en universiteit zijn verplicht.",
+                    "Name and university are required.",
+                    "Le nom et l’université sont obligatoires.",
+                )
             elif len(name) > 255 or len(university) > 255:
-                error = "Naam en universiteit mogen maximaal 255 tekens bevatten." if get_current_language() == "nl" else "Name and university may contain at most 255 characters."
+                error = l10n(
+                    "Naam en universiteit mogen maximaal 255 tekens bevatten.",
+                    "Name and university may contain at most 255 characters.",
+                    "Le nom et l’université ne peuvent pas dépasser 255 caractères.",
+                )
             elif not 5 <= daily_goal <= 100:
-                error = "Kies een dagelijks doel tussen 5 en 100 vragen." if get_current_language() == "nl" else "Choose a daily goal between 5 and 100 questions."
+                error = l10n(
+                    "Kies een dagelijks doel tussen 5 en 100 vragen.",
+                    "Choose a daily goal between 5 and 100 questions.",
+                    "Choisissez un objectif quotidien compris entre 5 et 100 questions.",
+                )
             else:
                 current_user.name = name
                 current_user.university = university
                 current_user.daily_question_goal = daily_goal
                 db.session.commit()
-                message = "Profiel bijgewerkt." if get_current_language() == "nl" else "Profile updated."
+                message = l10n(
+                    "Profiel bijgewerkt.",
+                    "Profile updated.",
+                    "Profil mis à jour.",
+                )
 
     total_quizzes, accuracy, streak_days = get_user_quiz_stats(current_user.id)
     return render_template(
@@ -3155,7 +3223,7 @@ def flashcards(category):
         home_url=url_for("home"),
         product="anatomy",
         product_name="Radius",
-        product_label="Anki Flashcards",
+        product_label="Flashcards",
     )
 
 
@@ -4102,17 +4170,13 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if not email:
-            field_errors["email"] = (
-                "Vul je e-mailadres in."
-                if get_current_language() == "nl"
-                else "Enter your email address."
+            field_errors["email"] = l10n(
+                "Vul je e-mailadres in.",
+                "Enter your email address.",
+                "Saisissez votre adresse e-mail.",
             )
         elif not user or not user.check_password(password):
-            field_errors["password"] = (
-                "Onjuist e-mailadres of wachtwoord."
-                if get_current_language() == "nl"
-                else "Incorrect email or password."
-            )
+            field_errors["password"] = tr("Incorrect email or password.")
         else:
             sync_user_admin_flag(user)
             user.last_login_at = datetime.utcnow()
@@ -4155,30 +4219,25 @@ def register():
         password = request.form.get("password") or ""
         confirm_password = request.form.get("confirm_password") or ""
 
-        is_dutch = get_current_language() == "nl"
         if not name:
-            field_errors["name"] = "Vul je naam in." if is_dutch else "Enter your name."
+            field_errors["name"] = l10n("Vul je naam in.", "Enter your name.", "Saisissez votre nom.")
         if not university:
-            field_errors["university"] = "Vul je universiteit in." if is_dutch else "Enter your university."
+            field_errors["university"] = l10n("Vul je universiteit in.", "Enter your university.", "Saisissez votre université.")
         if not email:
-            field_errors["email"] = "Vul je e-mailadres in." if is_dutch else "Enter your email address."
+            field_errors["email"] = l10n("Vul je e-mailadres in.", "Enter your email address.", "Saisissez votre adresse e-mail.")
         if len(password) < 8:
-            field_errors["password"] = (
-                "Gebruik minstens 8 tekens."
-                if is_dutch
-                else "Use at least 8 characters."
+            field_errors["password"] = l10n(
+                "Gebruik minstens 8 tekens.",
+                "Use at least 8 characters.",
+                "Utilisez au moins 8 caractères.",
             )
         if password != confirm_password:
-            field_errors["confirm_password"] = (
-                "De wachtwoorden komen niet overeen."
-                if is_dutch
-                else "The passwords do not match."
-            )
+            field_errors["confirm_password"] = tr("Passwords do not match.")
         if email and User.query.filter_by(email=email).first():
-            field_errors["email"] = (
-                "Dit e-mailadres is al geregistreerd."
-                if is_dutch
-                else "This email address is already registered."
+            field_errors["email"] = l10n(
+                "Dit e-mailadres is al geregistreerd.",
+                "This email address is already registered.",
+                "Cette adresse e-mail est déjà enregistrée.",
             )
 
         if not field_errors:
