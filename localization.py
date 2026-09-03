@@ -11,6 +11,12 @@ except ImportError:
     SOURCED_LATIN_SOURCES = {}
     SOURCED_LATIN_TERMS = {}
 
+try:
+    from sourced_french_terms import SOURCED_FRENCH_SOURCES, SOURCED_FRENCH_TERMS
+except ImportError:
+    SOURCED_FRENCH_SOURCES = {}
+    SOURCED_FRENCH_TERMS = {}
+
 
 SUPPORTED_LANGUAGES = {"en", "fr", "nl"}
 DEFAULT_LANGUAGE = "nl"
@@ -330,6 +336,11 @@ ALREADY_LATIN = {
     "trapezium", "trapezoid", "triquetrum", "trochlea", "ulna",
 }
 
+FRENCH_TERMS_BY_COMPACT_KEY = {
+    re.sub(r"[^a-z0-9]", "", key.casefold()): value
+    for key, value in SOURCED_FRENCH_TERMS.items()
+}
+
 
 def translate_ui(text: str, language: str) -> str:
     translations = {
@@ -372,7 +383,63 @@ def _side_suffix(side: str, latin_term: str) -> str:
     return f"{latin_term} {adjective}"
 
 
+def _french_side_suffix(side: str, french_term: str) -> str:
+    if side == "left":
+        adjective = "gauche"
+    else:
+        feminine_starts = (
+            "artère ", "veine ", "glande ", "fissure ", "fosse ", "face ",
+            "branche ", "tête ", "queue ", "lame ", "membrane ", "zone ",
+            "cavité ", "bourse ", "capsule ", "cochlée ", "moelle ", "trompe ",
+            "épine ", "crête ", "suture ", "racine ", "partie ", "paroi ",
+            "aile ", "articulation ", "scissure ", "loge ",
+        )
+        adjective = "droite" if french_term.casefold().startswith(feminine_starts) else "droit"
+    return f"{french_term} {adjective}"
+
+
+def frenchize_anatomy_term(text: str) -> str:
+    cleaned = _clean_term(text)
+    if not cleaned:
+        return cleaned
+
+    normalized = cleaned.casefold()
+    if re.fullmatch(r"\d+(?:[.,]\d+)?", normalized):
+        return cleaned
+    if normalized.startswith("attachment of "):
+        structure = re.sub(
+            r"^(the|a|an)\s+",
+            "",
+            cleaned[len("attachment of "):].strip(),
+            flags=re.IGNORECASE,
+        )
+        translated = frenchize_anatomy_term(structure)
+        return _capitalize_initial(f"Insertion de {_lowercase_initial(translated)}")
+
+    if normalized in SOURCED_FRENCH_TERMS:
+        return _capitalize_initial(SOURCED_FRENCH_TERMS[normalized])
+
+    compact_key = re.sub(r"[^a-z0-9]", "", normalized)
+    if compact_key in FRENCH_TERMS_BY_COMPACT_KEY:
+        return _capitalize_initial(FRENCH_TERMS_BY_COMPACT_KEY[compact_key])
+
+    for side in ("right", "left"):
+        prefix = f"{side} "
+        if normalized.startswith(prefix):
+            base = frenchize_anatomy_term(cleaned[len(prefix):])
+            if base.casefold() != cleaned[len(prefix):].casefold():
+                return _capitalize_initial(_french_side_suffix(side, base))
+            break
+
+    # Never expose a Latin fallback in the French interface. Unmatched terms
+    # remain in their source language until a sourced French name is added.
+    return _capitalize_initial(cleaned)
+
+
 def latinize_anatomy_term(text: str, language: str = "nl") -> str:
+    if language == "fr":
+        return frenchize_anatomy_term(text)
+
     cleaned = _clean_term(text)
     if not cleaned:
         return cleaned

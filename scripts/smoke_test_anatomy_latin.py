@@ -62,10 +62,10 @@ try:
         })
 
         assert localized_fr["Vraag"] == "Quelle structure anatomique est représentée ?"
-        assert localized_fr["A"] == "Arteria femoralis"
-        assert localized_fr["B"] == "Vena femoralis communis"
-        assert localized_fr["C"] == "Caput femoris"
-        assert localized_fr["D"] == "Collum femoris"
+        assert localized_fr["A"] == "Artère fémorale"
+        assert localized_fr["B"] == "Veine fémorale"
+        assert localized_fr["C"] == "Tête fémorale"
+        assert localized_fr["D"] == "Col fémoral"
 
     assert len(SOURCED_LATIN_TERMS) == len(SOURCED_LATIN_SOURCES)
     assert len(SOURCED_LATIN_TERMS) >= 450
