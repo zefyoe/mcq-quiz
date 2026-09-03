@@ -228,6 +228,21 @@ def _clean_term(text: str) -> str:
     return cleaned.strip()
 
 
+def _capitalize_initial(text: str) -> str:
+    """Capitalize the first letter without changing anatomical Latin casing."""
+    for index, character in enumerate(text):
+        if character.isalpha():
+            return text[:index] + character.upper() + text[index + 1:]
+    return text
+
+
+def _lowercase_initial(text: str) -> str:
+    for index, character in enumerate(text):
+        if character.isalpha():
+            return text[:index] + character.lower() + text[index + 1:]
+    return text
+
+
 def _side_suffix(side: str, latin_term: str) -> str:
     first = latin_term.split(" ", 1)[0].casefold()
     feminine = {"arteria", "vena", "glandula", "fissura", "fascia", "lamina", "pelvis", "tuba"}
@@ -245,14 +260,22 @@ def latinize_anatomy_term(text: str) -> str:
         return cleaned
 
     normalized = cleaned.casefold()
+    if normalized.startswith("attachment of "):
+        attached_structure = cleaned[len("attachment of "):].strip()
+        attached_structure = re.sub(r"^(the|a|an)\s+", "", attached_structure, flags=re.IGNORECASE)
+        translated_structure = latinize_anatomy_term(attached_structure)
+        return _capitalize_initial(
+            f"Aanhechting van {_lowercase_initial(translated_structure)}"
+        )
+
     if normalized in FILLED_LATIN_TERMS:
-        return FILLED_LATIN_TERMS[normalized]
+        return _capitalize_initial(FILLED_LATIN_TERMS[normalized])
     if normalized in LATIN_EXACT:
-        return LATIN_EXACT[normalized]
+        return _capitalize_initial(LATIN_EXACT[normalized])
     if normalized in SOURCED_LATIN_TERMS:
-        return SOURCED_LATIN_TERMS[normalized]
+        return _capitalize_initial(SOURCED_LATIN_TERMS[normalized])
     if normalized in ALREADY_LATIN:
-        return cleaned[:1].upper() + cleaned[1:]
+        return _capitalize_initial(cleaned)
 
     side = None
     for candidate in ("right", "left"):
@@ -270,9 +293,10 @@ def latinize_anatomy_term(text: str) -> str:
     elif normalized in SOURCED_LATIN_TERMS:
         translated = SOURCED_LATIN_TERMS[normalized]
     else:
-        return cleaned
+        return _capitalize_initial(cleaned)
 
-    return _side_suffix(side, translated) if side else translated
+    result = _side_suffix(side, translated) if side else translated
+    return _capitalize_initial(result)
 
 
 def get_latin_term_source(text: str) -> str | None:

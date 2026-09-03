@@ -484,7 +484,6 @@ def localize_question_for_display(question: dict) -> dict:
     if (
         get_current_language() != "nl"
         or not is_anatomy_category_name(question.get("Category"))
-        or (current_user.is_authenticated and current_user.is_admin)
     ):
         return localized
 
@@ -883,17 +882,17 @@ def get_effective_answer_options(q: dict) -> dict[str, str]:
     if q.get("structure_title") and use_compact_answer_buttons(q):
         correct_choice = get_effective_correct_choice(q)
         return {
-            "A": q["structure_title"] if correct_choice == "A" else "",
-            "B": q["structure_title"] if correct_choice == "B" else "",
-            "C": q["structure_title"] if correct_choice == "C" else "",
-            "D": q["structure_title"] if correct_choice == "D" else "",
+            "A": capitalize_initial(q["structure_title"]) if correct_choice == "A" else "",
+            "B": capitalize_initial(q["structure_title"]) if correct_choice == "B" else "",
+            "C": capitalize_initial(q["structure_title"]) if correct_choice == "C" else "",
+            "D": capitalize_initial(q["structure_title"]) if correct_choice == "D" else "",
         }
 
     return {
-        "A": get_display_answer_option(q, "A"),
-        "B": get_display_answer_option(q, "B"),
-        "C": get_display_answer_option(q, "C"),
-        "D": get_display_answer_option(q, "D"),
+        "A": capitalize_initial(get_display_answer_option(q, "A")),
+        "B": capitalize_initial(get_display_answer_option(q, "B")),
+        "C": capitalize_initial(get_display_answer_option(q, "C")),
+        "D": capitalize_initial(get_display_answer_option(q, "D")),
     }
 
 
