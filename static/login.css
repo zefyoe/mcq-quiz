@@ -323,6 +323,33 @@ body {
   background: var(--primary-hover);
 }
 
+.agenda-button {
+  height: 52px;
+  border: 2px solid var(--primary);
+  border-radius: 14px;
+  background: #f8fbff;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.agenda-button:hover {
+  transform: translateY(-1px);
+  background: var(--primary);
+  color: white;
+}
+
+.agenda-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(24, 59, 114, 0.18);
+}
+
 /* Tablet */
 @media (max-width: 980px) {
   .login-page {
@@ -425,7 +452,8 @@ body {
 
   .login-form input,
   .toggle-password,
-  .login-button {
+  .login-button,
+  .agenda-button {
     height: 50px;
     font-size: 16px;
   }

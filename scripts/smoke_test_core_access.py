@@ -70,6 +70,16 @@ try:
         core_attempt_id = core_attempt.id
 
     client = app.test_client()
+    login_page = client.get("/login")
+    assert login_page.status_code == 200
+    assert b'href="/admin/appointments"' in login_page.data
+    assert b">AGENDA</a>" in login_page.data
+    agenda_redirect = client.get("/admin/appointments")
+    assert agenda_redirect.status_code == 302
+    assert agenda_redirect.headers["Location"].endswith(
+        "/login?next=/admin/appointments"
+    )
+
     response = login(client, "student@example.com")
     assert response.status_code == 200
     assert b"/switch-product/core" not in response.data
@@ -92,9 +102,16 @@ try:
     client.get("/logout")
 
     for email in ("y@bymed.be", "ybahkani@gmail.com"):
-        response = login(client, email)
+        response = client.post(
+            "/login?next=/admin/appointments",
+            data={"email": email, "password": "strong-password"},
+            follow_redirects=True,
+        )
         assert response.status_code == 200
-        assert b"/switch-product/core" in response.data
+        assert b"Afsprakenplanner" in response.data
+        home_response = client.get("/")
+        assert home_response.status_code == 200
+        assert b"/switch-product/core" in home_response.data
         assert client.get("/core").status_code == 200
         assert client.get("/admin").status_code == 200
         switch_response = client.get("/switch-product/core")
