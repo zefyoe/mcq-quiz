@@ -2,6 +2,7 @@ import os
 import sqlite3
 import sys
 import tempfile
+from io import BytesIO
 from pathlib import Path
 
 
@@ -21,8 +22,8 @@ os.environ["DATABASE_URL"] = f"sqlite:///{database_file.name}"
 os.environ["SECRET_KEY"] = "core-access-smoke-test"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app import app, db  # noqa: E402
-from models import QuizAttempt, User  # noqa: E402
+from app import app, calculate_daily_appointment_finances, db  # noqa: E402
+from models import Appointment, QuizAttempt, User  # noqa: E402
 
 
 def add_user(email, *, is_admin=False):
@@ -118,10 +119,13 @@ try:
         assert b'<html lang="fr">' in french_agenda.data
         assert "Planificateur de rendez-vous".encode() in french_agenda.data
         assert "Planifier un examen".encode() in french_agenda.data
-        assert "Échographie abdominale complète".encode() in french_agenda.data
+        assert "459712 — Examen abdominal total".encode() in french_agenda.data
+        assert "Code INAMI et examen échographique".encode() in french_agenda.data
         assert "Ordonnance requise".encode() in french_agenda.data
         assert b"lundi" in french_agenda.data
         assert b'href="/language/nl?next=/admin/appointments' in french_agenda.data
+        assert "€".encode() not in french_agenda.data
+        assert b"102.95" not in french_agenda.data
         french_validation = client.post(
             "/admin/appointments/book",
             data={},
@@ -129,6 +133,44 @@ try:
         )
         assert french_validation.status_code == 200
         assert "Choisissez une heure valide".encode() in french_validation.data
+        if email == "y@bymed.be":
+            booked = client.post(
+                "/admin/appointments/book",
+                data={
+                    "slot_start": "2031-01-06T08:00",
+                    "week_date": "2031-01-06",
+                    "patient_name": "Patient Test",
+                    "patient_email": "patient@example.com",
+                    "inami_code": "459712",
+                    "prescription_file": (
+                        BytesIO(b"%PDF-1.4\n% test prescription"),
+                        "prescription.pdf",
+                    ),
+                },
+                content_type="multipart/form-data",
+                follow_redirects=True,
+            )
+            assert booked.status_code == 200
+            assert "Le rendez-vous".encode() in booked.data
+            assert "a été planifié".encode() in booked.data
+            assert "459712 — Examen abdominal total".encode() in booked.data
+            assert "€".encode() not in booked.data
+            with app.app_context():
+                appointment = Appointment.query.filter_by(
+                    inami_code="459712"
+                ).one()
+                assert appointment.inami_n_value == "N 85"
+                assert appointment.inami_consult_code == "460795"
+                assert appointment.inami_exam_total_cents == 6846
+                assert appointment.inami_consult_total_cents == 3449
+                assert appointment.inami_invoice_total_cents == 10295
+                daily = calculate_daily_appointment_finances([appointment])
+                assert daily["2031-01-06"] == {
+                    "appointment_count": 1,
+                    "reimbursement_cents": 9303,
+                    "patient_share_cents": 992,
+                    "revenue_cents": 10295,
+                }
         home_response = client.get("/")
         assert home_response.status_code == 200
         assert b"/switch-product/core" in home_response.data

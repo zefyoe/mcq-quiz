@@ -36,6 +36,12 @@ from localization import (
     latinize_anatomy_term,
     translate_ui,
 )
+from inami_ultrasound_catalog import (
+    INAMI_CONSULTATION_CODE,
+    INAMI_TARIFF_EFFECTIVE_DATE,
+    INAMI_ULTRASOUND_BY_CODE,
+    INAMI_ULTRASOUND_GROUPS,
+)
 from models import Appointment, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
@@ -788,11 +794,34 @@ def ensure_appointment_schema() -> None:
         statements.append("ALTER TABLE appointment ADD COLUMN prescription_mimetype VARCHAR(120)")
     if "prescription_data" not in column_names:
         statements.append(f"ALTER TABLE appointment ADD COLUMN prescription_data {binary_type}")
+    appointment_financial_columns = {
+        "inami_code": "VARCHAR(12)",
+        "inami_consult_code": "VARCHAR(12)",
+        "inami_n_value": "VARCHAR(20)",
+        "inami_exam_reimbursement_cents": "INTEGER",
+        "inami_exam_patient_share_cents": "INTEGER",
+        "inami_exam_total_cents": "INTEGER",
+        "inami_consult_reimbursement_cents": "INTEGER",
+        "inami_consult_patient_share_cents": "INTEGER",
+        "inami_consult_total_cents": "INTEGER",
+        "inami_invoice_total_cents": "INTEGER",
+        "inami_tariff_effective_date": "VARCHAR(10)",
+    }
+    for column_name, column_type in appointment_financial_columns.items():
+        if column_name not in column_names:
+            statements.append(
+                f"ALTER TABLE appointment ADD COLUMN {column_name} {column_type}"
+            )
 
     for statement in statements:
         db.session.execute(text(statement))
     if statements:
         db.session.commit()
+    db.session.execute(text(
+        "CREATE INDEX IF NOT EXISTS ix_appointment_inami_code "
+        "ON appointment (inami_code)"
+    ))
+    db.session.commit()
     APPOINTMENT_SCHEMA_READY = True
 
 
@@ -3555,6 +3584,64 @@ def get_appointment_week_start(raw_date: str | None = None) -> date:
     return selected_date - timedelta(days=selected_date.weekday())
 
 
+def get_localized_inami_appointment_groups(language: str) -> tuple:
+    """Return code + localized examination labels without exposing tariffs."""
+    groups = []
+    for group_fr, group_nl, entries in INAMI_ULTRASOUND_GROUPS:
+        group_label = group_fr if language == "fr" else group_nl
+        localized_entries = []
+        for entry in entries:
+            label = entry["label_fr"] if language == "fr" else entry["label_nl"]
+            localized_entries.append(
+                (entry["code"], f'{entry["code"]} — {label}')
+            )
+        groups.append((group_label, tuple(localized_entries)))
+    return tuple(groups)
+
+
+def get_appointment_display_labels(language: str) -> dict[str, str]:
+    """Build visible labels for new INAMI and legacy appointment records."""
+    labels = {
+        code: f'{code} — {entry["label_fr"] if language == "fr" else entry["label_nl"]}'
+        for code, entry in INAMI_ULTRASOUND_BY_CODE.items()
+    }
+    labels.update({
+        appointment_type: (
+            ULTRASOUND_APPOINTMENT_LABELS_FR.get(appointment_type, appointment_type)
+            if language == "fr"
+            else appointment_type
+        )
+        for appointment_type in ULTRASOUND_APPOINTMENT_TYPES
+    })
+    return labels
+
+
+def calculate_daily_appointment_finances(
+    appointments: list[Appointment],
+) -> dict[str, dict[str, int]]:
+    """Calculate private daily totals without exposing them to the planner UI."""
+    daily_totals = {}
+    for appointment in appointments:
+        day_key = appointment.starts_at.date().isoformat()
+        totals = daily_totals.setdefault(day_key, {
+            "appointment_count": 0,
+            "reimbursement_cents": 0,
+            "patient_share_cents": 0,
+            "revenue_cents": 0,
+        })
+        totals["appointment_count"] += 1
+        totals["reimbursement_cents"] += (
+            (appointment.inami_exam_reimbursement_cents or 0)
+            + (appointment.inami_consult_reimbursement_cents or 0)
+        )
+        totals["patient_share_cents"] += (
+            (appointment.inami_exam_patient_share_cents or 0)
+            + (appointment.inami_consult_patient_share_cents or 0)
+        )
+        totals["revenue_cents"] += appointment.inami_invoice_total_cents or 0
+    return daily_totals
+
+
 def build_appointment_slot_grid(
     week_start: date,
     appointments: list[Appointment],
@@ -3720,25 +3807,12 @@ def admin_appointments():
         appointments,
         language=language,
     )
-    appointment_type_labels = {
-        appointment_type: (
-            ULTRASOUND_APPOINTMENT_LABELS_FR.get(appointment_type, appointment_type)
-            if language == "fr"
-            else appointment_type
-        )
-        for appointment_type in ULTRASOUND_APPOINTMENT_TYPES
-    }
-    appointment_groups = tuple(
-        (
-            ULTRASOUND_APPOINTMENT_LABELS_FR.get(group_name, group_name)
-            if language == "fr"
-            else group_name,
-            tuple(
-                (appointment_type, appointment_type_labels[appointment_type])
-                for appointment_type in appointment_types
-            ),
-        )
-        for group_name, appointment_types in ULTRASOUND_APPOINTMENT_GROUPS
+    appointment_type_labels = get_appointment_display_labels(language)
+    appointment_groups = get_localized_inami_appointment_groups(language)
+    # Keep financial aggregates request-private. They are deliberately not
+    # passed to the template or rendered anywhere in the planner.
+    g.appointment_financial_totals = calculate_daily_appointment_finances(
+        appointments
     )
     return render_template(
         "admin_appointments.html",
@@ -3771,7 +3845,7 @@ def admin_book_appointment():
     patient_name = (request.form.get("patient_name") or "").strip()
     patient_email = (request.form.get("patient_email") or "").strip().lower()
     patient_phone = (request.form.get("patient_phone") or "").strip()
-    appointment_type = (request.form.get("appointment_type") or "").strip()
+    inami_code = (request.form.get("inami_code") or "").strip()
     notes = (request.form.get("notes") or "").strip()
 
     if not starts_at or not patient_name or not patient_email:
@@ -3794,7 +3868,8 @@ def admin_book_appointment():
                 "Saisissez une adresse e-mail valide.",
             ),
         ))
-    if appointment_type not in ULTRASOUND_APPOINTMENT_TYPES:
+    inami_entry = INAMI_ULTRASOUND_BY_CODE.get(inami_code)
+    if inami_entry is None:
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
@@ -3828,7 +3903,18 @@ def admin_book_appointment():
         patient_name=patient_name,
         patient_email=patient_email,
         patient_phone=patient_phone or None,
-        appointment_type=appointment_type,
+        appointment_type=inami_code,
+        inami_code=inami_code,
+        inami_consult_code=INAMI_CONSULTATION_CODE,
+        inami_n_value=inami_entry["n_value"],
+        inami_exam_reimbursement_cents=inami_entry["exam_reimbursement_cents"],
+        inami_exam_patient_share_cents=inami_entry["exam_patient_share_cents"],
+        inami_exam_total_cents=inami_entry["exam_total_cents"],
+        inami_consult_reimbursement_cents=inami_entry["consult_reimbursement_cents"],
+        inami_consult_patient_share_cents=inami_entry["consult_patient_share_cents"],
+        inami_consult_total_cents=inami_entry["consult_total_cents"],
+        inami_invoice_total_cents=inami_entry["invoice_total_cents"],
+        inami_tariff_effective_date=INAMI_TARIFF_EFFECTIVE_DATE,
         notes=notes or None,
         prescription_filename=prescription_filename,
         prescription_mimetype=prescription_mimetype,

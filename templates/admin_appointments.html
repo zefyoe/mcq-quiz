@@ -115,7 +115,8 @@
                     <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
                       <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(minutes=slot_duration_minutes)).strftime('%H:%M') }}</span>
                       <strong>{{ slot.appointment.patient_name }}</strong>
-                      <span>{{ appointment_type_labels.get(slot.appointment.appointment_type, slot.appointment.appointment_type) }}</span>
+                      {% set appointment_label_key = slot.appointment.inami_code or slot.appointment.appointment_type %}
+                      <span>{{ appointment_type_labels.get(appointment_label_key, slot.appointment.appointment_type) }}</span>
                       <details>
                         <summary>{{ l10n('Details', 'Details', 'Détails') }}</summary>
                         <p>{{ slot.appointment.patient_email }}</p>
@@ -173,9 +174,9 @@
             <input name="patient_phone" type="tel" autocomplete="tel" maxlength="80">
           </label>
           <label class="appointment-exam-field">
-            {{ l10n('Gewenst echografieonderzoek', 'Requested ultrasound examination', 'Examen échographique souhaité') }}
-            <select name="appointment_type" size="8" required aria-describedby="appointment-exam-help">
-              <option value="" selected disabled>{{ l10n('Kies een echografieonderzoek', 'Choose an ultrasound examination', 'Choisissez un examen échographique') }}</option>
+            {{ l10n('INAMI-code en echografieonderzoek', 'INAMI code and ultrasound examination', 'Code INAMI et examen échographique') }}
+            <select name="inami_code" size="8" required aria-describedby="appointment-exam-help">
+              <option value="" selected disabled>{{ l10n('Kies een INAMI-code en onderzoek', 'Choose an INAMI code and examination', 'Choisissez un code INAMI et un examen') }}</option>
               {% for group_name, appointment_types in appointment_groups %}
                 <optgroup label="{{ group_name }}">
                   {% for appointment_value, appointment_label in appointment_types %}
@@ -184,7 +185,7 @@
                 </optgroup>
               {% endfor %}
             </select>
-            <span id="appointment-exam-help" class="appointment-field-help">{{ l10n('Scroll door de lijst en kies het gewenste onderzoek.', 'Scroll through the list and choose the requested examination.', 'Parcourez la liste et choisissez l’examen souhaité.') }}</span>
+            <span id="appointment-exam-help" class="appointment-field-help">{{ l10n('De code en benaming worden bij de afspraak bewaard.', 'The code and description are saved with the appointment.', 'Le code et le libellé sont enregistrés avec le rendez-vous.') }}</span>
           </label>
           <section class="appointment-prescription-section" aria-labelledby="appointment-prescription-title">
             <div>
