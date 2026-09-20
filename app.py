@@ -209,6 +209,33 @@ ULTRASOUND_APPOINTMENT_TYPES = frozenset(
     for _, appointment_types in ULTRASOUND_APPOINTMENT_GROUPS
     for appointment_type in appointment_types
 )
+ULTRASOUND_APPOINTMENT_LABELS_FR = {
+    "Buik en urinewegen": "Abdomen et voies urinaires",
+    "Echografie abdomen volledig": "Échographie abdominale complète",
+    "Echografie bovenbuik (lever, galblaas, pancreas, milt)": "Échographie de l'abdomen supérieur (foie, vésicule biliaire, pancréas, rate)",
+    "Echografie nieren en blaas": "Échographie des reins et de la vessie",
+    "Echografie lies / hernia": "Échographie inguinale / recherche de hernie",
+    "Echografie bekken": "Échographie pelvienne",
+    "Echografie scrotum / testis": "Échographie scrotale / testiculaire",
+    "Hals en oppervlakkige structuren": "Cou et structures superficielles",
+    "Echografie hals en schildklier": "Échographie cervicale et thyroïdienne",
+    "Echografie speekselklieren": "Échographie des glandes salivaires",
+    "Echografie lymfeklieren": "Échographie ganglionnaire",
+    "Echografie weke delen / palpabele zwelling": "Échographie des parties molles / masse palpable",
+    "Bewegingsapparaat": "Appareil locomoteur",
+    "Echografie schouder": "Échographie de l'épaule",
+    "Echografie elleboog, pols of hand": "Échographie du coude, du poignet ou de la main",
+    "Echografie heup of knie": "Échographie de la hanche ou du genou",
+    "Echografie enkel of voet": "Échographie de la cheville ou du pied",
+    "Echografie spier of pees": "Échographie musculaire ou tendineuse",
+    "Borsten en bloedvaten": "Seins et vaisseaux sanguins",
+    "Echografie borst(en)": "Échographie mammaire",
+    "Doppler-echografie venen benen": "Écho-Doppler veineux des membres inférieurs",
+    "Doppler-echografie arteriën benen": "Écho-Doppler artériel des membres inférieurs",
+    "Doppler-echografie halsslagaders": "Écho-Doppler des artères carotides",
+    "Overig": "Autre",
+    "Andere echografie (te preciseren)": "Autre échographie (à préciser)",
+}
 ANATOMY_CATEGORY = "Anatomy"
 ANATOMY_SUBGROUPS = {
     "msk": {
@@ -3531,14 +3558,22 @@ def get_appointment_week_start(raw_date: str | None = None) -> date:
 def build_appointment_slot_grid(
     week_start: date,
     appointments: list[Appointment],
+    language: str = "nl",
 ) -> tuple[list[dict], list[dict]]:
     """Build the seven-day calendar in 15-minute appointment blocks."""
     appointments_by_start = {appointment.starts_at: appointment for appointment in appointments}
-    day_labels = ("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo")
-    day_names = (
-        "maandag", "dinsdag", "woensdag", "donderdag",
-        "vrijdag", "zaterdag", "zondag",
-    )
+    if language == "fr":
+        day_labels = ("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim")
+        day_names = (
+            "lundi", "mardi", "mercredi", "jeudi",
+            "vendredi", "samedi", "dimanche",
+        )
+    else:
+        day_labels = ("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo")
+        day_names = (
+            "maandag", "dinsdag", "woensdag", "donderdag",
+            "vrijdag", "zaterdag", "zondag",
+        )
     days = []
     for offset, (short_label, day_name) in enumerate(zip(day_labels, day_names)):
         day = week_start + timedelta(days=offset)
@@ -3600,34 +3635,62 @@ def read_prescription_upload() -> tuple[str, str, bytes]:
         if request.files.get(field) and request.files.get(field).filename
     ]
     if len(uploads) != 1:
-        raise ValueError("Laad precies een voorschrift op: een PDF of een foto.")
+        raise ValueError(l10n(
+            "Laad precies een voorschrift op: een PDF of een foto.",
+            "Upload exactly one prescription: a PDF or a photo.",
+            "Téléversez exactement une ordonnance : un PDF ou une photo.",
+        ))
 
     uploaded_file = uploads[0]
     filename = secure_filename(uploaded_file.filename or "")
     extension = os.path.splitext(filename)[1].lower()
     allowed_file_type = PRESCRIPTION_FILE_TYPES.get(extension)
     if not filename or not allowed_file_type:
-        raise ValueError("Gebruik een PDF, JPG, PNG of WEBP voor het voorschrift.")
+        raise ValueError(l10n(
+            "Gebruik een PDF, JPG, PNG of WEBP voor het voorschrift.",
+            "Use a PDF, JPG, PNG or WEBP for the prescription.",
+            "Utilisez un fichier PDF, JPG, PNG ou WEBP pour l'ordonnance.",
+        ))
 
     data = uploaded_file.read(MAX_PRESCRIPTION_UPLOAD_BYTES + 1)
     if not data:
-        raise ValueError("Het opgeladen voorschrift is leeg.")
+        raise ValueError(l10n(
+            "Het opgeladen voorschrift is leeg.",
+            "The uploaded prescription is empty.",
+            "L'ordonnance téléversée est vide.",
+        ))
     if len(data) > MAX_PRESCRIPTION_UPLOAD_BYTES:
-        raise ValueError("Het voorschrift mag maximaal 10 MB groot zijn.")
+        raise ValueError(l10n(
+            "Het voorschrift mag maximaal 10 MB groot zijn.",
+            "The prescription may not exceed 10 MB.",
+            "L'ordonnance ne peut pas dépasser 10 Mo.",
+        ))
 
     mimetype, expected_image_format = allowed_file_type
     if extension == ".pdf":
         if not data.startswith(b"%PDF-"):
-            raise ValueError("Het opgeladen bestand is geen geldige PDF.")
+            raise ValueError(l10n(
+                "Het opgeladen bestand is geen geldige PDF.",
+                "The uploaded file is not a valid PDF.",
+                "Le fichier téléversé n'est pas un PDF valide.",
+            ))
     else:
         try:
             with Image.open(BytesIO(data)) as image:
                 image_format = image.format
                 image.verify()
         except (UnidentifiedImageError, OSError, SyntaxError):
-            raise ValueError("De foto van het voorschrift kon niet worden gelezen.") from None
+            raise ValueError(l10n(
+                "De foto van het voorschrift kon niet worden gelezen.",
+                "The prescription photo could not be read.",
+                "La photo de l'ordonnance n'a pas pu être lue.",
+            )) from None
         if image_format != expected_image_format:
-            raise ValueError("Het bestandstype komt niet overeen met de gekozen foto.")
+            raise ValueError(l10n(
+                "Het bestandstype komt niet overeen met de gekozen foto.",
+                "The file type does not match the selected photo.",
+                "Le type de fichier ne correspond pas à la photo sélectionnée.",
+            ))
 
     return filename, mimetype, data
 
@@ -3651,7 +3714,32 @@ def admin_appointments():
         .order_by(Appointment.starts_at.asc())
         .all()
     )
-    days, slot_rows = build_appointment_slot_grid(week_start, appointments)
+    language = get_current_language()
+    days, slot_rows = build_appointment_slot_grid(
+        week_start,
+        appointments,
+        language=language,
+    )
+    appointment_type_labels = {
+        appointment_type: (
+            ULTRASOUND_APPOINTMENT_LABELS_FR.get(appointment_type, appointment_type)
+            if language == "fr"
+            else appointment_type
+        )
+        for appointment_type in ULTRASOUND_APPOINTMENT_TYPES
+    }
+    appointment_groups = tuple(
+        (
+            ULTRASOUND_APPOINTMENT_LABELS_FR.get(group_name, group_name)
+            if language == "fr"
+            else group_name,
+            tuple(
+                (appointment_type, appointment_type_labels[appointment_type])
+                for appointment_type in appointment_types
+            ),
+        )
+        for group_name, appointment_types in ULTRASOUND_APPOINTMENT_GROUPS
+    )
     return render_template(
         "admin_appointments.html",
         week_start=week_start,
@@ -3663,7 +3751,8 @@ def admin_appointments():
         slot_rows=slot_rows,
         booked_count=len(appointments),
         available_count=(7 * APPOINTMENT_SLOTS_PER_DAY) - len(appointments),
-        appointment_groups=ULTRASOUND_APPOINTMENT_GROUPS,
+        appointment_groups=appointment_groups,
+        appointment_type_labels=appointment_type_labels,
         slot_duration_minutes=APPOINTMENT_SLOT_MINUTES,
         error=(request.args.get("error") or "").strip(),
         success=(request.args.get("success") or "").strip(),
@@ -3689,19 +3778,31 @@ def admin_book_appointment():
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
-            error="Kies een geldig tijdstip en vul naam en e-mailadres in.",
+            error=l10n(
+                "Kies een geldig tijdstip en vul naam en e-mailadres in.",
+                "Choose a valid time and enter the name and email address.",
+                "Choisissez une heure valide et indiquez le nom et l'adresse e-mail.",
+            ),
         ))
     if "@" not in patient_email:
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
-            error="Vul een geldig e-mailadres in.",
+            error=l10n(
+                "Vul een geldig e-mailadres in.",
+                "Enter a valid email address.",
+                "Saisissez une adresse e-mail valide.",
+            ),
         ))
     if appointment_type not in ULTRASOUND_APPOINTMENT_TYPES:
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
-            error="Kies een echografieonderzoek uit de lijst.",
+            error=l10n(
+                "Kies een echografieonderzoek uit de lijst.",
+                "Choose an ultrasound examination from the list.",
+                "Choisissez un examen échographique dans la liste.",
+            ),
         ))
     try:
         prescription_filename, prescription_mimetype, prescription_data = read_prescription_upload()
@@ -3715,7 +3816,11 @@ def admin_book_appointment():
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
-            error="Dit tijdstip is net ingenomen. Kies een ander beschikbaar kwartier.",
+            error=l10n(
+                "Dit tijdstip is net ingenomen. Kies een ander beschikbaar kwartier.",
+                "This time has just been booked. Choose another available slot.",
+                "Ce créneau vient d'être réservé. Choisissez un autre quart d'heure disponible.",
+            ),
         ))
 
     appointment = Appointment(
@@ -3737,13 +3842,21 @@ def admin_book_appointment():
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
-            error="Dit tijdstip kon niet worden vastgelegd. Probeer opnieuw.",
+            error=l10n(
+                "Dit tijdstip kon niet worden vastgelegd. Probeer opnieuw.",
+                "This time could not be booked. Please try again.",
+                "Ce créneau n'a pas pu être réservé. Veuillez réessayer.",
+            ),
         ))
 
     return redirect(url_for(
         "admin_appointments",
         date=week_date,
-        success="De echografieafspraak is ingepland.",
+        success=l10n(
+            "De echografieafspraak is ingepland.",
+            "The ultrasound appointment has been scheduled.",
+            "Le rendez-vous d'échographie a été planifié.",
+        ),
     ))
 
 
@@ -3785,7 +3898,11 @@ def admin_cancel_appointment(appointment_id):
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
-            error="Deze afspraak bestaat niet meer.",
+            error=l10n(
+                "Deze afspraak bestaat niet meer.",
+                "This appointment no longer exists.",
+                "Ce rendez-vous n'existe plus.",
+            ),
         ))
 
     db.session.delete(appointment)
@@ -3793,7 +3910,11 @@ def admin_cancel_appointment(appointment_id):
     return redirect(url_for(
         "admin_appointments",
         date=week_date,
-        success="De afspraak is geannuleerd en het tijdstip is opnieuw beschikbaar.",
+        success=l10n(
+            "De afspraak is geannuleerd en het tijdstip is opnieuw beschikbaar.",
+            "The appointment has been cancelled and the time is available again.",
+            "Le rendez-vous a été annulé et le créneau est à nouveau disponible.",
+        ),
     ))
 
 

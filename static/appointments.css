@@ -40,6 +40,38 @@
   letter-spacing: 0.02em;
 }
 
+.appointment-topbar .language-switcher {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.appointment-topbar .language-option {
+  min-width: 34px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-decoration: none;
+}
+
+.appointment-topbar .language-option.active {
+  color: #24446f;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+}
+
+.appointment-topbar .language-option-en-disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
 .appointment-shell {
   width: min(1600px, calc(100% - 40px));
   margin: 0 auto;

@@ -102,6 +102,7 @@ try:
     client.get("/logout")
 
     for email in ("y@bymed.be", "ybahkani@gmail.com"):
+        client.get("/language/nl?next=/login")
         response = client.post(
             "/login?next=/admin/appointments",
             data={"email": email, "password": "strong-password"},
@@ -109,6 +110,25 @@ try:
         )
         assert response.status_code == 200
         assert b"Afsprakenplanner" in response.data
+        french_agenda = client.get(
+            "/language/fr?next=/admin/appointments",
+            follow_redirects=True,
+        )
+        assert french_agenda.status_code == 200
+        assert b'<html lang="fr">' in french_agenda.data
+        assert "Planificateur de rendez-vous".encode() in french_agenda.data
+        assert "Planifier un examen".encode() in french_agenda.data
+        assert "Échographie abdominale complète".encode() in french_agenda.data
+        assert "Ordonnance requise".encode() in french_agenda.data
+        assert b"lundi" in french_agenda.data
+        assert b'href="/language/nl?next=/admin/appointments' in french_agenda.data
+        french_validation = client.post(
+            "/admin/appointments/book",
+            data={},
+            follow_redirects=True,
+        )
+        assert french_validation.status_code == 200
+        assert "Choisissez une heure valide".encode() in french_validation.data
         home_response = client.get("/")
         assert home_response.status_code == 200
         assert b"/switch-product/core" in home_response.data
