@@ -40,6 +40,7 @@
         </div>
 
         <nav class="dashboard-nav">
+          <a href="{{ url_for('public_agenda') }}" class="dashboard-nav-link">AGENDA</a>
           <a href="{{ url_for('home') }}" class="dashboard-nav-link active">{{ tr("Dashboard") }}</a>
           <a href="{{ url_for('previous_tests') }}" class="dashboard-nav-link">{{ tr("Previous Tests") }}</a>
           <a href="{{ url_for('anatomy_sections') }}" class="dashboard-nav-link">{{ tr("New Anatomy Quiz") }}</a>

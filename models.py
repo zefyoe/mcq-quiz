@@ -40,6 +40,9 @@ class Appointment(db.Model):
     patient_name = db.Column(db.String(255), nullable=False)
     patient_email = db.Column(db.String(255), nullable=False)
     patient_phone = db.Column(db.String(80), nullable=True)
+    referring_doctor = db.Column(db.String(255), nullable=True)
+    insurance_status = db.Column(db.String(16), nullable=True)
+    duration_minutes = db.Column(db.Integer, nullable=False, default=10)
     appointment_type = db.Column(db.String(120), nullable=False, default="Consultatie")
     inami_code = db.Column(db.String(12), nullable=True, index=True)
     inami_consult_code = db.Column(db.String(12), nullable=True)
@@ -57,6 +60,12 @@ class Appointment(db.Model):
     prescription_mimetype = db.Column(db.String(120), nullable=True)
     prescription_data = db.Column(db.LargeBinary, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class AppointmentHold(db.Model):
+    starts_at = db.Column(db.DateTime, primary_key=True)
+    token = db.Column(db.String(80), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
 
 
 class Question(db.Model):

@@ -73,7 +73,7 @@ try:
     client = app.test_client()
     login_page = client.get("/login")
     assert login_page.status_code == 200
-    assert b'href="/admin/appointments"' in login_page.data
+    assert b'href="/agenda"' in login_page.data
     assert b">AGENDA</a>" in login_page.data
     agenda_redirect = client.get("/admin/appointments")
     assert agenda_redirect.status_code == 302
@@ -110,7 +110,7 @@ try:
             follow_redirects=True,
         )
         assert response.status_code == 200
-        assert b"Afsprakenplanner" in response.data
+        assert b"Planificateur de rendez-vous" in response.data
         french_agenda = client.get(
             "/language/fr?next=/admin/appointments",
             follow_redirects=True,
@@ -121,9 +121,9 @@ try:
         assert "Planifier un examen".encode() in french_agenda.data
         assert "459712 — Examen abdominal total".encode() in french_agenda.data
         assert "Code INAMI et examen échographique".encode() in french_agenda.data
-        assert "Ordonnance requise".encode() in french_agenda.data
+        assert "Ordonnance facultative".encode() in french_agenda.data
         assert b"lundi" in french_agenda.data
-        assert b'href="/language/nl?next=/admin/appointments' in french_agenda.data
+        assert b'<html lang="fr">' in french_agenda.data
         assert "€".encode() not in french_agenda.data
         assert b"102.95" not in french_agenda.data
         french_validation = client.post(
@@ -137,8 +137,8 @@ try:
             booked = client.post(
                 "/admin/appointments/book",
                 data={
-                    "slot_start": "2031-01-06T08:00",
-                    "week_date": "2031-01-06",
+                    "slot_start": "2031-01-07T18:10",
+                    "week_date": "2031-01-07",
                     "patient_name": "Patient Test",
                     "patient_email": "patient@example.com",
                     "inami_code": "459712",
@@ -165,7 +165,7 @@ try:
                 assert appointment.inami_consult_total_cents == 3449
                 assert appointment.inami_invoice_total_cents == 10295
                 daily = calculate_daily_appointment_finances([appointment])
-                assert daily["2031-01-06"] == {
+                assert daily["2031-01-07"] == {
                     "appointment_count": 1,
                     "reimbursement_cents": 9303,
                     "patient_share_cents": 992,

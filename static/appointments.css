@@ -398,6 +398,7 @@
 .appointment-modal { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 22px; }
 .appointment-modal-backdrop { position: absolute; inset: 0; background: rgba(13, 28, 48, 0.6); backdrop-filter: blur(3px); }
 .appointment-modal-card {
+  box-sizing: border-box;
   position: relative;
   z-index: 1;
   width: min(100%, 760px);
@@ -425,6 +426,9 @@
 }
 .appointment-selected-slot { margin: 12px 0 22px; padding: 11px 12px; border-radius: 9px; color: #22579e; background: #edf5ff; font-size: 0.85rem; font-weight: 750; }
 .appointment-booking-form label { display: grid; gap: 7px; }
+.appointment-booking-form input[type="radio"] { width: 20px; min-height: 20px; }
+.appointment-booking-form fieldset label { display: flex; align-items: center; margin: 10px 0; }
+.appointment-slot:disabled { cursor: default; opacity: .65; }
 .appointment-booking-form label span { color: #94a1b4; font-weight: 550; }
 .appointment-booking-form textarea { min-height: 86px; resize: vertical; }
 .appointment-booking-form select[size] {

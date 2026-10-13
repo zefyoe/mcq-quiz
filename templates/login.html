@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css', v=asset_version) }}">
 </head>
 <body>
+  <a class="agenda-button" style="position:absolute;top:18px;left:18px;z-index:21;width:auto;padding:12px 24px" href="{{ url_for('public_agenda') }}">AGENDA</a>
   {% include "_language_switcher.html" %}
   <div class="login-page">
     <div class="login-shell">
@@ -53,7 +54,6 @@
             </div>
 
             <button type="submit" class="login-button">{{ tr("Login") }}</button>
-            <a class="agenda-button" href="{{ url_for('admin_appointments') }}">AGENDA</a>
           </form>
 
           <p style="margin-top:18px; text-align:center; font-size:14px;">

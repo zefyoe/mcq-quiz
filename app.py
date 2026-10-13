@@ -2,6 +2,8 @@ import os
 import random
 import re
 import json
+import secrets
+from zoneinfo import ZoneInfo
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from io import BytesIO
@@ -17,7 +19,7 @@ from flask_login import (
     logout_user,
 )
 from flask_compress import Compress
-from sqlalchemy import func, inspect, text
+from sqlalchemy import DateTime, bindparam, func, inspect, text
 from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
@@ -42,7 +44,7 @@ from inami_ultrasound_catalog import (
     INAMI_ULTRASOUND_BY_CODE,
     INAMI_ULTRASOUND_GROUPS,
 )
-from models import Appointment, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from models import Appointment, AppointmentHold, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -164,7 +166,10 @@ ACCOUNT_CLEANUP_EMAILS = frozenset({
 LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "1").strip() == "1"
 AUTH_SCHEMA_READY = False
 APPOINTMENT_SCHEMA_READY = False
-APPOINTMENT_SLOT_MINUTES = 15
+APPOINTMENT_SLOT_MINUTES = 10
+APPOINTMENT_WEEKLY_WINDOWS = {1: (18 * 60 + 10, 20 * 60 + 10),
+                              3: (18 * 60 + 10, 20 * 60 + 10),
+                              5: (10 * 60, 13 * 60)}
 APPOINTMENT_OPENING_HOUR = 8
 APPOINTMENT_CLOSING_HOUR = 21
 APPOINTMENT_SLOTS_PER_DAY = (
@@ -478,6 +483,9 @@ def normalize_category(s: str) -> str:
 
 
 def get_current_language() -> str:
+    if request.endpoint in {"public_agenda", "public_agenda_hold", "public_book_appointment",
+                            "admin_appointments", "admin_book_appointment", "admin_cancel_appointment"}:
+        return "fr"
     if not LANGUAGE_SWITCHER_ENABLED:
         return "nl"
     language = (session.get("language") or DEFAULT_LANGUAGE).strip().lower()
@@ -780,6 +788,7 @@ def ensure_appointment_schema() -> None:
         return
 
     inspector = inspect(db.engine)
+    AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
     if "appointment" not in inspector.get_table_names():
         Appointment.__table__.create(bind=db.engine, checkfirst=True)
         APPOINTMENT_SCHEMA_READY = True
@@ -795,6 +804,9 @@ def ensure_appointment_schema() -> None:
     if "prescription_data" not in column_names:
         statements.append(f"ALTER TABLE appointment ADD COLUMN prescription_data {binary_type}")
     appointment_financial_columns = {
+        "referring_doctor": "VARCHAR(255)",
+        "insurance_status": "VARCHAR(16)",
+        "duration_minutes": "INTEGER NOT NULL DEFAULT 15",
         "inami_code": "VARCHAR(12)",
         "inami_consult_code": "VARCHAR(12)",
         "inami_n_value": "VARCHAR(20)",
@@ -3671,11 +3683,9 @@ def build_appointment_slot_grid(
         })
 
     slot_rows = []
-    for slot_index in range(APPOINTMENT_SLOTS_PER_DAY):
-        minutes_from_midnight = (
-            APPOINTMENT_OPENING_HOUR * 60
-            + slot_index * APPOINTMENT_SLOT_MINUTES
-        )
+    minute_marks = set(range(APPOINTMENT_OPENING_HOUR * 60, APPOINTMENT_CLOSING_HOUR * 60, 10))
+    minute_marks.update(a.starts_at.hour * 60 + a.starts_at.minute for a in appointments)
+    for minutes_from_midnight in sorted(minute_marks):
         hour, minute = divmod(minutes_from_midnight, 60)
         slots = []
         for day in days:
@@ -3684,6 +3694,9 @@ def build_appointment_slot_grid(
                 "starts_at": starts_at,
                 "appointment": appointments_by_start.get(starts_at),
                 "day_name": day["day_name"],
+                "blocked": not appointment_slot_is_open(starts_at) or any(a.starts_at < starts_at + timedelta(minutes=10)
+                    and a.starts_at + timedelta(minutes=a.duration_minutes) > starts_at
+                    for a in appointments),
             })
         slot_rows.append({
             "time_label": f"{hour:02d}:{minute:02d}",
@@ -3691,6 +3704,13 @@ def build_appointment_slot_grid(
         })
 
     return days, slot_rows
+
+
+def appointment_slot_is_open(starts_at):
+    window = APPOINTMENT_WEEKLY_WINDOWS.get(starts_at.weekday())
+    minute = starts_at.hour * 60 + starts_at.minute
+    return bool(window and window[0] <= minute and minute + 10 <= window[1]
+                and (minute - window[0]) % 10 == 0)
 
 
 def parse_appointment_slot(raw_slot: str | None) -> datetime | None:
@@ -3782,6 +3802,89 @@ def read_prescription_upload() -> tuple[str, str, bytes]:
     return filename, mimetype, data
 
 
+def agenda_now():
+    return datetime.now(ZoneInfo("Europe/Brussels")).replace(tzinfo=None)
+
+
+def agenda_token():
+    if "agenda_token" not in session:
+        session["agenda_token"] = secrets.token_urlsafe(32)
+    return session["agenda_token"]
+
+
+def slot_is_booked(starts_at):
+    nearby = Appointment.query.filter(
+        Appointment.starts_at < starts_at + timedelta(minutes=10),
+        Appointment.starts_at > starts_at - timedelta(minutes=60),
+    ).all()
+    return any(a.starts_at + timedelta(minutes=a.duration_minutes) > starts_at for a in nearby)
+
+
+def claim_agenda_slot(starts_at, token):
+    # Atomic ownership across workers; the row stays locked until commit.
+    now = datetime.utcnow()
+    result = db.session.execute(text(
+        "INSERT INTO appointment_hold (starts_at, token, expires_at) "
+        "VALUES (:start, :token, :expiry) ON CONFLICT (starts_at) DO UPDATE "
+        "SET token = :token, expires_at = :expiry "
+        "WHERE appointment_hold.expires_at < :now OR appointment_hold.token = :token "
+        "RETURNING token"
+    ).bindparams(bindparam("start", type_=DateTime), bindparam("expiry", type_=DateTime),
+                 bindparam("now", type_=DateTime)),
+        {"start": starts_at, "token": token, "expiry": now + timedelta(minutes=10), "now": now}).first()
+    return result is not None
+
+
+@app.after_request
+def private_agenda_cache(response):
+    if request.path.startswith(("/agenda", "/admin/appointments")):
+        response.headers["Cache-Control"] = "private, no-store"
+    return response
+
+
+@app.get("/agenda")
+def public_agenda():
+    ensure_appointment_schema()
+    start = get_appointment_week_start(request.args.get("date"))
+    end = start + timedelta(days=7)
+    # Only timestamps and durations are selected for the public calendar.
+    occupied = db.session.query(Appointment.starts_at, Appointment.duration_minutes).filter(
+        Appointment.starts_at >= datetime.combine(start, time.min) - timedelta(hours=1),
+        Appointment.starts_at < datetime.combine(end, time.min),
+    ).all()
+    holds = AppointmentHold.query.filter(AppointmentHold.expires_at > datetime.utcnow()).all()
+    days, rows = build_appointment_slot_grid(start, [], "fr")
+    for row in rows:
+        for slot in row["slots"]:
+            stamp = slot["starts_at"]
+            slot["unavailable"] = not appointment_slot_is_open(stamp) or stamp <= agenda_now() or any(
+                a.starts_at < stamp + timedelta(minutes=10)
+                and a.starts_at + timedelta(minutes=a.duration_minutes) > stamp for a in occupied
+            ) or any(h.starts_at == stamp for h in holds)
+    return render_template("public_agenda.html", days=days, slot_rows=rows,
+        week_start=start, week_end=end, timedelta=timedelta,
+        appointment_groups=get_localized_inami_appointment_groups("fr"),
+        csrf_token=agenda_token(), success=request.args.get("success") == "1")
+
+
+@app.post("/agenda/hold")
+def public_agenda_hold():
+    ensure_appointment_schema()
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    stamp = parse_appointment_slot(request.form.get("slot_start"))
+    if not stamp or stamp <= agenda_now() or not appointment_slot_is_open(stamp):
+        return jsonify(error="Choisissez un créneau futur valide."), 400
+    if not claim_agenda_slot(stamp, agenda_token()) or slot_is_booked(stamp):
+        db.session.rollback()
+        return jsonify(error="Ce créneau n’est plus disponible."), 409
+    db.session.execute(text(
+        "DELETE FROM appointment_hold WHERE token = :token AND starts_at != :start"
+    ).bindparams(bindparam("start", type_=DateTime)), {"token": agenda_token(), "start": stamp})
+    db.session.commit()
+    return jsonify(ok=True)
+
+
 @app.route("/admin/appointments")
 def admin_appointments():
     admin_redirect = admin_required()
@@ -3790,6 +3893,10 @@ def admin_appointments():
 
     ensure_appointment_schema()
     requested_date = request.args.get("date")
+    try:
+        shift_date = date.fromisoformat(requested_date or "")
+    except ValueError:
+        shift_date = agenda_now().date()
     week_start = get_appointment_week_start(requested_date)
     week_end = week_start + timedelta(days=7)
     appointments = (
@@ -3807,6 +3914,11 @@ def admin_appointments():
         appointments,
         language=language,
     )
+    reserved = {hold.starts_at for hold in AppointmentHold.query.filter(
+        AppointmentHold.expires_at > datetime.utcnow()).all()}
+    for row in slot_rows:
+        for slot in row['slots']:
+            slot['blocked'] = slot['blocked'] or slot['starts_at'] in reserved or slot['starts_at'] <= agenda_now()
     appointment_type_labels = get_appointment_display_labels(language)
     appointment_groups = get_localized_inami_appointment_groups(language)
     # Keep financial aggregates request-private. They are deliberately not
@@ -3816,6 +3928,8 @@ def admin_appointments():
     )
     return render_template(
         "admin_appointments.html",
+        shift_appointments=[a for a in appointments if a.starts_at.date() == shift_date],
+        shift_date=shift_date,
         week_start=week_start,
         week_end=week_end,
         selected_date=(requested_date or week_start.isoformat()),
@@ -3824,7 +3938,8 @@ def admin_appointments():
         days=days,
         slot_rows=slot_rows,
         booked_count=len(appointments),
-        available_count=(7 * APPOINTMENT_SLOTS_PER_DAY) - len(appointments),
+        available_count=sum(not slot['blocked'] and not slot['appointment']
+                            for row in slot_rows for slot in row['slots']),
         appointment_groups=appointment_groups,
         appointment_type_labels=appointment_type_labels,
         slot_duration_minutes=APPOINTMENT_SLOT_MINUTES,
@@ -3833,11 +3948,16 @@ def admin_appointments():
     )
 
 
+@app.post("/agenda/book", endpoint="public_book_appointment")
 @app.post("/admin/appointments/book")
 def admin_book_appointment():
-    admin_redirect = admin_required()
-    if admin_redirect:
-        return admin_redirect
+    public = request.endpoint == "public_book_appointment"
+    if not public:
+        admin_redirect = admin_required()
+        if admin_redirect:
+            return admin_redirect
+    elif not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
 
     ensure_appointment_schema()
     starts_at = parse_appointment_slot(request.form.get("slot_start"))
@@ -3847,6 +3967,18 @@ def admin_book_appointment():
     patient_phone = (request.form.get("patient_phone") or "").strip()
     inami_code = (request.form.get("inami_code") or "").strip()
     notes = (request.form.get("notes") or "").strip()
+    doctor = (request.form.get("referring_doctor") or "").strip()
+    insurance = request.form.get("insurance_status")
+    if public and (not starts_at or starts_at <= agenda_now() or not appointment_slot_is_open(starts_at) or not doctor
+                   or insurance not in {"bim", "normal"}):
+        return jsonify(error="Complétez le médecin, le statut et un créneau futur valide."), 400
+    if any(len(value) > limit for value, limit in (
+        (patient_name, 255), (patient_email, 255), (patient_phone, 80), (doctor, 255), (notes, 2000)
+    )):
+        abort(400)
+    if public and (not patient_name or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", patient_email)
+                   or inami_code not in INAMI_ULTRASOUND_BY_CODE):
+        return jsonify(error="Vérifiez le nom, l’adresse e-mail et l’examen."), 400
 
     if not starts_at or not patient_name or not patient_email:
         return redirect(url_for(
@@ -3858,6 +3990,9 @@ def admin_book_appointment():
                 "Choisissez une heure valide et indiquez le nom et l'adresse e-mail.",
             ),
         ))
+    if not appointment_slot_is_open(starts_at):
+        return redirect(url_for('admin_appointments', date=week_date,
+                                error='Ce créneau se situe en dehors des horaires de consultation.'))
     if "@" not in patient_email:
         return redirect(url_for(
             "admin_appointments",
@@ -3880,21 +4015,29 @@ def admin_book_appointment():
             ),
         ))
     try:
-        prescription_filename, prescription_mimetype, prescription_data = read_prescription_upload()
+        if any(f.filename for f in request.files.values()):
+            prescription_filename, prescription_mimetype, prescription_data = read_prescription_upload()
+        else:
+            prescription_filename, prescription_mimetype, prescription_data = None, None, None
     except ValueError as error:
+        if public:
+            return jsonify(error=str(error)), 400
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
             error=str(error),
         ))
-    if Appointment.query.filter_by(starts_at=starts_at).first():
+    if not claim_agenda_slot(starts_at, agenda_token()) or slot_is_booked(starts_at):
+        db.session.rollback()
+        if public:
+            return jsonify(error="Ce créneau n’est plus disponible. Choisissez-en un autre."), 409
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
             error=l10n(
                 "Dit tijdstip is net ingenomen. Kies een ander beschikbaar kwartier.",
                 "This time has just been booked. Choose another available slot.",
-                "Ce créneau vient d'être réservé. Choisissez un autre quart d'heure disponible.",
+                "Ce créneau vient d'être réservé. Choisissez un autre créneau disponible.",
             ),
         ))
 
@@ -3903,6 +4046,9 @@ def admin_book_appointment():
         patient_name=patient_name,
         patient_email=patient_email,
         patient_phone=patient_phone or None,
+        referring_doctor=doctor or None,
+        insurance_status=insurance if insurance in {"bim", "normal"} else None,
+        duration_minutes=10,
         appointment_type=inami_code,
         inami_code=inami_code,
         inami_consult_code=INAMI_CONSULTATION_CODE,
@@ -3925,6 +4071,8 @@ def admin_book_appointment():
         db.session.commit()
     except Exception:
         db.session.rollback()
+        if public:
+            return jsonify(error="Réservation impossible. Veuillez réessayer."), 409
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
@@ -3935,6 +4083,8 @@ def admin_book_appointment():
             ),
         ))
 
+    if public:
+        return jsonify(ok=True, redirect=url_for("public_agenda", date=starts_at.date().isoformat(), success=1))
     return redirect(url_for(
         "admin_appointments",
         date=week_date,
@@ -3992,6 +4142,7 @@ def admin_cancel_appointment(appointment_id):
         ))
 
     db.session.delete(appointment)
+    AppointmentHold.query.filter_by(starts_at=appointment.starts_at).delete()
     db.session.commit()
     return redirect(url_for(
         "admin_appointments",

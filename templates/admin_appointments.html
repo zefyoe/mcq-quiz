@@ -14,7 +14,6 @@
         <a class="appointment-brand" href="{{ url_for('admin_home') }}">Radius <span>{{ l10n('Privépraktijk', 'Private Practice', 'Cabinet privé') }}</span></a>
         <div class="admin-topbar-actions">
           <div class="admin-topbar-badge">{{ l10n('Afsprakenplanner', 'Appointment planner', 'Planificateur de rendez-vous') }}</div>
-          {% include "_language_switcher.html" %}
           <a class="admin-link-button admin-topbar-link" href="{{ url_for('admin_home') }}">Admin</a>
           <a class="admin-link-button admin-topbar-link" href="{{ url_for('logout') }}">{{ l10n('Uitloggen', 'Log out', 'Se déconnecter') }}</a>
         </div>
@@ -36,6 +35,20 @@
       {% if error %}
         <div class="appointment-alert appointment-alert-error" role="alert">{{ error }}</div>
       {% endif %}
+
+      <section class="appointment-calendar-card" style="background:white;border-radius:18px;margin-bottom:20px;overflow:auto">
+        <h2>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }}</h2>
+        {% for appointment in shift_appointments %}
+        <article style="padding:14px 0;border-bottom:1px solid #dfe7f1">
+          <strong>{{ appointment.starts_at.strftime('%H:%M') }} · {{ appointment.patient_name }}</strong>
+          <p>{{ appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type) }}</p>
+          <p>Médecin : {{ appointment.referring_doctor or 'Non renseigné' }} · Statut : {{ 'BIM (VIPO)' if appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
+          <p>{{ appointment.patient_email }}{% if appointment.patient_phone %} · {{ appointment.patient_phone }}{% endif %} · Ordonnance : {{ 'reçue' if appointment.prescription_filename else 'non jointe' }}</p>
+          {% if appointment.notes %}<p>{{ appointment.notes }}</p>{% endif %}
+          {% if appointment.prescription_filename %}<a href="{{ url_for('admin_download_appointment_prescription', appointment_id=appointment.id) }}">Télécharger l’ordonnance</a>{% endif %}
+        </article>
+        {% else %}<p>Aucun rendez-vous pour cette journée. Sélectionnez une date ci-dessous.</p>{% endfor %}
+      </section>
       {% if success %}
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
@@ -48,7 +61,7 @@
             <p>{{ l10n(
               'Kies een datum om naar de juiste week te gaan. Klik vervolgens op een vrij kwartier.',
               'Choose a date to open the correct week, then click an available slot.',
-              'Choisissez une date pour afficher la semaine correspondante, puis cliquez sur un quart d’heure disponible.'
+              'Choisissez une date pour afficher votre journée et la semaine correspondante. Les créneaux durent 10 minutes.'
             ) }}</p>
           </div>
 
@@ -74,14 +87,6 @@
             <span><i class="legend-booked"></i> {{ l10n('Ingepland', 'Scheduled', 'Planifié') }}</span>
           </div>
 
-          <div class="appointment-preview-note">
-            <strong>{{ l10n('Pilotversie', 'Pilot version', 'Version pilote') }}</strong>
-            <p>{{ l10n(
-              'De publieke patiëntomgeving staat nog niet open. Je kunt de afsprakenflow hier eerst veilig beoordelen.',
-              'The public patient area is not open yet. You can safely review the appointment flow here first.',
-              'L’espace public destiné aux patients n’est pas encore ouvert. Vous pouvez d’abord évaluer ici le parcours de prise de rendez-vous en toute sécurité.'
-            ) }}</p>
-          </div>
         </aside>
 
         <section class="appointment-calendar-card">
@@ -113,24 +118,28 @@
                 {% for slot in row.slots %}
                   {% if slot.appointment %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
-                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(minutes=slot_duration_minutes)).strftime('%H:%M') }}</span>
+                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
                       <strong>{{ slot.appointment.patient_name }}</strong>
                       {% set appointment_label_key = slot.appointment.inami_code or slot.appointment.appointment_type %}
                       <span>{{ appointment_type_labels.get(appointment_label_key, slot.appointment.appointment_type) }}</span>
                       <details>
                         <summary>{{ l10n('Details', 'Details', 'Détails') }}</summary>
                         <p>{{ slot.appointment.patient_email }}</p>
+                        <p>Médecin : {{ slot.appointment.referring_doctor or 'Non renseigné' }}</p>
+                        <p>Statut : {{ 'BIM (VIPO)' if slot.appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if slot.appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
                         {% if slot.appointment.patient_phone %}<p>{{ slot.appointment.patient_phone }}</p>{% endif %}
                         {% if slot.appointment.notes %}<p>{{ slot.appointment.notes }}</p>{% endif %}
                         {% if slot.appointment.prescription_filename %}
                           <p><a class="appointment-prescription-link" href="{{ url_for('admin_download_appointment_prescription', appointment_id=slot.appointment.id) }}">{{ l10n('Voorschrift downloaden', 'Download prescription', 'Télécharger l’ordonnance') }}</a></p>
                         {% endif %}
-                        <form method="post" action="{{ url_for('admin_cancel_appointment', appointment_id=slot.appointment.id) }}" onsubmit="return confirm({{ l10n('Deze afspraak annuleren en dit kwartier opnieuw vrijgeven?', 'Cancel this appointment and make this slot available again?', 'Annuler ce rendez-vous et libérer à nouveau ce créneau ?')|tojson }});">
+                        <form method="post" action="{{ url_for('admin_cancel_appointment', appointment_id=slot.appointment.id) }}" onsubmit='return confirm({{ "Annuler ce rendez-vous et libérer le créneau ?"|tojson }});'>
                           <input type="hidden" name="week_date" value="{{ selected_date }}">
                           <button type="submit" class="appointment-cancel-button">{{ l10n('Annuleer afspraak', 'Cancel appointment', 'Annuler le rendez-vous') }}</button>
                         </form>
                       </details>
                     </article>
+                  {% elif slot.blocked %}
+                    <div class="appointment-slot appointment-slot-booked">Indisponible</div>
                   {% else %}
                     <button
                       class="appointment-slot appointment-slot-available"
@@ -161,6 +170,8 @@
         <form method="post" action="{{ url_for('admin_book_appointment') }}" class="appointment-booking-form" enctype="multipart/form-data">
           <input type="hidden" name="slot_start" id="appointment-slot-start">
           <input type="hidden" name="week_date" value="{{ selected_date }}">
+          <label>Médecin prescripteur<input name="referring_doctor" maxlength="255"></label>
+          <label>Statut du patient<select name="insurance_status"><option value="">Non renseigné</option><option value="bim">BIM (VIPO)</option><option value="normal">Normal — sans intervention majorée</option></select></label>
           <label>
             {{ l10n('Naam patiënt', 'Patient name', 'Nom du patient') }}
             <input name="patient_name" type="text" autocomplete="name" required maxlength="255">
@@ -189,7 +200,7 @@
           </label>
           <section class="appointment-prescription-section" aria-labelledby="appointment-prescription-title">
             <div>
-              <p class="appointment-prescription-title" id="appointment-prescription-title">{{ l10n('Voorschrift vereist', 'Prescription required', 'Ordonnance requise') }}</p>
+              <p class="appointment-prescription-title" id="appointment-prescription-title">Ordonnance facultative</p>
               <p class="appointment-prescription-copy">{{ l10n('Laad het voorschrift als PDF op of neem een leesbare foto. Maximaal 10 MB.', 'Upload the prescription as a PDF or take a readable photo. Maximum 10 MB.', 'Téléversez l’ordonnance au format PDF ou prenez une photo lisible. Maximum 10 Mo.') }}</p>
             </div>
             <div class="appointment-upload-options">
