@@ -66,6 +66,18 @@ class AppointmentHold(db.Model):
     starts_at = db.Column(db.DateTime, primary_key=True)
     token = db.Column(db.String(80), nullable=False)
     expires_at = db.Column(db.DateTime, nullable=False)
+    draft_data = db.Column(db.Text, nullable=True)
+    prescription_filename = db.Column(db.String(255), nullable=True)
+    prescription_mimetype = db.Column(db.String(120), nullable=True)
+    prescription_data = db.Column(db.LargeBinary, nullable=True)
+
+    @property
+    def draft(self):
+        import json
+        try:
+            return json.loads(self.draft_data or "{}")
+        except (TypeError, ValueError):
+            return {}
 
 
 class Question(db.Model):

@@ -138,6 +138,22 @@
                         </form>
                       </details>
                     </article>
+                  {% elif slot.reservation %}
+                    {% set reservation_data = slot.reservation.draft %}
+                    <article class="appointment-slot appointment-slot-booked" aria-label="Réservation enregistrée">
+                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }}</span>
+                      <strong>{{ reservation_data.get('patient_name') or 'Formulaire en cours' }}</strong>
+                      {% set reservation_code = reservation_data.get('inami_code', '') %}
+                      {% if reservation_code %}<span>{{ appointment_type_labels.get(reservation_code, reservation_code) }}</span>{% else %}<span>Examen à compléter</span>{% endif %}
+                      <details open>
+                        <summary>Informations enregistrées</summary>
+                        <p>E-mail : {{ reservation_data.get('patient_email') or 'Non renseigné' }}</p>
+                        <p>Téléphone : {{ reservation_data.get('patient_phone') or 'Non renseigné' }}</p>
+                        <p>Statut : {{ 'BIM (VIPO)' if reservation_data.get('insurance_status') == 'bim' else ('Normal — sans intervention majorée' if reservation_data.get('insurance_status') == 'normal' else 'À compléter') }}</p>
+                        {% if slot.reservation.prescription_filename %}<p>Ordonnance : {{ slot.reservation.prescription_filename }}</p>{% else %}<p>Ordonnance : non jointe</p>{% endif %}
+                        <p>Créneau réservé et enregistré dans la base de données.</p>
+                      </details>
+                    </article>
                   {% elif slot.blocked %}
                     <div class="appointment-slot appointment-slot-blocked">{{ slot.block_reason }}</div>
                   {% else %}

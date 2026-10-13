@@ -789,6 +789,13 @@ def ensure_appointment_schema() -> None:
 
     inspector = inspect(db.engine)
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
+    hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
+    hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
+    for name, kind in (("draft_data", "TEXT"), ("prescription_filename", "VARCHAR(255)"),
+                       ("prescription_mimetype", "VARCHAR(120)"), ("prescription_data", hold_binary_type)):
+        if name not in hold_columns:
+            db.session.execute(text(f"ALTER TABLE appointment_hold ADD COLUMN {name} {kind}"))
+    db.session.commit()
     if "appointment" not in inspector.get_table_names():
         Appointment.__table__.create(bind=db.engine, checkfirst=True)
         APPOINTMENT_SCHEMA_READY = True
@@ -3841,17 +3848,15 @@ def slot_is_booked(starts_at):
 
 
 def claim_agenda_slot(starts_at, token):
-    # Atomic ownership across workers; the row stays locked until commit.
-    now = datetime.utcnow()
+    # A public reservation is a persistent internal booking until its form is completed.
     result = db.session.execute(text(
         "INSERT INTO appointment_hold (starts_at, token, expires_at) "
         "VALUES (:start, :token, :expiry) ON CONFLICT (starts_at) DO UPDATE "
         "SET token = :token, expires_at = :expiry "
-        "WHERE appointment_hold.expires_at < :now OR appointment_hold.token = :token "
+        "WHERE appointment_hold.token = :token "
         "RETURNING token"
-    ).bindparams(bindparam("start", type_=DateTime), bindparam("expiry", type_=DateTime),
-                 bindparam("now", type_=DateTime)),
-        {"start": starts_at, "token": token, "expiry": now + timedelta(minutes=10), "now": now}).first()
+    ).bindparams(bindparam("start", type_=DateTime), bindparam("expiry", type_=DateTime)),
+        {"start": starts_at, "token": token, "expiry": datetime.utcnow() + timedelta(days=36500)}).first()
     return result is not None
 
 
@@ -3872,7 +3877,7 @@ def public_agenda():
         Appointment.starts_at >= datetime.combine(start, time.min) - timedelta(hours=1),
         Appointment.starts_at < datetime.combine(end, time.min),
     ).all()
-    holds = AppointmentHold.query.filter(AppointmentHold.expires_at > datetime.utcnow()).all()
+    holds = AppointmentHold.query.all()
     days, rows = build_appointment_slot_grid(start, [], "fr")
     for row in rows:
         for slot in row["slots"]:
@@ -3912,6 +3917,36 @@ def public_agenda_hold():
     return jsonify(ok=True)
 
 
+@app.post("/agenda/draft")
+def public_agenda_draft():
+    ensure_appointment_schema()
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    stamp = parse_appointment_slot(request.form.get("slot_start"))
+    hold = db.session.get(AppointmentHold, stamp) if stamp else None
+    if not hold or hold.token != agenda_token():
+        return jsonify(error="Votre réservation n’est plus disponible."), 409
+    code = (request.form.get("inami_code") or "").strip()
+    insurance = request.form.get("insurance_status")
+    email = (request.form.get("patient_email") or "").strip().lower()
+    data = {"patient_name": (request.form.get("patient_name") or "").strip()[:255],
+            "patient_email": email[:255], "patient_phone": (request.form.get("patient_phone") or "").strip()[:80],
+            "insurance_status": insurance if insurance in {"bim", "normal"} else "",
+            "inami_code": code if code in INAMI_ULTRASOUND_BY_CODE else ""}
+    try:
+        upload = request.files.get("prescription_file")
+        if upload and upload.filename:
+            filename, mimetype, payload = read_prescription_upload()
+            hold.prescription_filename = filename
+            hold.prescription_mimetype = mimetype
+            hold.prescription_data = payload
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    hold.draft_data = json.dumps(data, ensure_ascii=False)
+    db.session.commit()
+    return jsonify(ok=True)
+
+
 @app.route("/admin/appointments")
 def admin_appointments():
     admin_redirect = admin_required()
@@ -3941,14 +3976,16 @@ def admin_appointments():
         appointments,
         language=language,
     )
-    reserved = {hold.starts_at for hold in AppointmentHold.query.filter(
-        AppointmentHold.expires_at > datetime.utcnow()).all()}
+    holds = AppointmentHold.query.all()
+    reserved = {hold.starts_at for hold in holds}
+    reservation_by_start = {hold.starts_at: hold for hold in holds}
     for row in slot_rows:
         for slot in row['slots']:
             # Keep the patient identifiable internally throughout a longer visit.
             if not slot['appointment']:
                 slot['appointment'] = next((a for a in appointments
                     if a.starts_at <= slot['starts_at'] < a.starts_at + timedelta(minutes=a.duration_minutes)), None)
+            slot['reservation'] = reservation_by_start.get(slot['starts_at']) if not slot['appointment'] else None
             slot['block_reason'] = (
                 'Réservation en cours' if slot['starts_at'] in reserved
                 else 'Fermé' if not appointment_slot_is_open(slot['starts_at'])
@@ -3973,7 +4010,7 @@ def admin_appointments():
         timedelta=timedelta,
         days=days,
         slot_rows=slot_rows,
-        booked_count=len(appointments),
+        booked_count=len(appointments) + len(holds),
         available_count=sum(not slot['blocked'] and not slot['appointment']
                             for row in slot_rows for slot in row['slots']),
         appointment_groups=appointment_groups,
@@ -4104,6 +4141,7 @@ def admin_book_appointment():
     )
     try:
         db.session.add(appointment)
+        hold = db.session.get(AppointmentHold, starts_at) if public else None
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -4120,6 +4158,9 @@ def admin_book_appointment():
         ))
 
     if public:
+        if hold:
+            db.session.delete(hold)
+            db.session.commit()
         return jsonify(ok=True, redirect=url_for("public_agenda", date=starts_at.date().isoformat(), success=1))
     return redirect(url_for(
         "admin_appointments",
