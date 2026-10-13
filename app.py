@@ -3945,6 +3945,15 @@ def admin_appointments():
         AppointmentHold.expires_at > datetime.utcnow()).all()}
     for row in slot_rows:
         for slot in row['slots']:
+            # Keep the patient identifiable internally throughout a longer visit.
+            if not slot['appointment']:
+                slot['appointment'] = next((a for a in appointments
+                    if a.starts_at <= slot['starts_at'] < a.starts_at + timedelta(minutes=a.duration_minutes)), None)
+            slot['block_reason'] = (
+                'Réservation en cours' if slot['starts_at'] in reserved
+                else 'Fermé' if not appointment_slot_is_open(slot['starts_at'])
+                else 'Créneau passé'
+            )
             slot['blocked'] = slot['blocked'] or slot['starts_at'] in reserved or slot['starts_at'] <= agenda_now()
     appointment_type_labels = get_appointment_display_labels(language)
     appointment_groups = get_localized_inami_appointment_groups(language)

@@ -24,7 +24,7 @@
       <section class="appointment-hero">
         <div>
           <p class="appointment-eyebrow">{{ l10n('PRIVÉPRAKTIJK RADIOLOGIE', 'PRIVATE RADIOLOGY PRACTICE', 'CABINET PRIVÉ DE RADIOLOGIE') }}</p>
-          <h1>{{ l10n('Afsprakenplanner', 'Appointment planner', 'Planificateur de rendez-vous') }}</h1>
+          <h1>Agenda interne · Patients</h1>
         </div>
         <div class="appointment-hero-note">
           <span class="appointment-note-dot"></span>
@@ -118,7 +118,7 @@
                 {% for slot in row.slots %}
                   {% if slot.appointment %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
-                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
+                      <span class="appointment-slot-time">{{ slot.appointment.starts_at.strftime('%H:%M') }} - {{ (slot.appointment.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
                       <strong>{{ slot.appointment.patient_name }}</strong>
                       {% set appointment_label_key = slot.appointment.inami_code or slot.appointment.appointment_type %}
                       <span>{{ appointment_type_labels.get(appointment_label_key, slot.appointment.appointment_type) }}</span>
@@ -139,7 +139,7 @@
                       </details>
                     </article>
                   {% elif slot.blocked %}
-                    <div class="appointment-slot appointment-slot-booked">Indisponible</div>
+                    <div class="appointment-slot appointment-slot-blocked">{{ slot.block_reason }}</div>
                   {% else %}
                     <button
                       class="appointment-slot appointment-slot-available"

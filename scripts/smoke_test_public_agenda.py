@@ -67,6 +67,13 @@ try:
     first.post('/login', data={'email':'y@bymed.be', 'password':'test-password'})
     page = first.get('/admin/appointments?date=' + day)
     assert page.status_code == 200
+    assert b'Agenda interne' in page.data
+    assert b'Indisponible' not in page.data
+    assert b'459712' in page.data
+    with app.test_request_context():
+        from flask import url_for
+        home_url = url_for('home')
+    assert b'AGENDA INTERNE' in first.get(home_url).data
     for value in (b'SECRET PATIENT', b'SECRET DOCTOR', b'BIM (VIPO)', b'Votre journ'):
         assert value in page.data
     assert b'SECRET PATIENT' not in first.get('/agenda?date=' + day).data
@@ -79,6 +86,9 @@ try:
         db.session.commit()
     assert second.post('/agenda/hold', data={'csrf_token':t2, 'slot_start':target.replace(hour=19, minute=20).isoformat()}).status_code == 409
     assert second.post('/agenda/hold', data={'csrf_token':t2, 'slot_start':target.replace(hour=19, minute=40).isoformat()}).status_code == 200
+    internal = first.get('/admin/appointments?date=' + day).data
+    assert 'Réservation en cours'.encode() in internal
+    assert internal.count(b'LEGACY') >= 3  # Day summary, start and continuation slot.
     # Boundaries: Tuesday/Thursday end at 20:10 and Saturday ends at 13:00.
     monday = datetime(2031, 1, 6)
     for weekday, hour, minute, expected in [(0,18,10,False),(1,18,0,False),(1,18,10,True),
