@@ -500,27 +500,17 @@
 .appointment-submit-button { min-height: 46px; margin-top: 8px; border-radius: 9px; font-size: 0.9rem; }
 .appointment-modal-open { overflow: hidden; }
 
-.appointment-availability-days {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
-  gap: 20px;
-  margin-top: 24px;
-}
-.appointment-availability-day {
-  border: 1px solid var(--appointment-border);
-  border-radius: 14px;
-  padding: 16px;
-  background: #f8fafd;
-}
-.appointment-availability-day h3 { margin: 0 0 16px; }
-.appointment-availability-day h3 span { color: var(--appointment-muted); font-size: .85em; }
-.appointment-availability-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.appointment-availability-slots .appointment-slot { border: 1px solid var(--appointment-border); border-radius: 9px; text-align: center; }
-.appointment-availability-slots small { display: block; margin-top: 3px; }
-.appointment-unavailable-slots { margin-top: 16px; color: var(--appointment-muted); font-size: .8rem; }
-.appointment-unavailable-slots summary { cursor: pointer; margin-bottom: 10px; }
-@media (max-width: 700px) { .appointment-availability-days { grid-template-columns: 1fr; } }
+.appointment-compact-week-wrap { margin-top: 24px; overflow-x: auto; }
+.appointment-compact-week { width: 100%; min-width: 700px; table-layout: fixed; border-collapse: collapse; }
+.appointment-compact-week th { padding: 14px 6px; background: #f8fafd; border: 1px solid var(--appointment-border); }
+.appointment-compact-week th span, .appointment-compact-week th strong { display: block; }
+.appointment-compact-week th span { font-size: .8rem; color: var(--appointment-muted); margin-bottom: 5px; }
+.appointment-compact-week td { padding: 0; height: 44px; border: 1px solid var(--appointment-border); text-align: center; }
+.appointment-compact-week .appointment-slot { width: 100%; min-height: 44px; border: 0; text-align: center; padding: 5px; }
+.appointment-compact-week .appointment-slot strong { font-size: .8rem; }
+.appointment-compact-week .appointment-slot small { display: block; font-size: .65rem; margin-top: 2px; }
+.appointment-closed-cell { background: #f3f5f8; }
+.appointment-closed-label { color: var(--appointment-muted); font-size: .75rem; }
 
 @media (max-width: 980px) {
   .appointment-dashboard { grid-template-columns: 1fr; }

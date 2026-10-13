@@ -3863,14 +3863,11 @@ def public_agenda():
             ) or any(h.starts_at == stamp for h in holds)
     consultation_days = []
     for index, day in enumerate(days):
-        if day['date'].weekday() not in APPOINTMENT_WEEKLY_WINDOWS:
-            continue
         day_slots = [row['slots'][index] for row in rows
                      if appointment_slot_is_open(row['slots'][index]['starts_at'])]
-        consultation_days.append(dict(day,
-            available_slots=[slot for slot in day_slots if not slot['unavailable']],
-            unavailable_slots=[slot for slot in day_slots if slot['unavailable']]))
+        consultation_days.append(dict(day, slots=day_slots))
     return render_template("public_agenda.html", consultation_days=consultation_days,
+        calendar_row_count=max(len(day['slots']) for day in consultation_days),
         week_start=start, week_end=end, timedelta=timedelta,
         appointment_groups=get_localized_inami_appointment_groups("fr"),
         csrf_token=agenda_token(), success=request.args.get("success") == "1")
