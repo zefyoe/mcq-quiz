@@ -169,7 +169,7 @@ APPOINTMENT_SCHEMA_READY = False
 APPOINTMENT_SLOT_MINUTES = 10
 APPOINTMENT_WEEKLY_WINDOWS = {1: (18 * 60 + 10, 20 * 60 + 10),
                               3: (18 * 60 + 10, 20 * 60 + 10),
-                              5: (10 * 60, 13 * 60)}
+                              5: (10 * 60, 16 * 60)}
 APPOINTMENT_OPENING_HOUR = 8
 APPOINTMENT_CLOSING_HOUR = 21
 APPOINTMENT_SLOTS_PER_DAY = (
