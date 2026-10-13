@@ -34,6 +34,7 @@
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="slot_start" id="slot-start">
 <label>Quel examen souhaitez-vous ? <span>(obligatoire)</span><select name="inami_code" required><option value="" selected disabled>Choisissez un examen</option>{% for group, entries in appointment_groups %}<optgroup label="{{ group }}">{% for code,label in entries %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</optgroup>{% endfor %}</select></label>
 <label class="agenda-half-field">Nom et prénom du patient<input name="patient_name" required maxlength="255" autocomplete="off"></label>
+<button class="appointment-submit-button" id="reserve-slot" type="button" disabled>Réserver le créneau</button>
 <label class="agenda-half-field">E-mail (facultatif)<input name="patient_email" type="email" maxlength="255" autocomplete="email"></label>
 <label class="agenda-half-field">Téléphone du patient (facultatif)<input name="patient_phone" type="tel" maxlength="80" autocomplete="off"></label>
 <fieldset><legend>Statut du patient</legend><label><input type="radio" name="insurance_status" value="bim" required> BIM (VIPO)</label><label><input type="radio" name="insurance_status" value="normal" required> Normal — sans intervention majorée</label></fieldset>
@@ -45,25 +46,30 @@ let lastSlotButton;
 let draftTimer;
 let claimed=false;
 const examSelect=form.elements.inami_code;
+const patientName=form.elements.patient_name;
+const reserveButton=document.getElementById('reserve-slot');
 const patientFields=[...form.querySelectorAll('input,select,button')].filter(el=>!['csrf_token','slot_start','inami_code'].includes(el.name) && el.id!=='close');
-function setPatientFieldsEnabled(enabled){patientFields.forEach(el=>el.disabled=!enabled);}
+function setPatientFieldsEnabled(enabled){patientFields.forEach(el=>{if(el!==patientName && el!==reserveButton)el.disabled=!enabled;});}
 setPatientFieldsEnabled(false);
 async function saveDraft(){
  const data=new FormData(form);data.set('slot_start',form.elements.slot_start.value);
  const response=await fetch('{{ url_for("public_agenda_draft") }}',{method:'POST',body:data});
  if(!response.ok){const result=await response.json();throw new Error(result.error || 'Enregistrement impossible.');}
 }
-form.addEventListener('input',()=>{if(!claimed)return;clearTimeout(draftTimer);draftTimer=setTimeout(()=>saveDraft().catch(error=>{document.getElementById('booking-error').textContent=error.message;}),400);});
+form.addEventListener('input',()=>{if(!claimed){reserveButton.disabled=!(examSelect.value && patientName.value.trim());return;}clearTimeout(draftTimer);draftTimer=setTimeout(()=>saveDraft().catch(error=>{document.getElementById('booking-error').textContent=error.message;}),400);});
 form.addEventListener('change',event=>{if(claimed && event.target!==examSelect)saveDraft().catch(error=>{document.getElementById('booking-error').textContent=error.message;});});
-examSelect.addEventListener('change',async()=>{
- if(!form.elements.slot_start.value || !examSelect.value)return;
- try{const data=new FormData();data.set('csrf_token',form.elements.csrf_token.value);data.set('slot_start',form.elements.slot_start.value);data.set('inami_code',examSelect.value);
+examSelect.addEventListener('change',()=>{patientName.disabled=!examSelect.value;reserveButton.disabled=!(examSelect.value && patientName.value.trim());if(examSelect.value)patientName.focus();});
+reserveButton.addEventListener('click',async()=>{
+ const errorBox=document.getElementById('booking-error');
+ if(!patientName.value.trim() || !examSelect.value){errorBox.textContent='Veuillez indiquer le nom du patient et l’examen ; le créneau ne peut pas être réservé sans ces deux informations.';return;}
+ reserveButton.disabled=true;
+ try{const data=new FormData();data.set('csrf_token',form.elements.csrf_token.value);data.set('slot_start',form.elements.slot_start.value);data.set('inami_code',examSelect.value);data.set('patient_name',patientName.value.trim());
  const response=await fetch('{{ url_for("public_agenda_hold") }}',{method:'POST',body:data});const result=await response.json();if(!response.ok)throw new Error(result.error || 'Réservation impossible.');
- claimed=true;setPatientFieldsEnabled(true);await saveDraft();form.querySelector('[name="patient_name"]').focus();
- }catch(error){document.getElementById('booking-error').textContent=error.message;examSelect.value='';}
+ claimed=true;setPatientFieldsEnabled(true);reserveButton.hidden=true;await saveDraft();form.querySelector('[name="patient_email"]').focus();
+ }catch(error){errorBox.textContent=error.message;reserveButton.disabled=false;}
 });
 document.querySelectorAll('[data-slot]').forEach(button=>button.addEventListener('click',()=>{
- form.reset();claimed=false;setPatientFieldsEnabled(false);lastSlotButton=button;form.elements.slot_start.value=button.dataset.slot;
+ form.reset();claimed=false;reserveButton.hidden=false;reserveButton.disabled=true;patientName.disabled=true;setPatientFieldsEnabled(false);lastSlotButton=button;form.elements.slot_start.value=button.dataset.slot;
  document.getElementById('booking-error').textContent='';document.getElementById('selected-slot').textContent=button.dataset.label;
  modal.hidden=false;document.body.classList.add('appointment-modal-open');examSelect.focus();
 }));

@@ -3906,9 +3906,10 @@ def public_agenda_hold():
         abort(400)
     stamp = parse_appointment_slot(request.form.get("slot_start"))
     exam_code = (request.form.get("inami_code") or "").strip()
+    patient_name = (request.form.get("patient_name") or "").strip()
     if (not stamp or stamp <= agenda_now() or not appointment_slot_is_open(stamp)
-            or exam_code not in INAMI_ULTRASOUND_BY_CODE):
-        return jsonify(error="Choisissez un créneau futur valide."), 400
+            or exam_code not in INAMI_ULTRASOUND_BY_CODE or not patient_name):
+        return jsonify(error="Veuillez indiquer le nom du patient et l’examen ; le créneau ne peut pas être réservé sans ces deux informations."), 400
     if not claim_agenda_slot(stamp, agenda_token()) or slot_is_booked(stamp):
         db.session.rollback()
         return jsonify(error="Ce créneau n’est plus disponible."), 409
@@ -3916,7 +3917,7 @@ def public_agenda_hold():
         "DELETE FROM appointment_hold WHERE token = :token AND starts_at != :start"
     ).bindparams(bindparam("start", type_=DateTime)), {"token": agenda_token(), "start": stamp})
     reservation = db.session.get(AppointmentHold, stamp)
-    reservation.draft_data = json.dumps({"inami_code": exam_code}, ensure_ascii=False)
+    reservation.draft_data = json.dumps({"inami_code": exam_code, "patient_name": patient_name[:255]}, ensure_ascii=False)
     db.session.commit()
     return jsonify(ok=True)
 
