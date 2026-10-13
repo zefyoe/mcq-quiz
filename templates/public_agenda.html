@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="fr">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Agenda — Bymed Radiologie</title>{% include '_favicon.html' %}
 <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='appointments.css') }}"></head>
+<link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v='mobile-agenda-2') }}"></head>
 <body class="appointments-page">
 <header class="admin-topbar appointment-topbar"><div class="admin-topbar-inner"><span class="appointment-brand">Bymed <span>Cabinet privé de radiologie</span></span><span>Prendre rendez-vous</span></div></header>
 <main class="appointment-shell"><section class="appointment-hero"><div><p class="appointment-eyebrow">ÉCHOGRAPHIE</p><h1>Agenda</h1><p>Choisissez un créneau de 10 minutes, puis complétez les informations du patient.</p></div></section>
@@ -15,10 +15,11 @@
 <a href="{{ url_for('public_agenda', date=(week_start-timedelta(days=7)).isoformat()) }}">Semaine précédente</a><a href="{{ url_for('public_agenda') }}">Aujourd’hui</a><a href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">Semaine suivante</a></nav></div>
 <form class="appointment-date-form" method="get"><label for="date">Aller à la date</label><input id="date" name="date" type="date" value="{{ week_start.isoformat() }}"><button>Afficher la semaine</button></form>
 <div class="appointment-compact-week-wrap">
+<p class="appointment-mobile-closed-days">Fermé le lundi, mercredi, vendredi et dimanche.</p>
 <table class="appointment-compact-week" aria-label="Agenda hebdomadaire — horaires par jour">
-<thead><tr>{% for day in consultation_days %}<th scope="col"><span>{{ day.day_name|capitalize }}</span><strong>{{ day.date.strftime('%d/%m') }}</strong></th>{% endfor %}</tr></thead>
+<thead><tr>{% for day in consultation_days %}<th scope="col" class="{{ 'appointment-closed-column' if not day.slots else '' }}"><span>{{ day.day_name|capitalize }}</span><strong>{{ day.date.strftime('%d/%m') }}</strong></th>{% endfor %}</tr></thead>
 <tbody>{% for index in range(calendar_row_count) %}<tr>{% for day in consultation_days %}
-<td class="{{ 'appointment-closed-cell' if not day.slots else '' }}">
+<td class="{{ 'appointment-closed-cell appointment-closed-column' if not day.slots else '' }}">
 {% if index < day.slots|length %}{% set slot = day.slots[index] %}
 <button class="appointment-slot {{ 'appointment-slot-booked' if slot.unavailable else 'appointment-slot-available' }}" type="button"
 {% if slot.unavailable %}disabled{% else %}data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}" data-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m/%Y à %H:%M') }}"{% endif %}>
@@ -34,24 +35,39 @@
 <label>E-mail de contact du patient<input name="patient_email" type="email" required maxlength="255" autocomplete="off"></label>
 <label>Téléphone du patient <span>facultatif</span><input name="patient_phone" type="tel" maxlength="80" autocomplete="off"></label>
 <fieldset><legend>Statut du patient</legend><label><input type="radio" name="insurance_status" value="bim" required> BIM (VIPO)</label><label><input type="radio" name="insurance_status" value="normal" required> Normal — sans intervention majorée</label></fieldset>
-<label>Code INAMI et examen échographique<select name="inami_code" required size="8"><option value="" selected disabled>Choisissez un examen</option>{% for group, entries in appointment_groups %}<optgroup label="{{ group }}">{% for code,label in entries %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</optgroup>{% endfor %}</select></label>
+<label>Code INAMI et examen échographique<select name="inami_code" required size="8" aria-describedby="selected-exam"><option value="" selected disabled>Choisissez un examen</option>{% for group, entries in appointment_groups %}<optgroup label="{{ group }}">{% for code,label in entries %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</optgroup>{% endfor %}</select></label>
+<p id="selected-exam" class="appointment-field-help" aria-live="polite"></p>
 <label>Ordonnance <span>facultative · PDF, JPG, PNG ou WEBP · maximum 10 Mo</span><input type="file" name="prescription_file" accept=".pdf,image/jpeg,image/png,image/webp"></label>
 <label>Informations pour le radiologue <span>facultatif</span><textarea name="notes" maxlength="2000" rows="3"></textarea></label>
 <button class="appointment-submit-button" type="submit">Confirmer le rendez-vous</button></form></section></div>
 <script>
 const modal=document.getElementById('booking-modal'), form=document.getElementById('booking-form');
+const mobileForm = window.matchMedia('(max-width: 1024px)');
+const exam = form.elements.inami_code;
+function resizeExam(){if(mobileForm.matches)exam.removeAttribute('size');else exam.setAttribute('size','8');}
+resizeExam();mobileForm.addEventListener('change',resizeExam);
+exam.addEventListener('change',()=>{document.getElementById('selected-exam').textContent=exam.selectedOptions[0]?.textContent || '';});
+let lastSlotButton;
 document.querySelectorAll('[data-slot]').forEach(button=>button.addEventListener('click',async()=>{
  button.disabled=true;
  try {const data=new FormData();data.set('csrf_token',form.elements.csrf_token.value);data.set('slot_start',button.dataset.slot);
  const response=await fetch('{{ url_for("public_agenda_hold") }}',{method:'POST',body:data});const result=await response.json();
  if(!response.ok) throw new Error(result.error || 'Réservation impossible.');
- form.elements.slot_start.value=button.dataset.slot;document.getElementById('selected-slot').textContent=button.dataset.label;modal.hidden=false;document.body.classList.add('appointment-modal-open');form.elements.referring_doctor.focus();
+ lastSlotButton=button;form.elements.slot_start.value=button.dataset.slot;document.getElementById('selected-slot').textContent=button.dataset.label;modal.hidden=false;document.body.classList.add('appointment-modal-open');document.getElementById('close').focus();
  }catch(error){document.getElementById('calendar-error').textContent=error.message;}finally{button.disabled=false;}
 }));
-document.getElementById('close').onclick=()=>{modal.hidden=true;document.body.classList.remove('appointment-modal-open');};
+document.getElementById('close').onclick=()=>{modal.hidden=true;document.body.classList.remove('appointment-modal-open');lastSlotButton?.focus();};
+modal.addEventListener('keydown',event=>{
+ if(event.key==='Escape'){document.getElementById('close').click();return;}
+ if(event.key!=='Tab')return;
+ const fields=[...modal.querySelectorAll('button,input:not([type=hidden]),select,textarea')].filter(el=>!el.disabled);
+ const first=fields[0],last=fields[fields.length-1];
+ if(event.shiftKey && document.activeElement===first){event.preventDefault();last.focus();}
+ else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}
+});
 form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('[type=submit]');submit.disabled=true;
  try{const response=await fetch(form.action,{method:'POST',body:new FormData(form)});const result=await response.json();if(!response.ok)throw new Error(result.error || 'Réservation impossible.');location.assign(result.redirect);}
  catch(error){document.getElementById('booking-error').textContent=error.message;submit.disabled=false;}
 });
-setInterval(()=>{if(modal.hidden)location.reload();},60000);
+setInterval(()=>{if(modal.hidden && document.visibilityState==='visible' && !document.activeElement.closest('form'))location.reload();},60000);
 </script></body></html>
