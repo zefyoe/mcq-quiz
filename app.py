@@ -3905,7 +3905,9 @@ def public_agenda_hold():
     if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
         abort(400)
     stamp = parse_appointment_slot(request.form.get("slot_start"))
-    if not stamp or stamp <= agenda_now() or not appointment_slot_is_open(stamp):
+    exam_code = (request.form.get("inami_code") or "").strip()
+    if (not stamp or stamp <= agenda_now() or not appointment_slot_is_open(stamp)
+            or exam_code not in INAMI_ULTRASOUND_BY_CODE):
         return jsonify(error="Choisissez un créneau futur valide."), 400
     if not claim_agenda_slot(stamp, agenda_token()) or slot_is_booked(stamp):
         db.session.rollback()
@@ -3913,6 +3915,8 @@ def public_agenda_hold():
     db.session.execute(text(
         "DELETE FROM appointment_hold WHERE token = :token AND starts_at != :start"
     ).bindparams(bindparam("start", type_=DateTime)), {"token": agenda_token(), "start": stamp})
+    reservation = db.session.get(AppointmentHold, stamp)
+    reservation.draft_data = json.dumps({"inami_code": exam_code}, ensure_ascii=False)
     db.session.commit()
     return jsonify(ok=True)
 
