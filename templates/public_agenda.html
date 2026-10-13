@@ -3,50 +3,44 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Agenda — Bymed Radiologie</title>{% include '_favicon.html' %}
 <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v='mobile-agenda-2') }}"></head>
-<body class="appointments-page">
+<link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v=agenda_asset_version) }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='public_agenda.css', v=agenda_asset_version) }}"></head>
+<body class="appointments-page public-agenda-page">
 <header class="admin-topbar appointment-topbar"><div class="admin-topbar-inner"><span class="appointment-brand">Bymed <span>Cabinet privé de radiologie</span></span><span>Prendre rendez-vous</span></div></header>
-<main class="appointment-shell"><section class="appointment-hero"><div><p class="appointment-eyebrow">ÉCHOGRAPHIE</p><h1>Agenda</h1><p>Choisissez un créneau de 10 minutes, puis complétez les informations du patient.</p></div></section>
+<main class="appointment-shell"><section class="appointment-hero"><div><p class="appointment-eyebrow">CABINET DE RADIOLOGIE · ÉCHOGRAPHIE</p><h1>Prendre rendez-vous</h1><p>Sélectionnez un horaire, puis renseignez le patient et l’examen souhaité.</p></div><div class="agenda-duration">10 min <span>par rendez-vous</span></div></section>
 {% if success %}<p class="appointment-alert appointment-alert-success" role="status">Le rendez-vous est confirmé.</p>{% endif %}
 <p id="calendar-error" role="alert"></p>
-<p>Mardi et jeudi : 18:10–20:10 · Samedi : 10:00–13:00</p>
-<section class="appointment-calendar-card appointment-dashboard" style="display:block">
-<div class="appointment-calendar-toolbar"><h2>{{ week_start.strftime('%d/%m/%Y') }} – {{ (week_end-timedelta(days=1)).strftime('%d/%m/%Y') }}</h2><nav class="appointment-week-actions">
-<a href="{{ url_for('public_agenda', date=(week_start-timedelta(days=7)).isoformat()) }}">Semaine précédente</a><a href="{{ url_for('public_agenda') }}">Aujourd’hui</a><a href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">Semaine suivante</a></nav></div>
-<form class="appointment-date-form" method="get"><label for="date">Aller à la date</label><input id="date" name="date" type="date" value="{{ week_start.isoformat() }}"><button>Afficher la semaine</button></form>
+<section class="appointment-calendar-card appointment-dashboard agenda-week-panel">
+<div class="appointment-calendar-toolbar"><div><p class="appointment-eyebrow">VOTRE SEMAINE</p><h2>{{ week_start.strftime('%d/%m/%Y') }} – {{ (week_end-timedelta(days=1)).strftime('%d/%m/%Y') }}</h2></div><nav class="appointment-week-actions" aria-label="Navigation entre les semaines">
+<a class="agenda-arrow" aria-label="Semaine précédente" title="Semaine précédente" href="{{ url_for('public_agenda', date=(week_start-timedelta(days=7)).isoformat()) }}">&#8249;</a><a class="appointment-today-link" href="{{ url_for('public_agenda') }}">Aujourd’hui</a><a class="agenda-arrow" aria-label="Semaine suivante" title="Semaine suivante" href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">&#8250;</a></nav></div>
+<div class="agenda-controls"><form class="appointment-date-form" method="get"><label for="date">Choisir une date</label><input id="date" name="date" type="date" value="{{ week_start.isoformat() }}"><button>Afficher</button></form>
+<div class="agenda-key" aria-label="Légende"><span><i class="agenda-key-free"></i>Disponible</span><span><i class="agenda-key-busy"></i>Indisponible</span></div></div>
 <div class="appointment-compact-week-wrap">
 <p class="appointment-mobile-closed-days">Fermé le lundi, mercredi, vendredi et dimanche.</p>
 <table class="appointment-compact-week" aria-label="Agenda hebdomadaire — horaires par jour">
-<thead><tr>{% for day in consultation_days %}<th scope="col" class="{{ 'appointment-closed-column' if not day.slots else '' }}"><span>{{ day.day_name|capitalize }}</span><strong>{{ day.date.strftime('%d/%m') }}</strong></th>{% endfor %}</tr></thead>
+<colgroup>{% for day in consultation_days %}<col class="{{ 'agenda-closed-col' if not day.slots else 'agenda-open-col' }}">{% endfor %}</colgroup>
+<thead><tr>{% for day in consultation_days %}<th scope="col" class="{{ 'appointment-closed-column' if not day.slots else 'agenda-open-day' }}"><span>{{ day.day_name|capitalize }}</span><strong>{{ day.date.strftime('%d/%m') }}</strong>{% if day.slots %}<small>{{ day.slots[0].starts_at.strftime('%H:%M') }}–{{ (day.slots[-1].starts_at+timedelta(minutes=10)).strftime('%H:%M') }}</small>{% else %}<small>Fermé</small>{% endif %}</th>{% endfor %}</tr></thead>
 <tbody>{% for index in range(calendar_row_count) %}<tr>{% for day in consultation_days %}
-<td class="{{ 'appointment-closed-cell appointment-closed-column' if not day.slots else '' }}">
+{% if day.slots %}<td>
 {% if index < day.slots|length %}{% set slot = day.slots[index] %}
 <button class="appointment-slot {{ 'appointment-slot-booked' if slot.unavailable else 'appointment-slot-available' }}" type="button"
 {% if slot.unavailable %}disabled{% else %}data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}" data-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m/%Y à %H:%M') }}"{% endif %}>
 <strong>{{ slot.starts_at.strftime('%H:%M') }}</strong><small>{{ 'Indisponible' if slot.unavailable else 'Libre' }}</small></button>
-{% elif index == 0 and not day.slots %}<span class="appointment-closed-label">Fermé</span>{% endif %}
-</td>{% endfor %}</tr>{% endfor %}</tbody></table>
-</div></section></main>
+{% endif %}
+</td>{% elif index == 0 %}<td rowspan="{{ calendar_row_count }}" class="appointment-closed-cell appointment-closed-column"><span class="agenda-closed-mark" aria-hidden="true">—</span></td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody></table>
+</div><p class="agenda-privacy-note">Les informations des patients sont uniquement visibles par le cabinet.</p></section></main>
 <div class="appointment-modal" id="booking-modal" hidden><div class="appointment-modal-backdrop"></div><section class="appointment-modal-card" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="appointment-modal-close" id="close" aria-label="Fermer">×</button><h2 id="booking-title">Planifier un rendez-vous</h2><p id="selected-slot" class="appointment-selected-slot"></p><p>Ce créneau vous est réservé pendant 10 minutes pour compléter le formulaire.</p><p id="booking-error" role="alert"></p>
 <form id="booking-form" class="appointment-booking-form" action="{{ url_for('public_book_appointment') }}" method="post" enctype="multipart/form-data">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="slot_start" id="slot-start">
-<label>Nom du médecin prescripteur<input name="referring_doctor" required maxlength="255" autocomplete="off"></label>
-<label>Nom et prénom du patient<input name="patient_name" required maxlength="255" autocomplete="off"></label>
-<label>E-mail de contact du patient<input name="patient_email" type="email" required maxlength="255" autocomplete="off"></label>
-<label>Téléphone du patient <span>facultatif</span><input name="patient_phone" type="tel" maxlength="80" autocomplete="off"></label>
+<label class="agenda-half-field">Nom et prénom du patient<input name="patient_name" required maxlength="255" autocomplete="off"></label>
+<label class="agenda-half-field">E-mail (facultatif)<input name="patient_email" type="email" maxlength="255" autocomplete="email"></label>
+<label class="agenda-half-field">Téléphone du patient (facultatif)<input name="patient_phone" type="tel" maxlength="80" autocomplete="off"></label>
 <fieldset><legend>Statut du patient</legend><label><input type="radio" name="insurance_status" value="bim" required> BIM (VIPO)</label><label><input type="radio" name="insurance_status" value="normal" required> Normal — sans intervention majorée</label></fieldset>
-<label>Code INAMI et examen échographique<select name="inami_code" required size="8" aria-describedby="selected-exam"><option value="" selected disabled>Choisissez un examen</option>{% for group, entries in appointment_groups %}<optgroup label="{{ group }}">{% for code,label in entries %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</optgroup>{% endfor %}</select></label>
-<p id="selected-exam" class="appointment-field-help" aria-live="polite"></p>
+<label>Quel examen souhaitez-vous ?<select name="inami_code" required><option value="" selected disabled>Choisissez un examen</option>{% for group, entries in appointment_groups %}<optgroup label="{{ group }}">{% for code,label in entries %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</optgroup>{% endfor %}</select></label>
 <label>Ordonnance <span>facultative · PDF, JPG, PNG ou WEBP · maximum 10 Mo</span><input type="file" name="prescription_file" accept=".pdf,image/jpeg,image/png,image/webp"></label>
-<label>Informations pour le radiologue <span>facultatif</span><textarea name="notes" maxlength="2000" rows="3"></textarea></label>
 <button class="appointment-submit-button" type="submit">Confirmer le rendez-vous</button></form></section></div>
 <script>
 const modal=document.getElementById('booking-modal'), form=document.getElementById('booking-form');
-const mobileForm = window.matchMedia('(max-width: 1024px)');
-const exam = form.elements.inami_code;
-function resizeExam(){if(mobileForm.matches)exam.removeAttribute('size');else exam.setAttribute('size','8');}
-resizeExam();mobileForm.addEventListener('change',resizeExam);
-exam.addEventListener('change',()=>{document.getElementById('selected-exam').textContent=exam.selectedOptions[0]?.textContent || '';});
 let lastSlotButton;
 document.querySelectorAll('[data-slot]').forEach(button=>button.addEventListener('click',async()=>{
  button.disabled=true;

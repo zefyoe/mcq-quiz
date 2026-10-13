@@ -32,6 +32,11 @@ try:
         assert page.status_code == 200
         assert b'<html lang="fr">' in page.data
         assert b'href="/admin' not in page.data and b'href="/login' not in page.data
+        assert b'Nom du m' not in page.data
+        assert b'Informations pour le radiologue' not in page.data
+        assert b'Code INAMI' not in page.data
+        assert 'Échographie abdominale'.encode() in page.data
+        assert b'type="email" required' not in page.data
         return re.search(rb'name="csrf_token" value="([^"]+)"', page.data)[1].decode()
     t1, t2 = token(first), token(second)
     assert first.post('/agenda/hold', data={'slot_start': target.isoformat()}).status_code == 400
@@ -83,6 +88,17 @@ try:
     assert second.post('/agenda/hold', data={'csrf_token':t2, 'slot_start':target.replace(hour=17).isoformat()}).status_code == 400
     assert second.post('/agenda/hold', data={'csrf_token':t2, 'slot_start':'2020-01-01T08:00'}).status_code == 400
     assert first.get('/admin/appointments?date=invalid').status_code == 200
+    # Patients can book without a prescriber, notes, prescription or email.
+    minimal = dict(csrf_token=t2, slot_start=target.replace(hour=19, minute=50).isoformat(),
+                   patient_name='PATIENT WITHOUT EMAIL', insurance_status='normal', inami_code='459712')
+    assert second.post('/agenda/book', data=dict(minimal, patient_email='invalid')).status_code == 400
+    assert second.post('/agenda/book', data=minimal).status_code == 200
+    with app.app_context():
+        minimal_booking = Appointment.query.filter_by(patient_name='PATIENT WITHOUT EMAIL').one()
+        assert minimal_booking.patient_email == ''
+        assert minimal_booking.referring_doctor is None
+        assert minimal_booking.inami_code == '459712'
+        assert minimal_booking.inami_exam_total_cents is not None
     # Two independent browser sessions submit the same available slot together.
     third, fourth = app.test_client(), app.test_client()
     tokens = [token(third), token(fourth)]

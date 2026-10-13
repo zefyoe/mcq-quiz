@@ -3596,6 +3596,26 @@ def get_appointment_week_start(raw_date: str | None = None) -> date:
     return selected_date - timedelta(days=selected_date.weekday())
 
 
+# Patient-facing wording only; the existing code and tariff snapshots stay internal.
+PUBLIC_APPOINTMENT_GROUPS = (
+    ("Échographie", (
+        ("459712", "Échographie abdominale"),
+        ("459734", "Échographie des reins et de la vessie"),
+        ("460095", "Échographie du cou"),
+        ("460294", "Échographie des articulations, muscles ou tendons"),
+        ("460250", "Échographie du bassin féminin"),
+        ("460235", "Échographie du bassin masculin"),
+        ("460272", "Échographie des testicules"),
+        ("460110", "Échographie du thorax"),
+    )),
+    ("Doppler", (
+        ("460316", "Doppler des carotides (cou)"),
+        ("461156", "Doppler des bras ou des jambes"),
+        ("460633", "Doppler des vaisseaux de l’abdomen"),
+    )),
+)
+
+
 def get_localized_inami_appointment_groups(language: str) -> tuple:
     """Return code + localized examination labels without exposing tariffs."""
     groups = []
@@ -3867,9 +3887,10 @@ def public_agenda():
                      if appointment_slot_is_open(row['slots'][index]['starts_at'])]
         consultation_days.append(dict(day, slots=day_slots))
     return render_template("public_agenda.html", consultation_days=consultation_days,
+        agenda_asset_version=os.stat(os.path.join(app.static_folder, 'public_agenda.css')).st_mtime_ns,
         calendar_row_count=max(len(day['slots']) for day in consultation_days),
         week_start=start, week_end=end, timedelta=timedelta,
-        appointment_groups=get_localized_inami_appointment_groups("fr"),
+        appointment_groups=PUBLIC_APPOINTMENT_GROUPS,
         csrf_token=agenda_token(), success=request.args.get("success") == "1")
 
 
@@ -3975,18 +3996,18 @@ def admin_book_appointment():
     notes = (request.form.get("notes") or "").strip()
     doctor = (request.form.get("referring_doctor") or "").strip()
     insurance = request.form.get("insurance_status")
-    if public and (not starts_at or starts_at <= agenda_now() or not appointment_slot_is_open(starts_at) or not doctor
+    if public and (not starts_at or starts_at <= agenda_now() or not appointment_slot_is_open(starts_at)
                    or insurance not in {"bim", "normal"}):
-        return jsonify(error="Complétez le médecin, le statut et un créneau futur valide."), 400
+        return jsonify(error="Choisissez votre statut et un créneau futur valide."), 400
     if any(len(value) > limit for value, limit in (
         (patient_name, 255), (patient_email, 255), (patient_phone, 80), (doctor, 255), (notes, 2000)
     )):
         abort(400)
-    if public and (not patient_name or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", patient_email)
+    if public and (not patient_name or (patient_email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", patient_email))
                    or inami_code not in INAMI_ULTRASOUND_BY_CODE):
         return jsonify(error="Vérifiez le nom, l’adresse e-mail et l’examen."), 400
 
-    if not starts_at or not patient_name or not patient_email:
+    if not starts_at or not patient_name or (not public and not patient_email):
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
@@ -3999,7 +4020,7 @@ def admin_book_appointment():
     if not appointment_slot_is_open(starts_at):
         return redirect(url_for('admin_appointments', date=week_date,
                                 error='Ce créneau se situe en dehors des horaires de consultation.'))
-    if "@" not in patient_email:
+    if patient_email and "@" not in patient_email:
         return redirect(url_for(
             "admin_appointments",
             date=week_date,
