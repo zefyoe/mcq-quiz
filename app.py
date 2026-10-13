@@ -3861,7 +3861,16 @@ def public_agenda():
                 a.starts_at < stamp + timedelta(minutes=10)
                 and a.starts_at + timedelta(minutes=a.duration_minutes) > stamp for a in occupied
             ) or any(h.starts_at == stamp for h in holds)
-    return render_template("public_agenda.html", days=days, slot_rows=rows,
+    consultation_days = []
+    for index, day in enumerate(days):
+        if day['date'].weekday() not in APPOINTMENT_WEEKLY_WINDOWS:
+            continue
+        day_slots = [row['slots'][index] for row in rows
+                     if appointment_slot_is_open(row['slots'][index]['starts_at'])]
+        consultation_days.append(dict(day,
+            available_slots=[slot for slot in day_slots if not slot['unavailable']],
+            unavailable_slots=[slot for slot in day_slots if slot['unavailable']]))
+    return render_template("public_agenda.html", consultation_days=consultation_days,
         week_start=start, week_end=end, timedelta=timedelta,
         appointment_groups=get_localized_inami_appointment_groups("fr"),
         csrf_token=agenda_token(), success=request.args.get("success") == "1")

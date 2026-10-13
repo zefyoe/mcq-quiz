@@ -14,11 +14,19 @@
 <div class="appointment-calendar-toolbar"><h2>{{ week_start.strftime('%d/%m/%Y') }} – {{ (week_end-timedelta(days=1)).strftime('%d/%m/%Y') }}</h2><nav class="appointment-week-actions">
 <a href="{{ url_for('public_agenda', date=(week_start-timedelta(days=7)).isoformat()) }}">Semaine précédente</a><a href="{{ url_for('public_agenda') }}">Aujourd’hui</a><a href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">Semaine suivante</a></nav></div>
 <form class="appointment-date-form" method="get"><label for="date">Aller à la date</label><input id="date" name="date" type="date" value="{{ week_start.isoformat() }}"><button>Afficher la semaine</button></form>
-<div class="appointment-calendar-scroll"><div class="appointment-calendar-grid">
-<div class="appointment-grid-head">Heure</div>{% for day in days %}<div class="appointment-day-header"><span>{{ day.day_name }}</span><strong>{{ day.date.strftime('%d/%m') }}</strong></div>{% endfor %}
-{% for row in slot_rows %}<div class="appointment-time-column">{{ row.time_label }}</div>{% for slot in row.slots %}
-<button class="appointment-slot {{ 'appointment-slot-booked' if slot.unavailable else 'appointment-slot-available' }}" type="button" {% if slot.unavailable %}disabled{% else %}data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}" data-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m/%Y à %H:%M') }}"{% endif %}>{{ 'Indisponible' if slot.unavailable else 'Libre' }}<small>{{ row.time_label }}</small></button>
-{% endfor %}{% endfor %}</div></div></section></main>
+<div class="appointment-availability-days">
+{% for day in consultation_days %}
+<section class="appointment-availability-day" aria-label="{{ day.day_name }} {{ day.date.strftime('%d/%m') }}">
+<h3>{{ day.day_name|capitalize }} <span>{{ day.date.strftime('%d/%m') }}</span></h3>
+<div class="appointment-availability-slots">
+{% for slot in day.available_slots %}
+<button class="appointment-slot appointment-slot-available" type="button" data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}" data-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m/%Y à %H:%M') }}"><strong>{{ slot.starts_at.strftime('%H:%M') }}</strong><small>Libre</small></button>
+{% else %}<p>Aucun créneau disponible.</p>{% endfor %}
+</div>
+{% if day.unavailable_slots %}<details class="appointment-unavailable-slots"><summary>Créneaux indisponibles ({{ day.unavailable_slots|length }})</summary><div class="appointment-availability-slots">{% for slot in day.unavailable_slots %}<button type="button" class="appointment-slot" disabled>{{ slot.starts_at.strftime('%H:%M') }}<small>Indisponible</small></button>{% endfor %}</div></details>{% endif %}
+</section>
+{% endfor %}
+</div></section></main>
 <div class="appointment-modal" id="booking-modal" hidden><div class="appointment-modal-backdrop"></div><section class="appointment-modal-card" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="appointment-modal-close" id="close" aria-label="Fermer">×</button><h2 id="booking-title">Planifier un rendez-vous</h2><p id="selected-slot" class="appointment-selected-slot"></p><p>Ce créneau vous est réservé pendant 10 minutes pour compléter le formulaire.</p><p id="booking-error" role="alert"></p>
 <form id="booking-form" class="appointment-booking-form" action="{{ url_for('public_book_appointment') }}" method="post" enctype="multipart/form-data">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="slot_start" id="slot-start">
