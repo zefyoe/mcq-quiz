@@ -3625,16 +3625,16 @@ PUBLIC_APPOINTMENT_GROUPS = (
 
 
 def get_localized_inami_appointment_groups(language: str) -> tuple:
-    """Return code + localized examination labels without exposing tariffs."""
+    """Return internal exam codes with readable labels, without showing code numbers."""
     groups = []
     for group_fr, group_nl, entries in INAMI_ULTRASOUND_GROUPS:
+        if group_fr == "Élastographies":
+            continue
         group_label = group_fr if language == "fr" else group_nl
         localized_entries = []
         for entry in entries:
             label = entry["label_fr"] if language == "fr" else entry["label_nl"]
-            localized_entries.append(
-                (entry["code"], f'{entry["code"]} — {label}')
-            )
+            localized_entries.append((entry["code"], label))
         groups.append((group_label, tuple(localized_entries)))
     return tuple(groups)
 
@@ -3642,8 +3642,9 @@ def get_localized_inami_appointment_groups(language: str) -> tuple:
 def get_appointment_display_labels(language: str) -> dict[str, str]:
     """Build visible labels for new INAMI and legacy appointment records."""
     labels = {
-        code: f'{code} — {entry["label_fr"] if language == "fr" else entry["label_nl"]}'
+        code: entry["label_fr"] if language == "fr" else entry["label_nl"]
         for code, entry in INAMI_ULTRASOUND_BY_CODE.items()
+        if entry["label_fr"]
     }
     labels.update({
         appointment_type: (
@@ -3654,6 +3655,14 @@ def get_appointment_display_labels(language: str) -> dict[str, str]:
         for appointment_type in ULTRASOUND_APPOINTMENT_TYPES
     })
     return labels
+
+
+def is_valid_patient_name(value: str) -> bool:
+    """Require a plausible first and last name, not a short placeholder."""
+    parts = (value or "").split()
+    letters = [character for character in (value or "")
+               if character.isalpha()]
+    return len(parts) >= 2 and len(letters) >= 5
 
 
 def calculate_daily_appointment_finances(
@@ -3970,8 +3979,8 @@ def public_agenda_hold():
     exam_code = (request.form.get("inami_code") or "").strip()
     patient_name = (request.form.get("patient_name") or "").strip()
     if (not stamp or stamp <= agenda_now() or not appointment_slot_is_open(stamp)
-            or exam_code not in INAMI_ULTRASOUND_BY_CODE or not patient_name):
-        return jsonify(error="Veuillez indiquer le nom du patient et l’examen ; le créneau ne peut pas être réservé sans ces deux informations."), 400
+            or exam_code not in INAMI_ULTRASOUND_BY_CODE or not is_valid_patient_name(patient_name)):
+        return jsonify(error="Indiquez le prénom et le nom complets (au moins 5 lettres) et choisissez un examen. Le créneau ne peut pas être réservé sans ces informations."), 400
     if stamp != next_bookable_appointment_slot(stamp.date()):
         return jsonify(error="Les créneaux se libèrent dans l’ordre chronologique. Choisissez le premier créneau disponible."), 409
     if not claim_agenda_slot(stamp, agenda_token()) or slot_is_booked(stamp):
@@ -4172,11 +4181,16 @@ def admin_book_appointment():
         (patient_name, 255), (patient_email, 255), (patient_phone, 80), (doctor, 255), (notes, 2000)
     )):
         abort(400)
-    if public and (not patient_name or (patient_email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", patient_email))
+    if public and (not is_valid_patient_name(patient_name) or (patient_email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", patient_email))
                    or inami_code not in INAMI_ULTRASOUND_BY_CODE):
-        return jsonify(error="Vérifiez le nom, l’adresse e-mail et l’examen."), 400
+        return jsonify(error="Vérifiez le prénom et le nom complets, l’adresse e-mail et l’examen."), 400
 
-    if not starts_at or not patient_name or (not public and not patient_email):
+    if not starts_at or not is_valid_patient_name(patient_name):
+        return redirect(url_for("admin_appointments", date=week_date,
+            error=l10n("Vul de volledige voor- en achternaam in (minstens 5 letters).",
+                       "Enter the full first and last name (at least 5 letters).",
+                       "Indiquez le prénom et le nom complets (au moins 5 lettres).")))
+    if not public and not patient_email:
         return redirect(url_for(
             "admin_appointments",
             date=week_date,

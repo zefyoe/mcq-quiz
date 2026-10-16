@@ -42,9 +42,8 @@
         <article style="padding:14px 0;border-bottom:1px solid #dfe7f1">
           <strong>{{ appointment.starts_at.strftime('%H:%M') }} · {{ appointment.patient_name }}</strong>
           <p>{{ appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type) }}</p>
-          <p>Médecin : {{ appointment.referring_doctor or 'Non renseigné' }} · Statut : {{ 'BIM (VIPO)' if appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
+          <p>Statut : {{ 'BIM (VIPO)' if appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
           <p>{{ appointment.patient_email }}{% if appointment.patient_phone %} · {{ appointment.patient_phone }}{% endif %} · Ordonnance : {{ 'reçue' if appointment.prescription_filename else 'non jointe' }}</p>
-          {% if appointment.notes %}<p>{{ appointment.notes }}</p>{% endif %}
           {% if appointment.prescription_filename %}<a href="{{ url_for('admin_download_appointment_prescription', appointment_id=appointment.id) }}">Télécharger l’ordonnance</a>{% endif %}
         </article>
         {% else %}<p>Aucun rendez-vous pour cette journée. Sélectionnez une date ci-dessous.</p>{% endfor %}
@@ -127,10 +126,8 @@
                       <details>
                         <summary>{{ l10n('Details', 'Details', 'Détails') }}</summary>
                         <p>{{ slot.appointment.patient_email }}</p>
-                        <p>Médecin : {{ slot.appointment.referring_doctor or 'Non renseigné' }}</p>
                         <p>Statut : {{ 'BIM (VIPO)' if slot.appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if slot.appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
                         {% if slot.appointment.patient_phone %}<p>{{ slot.appointment.patient_phone }}</p>{% endif %}
-                        {% if slot.appointment.notes %}<p>{{ slot.appointment.notes }}</p>{% endif %}
                         {% if slot.appointment.prescription_filename %}
                           <p><a class="appointment-prescription-link" href="{{ url_for('admin_download_appointment_prescription', appointment_id=slot.appointment.id) }}">{{ l10n('Voorschrift downloaden', 'Download prescription', 'Télécharger l’ordonnance') }}</a></p>
                         {% endif %}
@@ -204,11 +201,10 @@
         <form method="post" action="{{ url_for('admin_book_appointment') }}" class="appointment-booking-form" enctype="multipart/form-data">
           <input type="hidden" name="slot_start" id="appointment-slot-start">
           <input type="hidden" name="week_date" value="{{ selected_date }}">
-          <label>Médecin prescripteur<input name="referring_doctor" maxlength="255"></label>
           <label>Statut du patient<select name="insurance_status"><option value="">Non renseigné</option><option value="bim">BIM (VIPO)</option><option value="normal">Normal — sans intervention majorée</option></select></label>
           <label>
             {{ l10n('Naam patiënt', 'Patient name', 'Nom du patient') }}
-            <input name="patient_name" type="text" autocomplete="name" required maxlength="255">
+            <input name="patient_name" type="text" autocomplete="name" required minlength="5" maxlength="255">
           </label>
           <label>
             {{ l10n('E-mail patiënt', 'Patient email', 'E-mail du patient') }}
@@ -219,9 +215,9 @@
             <input name="patient_phone" type="tel" autocomplete="tel" maxlength="80">
           </label>
           <label class="appointment-exam-field">
-            {{ l10n('INAMI-code en echografieonderzoek', 'INAMI code and ultrasound examination', 'Code INAMI et examen échographique') }}
+            {{ l10n('Echografieonderzoek', 'Ultrasound examination', 'Examen échographique') }}
             <select name="inami_code" size="8" required aria-describedby="appointment-exam-help">
-              <option value="" selected disabled>{{ l10n('Kies een INAMI-code en onderzoek', 'Choose an INAMI code and examination', 'Choisissez un code INAMI et un examen') }}</option>
+              <option value="" selected disabled>{{ l10n('Kies een onderzoek', 'Choose an examination', 'Choisissez un examen') }}</option>
               {% for group_name, appointment_types in appointment_groups %}
                 <optgroup label="{{ group_name }}">
                   {% for appointment_value, appointment_label in appointment_types %}
@@ -230,7 +226,6 @@
                 </optgroup>
               {% endfor %}
             </select>
-            <span id="appointment-exam-help" class="appointment-field-help">{{ l10n('De code en benaming worden bij de afspraak bewaard.', 'The code and description are saved with the appointment.', 'Le code et le libellé sont enregistrés avec le rendez-vous.') }}</span>
           </label>
           <section class="appointment-prescription-section" aria-labelledby="appointment-prescription-title">
             <div>
@@ -250,10 +245,6 @@
               </div>
             </div>
           </section>
-          <label>
-            {{ l10n('Interne notitie', 'Internal note', 'Note interne') }} <span>{{ l10n('optioneel', 'optional', 'facultatif') }}</span>
-            <textarea name="notes" rows="3" maxlength="2000" placeholder="{{ l10n('Bijvoorbeeld: verwijsbrief ontvangen', 'For example: referral letter received', 'Par exemple : lettre de référence reçue') }}"></textarea>
-          </label>
           <button type="submit" class="appointment-submit-button">{{ l10n('Afspraak vastleggen', 'Schedule appointment', 'Enregistrer le rendez-vous') }}</button>
         </form>
       </section>
