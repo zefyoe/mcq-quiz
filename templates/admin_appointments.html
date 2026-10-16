@@ -161,8 +161,8 @@
                     {% if slot.can_manage %}
                     <form class="appointment-slot-toggle" method="post" action="{{ url_for('admin_set_appointment_availability') }}">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="week_date" value="{{ selected_date }}">
-                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="{{ '0' if slot.waiting and slot.is_open else '1' }}">
-                      <button type="submit">{{ 'Fermer' if slot.waiting and slot.is_open else 'Ouvrir' }}</button>
+                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="1">
+                      <button type="submit">Ouvrir</button>
                     </form>
                     {% endif %}
                   {% else %}
@@ -300,7 +300,7 @@
               if (!dayForm) return;
               const shouldBeOpen = dayForm.elements.is_open.value === '0';
               const start = dayForm.elements.slot_start.value;
-              const isReleased = shouldBeOpen && start === result.next_slot;
+              const isReleased = shouldBeOpen;
               let current = dayCell.querySelector('[data-slot], .appointment-slot-blocked');
               if (!current) return;
               if (isReleased) {

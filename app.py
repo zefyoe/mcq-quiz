@@ -4095,7 +4095,6 @@ def admin_appointments():
     holds = AppointmentHold.query.all()
     reserved = {hold.starts_at for hold in holds}
     reservation_by_start = {hold.starts_at: hold for hold in holds}
-    next_slots = {day["date"]: next_bookable_appointment_slot(day["date"], availability_overrides) for day in days}
     for row in slot_rows:
         for slot in row['slots']:
             if slot is None:
@@ -4113,10 +4112,8 @@ def admin_appointments():
                 else 'Créneau passé'
             )
             occupied = slot['blocked'] or slot['starts_at'] in reserved or slot['starts_at'] <= agenda_now()
-            slot['waiting'] = not occupied and slot['starts_at'] != next_slots.get(slot['starts_at'].date())
-            if slot['waiting']:
-                slot['block_reason'] = 'Après le créneau précédent'
-            slot['blocked'] = occupied or slot['waiting']
+            slot['waiting'] = False
+            slot['blocked'] = occupied
     appointment_type_labels = get_appointment_display_labels(language)
     appointment_groups = get_localized_inami_appointment_groups(language)
     # Keep financial aggregates request-private. They are deliberately not
