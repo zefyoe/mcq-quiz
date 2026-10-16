@@ -80,6 +80,13 @@ class AppointmentHold(db.Model):
             return {}
 
 
+class AppointmentSlotOverride(db.Model):
+    """Admin controlled, date-specific public availability for a 10-minute slot."""
+    starts_at = db.Column(db.DateTime, primary_key=True)
+    is_open = db.Column(db.Boolean, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

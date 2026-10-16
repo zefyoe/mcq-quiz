@@ -44,7 +44,7 @@ from inami_ultrasound_catalog import (
     INAMI_ULTRASOUND_BY_CODE,
     INAMI_ULTRASOUND_GROUPS,
 )
-from models import Appointment, AppointmentHold, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from models import Appointment, AppointmentHold, AppointmentSlotOverride, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -789,6 +789,7 @@ def ensure_appointment_schema() -> None:
 
     inspector = inspect(db.engine)
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
+    AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
     hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
     for name, kind in (("draft_data", "TEXT"), ("prescription_filename", "VARCHAR(255)"),
@@ -3685,6 +3686,7 @@ def build_appointment_slot_grid(
     week_start: date,
     appointments: list[Appointment],
     language: str = "nl",
+    availability_overrides: dict | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Build the seven-day calendar in 15-minute appointment blocks."""
     appointments_by_start = {appointment.starts_at: appointment for appointment in appointments}
@@ -3721,7 +3723,7 @@ def build_appointment_slot_grid(
                 "starts_at": starts_at,
                 "appointment": appointments_by_start.get(starts_at),
                 "day_name": day["day_name"],
-                "blocked": not appointment_slot_is_open(starts_at) or any(a.starts_at < starts_at + timedelta(minutes=10)
+                "blocked": not appointment_slot_is_open(starts_at, availability_overrides) or any(a.starts_at < starts_at + timedelta(minutes=10)
                     and a.starts_at + timedelta(minutes=a.duration_minutes) > starts_at
                     for a in appointments),
             })
@@ -3733,7 +3735,13 @@ def build_appointment_slot_grid(
     return days, slot_rows
 
 
-def appointment_slot_is_open(starts_at):
+def appointment_slot_is_open(starts_at, overrides=None):
+    if overrides is None:
+        override = db.session.get(AppointmentSlotOverride, starts_at)
+        if override is not None:
+            return override.is_open
+    elif starts_at in overrides:
+        return overrides[starts_at]
     window = APPOINTMENT_WEEKLY_WINDOWS.get(starts_at.weekday())
     minute = starts_at.hour * 60 + starts_at.minute
     return bool(window and window[0] <= minute and minute + 10 <= window[1]
@@ -3878,18 +3886,21 @@ def public_agenda():
         Appointment.starts_at < datetime.combine(end, time.min),
     ).all()
     holds = AppointmentHold.query.all()
-    days, rows = build_appointment_slot_grid(start, [], "fr")
+    availability_overrides = {item.starts_at: item.is_open for item in AppointmentSlotOverride.query.filter(
+        AppointmentSlotOverride.starts_at >= datetime.combine(start, time.min),
+        AppointmentSlotOverride.starts_at < datetime.combine(end, time.min)).all()}
+    days, rows = build_appointment_slot_grid(start, [], "fr", availability_overrides)
     for row in rows:
         for slot in row["slots"]:
             stamp = slot["starts_at"]
-            slot["unavailable"] = not appointment_slot_is_open(stamp) or stamp <= agenda_now() or any(
+            slot["unavailable"] = not appointment_slot_is_open(stamp, availability_overrides) or stamp <= agenda_now() or any(
                 a.starts_at < stamp + timedelta(minutes=10)
                 and a.starts_at + timedelta(minutes=a.duration_minutes) > stamp for a in occupied
             ) or any(h.starts_at == stamp for h in holds)
     consultation_days = []
     for index, day in enumerate(days):
         day_slots = [row['slots'][index] for row in rows
-                     if appointment_slot_is_open(row['slots'][index]['starts_at'])]
+                     if appointment_slot_is_open(row['slots'][index]['starts_at'], availability_overrides)]
         consultation_days.append(dict(day, slots=day_slots))
     return render_template("public_agenda.html", consultation_days=consultation_days,
         agenda_asset_version=os.stat(os.path.join(app.static_folder, 'public_agenda.css')).st_mtime_ns,
@@ -3952,6 +3963,39 @@ def public_agenda_draft():
     return jsonify(ok=True)
 
 
+@app.post("/admin/appointments/availability")
+def admin_set_appointment_availability():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    ensure_appointment_schema()
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    stamp = parse_appointment_slot(request.form.get("slot_start"))
+    target_open = request.form.get("is_open") == "1"
+    week_date = request.form.get("week_date") or (stamp.date().isoformat() if stamp else "")
+    if not stamp or stamp <= agenda_now() or stamp.hour >= APPOINTMENT_CLOSING_HOUR:
+        abort(400)
+    nearby = Appointment.query.filter(Appointment.starts_at < stamp + timedelta(minutes=10),
+        Appointment.starts_at > stamp - timedelta(minutes=60)).all()
+    if any(a.starts_at + timedelta(minutes=a.duration_minutes) > stamp for a in nearby):
+        return redirect(url_for("admin_appointments", date=week_date, error="Un rendez-vous occupe déjà ce créneau."))
+    if AppointmentHold.query.filter_by(starts_at=stamp).first():
+        return redirect(url_for("admin_appointments", date=week_date, error="Une réservation occupe déjà ce créneau."))
+    override = db.session.get(AppointmentSlotOverride, stamp)
+    default_open = appointment_slot_is_open(stamp, {})
+    if target_open == default_open:
+        if override:
+            db.session.delete(override)
+    elif override:
+        override.is_open = target_open
+        override.updated_at = datetime.utcnow()
+    else:
+        db.session.add(AppointmentSlotOverride(starts_at=stamp, is_open=target_open))
+    db.session.commit()
+    return redirect(url_for("admin_appointments", date=week_date))
+
+
 @app.route("/admin/appointments")
 def admin_appointments():
     admin_redirect = admin_required()
@@ -3966,6 +4010,9 @@ def admin_appointments():
         shift_date = agenda_now().date()
     week_start = get_appointment_week_start(requested_date)
     week_end = week_start + timedelta(days=7)
+    availability_overrides = {item.starts_at: item.is_open for item in AppointmentSlotOverride.query.filter(
+        AppointmentSlotOverride.starts_at >= datetime.combine(week_start, time.min),
+        AppointmentSlotOverride.starts_at < datetime.combine(week_end, time.min)).all()}
     appointments = (
         Appointment.query
         .filter(
@@ -3980,6 +4027,7 @@ def admin_appointments():
         week_start,
         appointments,
         language=language,
+        availability_overrides=availability_overrides,
     )
     holds = AppointmentHold.query.all()
     reserved = {hold.starts_at for hold in holds}
@@ -3991,9 +4039,11 @@ def admin_appointments():
                 slot['appointment'] = next((a for a in appointments
                     if a.starts_at <= slot['starts_at'] < a.starts_at + timedelta(minutes=a.duration_minutes)), None)
             slot['reservation'] = reservation_by_start.get(slot['starts_at']) if not slot['appointment'] else None
+            slot['is_open'] = appointment_slot_is_open(slot['starts_at'], availability_overrides)
+            slot['can_manage'] = not slot['appointment'] and not slot['reservation'] and slot['starts_at'] > agenda_now()
             slot['block_reason'] = (
                 'Réservation en cours' if slot['starts_at'] in reserved
-                else 'Fermé' if not appointment_slot_is_open(slot['starts_at'])
+                else 'Fermé par le cabinet' if not slot['is_open']
                 else 'Créneau passé'
             )
             slot['blocked'] = slot['blocked'] or slot['starts_at'] in reserved or slot['starts_at'] <= agenda_now()
@@ -4021,6 +4071,7 @@ def admin_appointments():
         appointment_groups=appointment_groups,
         appointment_type_labels=appointment_type_labels,
         slot_duration_minutes=APPOINTMENT_SLOT_MINUTES,
+        csrf_token=agenda_token(),
         error=(request.args.get("error") or "").strip(),
         success=(request.args.get("success") or "").strip(),
     )

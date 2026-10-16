@@ -116,6 +116,7 @@
               {% for row in slot_rows %}
                 <div class="appointment-time-column">{{ row.time_label }}</div>
                 {% for slot in row.slots %}
+                  <div class="appointment-slot-cell">
                   {% if slot.appointment %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
                       <span class="appointment-slot-time">{{ slot.appointment.starts_at.strftime('%H:%M') }} - {{ (slot.appointment.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
@@ -156,6 +157,13 @@
                     </article>
                   {% elif slot.blocked %}
                     <div class="appointment-slot appointment-slot-blocked">{{ slot.block_reason }}</div>
+                    {% if slot.can_manage %}
+                    <form class="appointment-slot-toggle" method="post" action="{{ url_for('admin_set_appointment_availability') }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="week_date" value="{{ selected_date }}">
+                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="1">
+                      <button type="submit">Ouvrir</button>
+                    </form>
+                    {% endif %}
                   {% else %}
                     <button
                       class="appointment-slot appointment-slot-available"
@@ -166,7 +174,15 @@
                       <span>{{ l10n('Vrij', 'Available', 'Libre') }}</span>
                       <small>{{ slot.starts_at.strftime('%H:%M') }}</small>
                     </button>
+                    {% if slot.can_manage %}
+                    <form class="appointment-slot-toggle" method="post" action="{{ url_for('admin_set_appointment_availability') }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="week_date" value="{{ selected_date }}">
+                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="0">
+                      <button type="submit">Fermer</button>
+                    </form>
+                    {% endif %}
                   {% endif %}
+                  </div>
                 {% endfor %}
               {% endfor %}
             </div>

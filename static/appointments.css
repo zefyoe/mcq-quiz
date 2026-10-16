@@ -430,6 +430,12 @@
 .appointment-booking-form fieldset label { display: flex; align-items: center; margin: 10px 0; }
 .appointment-slot:disabled { cursor: default; opacity: .65; }
 .appointment-slot-blocked { background: #f3f5f8; color: #778499; font-size: .72rem; border: 1px solid #e5eaf0; }
+.appointment-slot-toggle { margin: 2px 0 0; }
+.appointment-slot-cell { min-width: 0; min-height: 44px; padding: 2px 4px; border-right: 1px solid var(--appointment-border); border-bottom: 1px solid var(--appointment-border); }
+.appointment-slot-cell > .appointment-slot { width: 100%; box-sizing: border-box; }
+.appointment-slot-toggle button { width: 100%; min-height: 22px; }
+.appointment-slot-toggle button { border: 0; padding: 2px 5px; background: transparent; color: #456b9b; font-size: .66rem; cursor: pointer; }
+.appointment-slot-toggle button:hover { text-decoration: underline; }
 .appointment-booking-form label span { color: #94a1b4; font-weight: 550; }
 .appointment-booking-form textarea { min-height: 86px; resize: vertical; }
 .appointment-booking-form select[size] {
