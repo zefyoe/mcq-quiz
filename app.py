@@ -4097,7 +4097,7 @@ def admin_appointments():
         slot_rows=slot_rows,
         booked_count=len(appointments) + len(holds),
         available_count=sum(not slot['blocked'] and not slot['appointment']
-                            for row in slot_rows for slot in row['slots']),
+                            for row in slot_rows for slot in row['slots'] if slot is not None),
         appointment_groups=appointment_groups,
         appointment_type_labels=appointment_type_labels,
         slot_duration_minutes=APPOINTMENT_SLOT_MINUTES,
