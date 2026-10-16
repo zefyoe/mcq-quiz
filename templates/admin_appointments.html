@@ -116,7 +116,7 @@
               {% for row in slot_rows %}
                 <div class="appointment-time-column">{{ row.time_label }}</div>
                 {% for slot in row.slots %}
-                  <div class="appointment-slot-cell">
+                  <div class="appointment-slot-cell"{% if slot %} data-day="{{ slot.starts_at.date().isoformat() }}" data-start="{{ slot.starts_at.isoformat(timespec='minutes') }}"{% endif %}>
                   {% if slot %}
                   {% if slot.appointment %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
@@ -161,8 +161,8 @@
                     {% if slot.can_manage %}
                     <form class="appointment-slot-toggle" method="post" action="{{ url_for('admin_set_appointment_availability') }}">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="week_date" value="{{ selected_date }}">
-                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="1">
-                      <button type="submit">Ouvrir</button>
+                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="{{ '0' if slot.waiting and slot.is_open else '1' }}">
+                      <button type="submit">{{ 'Fermer' if slot.waiting and slot.is_open else 'Ouvrir' }}</button>
                     </form>
                     {% endif %}
                   {% else %}
@@ -294,32 +294,46 @@
               headers: {'X-Requested-With': 'XMLHttpRequest'}});
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'La disponibilité n’a pas pu être modifiée.');
-            const slot = cell.querySelector('[data-slot], .appointment-slot-blocked');
-            if (result.is_open) {
-              if (slot.classList.contains('appointment-slot-blocked')) {
-                const bookingButton = document.createElement('button');
-                bookingButton.type = 'button';
-                bookingButton.className = 'appointment-slot appointment-slot-available';
-                bookingButton.dataset.slot = result.starts_at;
-                bookingButton.dataset.slotLabel = result.label;
-                bookingButton.innerHTML = '<span>Planifier</span><small>' + result.starts_at.slice(11) + '</small>';
-                slot.replaceWith(bookingButton);
+            const day = cell.dataset.day;
+            document.querySelectorAll('.appointment-slot-cell[data-day="' + day + '"]').forEach((dayCell) => {
+              const dayForm = dayCell.querySelector('.appointment-slot-toggle');
+              if (!dayForm) return;
+              const shouldBeOpen = dayForm.elements.is_open.value === '0';
+              const start = dayForm.elements.slot_start.value;
+              const isReleased = shouldBeOpen && start === result.next_slot;
+              let current = dayCell.querySelector('[data-slot], .appointment-slot-blocked');
+              if (!current) return;
+              if (isReleased) {
+                if (!current.hasAttribute('data-slot')) {
+                  const bookingButton = document.createElement('button');
+                  bookingButton.type = 'button';
+                  bookingButton.className = 'appointment-slot appointment-slot-available';
+                  bookingButton.dataset.slot = start;
+                  const calendarDate = new Date(day + 'T12:00:00');
+                  const dayLabel = calendarDate.toLocaleDateString('fr-FR', {weekday: 'long', day: '2-digit', month: '2-digit'});
+                  const [hour, minute] = start.slice(11).split(':').map(Number);
+                  const endMinute = hour * 60 + minute + 10;
+                  const endLabel = String(Math.floor(endMinute / 60)).padStart(2, '0') + ':' + String(endMinute % 60).padStart(2, '0');
+                  bookingButton.dataset.slotLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1) + ', ' + day.slice(8) + '/' + day.slice(5, 7) + ', ' + start.slice(11) + ' - ' + endLabel;
+                  bookingButton.innerHTML = '<span>Planifier</span><small>' + start.slice(11) + '</small>';
+                  current.replaceWith(bookingButton);
+                }
+                dayCell.classList.add('is-open');
+              } else {
+                if (current.hasAttribute('data-slot')) {
+                  const closed = document.createElement('div');
+                  closed.className = 'appointment-slot appointment-slot-blocked';
+                  closed.textContent = shouldBeOpen ? 'Après le créneau précédent' : 'Fermé par le cabinet';
+                  current.replaceWith(closed);
+                } else {
+                  current.textContent = shouldBeOpen ? 'Après le créneau précédent' : 'Fermé par le cabinet';
+                }
+                dayCell.classList.remove('is-open');
               }
-              form.elements.is_open.value = '0';
-              toggle.textContent = 'Fermer';
-              cell.classList.add('is-open');
-            } else {
-              if (slot.hasAttribute('data-slot')) {
-                const closed = document.createElement('div');
-                closed.className = 'appointment-slot appointment-slot-blocked';
-                closed.textContent = 'Fermé par le cabinet';
-                slot.replaceWith(closed);
-              }
-              form.elements.is_open.value = '1';
-              toggle.textContent = 'Ouvrir';
-              cell.classList.remove('is-open');
-            }
-            toggle.disabled = false;
+              dayForm.elements.is_open.value = shouldBeOpen ? '0' : '1';
+              dayForm.querySelector('button').textContent = shouldBeOpen ? 'Fermer' : 'Ouvrir';
+              dayForm.querySelector('button').disabled = false;
+            });
           } catch (error) {
             toggle.disabled = false;
             let notice = document.getElementById('availability-feedback');

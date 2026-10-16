@@ -25,7 +25,7 @@
 {% if index < day.slots|length %}{% set slot = day.slots[index] %}
 <button class="appointment-slot {{ 'appointment-slot-booked' if slot.unavailable else 'appointment-slot-available' }}" type="button"
 {% if slot.unavailable %}disabled{% else %}data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}" data-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m/%Y à %H:%M') }}"{% endif %}>
-<strong>{{ slot.starts_at.strftime('%H:%M') }}</strong><small>{{ 'Indisponible' if slot.unavailable else 'Libre' }}</small></button>
+<strong>{{ slot.starts_at.strftime('%H:%M') }}</strong><small>{{ 'Après le créneau précédent' if slot.waiting else ('Indisponible' if slot.unavailable else 'Libre') }}</small></button>
 {% endif %}
 </td>{% elif index == 0 %}<td rowspan="{{ calendar_row_count }}" class="appointment-closed-cell appointment-closed-column"><span class="agenda-closed-mark" aria-hidden="true">—</span></td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody></table>
 </div><p class="agenda-privacy-note">Les informations des patients sont uniquement visibles par le cabinet.</p></section></main>
