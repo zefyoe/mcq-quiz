@@ -266,6 +266,21 @@
 
 .appointment-calendar-toolbar h2 { font-size: 1.4rem; }
 
+.appointment-day-close-button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #d5a0a0;
+  border-radius: 9px;
+  color: #8f3030;
+  background: #fff7f7;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.appointment-day-close-button:hover { background: #ffeded; }
+.appointment-day-close-button:disabled { opacity: 0.7; cursor: default; }
+
 .appointment-week-actions { display: flex; gap: 8px; }
 .appointment-week-actions a {
   padding: 9px 10px;

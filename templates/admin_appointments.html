@@ -37,7 +37,9 @@
       {% endif %}
 
       <section class="appointment-calendar-card" style="background:white;border-radius:18px;margin-bottom:20px;overflow:auto">
-        <h2>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }}</h2>
+        <div class="appointment-calendar-toolbar"><h2>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }}</h2>
+          <button type="button" class="appointment-day-close-button" data-close-day="{{ shift_date.isoformat() }}">Fermer toute la journée</button>
+        </div>
         {% for appointment in shift_appointments %}
         <article style="padding:14px 0;border-bottom:1px solid #dfe7f1">
           <strong>{{ appointment.starts_at.strftime('%H:%M') }} · {{ appointment.patient_name }}</strong>
@@ -258,10 +260,51 @@
         const firstInput = modal.querySelector('input[name="patient_name"]');
         const prescriptionInputs = [...modal.querySelectorAll('[data-prescription-input]')];
 
-        const closeModal = () => {
+      const closeModal = () => {
           modal.hidden = true;
           document.body.classList.remove('appointment-modal-open');
-        };
+      };
+
+      document.querySelector('[data-close-day]')?.addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        if (!window.confirm('Fermer tous les créneaux encore libres de cette journée ? Les rendez-vous déjà confirmés restent inchangés.')) return;
+        button.disabled = true;
+        const body = new FormData();
+        body.set('csrf_token', {{ csrf_token|tojson }});
+        body.set('day', button.dataset.closeDay);
+        try {
+          const response = await fetch('{{ url_for("admin_close_appointment_day") }}', {
+            method: 'POST', body, headers: {'X-Requested-With': 'XMLHttpRequest'}
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'La journée n’a pas pu être fermée.');
+          result.closed_slots.forEach((start) => {
+            const cell = document.querySelector('.appointment-slot-cell[data-start="' + start + '"]');
+            if (!cell) return;
+            const slotButton = cell.querySelector('[data-slot]');
+            if (slotButton) {
+              const closed = document.createElement('div');
+              closed.className = 'appointment-slot appointment-slot-blocked';
+              closed.textContent = 'Fermé par le cabinet';
+              slotButton.replaceWith(closed);
+            }
+            const form = cell.querySelector('.appointment-slot-toggle');
+            if (form) {
+              form.elements.is_open.value = '1';
+              form.querySelector('button').textContent = 'Ouvrir';
+            }
+          });
+          button.textContent = result.closed_slots.length ? 'Journée fermée' : 'Aucun créneau libre';
+        } catch (error) {
+          button.disabled = false;
+          let notice = document.getElementById('availability-feedback');
+          if (!notice) {
+            notice = document.createElement('p'); notice.id = 'availability-feedback';
+            notice.setAttribute('role', 'alert'); button.closest('.appointment-calendar-card').prepend(notice);
+          }
+          notice.textContent = error.message;
+        }
+      });
 
         document.querySelector('.appointment-calendar-grid').addEventListener('click', (event) => {
           const button = event.target.closest('[data-slot]');

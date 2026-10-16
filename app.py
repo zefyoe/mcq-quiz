@@ -4068,6 +4068,64 @@ def admin_set_appointment_availability():
     return redirect(url_for("admin_appointments", date=week_date))
 
 
+@app.post("/admin/appointments/availability/day")
+def admin_close_appointment_day():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    ensure_appointment_schema()
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    try:
+        target_day = date.fromisoformat(request.form.get("day", ""))
+    except ValueError:
+        abort(400)
+    if target_day < agenda_now().date():
+        abort(400)
+
+    overrides = {item.starts_at: item for item in AppointmentSlotOverride.query.filter(
+        AppointmentSlotOverride.starts_at >= datetime.combine(target_day, time.min),
+        AppointmentSlotOverride.starts_at < datetime.combine(target_day + timedelta(days=1), time.min),
+    ).all()}
+    window = APPOINTMENT_WEEKLY_WINDOWS.get(target_day.weekday())
+    minutes = set(range(window[0], window[1], APPOINTMENT_SLOT_MINUTES)) if window else set()
+    minutes.update(stamp.hour * 60 + stamp.minute for stamp in overrides
+                   if not appointment_slot_is_hard_closed(stamp))
+    day_start = datetime.combine(target_day, time.min)
+    day_end = day_start + timedelta(days=1)
+    appointments = Appointment.query.filter(
+        Appointment.starts_at >= day_start - timedelta(days=1),
+        Appointment.starts_at < day_end,
+    ).all()
+    holds = {hold.starts_at for hold in AppointmentHold.query.filter(
+        AppointmentHold.starts_at >= datetime.combine(target_day, time.min),
+        AppointmentHold.starts_at < datetime.combine(target_day + timedelta(days=1), time.min),
+    ).all()}
+    now = agenda_now()
+    closed_slots = []
+    for minute in sorted(minutes):
+        stamp = datetime.combine(target_day, time(hour=minute // 60, minute=minute % 60))
+        if stamp <= now or appointment_slot_is_hard_closed(stamp):
+            continue
+        if not appointment_slot_is_open(stamp, {key: item.is_open for key, item in overrides.items()}):
+            continue
+        if stamp in holds or any(a.starts_at < stamp + timedelta(minutes=APPOINTMENT_SLOT_MINUTES)
+                                 and a.starts_at + timedelta(minutes=a.duration_minutes) > stamp
+                                 for a in appointments):
+            continue
+        override = overrides.get(stamp)
+        if override:
+            override.is_open = False
+            override.updated_at = datetime.utcnow()
+        else:
+            db.session.add(AppointmentSlotOverride(starts_at=stamp, is_open=False))
+        closed_slots.append(stamp.isoformat(timespec="minutes"))
+    db.session.commit()
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify(ok=True, day=target_day.isoformat(), closed_slots=closed_slots)
+    return redirect(url_for("admin_appointments", date=target_day.isoformat()))
+
+
 @app.route("/admin/appointments")
 def admin_appointments():
     admin_redirect = admin_required()
