@@ -439,6 +439,9 @@
 .appointment-slot-toggle button { width: auto; min-height: 16px; padding: 1px 4px; font-size: .6rem; }
 .appointment-slot-toggle button { border: 0; padding: 2px 5px; background: transparent; color: #456b9b; font-size: .66rem; cursor: pointer; }
 .appointment-slot-toggle button:hover { text-decoration: underline; }
+.appointment-slot-toggle button:disabled { opacity: .55; cursor: wait; }
+.appointment-slot-cell.is-open > .appointment-slot-available { background: #e8f7ef; border-color: #b8dfc9; }
+#availability-feedback { padding: 9px 13px; color: #385b88; background: #edf5ff; border-radius: 8px; }
 .appointment-booking-form label span { color: #94a1b4; font-weight: 550; }
 .appointment-booking-form textarea { min-height: 86px; resize: vertical; }
 .appointment-booking-form select[size] {

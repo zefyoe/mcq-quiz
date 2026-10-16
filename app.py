@@ -3999,8 +3999,12 @@ def admin_set_appointment_availability():
     nearby = Appointment.query.filter(Appointment.starts_at < stamp + timedelta(minutes=10),
         Appointment.starts_at > stamp - timedelta(minutes=60)).all()
     if any(a.starts_at + timedelta(minutes=a.duration_minutes) > stamp for a in nearby):
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify(error="Un rendez-vous occupe déjà ce créneau."), 409
         return redirect(url_for("admin_appointments", date=week_date, error="Un rendez-vous occupe déjà ce créneau."))
     if AppointmentHold.query.filter_by(starts_at=stamp).first():
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify(error="Une réservation occupe déjà ce créneau."), 409
         return redirect(url_for("admin_appointments", date=week_date, error="Une réservation occupe déjà ce créneau."))
     override = db.session.get(AppointmentSlotOverride, stamp)
     default_open = appointment_slot_is_open(stamp, {})
@@ -4013,6 +4017,10 @@ def admin_set_appointment_availability():
     else:
         db.session.add(AppointmentSlotOverride(starts_at=stamp, is_open=target_open))
     db.session.commit()
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        day_name = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")[stamp.weekday()]
+        return jsonify(ok=True, is_open=target_open, starts_at=stamp.isoformat(timespec="minutes"),
+                       label=f"{day_name.capitalize()} {stamp.strftime('%d/%m')}, {stamp.strftime('%H:%M')} - {(stamp + timedelta(minutes=10)).strftime('%H:%M')}")
     return redirect(url_for("admin_appointments", date=week_date))
 
 
