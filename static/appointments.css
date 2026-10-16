@@ -431,9 +431,12 @@
 .appointment-slot:disabled { cursor: default; opacity: .65; }
 .appointment-slot-blocked { background: #f3f5f8; color: #778499; font-size: .72rem; border: 1px solid #e5eaf0; }
 .appointment-slot-toggle { margin: 2px 0 0; }
-.appointment-slot-cell { min-width: 0; min-height: 44px; padding: 2px 4px; border-right: 1px solid var(--appointment-border); border-bottom: 1px solid var(--appointment-border); }
+.appointment-slot-cell { position: relative; min-width: 0; min-height: 30px; padding: 1px 4px; border-right: 1px solid var(--appointment-border); border-bottom: 1px solid var(--appointment-border); }
+.appointment-slot-empty { display: block; min-height: 1px; }
 .appointment-slot-cell > .appointment-slot { width: 100%; box-sizing: border-box; }
-.appointment-slot-toggle button { width: 100%; min-height: 22px; }
+.appointment-slot-cell > .appointment-slot-available { min-height: 30px; padding: 3px 20px 3px 5px; }
+.appointment-slot-toggle { position: absolute; z-index: 2; right: 5px; bottom: 3px; margin: 0; background: #fff; border-radius: 4px; }
+.appointment-slot-toggle button { width: auto; min-height: 16px; padding: 1px 4px; font-size: .6rem; }
 .appointment-slot-toggle button { border: 0; padding: 2px 5px; background: transparent; color: #456b9b; font-size: .66rem; cursor: pointer; }
 .appointment-slot-toggle button:hover { text-decoration: underline; }
 .appointment-booking-form label span { color: #94a1b4; font-weight: 550; }

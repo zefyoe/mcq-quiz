@@ -117,6 +117,7 @@
                 <div class="appointment-time-column">{{ row.time_label }}</div>
                 {% for slot in row.slots %}
                   <div class="appointment-slot-cell">
+                  {% if slot %}
                   {% if slot.appointment %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
                       <span class="appointment-slot-time">{{ slot.appointment.starts_at.strftime('%H:%M') }} - {{ (slot.appointment.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
@@ -182,6 +183,7 @@
                     </form>
                     {% endif %}
                   {% endif %}
+                  {% else %}<span class="appointment-slot-empty" aria-hidden="true"></span>{% endif %}
                   </div>
                 {% endfor %}
               {% endfor %}

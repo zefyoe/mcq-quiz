@@ -167,8 +167,8 @@ LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "1").stri
 AUTH_SCHEMA_READY = False
 APPOINTMENT_SCHEMA_READY = False
 APPOINTMENT_SLOT_MINUTES = 10
-APPOINTMENT_WEEKLY_WINDOWS = {1: (18 * 60 + 10, 20 * 60 + 10),
-                              3: (18 * 60 + 10, 20 * 60 + 10),
+APPOINTMENT_WEEKLY_WINDOWS = {1: (18 * 60 + 30, 20 * 60 + 10),
+                              3: (18 * 60 + 30, 20 * 60 + 10),
                               5: (10 * 60, 16 * 60)}
 APPOINTMENT_OPENING_HOUR = 8
 APPOINTMENT_CLOSING_HOUR = 21
@@ -3688,7 +3688,7 @@ def build_appointment_slot_grid(
     language: str = "nl",
     availability_overrides: dict | None = None,
 ) -> tuple[list[dict], list[dict]]:
-    """Build the seven-day calendar in 15-minute appointment blocks."""
+    """Align each day's actual appointment slots by position in the weekly view."""
     appointments_by_start = {appointment.starts_at: appointment for appointment in appointments}
     if language == "fr":
         day_labels = ("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim")
@@ -3711,31 +3711,43 @@ def build_appointment_slot_grid(
             "day_name": day_name,
         })
 
-    slot_rows = []
-    minute_marks = set(range(APPOINTMENT_OPENING_HOUR * 60, APPOINTMENT_CLOSING_HOUR * 60, 10))
-    minute_marks.update(a.starts_at.hour * 60 + a.starts_at.minute for a in appointments)
-    for minutes_from_midnight in sorted(minute_marks):
-        hour, minute = divmod(minutes_from_midnight, 60)
-        slots = []
-        for day in days:
+    slots_by_day = []
+    for day in days:
+        window = APPOINTMENT_WEEKLY_WINDOWS.get(day["date"].weekday())
+        candidates = set(range(window[0], window[1], APPOINTMENT_SLOT_MINUTES)) if window else set()
+        for stamp in (availability_overrides or {}):
+            if stamp.date() == day["date"] and not appointment_slot_is_hard_closed(stamp):
+                candidates.add(stamp.hour * 60 + stamp.minute)
+        for appointment in appointments:
+            if appointment.starts_at.date() != day["date"]:
+                continue
+            start_minute = appointment.starts_at.hour * 60 + appointment.starts_at.minute
+            duration_slots = max(1, (appointment.duration_minutes + 9) // 10)
+            candidates.update(start_minute + 10 * offset for offset in range(duration_slots))
+        day_slots = []
+        for minutes_from_midnight in sorted(candidates):
+            hour, minute = divmod(minutes_from_midnight, 60)
             starts_at = datetime.combine(day["date"], time(hour=hour, minute=minute))
-            slots.append({
-                "starts_at": starts_at,
-                "appointment": appointments_by_start.get(starts_at),
+            appointment = appointments_by_start.get(starts_at) or next((a for a in appointments
+                if a.starts_at <= starts_at < a.starts_at + timedelta(minutes=a.duration_minutes)), None)
+            day_slots.append({"starts_at": starts_at, "appointment": appointment,
                 "day_name": day["day_name"],
-                "blocked": not appointment_slot_is_open(starts_at, availability_overrides) or any(a.starts_at < starts_at + timedelta(minutes=10)
+                "blocked": not appointment_slot_is_open(starts_at, availability_overrides) or any(
+                    a.starts_at < starts_at + timedelta(minutes=10)
                     and a.starts_at + timedelta(minutes=a.duration_minutes) > starts_at
-                    for a in appointments),
-            })
-        slot_rows.append({
-            "time_label": f"{hour:02d}:{minute:02d}",
-            "slots": slots,
-        })
+                    for a in appointments)})
+        slots_by_day.append(day_slots)
+
+    slot_rows = [{"time_label": "", "slots": [items[index] if index < len(items) else None
+                                                    for items in slots_by_day]}
+                 for index in range(max((len(items) for items in slots_by_day), default=0))]
 
     return days, slot_rows
 
 
 def appointment_slot_is_open(starts_at, overrides=None):
+    if appointment_slot_is_hard_closed(starts_at):
+        return False
     if overrides is None:
         override = db.session.get(AppointmentSlotOverride, starts_at)
         if override is not None:
@@ -3746,6 +3758,12 @@ def appointment_slot_is_open(starts_at, overrides=None):
     minute = starts_at.hour * 60 + starts_at.minute
     return bool(window and window[0] <= minute and minute + 10 <= window[1]
                 and (minute - window[0]) % 10 == 0)
+
+
+def appointment_slot_is_hard_closed(starts_at):
+    minute = starts_at.hour * 60 + starts_at.minute
+    return (starts_at.weekday() == 5 and minute >= 13 * 60) or (
+        starts_at.weekday() in {1, 3} and minute in {18 * 60 + 10, 18 * 60 + 20})
 
 
 def parse_appointment_slot(raw_slot: str | None) -> datetime | None:
@@ -3892,6 +3910,8 @@ def public_agenda():
     days, rows = build_appointment_slot_grid(start, [], "fr", availability_overrides)
     for row in rows:
         for slot in row["slots"]:
+            if slot is None:
+                continue
             stamp = slot["starts_at"]
             slot["unavailable"] = not appointment_slot_is_open(stamp, availability_overrides) or stamp <= agenda_now() or any(
                 a.starts_at < stamp + timedelta(minutes=10)
@@ -3900,7 +3920,7 @@ def public_agenda():
     consultation_days = []
     for index, day in enumerate(days):
         day_slots = [row['slots'][index] for row in rows
-                     if appointment_slot_is_open(row['slots'][index]['starts_at'], availability_overrides)]
+                     if row['slots'][index] is not None and appointment_slot_is_open(row['slots'][index]['starts_at'], availability_overrides)]
         consultation_days.append(dict(day, slots=day_slots))
     return render_template("public_agenda.html", consultation_days=consultation_days,
         agenda_asset_version=os.stat(os.path.join(app.static_folder, 'public_agenda.css')).st_mtime_ns,
@@ -3974,7 +3994,7 @@ def admin_set_appointment_availability():
     stamp = parse_appointment_slot(request.form.get("slot_start"))
     target_open = request.form.get("is_open") == "1"
     week_date = request.form.get("week_date") or (stamp.date().isoformat() if stamp else "")
-    if not stamp or stamp <= agenda_now() or stamp.hour >= APPOINTMENT_CLOSING_HOUR:
+    if not stamp or stamp <= agenda_now() or stamp.hour >= APPOINTMENT_CLOSING_HOUR or (target_open and appointment_slot_is_hard_closed(stamp)):
         abort(400)
     nearby = Appointment.query.filter(Appointment.starts_at < stamp + timedelta(minutes=10),
         Appointment.starts_at > stamp - timedelta(minutes=60)).all()
@@ -4034,6 +4054,8 @@ def admin_appointments():
     reservation_by_start = {hold.starts_at: hold for hold in holds}
     for row in slot_rows:
         for slot in row['slots']:
+            if slot is None:
+                continue
             # Keep the patient identifiable internally throughout a longer visit.
             if not slot['appointment']:
                 slot['appointment'] = next((a for a in appointments
