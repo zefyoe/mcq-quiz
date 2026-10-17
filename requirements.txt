@@ -15,4 +15,5 @@ MarkupSafe==3.0.3
 packaging==26.0
 typing_extensions==4.15.0
 Pillow>=11.3,<13
+reportlab>=4.2,<5
 stripe>=11,<14

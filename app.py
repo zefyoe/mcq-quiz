@@ -9,7 +9,7 @@ from functools import lru_cache
 from io import BytesIO
 from urllib.parse import urlparse
 
-from flask import Flask, abort, g, jsonify, render_template, request, session, redirect, url_for
+from flask import Flask, abort, g, jsonify, make_response, render_template, request, session, redirect, url_for
 from flask.sessions import SecureCookieSessionInterface
 from flask_login import (
     LoginManager,
@@ -44,6 +44,7 @@ from inami_ultrasound_catalog import (
     INAMI_ULTRASOUND_BY_CODE,
     INAMI_ULTRASOUND_GROUPS,
 )
+from appointment_confirmation import create_appointment_confirmation_pdf
 from models import Appointment, AppointmentHold, AppointmentSlotOverride, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
@@ -3622,6 +3623,12 @@ PUBLIC_APPOINTMENT_GROUPS = (
         ("460633", "Doppler des vaisseaux de l’abdomen"),
     )),
 )
+PUBLIC_APPOINTMENT_LABELS = {
+    code: label for _, entries in PUBLIC_APPOINTMENT_GROUPS for code, label in entries
+}
+APPOINTMENT_PRACTICE_ADDRESS = os.environ.get(
+    "APPOINTMENT_PRACTICE_ADDRESS", "Rue Gaillait 35, Centre d'Echographie de Pavillon"
+)
 
 
 def get_localized_inami_appointment_groups(language: str) -> tuple:
@@ -3979,7 +3986,7 @@ def public_agenda_hold():
     exam_code = (request.form.get("inami_code") or "").strip()
     patient_name = (request.form.get("patient_name") or "").strip()
     if (not stamp or stamp <= agenda_now() or not appointment_slot_is_open(stamp)
-            or exam_code not in INAMI_ULTRASOUND_BY_CODE or not is_valid_patient_name(patient_name)):
+            or exam_code not in PUBLIC_APPOINTMENT_LABELS or not is_valid_patient_name(patient_name)):
         return jsonify(error="Indiquez le prénom et le nom complets (au moins 5 lettres) et choisissez un examen. Le créneau ne peut pas être réservé sans ces informations."), 400
     if stamp != next_bookable_appointment_slot(stamp.date()):
         return jsonify(error="Les créneaux se libèrent dans l’ordre chronologique. Choisissez le premier créneau disponible."), 409
@@ -4240,7 +4247,7 @@ def admin_book_appointment():
     )):
         abort(400)
     if public and (not is_valid_patient_name(patient_name) or (patient_email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", patient_email))
-                   or inami_code not in INAMI_ULTRASOUND_BY_CODE):
+                   or inami_code not in PUBLIC_APPOINTMENT_LABELS):
         return jsonify(error="Vérifiez le prénom et le nom complets, l’adresse e-mail et l’examen."), 400
 
     if not starts_at or not is_valid_patient_name(patient_name):
@@ -4335,8 +4342,19 @@ def admin_book_appointment():
         prescription_data=prescription_data,
     )
     try:
+        confirmation_pdf = (create_appointment_confirmation_pdf(
+            patient_name=patient_name,
+            starts_at=starts_at,
+            examination=PUBLIC_APPOINTMENT_LABELS[inami_code],
+            practice_address=APPOINTMENT_PRACTICE_ADDRESS,
+            email=patient_email,
+            phone=patient_phone,
+            prescription_attached=bool(prescription_filename),
+        ) if public else None)
         db.session.add(appointment)
         hold = db.session.get(AppointmentHold, starts_at) if public else None
+        if hold:
+            db.session.delete(hold)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -4353,10 +4371,10 @@ def admin_book_appointment():
         ))
 
     if public:
-        if hold:
-            db.session.delete(hold)
-            db.session.commit()
-        return jsonify(ok=True, redirect=url_for("public_agenda", date=starts_at.date().isoformat(), success=1))
+        response = make_response(confirmation_pdf)
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = 'inline; filename="confirmation-rendez-vous.pdf"'
+        return response
     return redirect(url_for(
         "admin_appointments",
         date=week_date,
