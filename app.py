@@ -4249,6 +4249,11 @@ def admin_book_appointment():
     if public and (not is_valid_patient_name(patient_name) or (patient_email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", patient_email))
                    or inami_code not in PUBLIC_APPOINTMENT_LABELS):
         return jsonify(error="Vérifiez le prénom et le nom complets, l’adresse e-mail et l’examen."), 400
+    if public:
+        existing_hold = db.session.get(AppointmentHold, starts_at)
+        own_hold = existing_hold is not None and existing_hold.token == agenda_token()
+        if not own_hold and starts_at != next_bookable_appointment_slot(starts_at.date()):
+            return jsonify(error="Ce créneau n’est plus le premier disponible. Actualisez l’agenda et choisissez le créneau proposé."), 409
 
     if not starts_at or not is_valid_patient_name(patient_name):
         return redirect(url_for("admin_appointments", date=week_date,
