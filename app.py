@@ -3782,8 +3782,8 @@ def appointment_slot_is_hard_closed(starts_at):
         starts_at.weekday() in {1, 3} and minute in {18 * 60 + 10, 18 * 60 + 20})
 
 
-def next_bookable_appointment_slot(day, availability_overrides=None):
-    """Return only the earliest unoccupied opening for a day, to group visits."""
+def bookable_appointment_slots(day, availability_overrides=None):
+    """Expose two adjacent openings, advancing only past an occupied first slot."""
     if availability_overrides is None:
         availability_overrides = {item.starts_at: item.is_open for item in AppointmentSlotOverride.query.filter(
             AppointmentSlotOverride.starts_at >= datetime.combine(day, time.min),
@@ -3798,16 +3798,32 @@ def next_bookable_appointment_slot(day, availability_overrides=None):
     holds = {hold.starts_at for hold in AppointmentHold.query.filter(
         AppointmentHold.starts_at >= datetime.combine(day, time.min),
         AppointmentHold.starts_at < datetime.combine(day + timedelta(days=1), time.min)).all()}
+    visible_slots = []
+    now = agenda_now()
     for minute in sorted(candidates):
         hour, minute_value = divmod(minute, 60)
         stamp = datetime.combine(day, time(hour=hour, minute=minute_value))
-        if stamp <= agenda_now() or not appointment_slot_is_open(stamp, availability_overrides) or stamp in holds:
+        unavailable = (stamp <= now or not appointment_slot_is_open(stamp, availability_overrides)
+                       or stamp in holds or any(
+                           item.starts_at < stamp + timedelta(minutes=APPOINTMENT_SLOT_MINUTES)
+                           and item.starts_at + timedelta(minutes=item.duration_minutes) > stamp
+                           for item in appointments))
+        if unavailable:
+            if visible_slots:
+                break
             continue
-        if any(item.starts_at < stamp + timedelta(minutes=10)
-               and item.starts_at + timedelta(minutes=item.duration_minutes) > stamp for item in appointments):
-            continue
-        return stamp
-    return None
+        if visible_slots and stamp != visible_slots[-1] + timedelta(minutes=APPOINTMENT_SLOT_MINUTES):
+            break
+        visible_slots.append(stamp)
+        if len(visible_slots) == 2:
+            break
+    return tuple(visible_slots)
+
+
+def next_bookable_appointment_slot(day, availability_overrides=None):
+    """Return the earliest public opening for availability feedback."""
+    slots = bookable_appointment_slots(day, availability_overrides)
+    return slots[0] if slots else None
 
 
 def parse_appointment_slot(raw_slot: str | None) -> datetime | None:
@@ -3952,7 +3968,8 @@ def public_agenda():
         AppointmentSlotOverride.starts_at >= datetime.combine(start, time.min),
         AppointmentSlotOverride.starts_at < datetime.combine(end, time.min)).all()}
     days, rows = build_appointment_slot_grid(start, [], "fr", availability_overrides)
-    next_slots = {day["date"]: next_bookable_appointment_slot(day["date"], availability_overrides) for day in days}
+    visible_slots = {day["date"]: set(bookable_appointment_slots(day["date"], availability_overrides))
+                     for day in days}
     for row in rows:
         for slot in row["slots"]:
             if slot is None:
@@ -3962,7 +3979,7 @@ def public_agenda():
                 a.starts_at < stamp + timedelta(minutes=10)
                 and a.starts_at + timedelta(minutes=a.duration_minutes) > stamp for a in occupied
             ) or any(h.starts_at == stamp for h in holds)
-            slot["waiting"] = not base_unavailable and stamp != next_slots.get(stamp.date())
+            slot["waiting"] = not base_unavailable and stamp not in visible_slots[stamp.date()]
             slot["unavailable"] = base_unavailable or slot["waiting"]
     consultation_days = []
     for index, day in enumerate(days):
@@ -3988,8 +4005,8 @@ def public_agenda_hold():
     if (not stamp or stamp <= agenda_now() or not appointment_slot_is_open(stamp)
             or exam_code not in PUBLIC_APPOINTMENT_LABELS or not is_valid_patient_name(patient_name)):
         return jsonify(error="Indiquez le prénom et le nom complets (au moins 5 lettres) et choisissez un examen. Le créneau ne peut pas être réservé sans ces informations."), 400
-    if stamp != next_bookable_appointment_slot(stamp.date()):
-        return jsonify(error="Les créneaux se libèrent dans l’ordre chronologique. Choisissez le premier créneau disponible."), 409
+    if stamp not in bookable_appointment_slots(stamp.date()):
+        return jsonify(error="Les créneaux se libèrent dans l’ordre chronologique. Choisissez l’un des créneaux disponibles."), 409
     if not claim_agenda_slot(stamp, agenda_token()) or slot_is_booked(stamp):
         db.session.rollback()
         return jsonify(error="Ce créneau n’est plus disponible."), 409
@@ -4252,8 +4269,8 @@ def admin_book_appointment():
     if public:
         existing_hold = db.session.get(AppointmentHold, starts_at)
         own_hold = existing_hold is not None and existing_hold.token == agenda_token()
-        if not own_hold and starts_at != next_bookable_appointment_slot(starts_at.date()):
-            return jsonify(error="Ce créneau n’est plus le premier disponible. Actualisez l’agenda et choisissez le créneau proposé."), 409
+        if not own_hold and starts_at not in bookable_appointment_slots(starts_at.date()):
+            return jsonify(error="Ce créneau n’est plus disponible. Actualisez l’agenda et choisissez un créneau proposé."), 409
 
     if not starts_at or not is_valid_patient_name(patient_name):
         return redirect(url_for("admin_appointments", date=week_date,
