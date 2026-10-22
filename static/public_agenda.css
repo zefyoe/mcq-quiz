@@ -1,6 +1,9 @@
 /* Public booking calendar: desktop-first week view, compact touch layout. */
 .public-agenda-page { background: #f0f4f8; }
 .public-agenda-page .appointment-shell { max-width: 1320px; padding-top: 32px; }
+.agenda-location { box-sizing: border-box; width: fit-content; max-width: 100%; margin: 0 auto 24px; padding: 12px 22px; border: 1px solid #d3dfed; border-radius: 12px; background: #fff; color: #263951; font-style: normal; text-align: center; line-height: 1.4; }
+.agenda-location span { display: block; margin-bottom: 3px; color: #60718a; font-size: .75rem; font-weight: 650; }
+.agenda-location strong { display: block; font-size: .95rem; font-weight: 750; }
 .public-agenda-page .appointment-hero { align-items: center; margin-bottom: 24px; }
 .public-agenda-page .appointment-hero h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); }
 .public-agenda-page .agenda-week-panel { display: block; padding: 24px; border-radius: 18px; box-shadow: 0 8px 30px #2136510a; }
