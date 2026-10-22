@@ -3,8 +3,6 @@
 .public-agenda-page .appointment-shell { max-width: 1320px; padding-top: 32px; }
 .public-agenda-page .appointment-hero { align-items: center; margin-bottom: 24px; }
 .public-agenda-page .appointment-hero h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); }
-.agenda-duration { padding: 12px 18px; border: 1px solid #d3dfed; border-radius: 12px; background: #fff; color: #245387; font-size: 1.15rem; font-weight: 750; white-space: nowrap; }
-.agenda-duration span { display: block; margin-top: 3px; font-size: .72rem; font-weight: 500; color: #63708a; }
 .public-agenda-page .agenda-week-panel { display: block; padding: 24px; border-radius: 18px; box-shadow: 0 8px 30px #2136510a; }
 .public-agenda-page .appointment-calendar-toolbar { margin-bottom: 18px; gap: 16px; }
 .public-agenda-page .appointment-calendar-toolbar h2 { font-size: 1.35rem; letter-spacing: -.025em; }
@@ -71,7 +69,6 @@
   .agenda-confirmation-actions button { width: 100%; }
   .public-agenda-page .agenda-week-panel { padding: 16px 10px; }
   .public-agenda-page .appointment-hero { align-items: flex-start; }
-  .agenda-duration { display: none; }
   .agenda-closed-col, .public-agenda-page .appointment-closed-column { display: none; }
   .agenda-open-col { width: 33.333%; }
   .public-agenda-page .appointment-compact-week td { padding: 3px; }

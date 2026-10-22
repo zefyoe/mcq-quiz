@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='public_agenda.css', v=agenda_asset_version) }}"></head>
 <body class="appointments-page public-agenda-page">
 <header class="admin-topbar appointment-topbar"><div class="admin-topbar-inner"><span class="appointment-brand">Bymed <span>Cabinet privé de radiologie</span></span><span>Prendre rendez-vous</span></div></header>
-<main class="appointment-shell"><section class="appointment-hero"><div><p class="appointment-eyebrow">CABINET DE RADIOLOGIE · ÉCHOGRAPHIE</p><h1>Prendre rendez-vous</h1><p>Sélectionnez un horaire, puis renseignez le patient et l’examen souhaité.</p></div><div class="agenda-duration">10 min <span>par rendez-vous</span></div></section>
+<main class="appointment-shell"><section class="appointment-hero"><div><p class="appointment-eyebrow">CABINET DE RADIOLOGIE · ÉCHOGRAPHIE</p><h1>Prendre rendez-vous</h1><p>Sélectionnez un horaire, puis renseignez le patient et l’examen souhaité.</p></div></section>
 {% if success %}<p class="appointment-alert appointment-alert-success" role="status">Le rendez-vous est confirmé.</p>{% endif %}
 <p id="calendar-error" role="alert"></p>
 <section class="appointment-calendar-card appointment-dashboard agenda-week-panel">
