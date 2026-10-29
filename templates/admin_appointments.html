@@ -91,6 +91,15 @@
             <span><i class="legend-booked"></i> {{ l10n('Ingepland', 'Scheduled', 'Planifié') }}</span>
           </div>
 
+          <section class="report-notice" aria-label="Connexion Gmail">
+            {% if gmail_sender %}<p>Gmail connecté : <strong>{{ gmail_sender }}</strong></p>{% else %}<p>Connectez votre compte Google pour envoyer les comptes rendus avec Gmail.</p>{% endif %}
+            <form method="post" action="{{ url_for('google_login_start') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="appointment-day-close-button" type="submit" {% if not google_oauth_ready %}disabled{% endif %}>{{ 'Reconnecter Gmail' if gmail_sender else 'Connecter Google / Gmail' }}</button>
+            </form>
+            {% if not google_oauth_ready %}<p>La connexion Google doit d’abord être configurée pour ce site.</p>{% endif %}
+          </section>
+
         </aside>
 
         <section class="appointment-calendar-card">

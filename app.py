@@ -50,7 +50,9 @@ from inami_ultrasound_catalog import (
 from appointment_confirmation import create_appointment_confirmation_pdf
 from radiology_report import create_radiology_report_pdf
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
-from models import Appointment, AppointmentHold, AppointmentReport, AppointmentSlotOverride, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
+                             verified_google_identity, token_cipher, send_gmail_report)
+from models import Appointment, AppointmentHold, AppointmentReport, AppointmentSlotOverride, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -797,6 +799,7 @@ def ensure_appointment_schema() -> None:
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentReport.__table__.create(bind=db.engine, checkfirst=True)
+    GmailConnection.__table__.create(bind=db.engine, checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
     hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
     for name, kind in (("draft_data", "TEXT"), ("prescription_filename", "VARCHAR(255)"),
@@ -3956,6 +3959,9 @@ def claim_agenda_slot(starts_at, token):
 def private_agenda_cache(response):
     if request.path.startswith(("/agenda", "/admin/appointments")):
         response.headers["Cache-Control"] = "private, no-store"
+    if request.path.startswith("/auth/google/") or request.path == "/login":
+        response.headers["Cache-Control"] = "private, no-store"
+        response.headers["Referrer-Policy"] = "no-referrer"
     return response
 
 
@@ -4224,6 +4230,8 @@ def admin_appointments():
         shift_date=shift_date,
         appointments_asset_version=os.stat(os.path.join(app.static_folder, 'appointments.css')).st_mtime_ns,
         report_asset_version=os.stat(os.path.join(app.static_folder, 'internal_reporting.js')).st_mtime_ns,
+        google_oauth_ready=google_oauth_configured(),
+        gmail_sender=(active_gmail_connection().email if active_gmail_connection() else None),
         week_start=week_start,
         week_end=week_end,
         selected_date=(requested_date or week_start.isoformat()),
@@ -4428,6 +4436,13 @@ def appointment_report_key(record):
     return hashlib.sha256(identity.encode("utf-8")).hexdigest()
 
 
+def active_gmail_connection():
+    if not google_oauth_configured() or not current_user.is_authenticated:
+        return None
+    connection = db.session.get(GmailConnection, current_user.id)
+    return connection if connection and connection.email.lower() == current_user.email.lower() else None
+
+
 def appointment_report_context(values):
     appointment_id = values.get("appointment_id", type=int)
     record = db.session.get(Appointment, appointment_id) if appointment_id else None
@@ -4459,7 +4474,7 @@ def admin_saved_radiology_report():
         request.form if request.method == "POST" else request.args)
     report = AppointmentReport.query.filter_by(context_key=key).first()
     if request.method == "GET":
-        return jsonify(email_enabled=report_mail_configured(), report=None if report is None else {
+        return jsonify(email_enabled=bool(active_gmail_connection()) or report_mail_configured(), report=None if report is None else {
             "report_text": report.report_text, "report_date": report.report_date.isoformat(),
             "radiologist": report.radiologist, "revision": report.revision,
             "updated_at": report.updated_at.isoformat() + "Z"})
@@ -4494,7 +4509,8 @@ def admin_email_radiology_report():
         return admin_redirect
     if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
         abort(400)
-    if not report_mail_configured():
+    gmail = active_gmail_connection()
+    if not gmail and not report_mail_configured():
         return jsonify(error="L’envoi par e-mail n’est pas encore activé."), 503
     ensure_appointment_schema()
     key, _, _, _ = appointment_report_context(request.form)
@@ -4513,7 +4529,11 @@ def admin_email_radiology_report():
         radiologist=report.radiologist, practice_address=APPOINTMENT_PRACTICE_ADDRESS)
     delivery_key = hashlib.sha256(f"{key}:{report.revision}:{recipient}:{attempt}".encode()).hexdigest()
     try:
-        send_report_pdf(recipient=recipient, pdf=pdf, idempotency_key=delivery_key)
+        if gmail:
+            send_gmail_report(connection=gmail, secret=app.secret_key,
+                              recipient=recipient, pdf=pdf, message_key=delivery_key)
+        else:
+            send_report_pdf(recipient=recipient, pdf=pdf, idempotency_key=delivery_key)
     except ReportMailError as error:
         return jsonify(error=str(error)), 502
     return jsonify(ok=True, message="Le compte rendu PDF a été confié au service d’envoi pour " + recipient + ".")
@@ -4962,12 +4982,85 @@ def admin_import_images():
 # Auth
 # -------------------------
 
+@app.post("/auth/google/start")
+def google_login_start():
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    if not google_oauth_configured():
+        return redirect(url_for("login", google_error="La connexion Google doit d’abord être configurée pour ce site."))
+    if current_user.is_authenticated and not user_has_admin_access(current_user):
+        abort(403)
+    ensure_appointment_schema()
+    force_consent = session.pop("google_force_consent", False)
+    prompt = "consent" if force_consent or current_user.is_authenticated or GmailConnection.query.first() is None else "select_account"
+    nonce = secrets.token_urlsafe(32)
+    flow = google_flow()
+    authorization_url, state = flow.authorization_url(
+        access_type="offline", prompt=prompt, nonce=nonce)
+    session["google_reporting_oauth"] = {
+        "state": state, "nonce": nonce, "verifier": flow.code_verifier,
+        "started": datetime.now(ZoneInfo("UTC")).timestamp(),
+        "user_id": current_user.id if current_user.is_authenticated else None,
+    }
+    return redirect(authorization_url)
+
+
+@app.get("/auth/google/callback")
+def google_login_callback():
+    pending = session.pop("google_reporting_oauth", None)
+    if (not pending or not google_oauth_configured()
+            or datetime.now(ZoneInfo("UTC")).timestamp() - pending["started"] > 600
+            or not secrets.compare_digest(request.args.get("state", ""), pending["state"])):
+        abort(400)
+    target = "admin_appointments" if current_user.is_authenticated else "login"
+    def fail(message):
+        return redirect(url_for(target, **{"error" if target == "admin_appointments" else "google_error": message}))
+    if request.args.get("error") or not request.args.get("code"):
+        return fail("Connexion Google annulée. Vous pouvez réessayer.")
+    try:
+        flow = google_flow(state=pending["state"], verifier=pending["verifier"])
+        flow.fetch_token(code=request.args["code"], timeout=20)
+        credentials = flow.credentials
+        claims = verified_google_identity(credentials, pending["nonce"])
+        email = (claims.get("email") or "").strip().lower()
+        user = User.query.filter(func.lower(User.email) == email).first()
+        if not user or not is_admin_email(email):
+            return fail("Ce compte Google n’est pas autorisé dans l’environnement interne.")
+        if pending["user_id"] is not None and (not current_user.is_authenticated or user.id != pending["user_id"] or current_user.id != user.id):
+            return fail("Connectez le compte Google correspondant à votre compte administrateur.")
+        if GMAIL_SCOPE not in (credentials.granted_scopes or credentials.scopes or []):
+            session["google_force_consent"] = True
+            return fail("Autorisez l’envoi Gmail pour connecter ce compte, puis réessayez.")
+        ensure_appointment_schema()
+        connection = db.session.get(GmailConnection, user.id)
+        if connection and connection.google_subject != claims["sub"]:
+            return fail("Ce compte Google ne correspond pas à la connexion enregistrée.")
+        if connection is None and not credentials.refresh_token:
+            session["google_force_consent"] = True
+            return fail("Autorisez l’envoi Gmail pour connecter ce compte, puis réessayez.")
+        if connection is None:
+            connection = GmailConnection(user_id=user.id)
+            db.session.add(connection)
+        connection.email, connection.google_subject = email, claims["sub"]
+        if credentials.refresh_token:
+            connection.encrypted_refresh_token = token_cipher(app.secret_key).encrypt(credentials.refresh_token.encode()).decode()
+        connection.updated_at = datetime.utcnow()
+        user.last_login_at = datetime.utcnow()
+        db.session.commit()
+        login_user(user)
+        record_login_event(user)
+    except Exception:
+        db.session.rollback()
+        return fail("La connexion Google n’a pas pu être finalisée. Réessayez ou utilisez votre mot de passe.")
+    return redirect(url_for("admin_appointments", success="Connexion Google et Gmail établie pour " + email + "."))
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("home"))
 
-    error = None
+    error = (request.args.get("google_error") or "").strip() or None
     field_errors = {}
     next_url = safe_redirect_target(request.args.get("next"), "home")
     submitted_email = ""
@@ -5001,6 +5094,8 @@ def login():
         errors=field_errors,
         next=next_url,
         submitted_email=submitted_email,
+        google_oauth_ready=google_oauth_configured(),
+        csrf_token=agenda_token(),
     )
 
 

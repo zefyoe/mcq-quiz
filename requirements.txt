@@ -17,3 +17,5 @@ typing_extensions==4.15.0
 Pillow>=11.3,<13
 reportlab>=4.2,<5
 stripe>=11,<14
+google-auth-oauthlib>=1.2,<2
+cryptography>=45,<47

@@ -80,6 +80,14 @@ class AppointmentHold(db.Model):
             return {}
 
 
+class GmailConnection(db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
+    email = db.Column(db.String(255), nullable=False)
+    google_subject = db.Column(db.String(255), nullable=False)
+    encrypted_refresh_token = db.Column(db.Text, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
 class AppointmentReport(db.Model):
     """Private report linked to a specific booking, with an identity snapshot."""
     id = db.Column(db.Integer, primary_key=True)
