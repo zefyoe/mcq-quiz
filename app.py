@@ -45,6 +45,7 @@ from inami_ultrasound_catalog import (
     INAMI_ULTRASOUND_GROUPS,
 )
 from appointment_confirmation import create_appointment_confirmation_pdf
+from radiology_report import create_radiology_report_pdf
 from models import Appointment, AppointmentHold, AppointmentSlotOverride, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
@@ -4216,10 +4217,12 @@ def admin_appointments():
         "admin_appointments.html",
         shift_appointments=[a for a in appointments if a.starts_at.date() == shift_date],
         shift_date=shift_date,
+        appointments_asset_version=os.stat(os.path.join(app.static_folder, 'appointments.css')).st_mtime_ns,
+        report_asset_version=os.stat(os.path.join(app.static_folder, 'internal_reporting.js')).st_mtime_ns,
         week_start=week_start,
         week_end=week_end,
         selected_date=(requested_date or week_start.isoformat()),
-        today=datetime.now().date(),
+        today=agenda_now().date(),
         timedelta=timedelta,
         days=days,
         slot_rows=slot_rows,
@@ -4406,6 +4409,47 @@ def admin_book_appointment():
             "Le rendez-vous d'échographie a été planifié.",
         ),
     ))
+
+
+@app.post("/admin/appointments/report/pdf")
+def admin_radiology_report_pdf():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    appointment_id = request.form.get("appointment_id", type=int)
+    record = db.session.get(Appointment, appointment_id) if appointment_id else None
+    if record:
+        patient_name, starts_at = record.patient_name, record.starts_at
+        exam_code = record.inami_code or record.appointment_type
+    else:
+        stamp = parse_appointment_slot(request.form.get("reservation_start"))
+        hold = db.session.get(AppointmentHold, stamp) if stamp else None
+        if not hold:
+            abort(404)
+        patient_name, starts_at = hold.draft.get("patient_name", ""), hold.starts_at
+        exam_code = hold.draft.get("inami_code", "")
+    report_text = (request.form.get("report_text") or "").strip()
+    radiologist = (request.form.get("radiologist") or "").strip()
+    try:
+        report_date = date.fromisoformat(request.form.get("report_date", ""))
+    except ValueError:
+        return jsonify(error="Indiquez une date de compte rendu valide."), 400
+    if not report_text or len(report_text) > 50000 or len(radiologist) > 255:
+        return jsonify(error="Saisissez le compte rendu (50 000 caractères maximum)."), 400
+    payload = create_radiology_report_pdf(patient_name=patient_name,
+        examination=PUBLIC_APPOINTMENT_LABELS.get(exam_code)
+                    or get_appointment_display_labels("fr").get(exam_code, "Examen échographique"),
+        starts_at=starts_at, report_date=report_date, report_text=report_text,
+        radiologist=radiologist, practice_address=APPOINTMENT_PRACTICE_ADDRESS)
+    response = make_response(payload)
+    response.headers["Content-Type"] = "application/pdf"
+    filename = secure_filename(f"compte-rendu-{patient_name}-{report_date.isoformat()}.pdf")
+    response.headers["Content-Disposition"] = f'inline; filename="{filename}"'
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 @app.get("/admin/appointments/<int:appointment_id>/prescription")

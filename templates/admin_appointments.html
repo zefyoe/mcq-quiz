@@ -1,3 +1,6 @@
+{% macro report_link(name, exam, starts_at, appointment_id='', reservation_start='') -%}
+<button type="button" class="report-patient-link" data-report-patient="{{ name }}" data-report-exam="{{ exam }}" data-report-date="{{ starts_at.strftime('%d/%m/%Y à %H:%M') }}" data-report-appointment="{{ appointment_id }}" data-report-reservation="{{ reservation_start }}" title="Rédiger un compte rendu">{{ name }}</button>
+{%- endmacro %}
 <!doctype html>
 <html lang="{{ language }}">
   <head>
@@ -6,7 +9,7 @@
     <title>{{ l10n('Afsprakenplanner', 'Appointment planner', 'Planificateur de rendez-vous') }}</title>
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v=asset_version) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v=appointments_asset_version) }}">
   </head>
   <body class="appointments-page">
     <header class="admin-topbar appointment-topbar">
@@ -42,7 +45,7 @@
         </div>
         {% for appointment in shift_appointments %}
         <article style="padding:14px 0;border-bottom:1px solid #dfe7f1">
-          <strong>{{ appointment.starts_at.strftime('%H:%M') }} · {{ appointment.patient_name }}</strong>
+          <strong>{{ appointment.starts_at.strftime('%H:%M') }} · {{ report_link(appointment.patient_name, appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type), appointment.starts_at, appointment.id) }}</strong>
           <p>{{ appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type) }}</p>
           <p>Statut : {{ 'BIM (VIPO)' if appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
           <p>{{ appointment.patient_email }}{% if appointment.patient_phone %} · {{ appointment.patient_phone }}{% endif %} · Ordonnance : {{ 'reçue' if appointment.prescription_filename else 'non jointe' }}</p>
@@ -122,7 +125,7 @@
                   {% if slot.appointment %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
                       <span class="appointment-slot-time">{{ slot.appointment.starts_at.strftime('%H:%M') }} - {{ (slot.appointment.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
-                      <strong>{{ slot.appointment.patient_name }}</strong>
+                      <strong>{{ report_link(slot.appointment.patient_name, appointment_type_labels.get(slot.appointment.inami_code or slot.appointment.appointment_type, slot.appointment.appointment_type), slot.appointment.starts_at, slot.appointment.id) }}</strong>
                       {% set appointment_label_key = slot.appointment.inami_code or slot.appointment.appointment_type %}
                       <span>{{ appointment_type_labels.get(appointment_label_key, slot.appointment.appointment_type) }}</span>
                       <details>
@@ -143,7 +146,7 @@
                     {% set reservation_data = slot.reservation.draft %}
                     <article class="appointment-slot appointment-slot-booked" aria-label="Réservation enregistrée">
                       <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }}</span>
-                      <strong>{{ reservation_data.get('patient_name') or 'Formulaire en cours' }}</strong>
+                      <strong>{{ report_link(reservation_data.get('patient_name') or 'Formulaire en cours', appointment_type_labels.get(reservation_data.get('inami_code', ''), 'Examen à compléter'), slot.starts_at, reservation_start=slot.starts_at.isoformat(timespec='minutes')) }}</strong>
                       {% set reservation_code = reservation_data.get('inami_code', '') %}
                       {% if reservation_code %}<span>{{ appointment_type_labels.get(reservation_code, reservation_code) }}</span>{% else %}<span>Examen à compléter</span>{% endif %}
                       <details open>
@@ -252,6 +255,8 @@
       </section>
     </div>
 
+    {% include '_appointment_reporting.html' %}
+    <script src="{{ url_for('static', filename='internal_reporting.js', v=report_asset_version) }}"></script>
     <script>
       (() => {
         const modal = document.getElementById('appointment-modal');

@@ -1,0 +1,24 @@
+<div class="appointment-modal" id="report-modal" hidden data-endpoint="{{ url_for('admin_radiology_report_pdf') }}">
+  <div class="appointment-modal-backdrop"></div>
+  <section class="appointment-modal-card report-card" role="dialog" aria-modal="true" aria-labelledby="report-title">
+    <button type="button" class="appointment-modal-close" id="report-close" aria-label="Fermer">×</button>
+    <p class="appointment-eyebrow">AGENDA INTERNE · RADIOLOGIE</p>
+    <h2 id="report-title">Compte rendu radiologique</h2>
+    <p id="report-patient-summary"></p>
+    <p class="report-notice">Le texte et le PDF ne sont pas enregistrés. Téléchargez votre compte rendu avant de fermer.</p>
+    <p id="report-error" role="alert"></p>
+    <form id="report-form" class="appointment-booking-form" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="appointment_id"><input type="hidden" name="reservation_start">
+      <label>Date du compte rendu<input type="date" name="report_date" value="{{ today.isoformat() }}" required></label>
+      <label>Radiologue (facultatif)<input name="radiologist" maxlength="255" placeholder="Dr …"></label>
+      <label>Compte rendu<textarea name="report_text" rows="16" maxlength="50000" required spellcheck="true" lang="fr" placeholder="Collez ou rédigez ici votre compte rendu : indication, technique, résultats et conclusion."></textarea></label>
+      <button type="submit" class="appointment-submit-button">Générer le PDF</button>
+    </form>
+    <section id="report-output" hidden aria-label="Aperçu du compte rendu">
+      <p id="report-preview-status" role="status"></p>
+      <iframe id="report-preview" title="Aperçu du compte rendu PDF"></iframe>
+      <div class="report-actions"><button type="button" id="report-print">Imprimer</button><a id="report-download" download="compte-rendu-radiologique.pdf">Télécharger le PDF</a><button type="button" id="report-edit">Modifier le texte</button></div>
+    </section>
+  </section>
+</div>

@@ -280,6 +280,17 @@
 }
 .appointment-day-close-button:hover { background: #ffeded; }
 .appointment-day-close-button:disabled { opacity: 0.7; cursor: default; }
+.report-patient-link { border: 0; padding: 0; background: none; color: inherit; font: inherit; font-weight: 750; text-align: left; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.report-patient-link:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.report-card { width: min(100%, 980px); }
+.report-card [hidden] { display: none !important; }
+.report-card textarea { min-height: 300px; resize: vertical; line-height: 1.65; }
+.report-notice { padding: 12px; border-radius: 9px; background: #edf4fb; color: #425b79; font-size: .85rem; }
+#report-error { color: #a32936; }
+#report-preview { width: 100%; height: 60vh; min-height: 280px; border: 1px solid #d3dfed; border-radius: 9px; }
+.report-actions { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 14px; }
+.report-actions button, .report-actions a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; box-sizing: border-box; padding: 10px 16px; border: 1px solid #c5d5e7; border-radius: 9px; background: #edf4fb; color: #214d83; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+@media (max-width: 640px) { .report-actions > * { flex: 1 1 100%; } }
 
 .appointment-week-actions { display: flex; gap: 8px; }
 .appointment-week-actions a {
