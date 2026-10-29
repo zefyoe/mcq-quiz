@@ -3,6 +3,7 @@ import random
 import re
 import json
 import secrets
+import hashlib
 from zoneinfo import ZoneInfo
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
@@ -20,6 +21,8 @@ from flask_login import (
 )
 from flask_compress import Compress
 from sqlalchemy import DateTime, bindparam, func, inspect, text
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import StaleDataError
 from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
@@ -46,7 +49,7 @@ from inami_ultrasound_catalog import (
 )
 from appointment_confirmation import create_appointment_confirmation_pdf
 from radiology_report import create_radiology_report_pdf
-from models import Appointment, AppointmentHold, AppointmentSlotOverride, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from models import Appointment, AppointmentHold, AppointmentReport, AppointmentSlotOverride, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -792,6 +795,7 @@ def ensure_appointment_schema() -> None:
     inspector = inspect(db.engine)
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
+    AppointmentReport.__table__.create(bind=db.engine, checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
     hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
     for name, kind in (("draft_data", "TEXT"), ("prescription_filename", "VARCHAR(255)"),
@@ -4379,6 +4383,9 @@ def admin_book_appointment():
         db.session.add(appointment)
         hold = db.session.get(AppointmentHold, starts_at) if public else None
         if hold:
+            saved_report = AppointmentReport.query.filter_by(context_key=appointment_report_key(hold)).first()
+            if saved_report:
+                saved_report.context_key = appointment_report_key(appointment)
             db.session.delete(hold)
         db.session.commit()
     except Exception:
@@ -4411,6 +4418,74 @@ def admin_book_appointment():
     ))
 
 
+def appointment_report_key(record):
+    """Distinguish rebookings even when SQLite reuses an appointment id."""
+    if isinstance(record, Appointment):
+        identity = f"appointment:{record.id}:{record.created_at}:{record.starts_at}:{record.patient_name}"
+    else:
+        identity = f"reservation:{record.starts_at}:{record.token}"
+    return hashlib.sha256(identity.encode("utf-8")).hexdigest()
+
+
+def appointment_report_context(values):
+    appointment_id = values.get("appointment_id", type=int)
+    record = db.session.get(Appointment, appointment_id) if appointment_id else None
+    if appointment_id and record is None:
+        abort(404)
+    if record:
+        patient_name, starts_at = record.patient_name, record.starts_at
+        exam_code = record.inami_code or record.appointment_type
+    else:
+        stamp = parse_appointment_slot(values.get("reservation_start"))
+        record = db.session.get(AppointmentHold, stamp) if stamp else None
+        if not record:
+            abort(404)
+        patient_name, starts_at = record.draft.get("patient_name", ""), record.starts_at
+        exam_code = record.draft.get("inami_code", "")
+    examination = PUBLIC_APPOINTMENT_LABELS.get(exam_code) or get_appointment_display_labels("fr").get(exam_code, "Examen échographique")
+    return appointment_report_key(record), patient_name, starts_at, examination
+
+
+@app.route("/admin/appointments/report", methods=["GET", "POST"])
+def admin_saved_radiology_report():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    if request.method == "POST" and not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    key, patient_name, starts_at, examination = appointment_report_context(
+        request.form if request.method == "POST" else request.args)
+    report = AppointmentReport.query.filter_by(context_key=key).first()
+    if request.method == "GET":
+        return jsonify(report=None if report is None else {
+            "report_text": report.report_text, "report_date": report.report_date.isoformat(),
+            "radiologist": report.radiologist, "revision": report.revision,
+            "updated_at": report.updated_at.isoformat() + "Z"})
+    report_text = (request.form.get("report_text") or "").strip()
+    radiologist = (request.form.get("radiologist") or "").strip()
+    try:
+        report_date = date.fromisoformat(request.form.get("report_date", ""))
+    except ValueError:
+        return jsonify(error="Indiquez une date de compte rendu valide."), 400
+    if not report_text or len(report_text) > 50000 or len(radiologist) > 255:
+        return jsonify(error="Saisissez le compte rendu (50 000 caractères maximum)."), 400
+    if request.form.get("revision", type=int) != (report.revision if report else 0):
+        return jsonify(error="Ce compte rendu a été modifié dans une autre fenêtre. Copiez votre texte puis rouvrez le patient pour charger la dernière version."), 409
+    if report is None:
+        report = AppointmentReport(context_key=key)
+        db.session.add(report)
+    report.patient_name, report.starts_at, report.examination = patient_name, starts_at, examination
+    report.report_date, report.report_text, report.radiologist = report_date, report_text, radiologist
+    report.updated_at = datetime.utcnow()
+    try:
+        db.session.commit()
+    except (IntegrityError, StaleDataError):
+        db.session.rollback()
+        return jsonify(error="Le compte rendu a changé. Copiez votre texte puis rouvrez le patient."), 409
+    return jsonify(ok=True, revision=report.revision, updated_at=report.updated_at.isoformat() + "Z")
+
+
 @app.post("/admin/appointments/report/pdf")
 def admin_radiology_report_pdf():
     admin_redirect = admin_required()
@@ -4419,18 +4494,7 @@ def admin_radiology_report_pdf():
     if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
         abort(400)
     ensure_appointment_schema()
-    appointment_id = request.form.get("appointment_id", type=int)
-    record = db.session.get(Appointment, appointment_id) if appointment_id else None
-    if record:
-        patient_name, starts_at = record.patient_name, record.starts_at
-        exam_code = record.inami_code or record.appointment_type
-    else:
-        stamp = parse_appointment_slot(request.form.get("reservation_start"))
-        hold = db.session.get(AppointmentHold, stamp) if stamp else None
-        if not hold:
-            abort(404)
-        patient_name, starts_at = hold.draft.get("patient_name", ""), hold.starts_at
-        exam_code = hold.draft.get("inami_code", "")
+    _, patient_name, starts_at, examination = appointment_report_context(request.form)
     report_text = (request.form.get("report_text") or "").strip()
     radiologist = (request.form.get("radiologist") or "").strip()
     try:
@@ -4440,8 +4504,7 @@ def admin_radiology_report_pdf():
     if not report_text or len(report_text) > 50000 or len(radiologist) > 255:
         return jsonify(error="Saisissez le compte rendu (50 000 caractères maximum)."), 400
     payload = create_radiology_report_pdf(patient_name=patient_name,
-        examination=PUBLIC_APPOINTMENT_LABELS.get(exam_code)
-                    or get_appointment_display_labels("fr").get(exam_code, "Examen échographique"),
+        examination=examination,
         starts_at=starts_at, report_date=report_date, report_text=report_text,
         radiologist=radiologist, practice_address=APPOINTMENT_PRACTICE_ADDRESS)
     response = make_response(payload)

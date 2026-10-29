@@ -80,6 +80,21 @@ class AppointmentHold(db.Model):
             return {}
 
 
+class AppointmentReport(db.Model):
+    """Private report linked to a specific booking, with an identity snapshot."""
+    id = db.Column(db.Integer, primary_key=True)
+    context_key = db.Column(db.String(64), nullable=False, unique=True)
+    patient_name = db.Column(db.String(255), nullable=False)
+    examination = db.Column(db.String(1000), nullable=False)
+    starts_at = db.Column(db.DateTime, nullable=False)
+    report_date = db.Column(db.Date, nullable=False)
+    report_text = db.Column(db.Text, nullable=False)
+    radiologist = db.Column(db.String(255), nullable=False, default="")
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    revision = db.Column(db.Integer, nullable=False, default=1)
+    __mapper_args__ = {"version_id_col": revision}
+
+
 class AppointmentSlotOverride(db.Model):
     """Admin controlled, date-specific public availability for a 10-minute slot."""
     starts_at = db.Column(db.DateTime, primary_key=True)
