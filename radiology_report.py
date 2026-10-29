@@ -12,9 +12,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 def create_radiology_report_pdf(*, patient_name, examination, starts_at,
                                 report_date, report_text, radiologist, practice_address):
     output = BytesIO()
+    # Stable PDF bytes let the mail service deduplicate retries of the same report.
     document = SimpleDocTemplate(output, pagesize=A4, rightMargin=20*mm,
         leftMargin=20*mm, topMargin=66*mm, bottomMargin=22*mm,
-        title="Compte rendu radiologique", author=radiologist or "Bymed Radiologie")
+        title="Compte rendu radiologique", author=radiologist or "Bymed Radiologie", invariant=True)
     body_style = ParagraphStyle("report", fontName="Helvetica", fontSize=11,
                                leading=16, spaceAfter=8, splitLongWords=True)
     meta_style = ParagraphStyle("metadata", fontName="Helvetica", fontSize=10, leading=14)

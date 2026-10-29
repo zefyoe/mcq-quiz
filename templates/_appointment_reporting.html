@@ -1,4 +1,4 @@
-<div class="appointment-modal" id="report-modal" hidden data-endpoint="{{ url_for('admin_radiology_report_pdf') }}" data-storage-endpoint="{{ url_for('admin_saved_radiology_report') }}">
+<div class="appointment-modal" id="report-modal" hidden data-endpoint="{{ url_for('admin_radiology_report_pdf') }}" data-storage-endpoint="{{ url_for('admin_saved_radiology_report') }}" data-email-endpoint="{{ url_for('admin_email_radiology_report') }}">
   <div class="appointment-modal-backdrop"></div>
   <section class="appointment-modal-card report-card" role="dialog" aria-modal="true" aria-labelledby="report-title">
     <button type="button" class="appointment-modal-close" id="report-close" aria-label="Fermer">×</button>
@@ -22,5 +22,17 @@
       <iframe id="report-preview" title="Aperçu du compte rendu PDF"></iframe>
       <div class="report-actions"><button type="button" id="report-save-preview">Enregistrer</button><button type="button" id="report-print">Imprimer</button><a id="report-download" download="compte-rendu-radiologique.pdf">Télécharger le PDF</a><button type="button" id="report-edit">Modifier le texte</button></div>
     </section>
+    <details id="report-email-panel" class="report-email-panel">
+      <summary>Envoyer par e-mail</summary>
+      <p id="report-email-setup" class="report-notice">L’envoi par e-mail n’est pas encore activé.</p>
+      <form id="report-email-form" autocomplete="off">
+        <fieldset id="report-email-fields" disabled>
+          <label>Adresse e-mail du destinataire<input type="email" name="recipient" required maxlength="254" placeholder="destinataire@exemple.be"></label>
+          <p>Le compte rendu sera enregistré puis envoyé en pièce jointe PDF à cette adresse.</p>
+          <button type="submit" class="appointment-submit-button">Envoyer le PDF</button>
+        </fieldset>
+      </form>
+      <p id="report-email-status" role="status"></p>
+    </details>
   </section>
 </div>

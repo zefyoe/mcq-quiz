@@ -49,6 +49,7 @@ from inami_ultrasound_catalog import (
 )
 from appointment_confirmation import create_appointment_confirmation_pdf
 from radiology_report import create_radiology_report_pdf
+from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from models import Appointment, AppointmentHold, AppointmentReport, AppointmentSlotOverride, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
@@ -4458,7 +4459,7 @@ def admin_saved_radiology_report():
         request.form if request.method == "POST" else request.args)
     report = AppointmentReport.query.filter_by(context_key=key).first()
     if request.method == "GET":
-        return jsonify(report=None if report is None else {
+        return jsonify(email_enabled=report_mail_configured(), report=None if report is None else {
             "report_text": report.report_text, "report_date": report.report_date.isoformat(),
             "radiologist": report.radiologist, "revision": report.revision,
             "updated_at": report.updated_at.isoformat() + "Z"})
@@ -4484,6 +4485,38 @@ def admin_saved_radiology_report():
         db.session.rollback()
         return jsonify(error="Le compte rendu a changé. Copiez votre texte puis rouvrez le patient."), 409
     return jsonify(ok=True, revision=report.revision, updated_at=report.updated_at.isoformat() + "Z")
+
+
+@app.post("/admin/appointments/report/email")
+def admin_email_radiology_report():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    if not report_mail_configured():
+        return jsonify(error="L’envoi par e-mail n’est pas encore activé."), 503
+    ensure_appointment_schema()
+    key, _, _, _ = appointment_report_context(request.form)
+    report = AppointmentReport.query.filter_by(context_key=key).first()
+    if not report or request.form.get("revision", type=int) != report.revision:
+        return jsonify(error="Enregistrez la dernière version du compte rendu avant l’envoi."), 409
+    recipient = (request.form.get("recipient") or "").strip()
+    attempt = request.form.get("email_attempt", "")
+    if len(recipient) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", recipient):
+        return jsonify(error="Indiquez une adresse e-mail valide."), 400
+    if not re.fullmatch(r"[a-zA-Z0-9-]{16,64}", attempt):
+        abort(400)
+    pdf = create_radiology_report_pdf(patient_name=report.patient_name,
+        examination=report.examination, starts_at=report.starts_at,
+        report_date=report.report_date, report_text=report.report_text,
+        radiologist=report.radiologist, practice_address=APPOINTMENT_PRACTICE_ADDRESS)
+    delivery_key = hashlib.sha256(f"{key}:{report.revision}:{recipient}:{attempt}".encode()).hexdigest()
+    try:
+        send_report_pdf(recipient=recipient, pdf=pdf, idempotency_key=delivery_key)
+    except ReportMailError as error:
+        return jsonify(error=str(error)), 502
+    return jsonify(ok=True, message="Le compte rendu PDF a été confié au service d’envoi pour " + recipient + ".")
 
 
 @app.post("/admin/appointments/report/pdf")

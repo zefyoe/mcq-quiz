@@ -27,3 +27,25 @@ Current service settings from `render.yaml`:
 - Start command: `gunicorn app:app`
 - Auto deploy: enabled
 - Database: Postgres linked to `DATABASE_URL`
+
+## Internal report e-mail
+
+The internal reporting window can send a saved report as a PDF attachment to one
+manually entered recipient. Sending first saves unsaved changes. Only administrators
+can use this action; nothing is sent automatically when saving a report.
+
+Delivery uses the [Resend HTTPS API](https://resend.com/docs/api-reference/emails/send-email).
+In the Render web service's Environment settings, configure:
+
+- `RESEND_API_KEY`: a sending API key for the practice's Resend account.
+- `REPORT_EMAIL_FROM`: a verified sender, for example `Bymed Radiologie <radiologie@bymed.be>`.
+
+Verify the sender domain in Resend before enabling real sending. Keep the API key
+in Render's secret environment settings, never in Git or chat. The e-mail form
+stays disabled until both settings exist. No SMTP configuration is necessary.
+Render Free services [block the usual SMTP ports](https://render.com/docs/free#other-limitations).
+
+The response confirms acceptance by the sending service, not delivery to the
+recipient's inbox. Network failures keep the report saved. Repeating an uncertain
+attempt from the same open window within 24 hours reuses an idempotency key to avoid duplicates;
+after a successful send, a new click is a new intentional send.

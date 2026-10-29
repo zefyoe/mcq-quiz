@@ -286,6 +286,13 @@
 .report-card [hidden] { display: none !important; }
 .report-card textarea { min-height: 300px; resize: vertical; line-height: 1.65; }
 .report-notice { padding: 12px; border-radius: 9px; background: #edf4fb; color: #425b79; font-size: .85rem; }
+.report-email-panel { margin-top: 20px; border-top: 1px solid #d3dfed; padding-top: 16px; }
+.report-email-panel summary { cursor: pointer; font-weight: 750; padding: 10px 0; }
+.report-email-panel fieldset { border: 0; padding: 0; margin: 8px 0; }
+.report-email-panel label { display: grid; gap: 8px; font-weight: 650; }
+.report-email-panel input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px; border: 1px solid #c5d5e7; border-radius: 8px; font: inherit; }
+.report-email-panel p { font-size: .85rem; line-height: 1.5; }
+.report-email-panel :disabled { opacity: .6; cursor: default; }
 #report-error { color: #a32936; }
 #report-preview { width: 100%; height: 60vh; min-height: 280px; border: 1px solid #d3dfed; border-radius: 9px; }
 .report-actions { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 14px; }
