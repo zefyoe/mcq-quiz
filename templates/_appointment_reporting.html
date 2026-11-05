@@ -1,38 +1,77 @@
-<div class="appointment-modal" id="report-modal" hidden data-endpoint="{{ url_for('admin_radiology_report_pdf') }}" data-storage-endpoint="{{ url_for('admin_saved_radiology_report') }}" data-email-endpoint="{{ url_for('admin_email_radiology_report') }}">
-  <div class="appointment-modal-backdrop"></div>
-  <section class="appointment-modal-card report-card" role="dialog" aria-modal="true" aria-labelledby="report-title">
-    <button type="button" class="appointment-modal-close" id="report-close" aria-label="Fermer">×</button>
-    <p class="appointment-eyebrow">AGENDA INTERNE · RADIOLOGIE</p>
-    <h2 id="report-title">Compte rendu radiologique</h2>
+<aside class="report-drawer" id="report-modal" hidden role="region" aria-labelledby="report-title"
+  data-endpoint="{{ url_for('admin_radiology_report_pdf') }}"
+  data-storage-endpoint="{{ url_for('admin_saved_radiology_report') }}"
+  data-patient-endpoint="{{ url_for('admin_patient_details') }}"
+  data-prescription-endpoint="{{ url_for('admin_patient_prescription') }}"
+  data-email-endpoint="{{ url_for('admin_email_radiology_report') }}">
+  <header class="report-drawer-header">
+    <div><p class="appointment-eyebrow">DOSSIER PATIENT · INTERNE</p><h2 id="report-title">Dossier patient</h2></div>
+    <button type="button" id="report-close" aria-label="Fermer le dossier">×</button>
+  </header>
+  <div class="report-drawer-content">
     <p id="report-patient-summary"></p>
-    <p class="report-notice">Cliquez sur « Enregistrer » pour conserver le compte rendu dans l’agenda interne. Vous pourrez le retrouver en ouvrant ce patient.</p>
-    <p id="report-save-status" role="status"></p>
+    <nav class="patient-workflow" aria-label="Documents du patient">
+      <button type="button" id="patient-request-tab">Scanner / importer la demande</button>
+      <button type="button" id="patient-report-tab">Créer un compte rendu</button>
+    </nav>
+    <p id="report-save-status" role="status" aria-live="polite"></p>
     <p id="report-error" role="alert"></p>
-    <form id="report-form" class="appointment-booking-form" autocomplete="off">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <input type="hidden" name="appointment_id"><input type="hidden" name="reservation_start">
-      <input type="hidden" name="revision" value="0">
-      <label>Date du compte rendu<input type="date" name="report_date" value="{{ today.isoformat() }}" required></label>
-      <label>Radiologue (facultatif)<input name="radiologist" maxlength="255" placeholder="Dr …"></label>
-      <label>Compte rendu<textarea name="report_text" rows="16" maxlength="50000" required spellcheck="true" lang="fr" placeholder="Collez ou rédigez ici votre compte rendu : indication, technique, résultats et conclusion."></textarea></label>
-      <div class="report-actions"><button type="button" id="report-save">Enregistrer</button><button type="submit">Générer le PDF</button></div>
+    <button type="button" id="report-retry" hidden>Réessayer le chargement</button>
+    <form id="patient-details-form" class="patient-identifier-form" autocomplete="off">
+      <label>N° de registre national <span>(facultatif)</span><input name="national_number" inputmode="numeric" maxlength="15" placeholder="11 chiffres"></label>
+      <button type="submit">Enregistrer l’identifiant</button><span id="patient-details-status" role="status"></span>
     </form>
-    <section id="report-output" hidden aria-label="Aperçu du compte rendu">
-      <p id="report-preview-status" role="status"></p>
-      <iframe id="report-preview" title="Aperçu du compte rendu PDF"></iframe>
-      <div class="report-actions"><button type="button" id="report-save-preview">Enregistrer</button><button type="button" id="report-print">Imprimer</button><a id="report-download" download="compte-rendu-radiologique.pdf">Télécharger le PDF</a><button type="button" id="report-edit">Modifier le texte</button></div>
-    </section>
-    <details id="report-email-panel" class="report-email-panel">
-      <summary>Envoyer par e-mail</summary>
-      <p id="report-email-setup" class="report-notice">Connectez votre compte Google / Gmail depuis l’agenda pour activer l’envoi. Si la connexion n’est pas encore configurée, contactez l’administrateur.</p>
-      <form id="report-email-form" autocomplete="off">
-        <fieldset id="report-email-fields" disabled>
-          <label>Adresse e-mail du destinataire<input type="email" name="recipient" required maxlength="254" placeholder="destinataire@exemple.be"></label>
-          <p>Le compte rendu sera enregistré puis envoyé en pièce jointe PDF à cette adresse.</p>
-          <button type="submit" class="appointment-submit-button">Envoyer le PDF</button>
-        </fieldset>
+    <section id="patient-request" hidden aria-label="Demande d’examen">
+      <h3>Demande d’examen</h3>
+      <form id="patient-request-form" class="request-upload-form" enctype="multipart/form-data">
+        <p>Importez le PDF produit par votre scanner, ou choisissez un PDF déjà enregistré. Maximum : 10 Mo.</p>
+        <label class="file-drop-label">Scanner / importer la demande<input type="file" name="prescription_file" accept="application/pdf,.pdf" required></label>
+        <p class="report-notice">La numérisation se fait avec le logiciel de votre scanner. Sélectionnez ensuite le PDF ici.</p>
+        <button type="submit">Enregistrer la demande</button>
       </form>
-      <p id="report-email-status" role="status"></p>
-    </details>
-  </section>
-</div>
+      <div id="patient-request-existing" hidden>
+        <p id="patient-request-name"></p>
+        <div class="report-actions"><a id="patient-request-download">Télécharger la demande</a></div>
+        <iframe id="patient-request-preview" title="Demande d’examen enregistrée"></iframe>
+      </div>
+      <p id="patient-request-status" role="status"></p>
+    </section>
+    <section id="patient-report" aria-label="Compte rendu">
+      <section id="report-readonly" hidden>
+        <div class="report-section-heading"><h3>Compte rendu enregistré</h3><button type="button" id="report-start-edit">Modifier le compte rendu</button></div>
+        <p id="report-readonly-meta"></p>
+        <div id="report-readonly-text" tabindex="0"></div>
+        <div class="report-actions"><button type="button" id="report-copy">Copier le texte</button><button type="button" id="report-view-pdf">Voir / imprimer le PDF</button></div>
+      </section>
+      <form id="report-form" class="appointment-booking-form" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="appointment_id"><input type="hidden" name="reservation_start">
+        <input type="hidden" name="revision" value="0">
+        <div class="report-fields-row">
+          <label>Date du compte rendu<input type="date" name="report_date" value="{{ today.isoformat() }}" required></label>
+          <label>Radiologue (facultatif)<input name="radiologist" maxlength="255" placeholder="Dr …"></label>
+        </div>
+        <label>Compte rendu<textarea name="report_text" rows="16" maxlength="50000" required spellcheck="true" lang="fr" placeholder="Collez ou rédigez votre compte rendu ici…"></textarea></label>
+        <div class="report-actions report-editor-actions"><button type="button" id="report-save">Enregistrer</button><button type="submit">PDF / imprimer</button><button type="button" id="report-cancel-edit">Revenir au compte rendu enregistré</button></div>
+      </form>
+      <section id="report-output" hidden aria-label="Aperçu du compte rendu">
+        <p id="report-preview-status" role="status"></p>
+        <iframe id="report-preview" title="Aperçu du compte rendu PDF"></iframe>
+        <div class="report-actions"><button type="button" id="report-print">Imprimer</button><a id="report-download" download="compte-rendu-radiologique.pdf">Télécharger le PDF</a><button type="button" id="report-back">Retour au texte</button></div>
+      </section>
+      <details id="report-email-panel" class="report-email-panel">
+        <summary>Envoyer par e-mail</summary>
+        <p id="report-email-setup" class="report-notice">Connectez votre compte Google / Gmail depuis l’agenda pour activer l’envoi.</p>
+        <form id="report-email-form" autocomplete="off">
+          <fieldset id="report-email-fields" disabled>
+            <label>Adresse e-mail du destinataire<input type="email" name="recipient" required maxlength="254" placeholder="destinataire@exemple.be"></label>
+            <p>Le compte rendu sera enregistré puis envoyé en pièce jointe PDF à cette adresse.</p>
+            <button type="submit">Envoyer le PDF</button>
+          </fieldset>
+        </form>
+        <p id="report-email-status" role="status"></p>
+      </details>
+    </section>
+    <footer class="patient-navigation"><button type="button" id="patient-previous">← Patient précédent</button><button type="button" id="patient-next">Patient suivant →</button></footer>
+  </div>
+</aside>

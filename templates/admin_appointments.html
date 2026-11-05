@@ -1,5 +1,5 @@
-{% macro report_link(name, exam, starts_at, appointment_id='', reservation_start='') -%}
-<button type="button" class="report-patient-link" data-report-patient="{{ name }}" data-report-exam="{{ exam }}" data-report-date="{{ starts_at.strftime('%d/%m/%Y à %H:%M') }}" data-report-appointment="{{ appointment_id }}" data-report-reservation="{{ reservation_start }}" title="Rédiger un compte rendu">{{ name }}</button>
+{% macro report_link(name, exam, starts_at, appointment_id='', reservation_start='', label='', action='report') -%}
+<button type="button" class="report-patient-link" data-report-patient="{{ name }}" data-report-exam="{{ exam }}" data-report-date="{{ starts_at.strftime('%d/%m/%Y à %H:%M') }}" data-report-appointment="{{ appointment_id }}" data-report-reservation="{{ reservation_start }}" data-report-action="{{ action }}" title="Ouvrir le dossier patient">{{ label or name }}</button>
 {%- endmacro %}
 <!doctype html>
 <html lang="{{ language }}">
@@ -39,9 +39,10 @@
         <div class="appointment-alert appointment-alert-error" role="alert">{{ error }}</div>
       {% endif %}
 
-      <section class="appointment-calendar-card" style="background:white;border-radius:18px;margin-bottom:20px;overflow:auto">
+      <details class="appointment-calendar-card day-summary">
+        <summary>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }} · {{ shift_appointments|length }} patient(s)</summary>
         <div class="appointment-calendar-toolbar"><h2>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }}</h2>
-          <button type="button" class="appointment-day-close-button" data-close-day="{{ shift_date.isoformat() }}">Fermer toute la journée</button>
+          <div class="day-quick-actions"><button type="button" data-day-action="open" data-day="{{ shift_date.isoformat() }}" {% if shift_date < today %}disabled data-past-day{% endif %}>Ouvrir la journée</button><button type="button" class="appointment-day-close-button" data-day-action="close" data-day="{{ shift_date.isoformat() }}" {% if shift_date < today %}disabled data-past-day{% endif %}>Fermer la journée</button></div>
         </div>
         {% for appointment in shift_appointments %}
         <article style="padding:14px 0;border-bottom:1px solid #dfe7f1">
@@ -52,12 +53,28 @@
           {% if appointment.prescription_filename %}<a href="{{ url_for('admin_download_appointment_prescription', appointment_id=appointment.id) }}">Télécharger l’ordonnance</a>{% endif %}
         </article>
         {% else %}<p>Aucun rendez-vous pour cette journée. Sélectionnez une date ci-dessous.</p>{% endfor %}
-      </section>
+      </details>
       {% if success %}
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
 
-      <section class="appointment-dashboard" aria-label="{{ l10n('Weekagenda', 'Weekly calendar', 'Agenda hebdomadaire') }}">
+      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button></div><p>Cliquez sur une date pour ouvrir ou fermer ses créneaux.</p></div>
+      <p id="availability-feedback" role="status" aria-live="polite" hidden></p>
+      <section id="patient-list" class="patient-list-card" hidden aria-label="Patients par ordre chronologique">
+        <header><h2>Patients de la semaine</h2><p>Demandes, comptes rendus et copie manuelle, dans l’ordre des rendez-vous.</p></header>
+        <div class="patient-table-scroll"><table class="patient-table">
+          <thead><tr><th scope="col">Patient / rendez-vous</th><th scope="col">N° registre national</th><th scope="col">Demande d’examen</th><th scope="col">Compte rendu</th></tr></thead>
+          <tbody>{% for patient in patient_rows %}
+            <tr data-patient-row data-appointment="{{ patient.appointment_id }}" data-reservation="{{ patient.reservation_start }}">
+              <td><span class="patient-row-time">{{ patient.starts_at.strftime('%d/%m/%Y · %H:%M') }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start) }}<small>{{ patient.examination }}</small></td>
+              <td><span data-national-number>{{ patient.national_number or 'Non renseigné' }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Compléter / modifier', 'identity') }}</td>
+              <td data-request-actions>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Voir la demande' if patient.has_prescription else 'Scanner / importer la demande', 'request') }}{% if patient.has_prescription %}<a href="{{ url_for('admin_patient_prescription', appointment_id=patient.appointment_id, reservation_start=patient.reservation_start) }}">Télécharger la demande</a>{% endif %}</td>
+              <td data-report-actions>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Voir le compte rendu' if patient.has_report else 'Créer un compte rendu') }}{% if patient.has_report %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Modifier', 'edit') }}{% endif %}</td>
+            </tr>
+          {% else %}<tr><td colspan="4">Aucun patient cette semaine. Choisissez une autre semaine dans l’agenda.</td></tr>{% endfor %}</tbody>
+        </table></div>
+      </section>
+      <section class="appointment-dashboard" id="internal-calendar" aria-label="{{ l10n('Weekagenda', 'Weekly calendar', 'Agenda hebdomadaire') }}">
         <aside class="appointment-sidebar">
           <div class="appointment-side-heading">
             <p class="appointment-eyebrow">AGENDA</p>
@@ -82,7 +99,7 @@
             </div>
             <div>
               <span>{{ l10n('Beschikbaar', 'Available', 'Disponibles') }}</span>
-              <strong>{{ available_count }}</strong>
+              <strong data-available-count>{{ available_count }}</strong>
             </div>
           </div>
 
@@ -116,14 +133,13 @@
           </div>
 
           <div class="appointment-calendar-scroll">
-            <div class="appointment-calendar-grid">
+            <div class="appointment-calendar-grid" style="--internal-columns:32px{% for day in days %} {{ 'minmax(100px,1fr)' if day.has_slots else '38px' }}{% endfor %}">
               <div class="appointment-time-column appointment-grid-head">{{ l10n('Tijd', 'Time', 'Heure') }}</div>
               {% for day in days %}
-                <div class="appointment-day-header{% if day.date == today %} is-today{% endif %}">
-                  <span>{{ day.short_label }}</span>
-                  <strong>{{ day.date.strftime('%d') }}</strong>
-                  <small>{{ day.day_name }}</small>
-                </div>
+                <details class="appointment-day-header day-menu{% if day.date == today %} is-today{% endif %}">
+                  <summary aria-label="Gérer la journée du {{ day.date.strftime('%d/%m/%Y') }}"><span>{{ day.short_label }}</span><strong>{{ day.date.strftime('%d') }}</strong><small>{{ day.day_name }} · Gérer ▾</small></summary>
+                  <div class="day-menu-actions"><p>{{ day.date.strftime('%d/%m/%Y') }}</p><button type="button" data-day-action="open" data-day="{{ day.date.isoformat() }}" {% if day.date < today %}disabled data-past-day{% endif %}>Ouvrir les créneaux</button><button type="button" data-day-action="close" data-day="{{ day.date.isoformat() }}" {% if day.date < today %}disabled data-past-day{% endif %}>Fermer la journée</button><small>{{ 'Journée passée : consultation uniquement.' if day.date < today else 'Les rendez-vous existants sont conservés.' }}</small></div>
+                </details>
               {% endfor %}
 
               {% for row in slot_rows %}
@@ -146,6 +162,7 @@
                           <p><a class="appointment-prescription-link" href="{{ url_for('admin_download_appointment_prescription', appointment_id=slot.appointment.id) }}">{{ l10n('Voorschrift downloaden', 'Download prescription', 'Télécharger l’ordonnance') }}</a></p>
                         {% endif %}
                         <form method="post" action="{{ url_for('admin_cancel_appointment', appointment_id=slot.appointment.id) }}" onsubmit='return confirm({{ "Annuler ce rendez-vous et libérer le créneau ?"|tojson }});'>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                           <input type="hidden" name="week_date" value="{{ selected_date }}">
                           <button type="submit" class="appointment-cancel-button">{{ l10n('Annuleer afspraak', 'Cancel appointment', 'Annuler le rendez-vous') }}</button>
                         </form>
@@ -158,7 +175,7 @@
                       <strong>{{ report_link(reservation_data.get('patient_name') or 'Formulaire en cours', appointment_type_labels.get(reservation_data.get('inami_code', ''), 'Examen à compléter'), slot.starts_at, reservation_start=slot.starts_at.isoformat(timespec='minutes')) }}</strong>
                       {% set reservation_code = reservation_data.get('inami_code', '') %}
                       {% if reservation_code %}<span>{{ appointment_type_labels.get(reservation_code, reservation_code) }}</span>{% else %}<span>Examen à compléter</span>{% endif %}
-                      <details open>
+                      <details>
                         <summary>Informations enregistrées</summary>
                         <p>E-mail : {{ reservation_data.get('patient_email') or 'Non renseigné' }}</p>
                         <p>Téléphone : {{ reservation_data.get('patient_phone') or 'Non renseigné' }}</p>
@@ -213,6 +230,7 @@
         <p class="appointment-selected-slot" id="appointment-selected-slot"></p>
 
         <form method="post" action="{{ url_for('admin_book_appointment') }}" class="appointment-booking-form" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="slot_start" id="appointment-slot-start">
           <input type="hidden" name="week_date" value="{{ selected_date }}">
           <label>Statut du patient<select name="insurance_status"><option value="">Non renseigné</option><option value="bim">BIM (VIPO)</option><option value="normal">Normal — sans intervention majorée</option></select></label>
@@ -265,153 +283,7 @@
     </div>
 
     {% include '_appointment_reporting.html' %}
+    <script src="{{ url_for('static', filename='internal_agenda.js', v=agenda_asset_version) }}" data-day-endpoint="{{ url_for('admin_close_appointment_day') }}" data-csrf="{{ csrf_token }}"></script>
     <script src="{{ url_for('static', filename='internal_reporting.js', v=report_asset_version) }}"></script>
-    <script>
-      (() => {
-        const modal = document.getElementById('appointment-modal');
-        const slotInput = document.getElementById('appointment-slot-start');
-        const selectedSlot = document.getElementById('appointment-selected-slot');
-        const firstInput = modal.querySelector('input[name="patient_name"]');
-        const prescriptionInputs = [...modal.querySelectorAll('[data-prescription-input]')];
-
-      const closeModal = () => {
-          modal.hidden = true;
-          document.body.classList.remove('appointment-modal-open');
-      };
-
-      document.querySelector('[data-close-day]')?.addEventListener('click', async (event) => {
-        const button = event.currentTarget;
-        if (!window.confirm('Fermer tous les créneaux encore libres de cette journée ? Les rendez-vous déjà confirmés restent inchangés.')) return;
-        button.disabled = true;
-        const body = new FormData();
-        body.set('csrf_token', {{ csrf_token|tojson }});
-        body.set('day', button.dataset.closeDay);
-        try {
-          const response = await fetch('{{ url_for("admin_close_appointment_day") }}', {
-            method: 'POST', body, headers: {'X-Requested-With': 'XMLHttpRequest'}
-          });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || 'La journée n’a pas pu être fermée.');
-          result.closed_slots.forEach((start) => {
-            const cell = document.querySelector('.appointment-slot-cell[data-start="' + start + '"]');
-            if (!cell) return;
-            const slotButton = cell.querySelector('[data-slot]');
-            if (slotButton) {
-              const closed = document.createElement('div');
-              closed.className = 'appointment-slot appointment-slot-blocked';
-              closed.textContent = 'Fermé par le cabinet';
-              slotButton.replaceWith(closed);
-            }
-            const form = cell.querySelector('.appointment-slot-toggle');
-            if (form) {
-              form.elements.is_open.value = '1';
-              form.querySelector('button').textContent = 'Ouvrir';
-            }
-          });
-          button.textContent = result.closed_slots.length ? 'Journée fermée' : 'Aucun créneau libre';
-        } catch (error) {
-          button.disabled = false;
-          let notice = document.getElementById('availability-feedback');
-          if (!notice) {
-            notice = document.createElement('p'); notice.id = 'availability-feedback';
-            notice.setAttribute('role', 'alert'); button.closest('.appointment-calendar-card').prepend(notice);
-          }
-          notice.textContent = error.message;
-        }
-      });
-
-        document.querySelector('.appointment-calendar-grid').addEventListener('click', (event) => {
-          const button = event.target.closest('[data-slot]');
-          if (!button) return;
-            slotInput.value = button.dataset.slot;
-            selectedSlot.textContent = button.dataset.slotLabel;
-            modal.hidden = false;
-            document.body.classList.add('appointment-modal-open');
-            window.setTimeout(() => firstInput.focus(), 0);
-        });
-
-        document.querySelector('.appointment-calendar-grid').addEventListener('submit', async (event) => {
-          const form = event.target.closest('.appointment-slot-toggle');
-          if (!form) return;
-          event.preventDefault();
-          const cell = form.closest('.appointment-slot-cell');
-          const toggle = form.querySelector('button');
-          toggle.disabled = true;
-          try {
-            const response = await fetch(form.action, {method: 'POST', body: new FormData(form),
-              headers: {'X-Requested-With': 'XMLHttpRequest'}});
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'La disponibilité n’a pas pu être modifiée.');
-            const day = cell.dataset.day;
-            document.querySelectorAll('.appointment-slot-cell[data-day="' + day + '"]').forEach((dayCell) => {
-              const dayForm = dayCell.querySelector('.appointment-slot-toggle');
-              if (!dayForm) return;
-              const shouldBeOpen = dayForm.elements.is_open.value === '0';
-              const start = dayForm.elements.slot_start.value;
-              const isReleased = shouldBeOpen;
-              let current = dayCell.querySelector('[data-slot], .appointment-slot-blocked');
-              if (!current) return;
-              if (isReleased) {
-                if (!current.hasAttribute('data-slot')) {
-                  const bookingButton = document.createElement('button');
-                  bookingButton.type = 'button';
-                  bookingButton.className = 'appointment-slot appointment-slot-available';
-                  bookingButton.dataset.slot = start;
-                  const calendarDate = new Date(day + 'T12:00:00');
-                  const dayLabel = calendarDate.toLocaleDateString('fr-FR', {weekday: 'long', day: '2-digit', month: '2-digit'});
-                  const [hour, minute] = start.slice(11).split(':').map(Number);
-                  const endMinute = hour * 60 + minute + 10;
-                  const endLabel = String(Math.floor(endMinute / 60)).padStart(2, '0') + ':' + String(endMinute % 60).padStart(2, '0');
-                  bookingButton.dataset.slotLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1) + ', ' + day.slice(8) + '/' + day.slice(5, 7) + ', ' + start.slice(11) + ' - ' + endLabel;
-                  bookingButton.innerHTML = '<span>Planifier</span><small>' + start.slice(11) + '</small>';
-                  current.replaceWith(bookingButton);
-                }
-                dayCell.classList.add('is-open');
-              } else {
-                if (current.hasAttribute('data-slot')) {
-                  const closed = document.createElement('div');
-                  closed.className = 'appointment-slot appointment-slot-blocked';
-                  closed.textContent = shouldBeOpen ? 'Après le créneau précédent' : 'Fermé par le cabinet';
-                  current.replaceWith(closed);
-                } else {
-                  current.textContent = shouldBeOpen ? 'Après le créneau précédent' : 'Fermé par le cabinet';
-                }
-                dayCell.classList.remove('is-open');
-              }
-              dayForm.elements.is_open.value = shouldBeOpen ? '0' : '1';
-              dayForm.querySelector('button').textContent = shouldBeOpen ? 'Fermer' : 'Ouvrir';
-              dayForm.querySelector('button').disabled = false;
-            });
-          } catch (error) {
-            toggle.disabled = false;
-            let notice = document.getElementById('availability-feedback');
-            if (!notice) {
-              notice = document.createElement('p'); notice.id = 'availability-feedback';
-              notice.setAttribute('role', 'alert'); form.closest('.appointment-dashboard').prepend(notice);
-            }
-            notice.textContent = error.message;
-          }
-        });
-
-        document.querySelectorAll('[data-close-modal]').forEach((button) => {
-          button.addEventListener('click', closeModal);
-        });
-
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape' && !modal.hidden) closeModal();
-        });
-
-        prescriptionInputs.forEach((input) => {
-          input.addEventListener('change', () => {
-            if (!input.files || !input.files.length) return;
-            prescriptionInputs
-              .filter((otherInput) => otherInput !== input)
-              .forEach((otherInput) => { otherInput.value = ''; });
-            const status = modal.querySelector(`[data-upload-status="${input.id.includes('photo') ? 'photo' : 'file'}"]`);
-            if (status) status.textContent = input.files[0].name;
-          });
-        });
-      })();
-    </script>
   </body>
 </html>

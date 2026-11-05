@@ -30,6 +30,45 @@ Current service settings from `render.yaml`:
 
 ## Internal report e-mail
 
+### Internal patient workspace
+
+The private agenda has **Agenda** and **Liste patients** views. The patient list
+is chronological within the selected week. Clicking a patient opens a side panel;
+on desktop the calendar remains usable beside it, and on phones the panel uses
+the available screen. Existing reports open read-only; editing is explicit.
+**Copier le texte**, PDF/print/download and previous/next patient support manual
+transfer to another system. No transfer to another medical application is automatic.
+
+Each booking (including an existing reservation) can store one private examination
+request. **Scanner / importer la demande** imports a PDF produced by the scanner's
+own software; it does not directly operate scanner hardware. New imports are limited
+to a readable, unencrypted PDF of at most 10 MiB / 200 pages, stored in the existing
+database binary fields, never under public static files. Once present, the upload
+action becomes **Voir la demande** / **Télécharger la demande**. Existing image
+prescriptions remain accessible. Replacing an existing request is deliberately
+not allowed. The optional national-register number is entered manually in the
+private panel (11 digits; format validation only, not identity verification),
+stored per booking in the additive `appointment_patient_details` table. It is
+not added to public pages, e-mails or PDFs.
+
+Date headers open quick day controls. Closing/reopening is asynchronous and only
+changes future unoccupied slots, preserving confirmed appointments and reservations.
+Reopening uses the usual consultation hours plus previously configured custom
+slots; it does not open 24 hours or bypass Saturday / 18:10–18:20 restrictions.
+
+Saving has a 25-second client timeout, retains the editor's text on failure, and
+allows safe retries of identical content after a lost response. Version conflicts
+never silently overwrite another editor's changes. Edits made while a save is
+pending remain marked unsaved. There is no browser localStorage/sessionStorage
+copy of patient documents; unsaved text exists only in the open page, so the exit
+warning must not be ignored. The week overview defers prescription binary data
+until an individual patient's request is opened.
+
+Isolated checks (temporary SQLite DB, synthetic patients only, no real e-mails):
+`python scripts/smoke_test_internal_workspace.py`.
+Add `--serve` for a localhost-only synthetic preview on port 5057; test login
+`y@bymed.be` / `test-password` exists only in that disposable preview database.
+
 The internal reporting window can send a saved report as a PDF attachment to one
 manually entered recipient. Sending first saves unsaved changes. Only administrators
 can use this action; nothing is sent automatically when saving a report.

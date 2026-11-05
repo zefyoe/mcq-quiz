@@ -103,6 +103,13 @@ class AppointmentReport(db.Model):
     __mapper_args__ = {"version_id_col": revision}
 
 
+class AppointmentPatientDetails(db.Model):
+    """Optional identifiers, private to a specific booking, never public."""
+    context_key = db.Column(db.String(64), primary_key=True)
+    national_number = db.Column(db.String(11), nullable=False, default="")
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
 class AppointmentSlotOverride(db.Model):
     """Admin controlled, date-specific public availability for a 10-minute slot."""
     starts_at = db.Column(db.DateTime, primary_key=True)

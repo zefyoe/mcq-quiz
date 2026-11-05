@@ -474,6 +474,107 @@
 .appointment-slot-toggle button:hover { text-decoration: underline; }
 .appointment-slot-toggle button:disabled { opacity: .55; cursor: wait; }
 .appointment-slot-cell.is-open > .appointment-slot-available { background: #e8f7ef; border-color: #b8dfc9; }
+
+/* Internal workspace: the agenda remains usable while the dossier is open. */
+[hidden] { display: none !important; }
+.internal-view-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin:18px 0; }
+.internal-view-toolbar [role=group], .day-quick-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.internal-view-toolbar p { color:var(--appointment-muted); font-size:.85rem; }
+.day-summary { background:white; border-radius:16px; margin-bottom:18px; }
+.day-summary > summary { cursor:pointer; font-weight:750; padding:12px 0; }
+.internal-view-toolbar button, .day-quick-actions button, .report-drawer button, .day-menu-actions button {
+  font:inherit; font-size:.86rem; font-weight:650; border:1px solid #cbd8e8; border-radius:9px;
+  padding:10px 13px; min-height:42px; background:#fff; color:#214d83; cursor:pointer;
+}
+.internal-view-toolbar button[aria-pressed=true], .patient-workflow button[aria-pressed=true] { background:#214d83; color:#fff; border-color:#214d83; }
+.internal-view-toolbar button:hover, .report-drawer button:hover { border-color:#3475d0; }
+.report-drawer button:disabled { opacity:.5; cursor:wait; }
+.day-menu { position:relative; overflow:visible; }
+.day-menu summary { cursor:pointer; list-style:none; padding:6px 0; }
+.day-menu summary::-webkit-details-marker { display:none; }
+.day-menu[open] { z-index:8; }
+.day-menu-actions { position:absolute; top:100%; left:0; width:220px; padding:14px; box-sizing:border-box;
+  background:#fff; border:1px solid #cbd8e8; box-shadow:0 12px 25px #10243e26; border-radius:12px; text-align:left; }
+.day-menu:nth-child(n+6) .day-menu-actions { left:auto; right:0; }
+.day-menu-actions button { display:block; width:100%; margin:6px 0; text-align:left; }
+.day-menu-actions p { font-weight:750; margin:0 0 8px; }
+.day-menu-actions small { color:#63708a; font-size:.75rem; }
+.patient-list-card { background:white; border:1px solid var(--appointment-border); border-radius:18px; overflow:hidden; }
+.patient-list-card header { padding:20px 24px; }
+.patient-list-card h2 { margin:0; font-size:1.3rem; }
+.patient-list-card header p { color:var(--appointment-muted); }
+.patient-table-scroll { overflow:auto; }
+.patient-table { width:100%; border-collapse:collapse; text-align:left; min-width:760px; }
+.patient-table th { color:#526682; background:#f3f7fc; font-size:.76rem; letter-spacing:.03em; padding:14px 18px; }
+.patient-table td { padding:18px; border-top:1px solid #e2e9f3; vertical-align:top; min-width:160px; }
+.patient-table tr:hover { background:#f8fbff; }
+.patient-table td:first-child { width:30%; }
+.patient-table td > *, .patient-table td > a { display:block; margin:4px 0 9px; }
+.patient-table td > .report-patient-link { color:#24558c; font-size:.86rem; }
+.patient-table small { color:var(--appointment-muted); max-width:300px; }
+.patient-row-time { font-size:.76rem; font-weight:750; color:#63708a; }
+.report-drawer { --drawer-pad:24px; position:fixed; top:0; right:0; bottom:0; z-index:25; width:var(--report-width, 560px);
+  box-sizing:border-box; background:#fff; border-left:1px solid #ccd9e9; box-shadow:-12px 0 40px #1733531a;
+  display:flex; flex-direction:column; animation:report-slide-in .18s ease-out; }
+.report-drawer-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px var(--drawer-pad); background:#f5f8fd; border-bottom:1px solid #dfe7f1; }
+.report-drawer-header h2 { font-size:1.25rem; margin:0; overflow-wrap:anywhere; }
+.report-drawer-header .appointment-eyebrow { font-size:.64rem; margin-bottom:6px; }
+.report-drawer-header #report-close { font-size:1.6rem; min-width:42px; padding:0; flex-shrink:0; }
+.report-drawer-content { padding:0 var(--drawer-pad) 20px; overflow-y:auto; overscroll-behavior:contain; min-height:0; }
+#report-patient-summary { font-size:.85rem; color:#526682; line-height:1.6; }
+.patient-workflow { display:flex; gap:8px; border-bottom:1px solid #dfe7f1; padding-bottom:15px; }
+.patient-workflow button { flex:1; }
+#report-save-status { color:#336b57; font-size:.8rem; min-height:1.2em; }
+#report-error:empty, #patient-details-status:empty, #patient-request-status:empty { display:none; }
+.patient-identifier-form { padding:14px; border:1px solid #e1e8f2; border-radius:10px; margin:18px 0; display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end; }
+.patient-identifier-form label { display:grid; gap:7px; font-size:.8rem; font-weight:650; }
+.patient-identifier-form label span { color:#63708a; font-weight:400; }
+.patient-identifier-form input { min-width:0; box-sizing:border-box; width:100%; padding:10px; border:1px solid #cbd8e8; border-radius:7px; font:inherit; }
+#patient-details-status { grid-column:1/-1; font-size:.8rem; }
+.report-drawer .appointment-booking-form { display:grid; gap:16px; }
+.report-drawer .appointment-booking-form textarea { min-height:330px; line-height:1.7; font-size:.95rem; padding:14px; resize:vertical; }
+.report-fields-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.report-section-heading { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
+.report-section-heading h3 { font-size:1rem; }
+#report-readonly-meta { color:#63708a; font-size:.8rem; }
+#report-readonly-text { white-space:pre-wrap; overflow-wrap:anywhere; padding:20px; border:1px solid #dfe7f1; background:#fafcfe; border-radius:10px; font-size:.96rem; line-height:1.8; user-select:text; }
+.report-drawer iframe { width:100%; box-sizing:border-box; height:55vh; min-height:300px; border:1px solid #d3dfed; border-radius:9px; margin-top:14px; background:#f3f6fa; }
+.request-upload-form { display:grid; gap:12px; }
+.request-upload-form p { line-height:1.6; font-size:.86rem; }
+.file-drop-label { padding:22px; border:2px dashed #aac1df; border-radius:12px; background:#f5f9ff; display:grid; gap:14px; font-weight:650; }
+.file-drop-label input { max-width:100%; }
+.patient-navigation { display:flex; justify-content:space-between; gap:10px; border-top:1px solid #dfe7f1; margin-top:24px; padding-top:18px; }
+.report-panel-open { --report-width: min(46vw, 700px); padding-right:var(--report-width); }
+.report-panel-open .appointment-sidebar { display:none; }
+.report-panel-open .appointment-dashboard { grid-template-columns:minmax(0,1fr); }
+.report-panel-open .appointment-hero h1 { font-size:1.6rem; }
+.report-panel-open .appointment-hero-note { display:none; }
+.report-panel-open .appointment-shell { width:calc(100% - 28px); padding-top:24px; }
+.report-panel-open .appointment-calendar-toolbar { flex-wrap:wrap; }
+.report-panel-open .patient-table { min-width:0; table-layout:fixed; }
+.report-panel-open .patient-table td { min-width:0; padding:12px 10px; overflow-wrap:anywhere; }
+.report-panel-open .patient-table th { padding:12px 10px; font-size:.69rem; }
+.report-panel-open .patient-table .report-patient-link { font-size:.8rem; }
+.report-panel-open .appointment-calendar-grid { min-width:500px; grid-template-columns:var(--internal-columns); }
+.report-panel-open .appointment-day-header { padding:10px 2px; }
+.report-panel-open .appointment-day-header small { font-size:.55rem; overflow-wrap:anywhere; }
+.report-panel-open .appointment-topbar .admin-topbar-actions { flex-wrap:wrap; }
+@keyframes report-slide-in { from { transform:translateX(30px); opacity:.3; } to { transform:translateX(0); opacity:1; } }
+@media (min-width:800px) and (max-width:1100px) {
+  .report-panel-open { --report-width:52vw; }
+  .report-panel-open .appointment-hero { display:block; }
+  .report-panel-open .appointment-topbar .admin-topbar-badge { display:none; }
+  .report-drawer { --drawer-pad:16px; }
+  .patient-identifier-form { grid-template-columns:1fr; }
+}
+@media (max-width:799px) {
+  .report-panel-open { padding-right:0; }
+  .report-drawer { width:100%; --drawer-pad:16px; }
+  .report-fields-row, .patient-identifier-form { grid-template-columns:1fr; }
+  .patient-workflow { flex-wrap:wrap; }
+  .patient-navigation button { font-size:.75rem; padding:9px; }
+}
+@media (prefers-reduced-motion:reduce) { .report-drawer { animation:none; } }
 #availability-feedback { padding: 9px 13px; color: #385b88; background: #edf5ff; border-radius: 8px; }
 .appointment-booking-form label span { color: #94a1b4; font-weight: 550; }
 .appointment-booking-form textarea { min-height: 86px; resize: vertical; }

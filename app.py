@@ -20,12 +20,15 @@ from flask_login import (
     logout_user,
 )
 from flask_compress import Compress
-from sqlalchemy import DateTime, bindparam, func, inspect, text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import DateTime, bindparam, func, inspect, text, update
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm.exc import StaleDataError
+from sqlalchemy.orm import defer
 from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
+from pypdf import PdfReader
+from pypdf.errors import PdfReadError
 
 try:
     import stripe
@@ -52,7 +55,7 @@ from radiology_report import create_radiology_report_pdf
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
                              verified_google_identity, token_cipher, send_gmail_report)
-from models import Appointment, AppointmentHold, AppointmentReport, AppointmentSlotOverride, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from models import Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, AppointmentSlotOverride, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -799,6 +802,7 @@ def ensure_appointment_schema() -> None:
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentReport.__table__.create(bind=db.engine, checkfirst=True)
+    AppointmentPatientDetails.__table__.create(bind=db.engine, checkfirst=True)
     GmailConnection.__table__.create(bind=db.engine, checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
     hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
@@ -3610,7 +3614,7 @@ def get_appointment_week_start(raw_date: str | None = None) -> date:
     try:
         selected_date = datetime.strptime(raw_date or "", "%Y-%m-%d").date()
     except ValueError:
-        selected_date = datetime.now().date()
+        selected_date = agenda_now().date()
     return selected_date - timedelta(days=selected_date.weekday())
 
 
@@ -4118,6 +4122,9 @@ def admin_close_appointment_day():
         abort(400)
     if target_day < agenda_now().date():
         abort(400)
+    # Reopening restores the usual hours and previously configured custom slots,
+    # never the whole 24-hour day. Existing bookings are not changed.
+    target_open = request.form.get("is_open", "0") == "1"
 
     overrides = {item.starts_at: item for item in AppointmentSlotOverride.query.filter(
         AppointmentSlotOverride.starts_at >= datetime.combine(target_day, time.min),
@@ -4138,27 +4145,32 @@ def admin_close_appointment_day():
         AppointmentHold.starts_at < datetime.combine(target_day + timedelta(days=1), time.min),
     ).all()}
     now = agenda_now()
-    closed_slots = []
+    changed_slots = []
+    protected_count = 0
     for minute in sorted(minutes):
         stamp = datetime.combine(target_day, time(hour=minute // 60, minute=minute % 60))
         if stamp <= now or appointment_slot_is_hard_closed(stamp):
             continue
-        if not appointment_slot_is_open(stamp, {key: item.is_open for key, item in overrides.items()}):
-            continue
         if stamp in holds or any(a.starts_at < stamp + timedelta(minutes=APPOINTMENT_SLOT_MINUTES)
                                  and a.starts_at + timedelta(minutes=a.duration_minutes) > stamp
                                  for a in appointments):
+            protected_count += 1
+            continue
+        if appointment_slot_is_open(stamp, {key: item.is_open for key, item in overrides.items()}) == target_open:
             continue
         override = overrides.get(stamp)
         if override:
-            override.is_open = False
+            override.is_open = target_open
             override.updated_at = datetime.utcnow()
         else:
-            db.session.add(AppointmentSlotOverride(starts_at=stamp, is_open=False))
-        closed_slots.append(stamp.isoformat(timespec="minutes"))
+            db.session.add(AppointmentSlotOverride(starts_at=stamp, is_open=target_open))
+        changed_slots.append(stamp.isoformat(timespec="minutes"))
     db.session.commit()
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return jsonify(ok=True, day=target_day.isoformat(), closed_slots=closed_slots)
+        return jsonify(ok=True, day=target_day.isoformat(), is_open=target_open,
+                       changed_slots=changed_slots, protected_count=protected_count,
+                       closed_slots=[] if target_open else changed_slots,
+                       opened_slots=changed_slots if target_open else [])
     return redirect(url_for("admin_appointments", date=target_day.isoformat()))
 
 
@@ -4181,6 +4193,7 @@ def admin_appointments():
         AppointmentSlotOverride.starts_at < datetime.combine(week_end, time.min)).all()}
     appointments = (
         Appointment.query
+        .options(defer(Appointment.prescription_data))
         .filter(
             Appointment.starts_at >= datetime.combine(week_start, time.min),
             Appointment.starts_at < datetime.combine(week_end, time.min),
@@ -4195,7 +4208,9 @@ def admin_appointments():
         language=language,
         availability_overrides=availability_overrides,
     )
-    holds = AppointmentHold.query.all()
+    holds = AppointmentHold.query.options(defer(AppointmentHold.prescription_data)).filter(
+        AppointmentHold.starts_at >= datetime.combine(week_start, time.min),
+        AppointmentHold.starts_at < datetime.combine(week_end, time.min)).all()
     reserved = {hold.starts_at for hold in holds}
     reservation_by_start = {hold.starts_at: hold for hold in holds}
     for row in slot_rows:
@@ -4217,8 +4232,29 @@ def admin_appointments():
             occupied = slot['blocked'] or slot['starts_at'] in reserved or slot['starts_at'] <= agenda_now()
             slot['waiting'] = False
             slot['blocked'] = occupied
-    appointment_type_labels = get_appointment_display_labels(language)
+    appointment_type_labels = {**get_appointment_display_labels(language), **PUBLIC_APPOINTMENT_LABELS}
     appointment_groups = get_localized_inami_appointment_groups(language)
+    for index, day in enumerate(days):
+        day["has_slots"] = any(row["slots"][index] is not None for row in slot_rows)
+    week_holds = [h for h in holds if week_start <= h.starts_at.date() < week_end
+                  and h.starts_at not in {a.starts_at for a in appointments}]
+    records = sorted([*appointments, *week_holds], key=lambda item: item.starts_at)
+    keys = [appointment_report_key(item) for item in records]
+    reports = {r.context_key for r in db.session.query(AppointmentReport.context_key).filter(
+        AppointmentReport.context_key.in_(keys)).all()} if keys else {}
+    details = {d.context_key: d for d in AppointmentPatientDetails.query.filter(
+        AppointmentPatientDetails.context_key.in_(keys)).all()} if keys else {}
+    patient_rows = []
+    for record in records:
+        key = appointment_report_key(record)
+        booked = isinstance(record, Appointment)
+        code = (record.inami_code or record.appointment_type) if booked else record.draft.get("inami_code", "")
+        patient_rows.append(dict(appointment_id=record.id if booked else "",
+            reservation_start="" if booked else record.starts_at.isoformat(timespec="minutes"),
+            starts_at=record.starts_at, name=record.patient_name if booked else record.draft.get("patient_name", "À compléter"),
+            examination=PUBLIC_APPOINTMENT_LABELS.get(code, appointment_type_labels.get(code, "Examen à compléter")),
+            national_number=details[key].national_number if key in details else "",
+            has_prescription=bool(record.prescription_filename), has_report=key in reports))
     # Keep financial aggregates request-private. They are deliberately not
     # passed to the template or rendered anywhere in the planner.
     g.appointment_financial_totals = calculate_daily_appointment_finances(
@@ -4226,6 +4262,8 @@ def admin_appointments():
     )
     return render_template(
         "admin_appointments.html",
+        patient_rows=patient_rows,
+        agenda_asset_version=os.stat(os.path.join(app.static_folder, 'internal_agenda.js')).st_mtime_ns,
         shift_appointments=[a for a in appointments if a.starts_at.date() == shift_date],
         shift_date=shift_date,
         appointments_asset_version=os.stat(os.path.join(app.static_folder, 'appointments.css')).st_mtime_ns,
@@ -4259,7 +4297,7 @@ def admin_book_appointment():
         admin_redirect = admin_required()
         if admin_redirect:
             return admin_redirect
-    elif not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
         abort(400)
 
     ensure_appointment_schema()
@@ -4330,6 +4368,10 @@ def admin_book_appointment():
     try:
         if any(f.filename for f in request.files.values()):
             prescription_filename, prescription_mimetype, prescription_data = read_prescription_upload()
+        elif public and existing_hold and existing_hold.prescription_data:
+            prescription_filename = existing_hold.prescription_filename
+            prescription_mimetype = existing_hold.prescription_mimetype
+            prescription_data = existing_hold.prescription_data
         else:
             prescription_filename, prescription_mimetype, prescription_data = None, None, None
     except ValueError as error:
@@ -4395,6 +4437,9 @@ def admin_book_appointment():
             saved_report = AppointmentReport.query.filter_by(context_key=appointment_report_key(hold)).first()
             if saved_report:
                 saved_report.context_key = appointment_report_key(appointment)
+            patient_details = db.session.get(AppointmentPatientDetails, appointment_report_key(hold))
+            if patient_details:
+                patient_details.context_key = appointment_report_key(appointment)
             db.session.delete(hold)
         db.session.commit()
     except Exception:
@@ -4443,23 +4488,119 @@ def active_gmail_connection():
     return connection if connection and connection.email.lower() == current_user.email.lower() else None
 
 
-def appointment_report_context(values):
+def appointment_patient_record(values):
     appointment_id = values.get("appointment_id", type=int)
     record = db.session.get(Appointment, appointment_id) if appointment_id else None
     if appointment_id and record is None:
         abort(404)
-    if record:
-        patient_name, starts_at = record.patient_name, record.starts_at
-        exam_code = record.inami_code or record.appointment_type
-    else:
+    if not record:
         stamp = parse_appointment_slot(values.get("reservation_start"))
         record = db.session.get(AppointmentHold, stamp) if stamp else None
         if not record:
             abort(404)
+    return record
+
+
+def appointment_report_context(values):
+    record = appointment_patient_record(values)
+    if isinstance(record, Appointment):
+        patient_name, starts_at = record.patient_name, record.starts_at
+        exam_code = record.inami_code or record.appointment_type
+    else:
         patient_name, starts_at = record.draft.get("patient_name", ""), record.starts_at
         exam_code = record.draft.get("inami_code", "")
     examination = PUBLIC_APPOINTMENT_LABELS.get(exam_code) or get_appointment_display_labels("fr").get(exam_code, "Examen échographique")
     return appointment_report_key(record), patient_name, starts_at, examination
+
+
+def private_prescription_links(record):
+    if not record.prescription_data:
+        return None
+    context = ({"appointment_id": record.id} if isinstance(record, Appointment)
+               else {"reservation_start": record.starts_at.isoformat(timespec="minutes")})
+    return {"filename": record.prescription_filename, "mimetype": record.prescription_mimetype,
+            "view_url": url_for("admin_patient_prescription", **context, inline="1"),
+            "download_url": url_for("admin_patient_prescription", **context)}
+
+
+@app.route("/admin/appointments/patient", methods=["GET", "POST"])
+def admin_patient_details():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    if request.method == "POST" and not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    record = appointment_patient_record(request.form if request.method == "POST" else request.args)
+    key = appointment_report_key(record)
+    details = db.session.get(AppointmentPatientDetails, key)
+    if request.method == "POST":
+        raw = (request.form.get("national_number") or "").strip()
+        number = re.sub(r"[ .-]", "", raw)
+        if number and not re.fullmatch(r"[0-9]{11}", number):
+            return jsonify(error="Le numéro de registre national doit contenir 11 chiffres, ou rester vide."), 400
+        if details is None:
+            details = AppointmentPatientDetails(context_key=key)
+            db.session.add(details)
+        details.national_number = number
+        details.updated_at = datetime.utcnow()
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            return jsonify(error="Identifiant non enregistré. Réessayez sans fermer le dossier."), 503
+    return jsonify(ok=True, national_number=details.national_number if details else "",
+                   prescription=private_prescription_links(record))
+
+
+@app.route("/admin/appointments/patient/prescription", methods=["GET", "POST"])
+def admin_patient_prescription():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    if request.method == "POST" and not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    record = appointment_patient_record(request.form if request.method == "POST" else request.args)
+    if request.method == "POST":
+        if record.prescription_data:
+            return jsonify(error="Une demande est déjà enregistrée. Consultez la demande existante."), 409
+        try:
+            filename, mimetype, payload = read_prescription_upload()
+            if mimetype != "application/pdf":
+                raise ValueError("Choisissez une demande au format PDF (10 Mo maximum).")
+            reader = PdfReader(BytesIO(payload), strict=True)
+            if reader.is_encrypted or not 1 <= len(reader.pages) <= 200:
+                raise ValueError("Utilisez un PDF non protégé contenant de 1 à 200 pages.")
+        except (ValueError, PdfReadError, OSError, RecursionError):
+            return jsonify(error="PDF invalide, protégé ou trop volumineux. Maximum : 10 Mo et 200 pages."), 400
+        model = type(record)
+        identity = model.id == record.id if isinstance(record, Appointment) else model.starts_at == record.starts_at
+        try:
+            changed = db.session.execute(update(model).where(identity, model.prescription_data.is_(None)).values(
+                prescription_filename=filename, prescription_mimetype=mimetype, prescription_data=payload))
+            if not changed.rowcount:
+                db.session.rollback()
+                return jsonify(error="Une demande a déjà été ajoutée. Rouvrez le dossier pour la consulter."), 409
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            return jsonify(error="La demande n’a pas été enregistrée. Réessayez."), 503
+        return jsonify(ok=True, prescription=private_prescription_links(record))
+    if not record.prescription_data:
+        abort(404)
+    allowed = {"application/pdf", "image/jpeg", "image/png", "image/webp"}
+    mimetype = record.prescription_mimetype if record.prescription_mimetype in allowed else "application/octet-stream"
+    response = app.response_class(record.prescription_data, mimetype=mimetype)
+    filename = secure_filename(record.prescription_filename or "demande.pdf")
+    disposition = "inline" if request.args.get("inline") == "1" and mimetype in allowed else "attachment"
+    response.headers["Content-Disposition"] = f'{disposition}; filename="{filename}"'
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    # A CSP sandbox blocks the built-in PDF viewer in some browsers. Restrict
+    # framing instead; validated PDFs/images are never served as HTML.
+    response.headers["Content-Security-Policy"] = "frame-ancestors 'self'; base-uri 'none'"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    return response
 
 
 @app.route("/admin/appointments/report", methods=["GET", "POST"])
@@ -4486,6 +4627,10 @@ def admin_saved_radiology_report():
         return jsonify(error="Indiquez une date de compte rendu valide."), 400
     if not report_text or len(report_text) > 50000 or len(radiologist) > 255:
         return jsonify(error="Saisissez le compte rendu (50 000 caractères maximum)."), 400
+    # A timed-out request may already have committed. Retrying the identical
+    # content is safe; never overwrite another editor's different revision.
+    if report and (report.report_text, report.report_date, report.radiologist) == (report_text, report_date, radiologist):
+        return jsonify(ok=True, revision=report.revision, updated_at=report.updated_at.isoformat() + "Z")
     if request.form.get("revision", type=int) != (report.revision if report else 0):
         return jsonify(error="Ce compte rendu a été modifié dans une autre fenêtre. Copiez votre texte puis rouvrez le patient pour charger la dernière version."), 409
     if report is None:
@@ -4499,6 +4644,9 @@ def admin_saved_radiology_report():
     except (IntegrityError, StaleDataError):
         db.session.rollback()
         return jsonify(error="Le compte rendu a changé. Copiez votre texte puis rouvrez le patient."), 409
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(error="L’enregistrement a échoué. Votre texte reste dans le panneau : réessayez."), 503
     return jsonify(ok=True, revision=report.revision, updated_at=report.updated_at.isoformat() + "Z")
 
 
@@ -4598,6 +4746,8 @@ def admin_cancel_appointment(appointment_id):
     admin_redirect = admin_required()
     if admin_redirect:
         return admin_redirect
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
 
     ensure_appointment_schema()
     appointment = db.session.get(Appointment, appointment_id)
