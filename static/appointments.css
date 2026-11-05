@@ -489,16 +489,24 @@
 .internal-view-toolbar button[aria-pressed=true], .patient-workflow button[aria-pressed=true] { background:#214d83; color:#fff; border-color:#214d83; }
 .internal-view-toolbar button:hover, .report-drawer button:hover { border-color:#3475d0; }
 .report-drawer button:disabled { opacity:.5; cursor:wait; }
-.day-menu { position:relative; overflow:visible; }
-.day-menu summary { cursor:pointer; list-style:none; padding:6px 0; }
+.day-menu { position:sticky; overflow:visible; container-type:inline-size; }
+.day-menu summary { cursor:pointer; list-style:none; padding:6px 0; border-radius:8px; }
 .day-menu summary::-webkit-details-marker { display:none; }
+.day-menu summary strong { display:flex; align-items:center; justify-content:center; gap:4px; }
+.day-menu summary:focus-visible { outline:2px solid #3475d0; outline-offset:2px; }
+.day-menu-chevron { flex-shrink:0; opacity:.55; transition:transform .15s ease; }
+.day-menu[open] .day-menu-chevron { transform:rotate(180deg); }
 .day-menu[open] { z-index:8; }
-.day-menu-actions { position:absolute; top:100%; left:0; width:220px; padding:14px; box-sizing:border-box;
-  background:#fff; border:1px solid #cbd8e8; box-shadow:0 12px 25px #10243e26; border-radius:12px; text-align:left; }
-.day-menu:nth-child(n+6) .day-menu-actions { left:auto; right:0; }
-.day-menu-actions button { display:block; width:100%; margin:6px 0; text-align:left; }
-.day-menu-actions p { font-weight:750; margin:0 0 8px; }
-.day-menu-actions small { color:#63708a; font-size:.75rem; }
+.day-menu-actions { position:absolute; top:calc(100% + 4px); left:0; right:0; width:100%; padding:6px; box-sizing:border-box;
+  display:grid; gap:6px; background:#fff; border:1px solid #dce5f0; box-shadow:0 6px 18px #10243e1a; border-radius:10px; text-align:center; }
+.day-menu-actions button { display:flex; align-items:center; justify-content:center; gap:5px; width:100%; min-width:0;
+  min-height:36px; margin:0; padding:7px 3px; box-sizing:border-box; font-size:.76rem; line-height:1.2; white-space:nowrap; }
+.day-menu-actions button svg { flex-shrink:0; }
+.day-menu-actions [data-day-action=open] { color:#23694f; background:#eff8f3; border-color:#cee5d8; }
+.day-menu-actions [data-day-action=close] { color:#9a3b48; background:#fff4f4; border-color:#eed6db; }
+.day-menu-actions button:hover { filter:brightness(.97); }
+.day-menu-actions button:disabled { opacity:.45; cursor:default; }
+@container (max-width:75px) { .day-menu-actions button span { display:none; } .day-menu-actions button { gap:0; } }
 .patient-list-card { background:white; border:1px solid var(--appointment-border); border-radius:18px; overflow:hidden; }
 .patient-list-card header { padding:20px 24px; }
 .patient-list-card h2 { margin:0; font-size:1.3rem; }

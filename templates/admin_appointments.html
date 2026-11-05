@@ -58,7 +58,7 @@
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
 
-      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button></div><p>Cliquez sur une date pour ouvrir ou fermer ses créneaux.</p></div>
+      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button></div></div>
       <p id="availability-feedback" role="status" aria-live="polite" hidden></p>
       <section id="patient-list" class="patient-list-card" hidden aria-label="Patients par ordre chronologique">
         <header><h2>Patients de la semaine</h2><p>Demandes, comptes rendus et copie manuelle, dans l’ordre des rendez-vous.</p></header>
@@ -136,9 +136,12 @@
             <div class="appointment-calendar-grid" style="--internal-columns:32px{% for day in days %} {{ 'minmax(100px,1fr)' if day.has_slots else '38px' }}{% endfor %}">
               <div class="appointment-time-column appointment-grid-head">{{ l10n('Tijd', 'Time', 'Heure') }}</div>
               {% for day in days %}
-                <details class="appointment-day-header day-menu{% if day.date == today %} is-today{% endif %}">
-                  <summary aria-label="Gérer la journée du {{ day.date.strftime('%d/%m/%Y') }}"><span>{{ day.short_label }}</span><strong>{{ day.date.strftime('%d') }}</strong><small>{{ day.day_name }} · Gérer ▾</small></summary>
-                  <div class="day-menu-actions"><p>{{ day.date.strftime('%d/%m/%Y') }}</p><button type="button" data-day-action="open" data-day="{{ day.date.isoformat() }}" {% if day.date < today %}disabled data-past-day{% endif %}>Ouvrir les créneaux</button><button type="button" data-day-action="close" data-day="{{ day.date.isoformat() }}" {% if day.date < today %}disabled data-past-day{% endif %}>Fermer la journée</button><small>{{ 'Journée passée : consultation uniquement.' if day.date < today else 'Les rendez-vous existants sont conservés.' }}</small></div>
+                <details name="agenda-day-actions" class="appointment-day-header day-menu{% if day.date == today %} is-today{% endif %}">
+                  <summary aria-label="Gérer la journée du {{ day.date.strftime('%d/%m/%Y') }}"><span>{{ day.short_label }}</span><strong>{{ day.date.strftime('%d') }} <svg class="day-menu-chevron" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></strong></summary>
+                  <div class="day-menu-actions">
+                    <button type="button" data-day-action="open" data-day="{{ day.date.isoformat() }}" aria-label="Ouvrir les créneaux du {{ day.date.strftime('%d/%m/%Y') }}" title="Ouvrir les créneaux" {% if day.date < today %}disabled data-past-day{% endif %}><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M6 8V5a4 4 0 0 1 8 0M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Ouvrir</span></button>
+                    <button type="button" data-day-action="close" data-day="{{ day.date.isoformat() }}" aria-label="Fermer la journée du {{ day.date.strftime('%d/%m/%Y') }}" title="Fermer la journée" {% if day.date < today %}disabled data-past-day{% endif %}><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M6 8V5a4 4 0 0 1 8 0v3M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Fermer</span></button>
+                  </div>
                 </details>
               {% endfor %}
 

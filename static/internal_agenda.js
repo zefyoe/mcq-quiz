@@ -52,7 +52,18 @@
     if (counter) counter.textContent = document.querySelectorAll('.appointment-slot-cell [data-slot]').length;
   }
   let availabilityBusy = false;
+  function closeDayMenus(except = null) {
+    document.querySelectorAll('.day-menu[open]').forEach(menu => {
+      if (menu !== except) menu.removeAttribute('open');
+    });
+  }
+  // Native exclusive details groups, with a fallback for older browsers and
+  // assistive-technology toggles. Clicking outside also dismisses the menu.
+  document.addEventListener('toggle', event => {
+    if (event.target.matches?.('.day-menu') && event.target.open) closeDayMenus(event.target);
+  }, true);
   document.addEventListener('click', async event => {
+    closeDayMenus(event.target.closest('.day-menu'));
     const view = event.target.closest('[data-agenda-view]');
     if (view) {
       const patients = view.dataset.agendaView === 'patients';
@@ -108,7 +119,11 @@
     booking.querySelector('[name=patient_name]').focus();
   });
   document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', closeBooking));
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !booking.hidden) closeBooking(); });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    closeDayMenus();
+    if (!booking.hidden) closeBooking();
+  });
   const uploads = [...booking.querySelectorAll('[data-prescription-input]')];
   uploads.forEach(input => input.addEventListener('change', () => {
     if (!input.files.length) return;
