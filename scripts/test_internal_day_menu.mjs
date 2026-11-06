@@ -11,7 +11,7 @@ const document = {currentScript:{dataset:{}},
   querySelector() { return element; }, getElementById() { return element; },
   querySelectorAll(selector) { return selector === '.day-menu[open]' ? [first,second].filter(m=>m.open) : []; }};
 vm.runInNewContext(fs.readFileSync(new URL('../static/internal_agenda.js',import.meta.url),'utf8'),
-  {document,window:{},AbortController,setTimeout,clearTimeout,Error,TypeError});
+  {document,window:{addEventListener() {}},AbortController,setTimeout,clearTimeout,Error,TypeError});
 first.open = second.open = true;
 for (const handler of events.get('toggle')) handler({target:second});
 assert.equal(first.open,false); assert.equal(second.open,true);

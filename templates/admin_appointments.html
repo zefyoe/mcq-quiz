@@ -1,6 +1,4 @@
-{% macro report_link(name, exam, starts_at, appointment_id='', reservation_start='', label='', action='report') -%}
-<button type="button" class="report-patient-link" data-report-patient="{{ name }}" data-report-exam="{{ exam }}" data-report-date="{{ starts_at.strftime('%d/%m/%Y à %H:%M') }}" data-report-appointment="{{ appointment_id }}" data-report-reservation="{{ reservation_start }}" data-report-action="{{ action }}" title="Ouvrir le dossier patient">{{ label or name }}</button>
-{%- endmacro %}
+{% from '_patient_report_link.html' import report_link %}
 <!doctype html>
 <html lang="{{ language }}">
   <head>
@@ -58,8 +56,17 @@
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
 
-      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button></div></div>
+      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button><button type="button" data-agenda-view="riziv" aria-pressed="false">Liste RIZIV · Tous les patients</button></div></div>
       <p id="availability-feedback" role="status" aria-live="polite" hidden></p>
+      <section id="riziv-list" class="patient-list-card riziv-list-card" hidden aria-label="Liste RIZIV de tous les patients" data-endpoint="{{ url_for('admin_riziv_patient_list') }}">
+        <header class="riziv-list-header">
+          <div><h2>Liste RIZIV</h2><p>Toutes les dates · du premier au dernier rendez-vous · <strong id="riziv-total">—</strong> enregistrement(s)</p></div>
+          <div class="report-actions riziv-list-tools"><button type="button" id="riziv-refresh">Actualiser</button><button type="button" id="riziv-print" disabled>Imprimer</button><a href="{{ url_for('admin_riziv_patient_csv') }}">Télécharger le CSV</a></div>
+        </header>
+        <p class="riziv-list-notice">Une ligne par rendez-vous ou réservation, y compris les dates futures. Les données manquantes restent à compléter. Cet aperçu ne confirme pas qu’un examen a été réalisé et n’est pas une déclaration officielle.</p>
+        <p id="riziv-status" role="status" aria-live="polite"></p>
+        <div id="riziv-patients"></div>
+      </section>
       <section id="patient-list" class="patient-list-card" hidden aria-label="Patients par ordre chronologique">
         <header><h2>Patients de la semaine</h2><p>Demandes, comptes rendus et copie manuelle, dans l’ordre des rendez-vous.</p></header>
         <div class="patient-table-scroll"><table class="patient-table">

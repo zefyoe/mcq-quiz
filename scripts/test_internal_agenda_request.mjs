@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source = fs.readFileSync(new URL('../static/internal_agenda.js', import.meta.url), 'utf8');
 const element = {addEventListener() {}, querySelectorAll() { return []; }};
 function client(fetch, immediateTimeout = false) {
-  const scope = {window:{}, document:{currentScript:{dataset:{}}, addEventListener() {},
+  const scope = {window:{addEventListener() {}}, document:{currentScript:{dataset:{}}, addEventListener() {},
     querySelector() { return element; }, querySelectorAll() { return []; }, getElementById() { return element; }},
     fetch, AbortController, Error, TypeError,
     setTimeout: immediateTimeout ? fn => { queueMicrotask(fn); return 1; } : setTimeout,

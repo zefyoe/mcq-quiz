@@ -4,10 +4,11 @@ import re
 import json
 import secrets
 import hashlib
+import csv
 from zoneinfo import ZoneInfo
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
-from io import BytesIO
+from io import BytesIO, StringIO
 from urllib.parse import urlparse
 
 from flask import Flask, abort, g, jsonify, make_response, render_template, request, session, redirect, url_for
@@ -23,7 +24,7 @@ from flask_compress import Compress
 from sqlalchemy import DateTime, bindparam, func, inspect, text, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm.exc import StaleDataError
-from sqlalchemy.orm import defer
+from sqlalchemy.orm import defer, load_only
 from whitenoise import WhiteNoise
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
@@ -4174,6 +4175,78 @@ def admin_close_appointment_day():
     return redirect(url_for("admin_appointments", date=target_day.isoformat()))
 
 
+def build_internal_patient_rows(records):
+    """One chronological row per booking; never merge people by their names."""
+    records = sorted(records, key=lambda item: item.starts_at)
+    keys = [appointment_report_key(item) for item in records]
+    reports, details = set(), {}
+    # Stay within database parameter limits for a practice's entire history.
+    for offset in range(0, len(keys), 500):
+        batch = keys[offset:offset + 500]
+        reports.update(r.context_key for r in db.session.query(AppointmentReport.context_key).filter(
+            AppointmentReport.context_key.in_(batch)).all())
+        details.update((d.context_key, d) for d in AppointmentPatientDetails.query.filter(
+            AppointmentPatientDetails.context_key.in_(batch)).all())
+    labels = {**get_appointment_display_labels("fr"), **PUBLIC_APPOINTMENT_LABELS}
+    rows = []
+    for record in records:
+        key = appointment_report_key(record)
+        booked = isinstance(record, Appointment)
+        code = (record.inami_code or record.appointment_type) if booked else record.draft.get("inami_code", "")
+        rows.append(dict(appointment_id=record.id if booked else "",
+            reservation_start="" if booked else record.starts_at.isoformat(timespec="minutes"),
+            starts_at=record.starts_at,
+            name=record.patient_name if booked else record.draft.get("patient_name") or "À compléter",
+            examination=labels.get(code, "Examen à compléter"),
+            national_number=details[key].national_number if key in details else "",
+            has_prescription=bool(record.prescription_filename), has_report=key in reports,
+            registration_label="Rendez-vous enregistré" if booked else "Réservation enregistrée"))
+    return rows
+
+
+def all_internal_patient_rows():
+    appointments = Appointment.query.options(load_only(
+        Appointment.id, Appointment.starts_at, Appointment.patient_name, Appointment.created_at,
+        Appointment.inami_code, Appointment.appointment_type, Appointment.prescription_filename)).all()
+    booked_starts = {item.starts_at for item in appointments}
+    holds = AppointmentHold.query.options(load_only(AppointmentHold.starts_at, AppointmentHold.token,
+        AppointmentHold.draft_data, AppointmentHold.prescription_filename)).all()
+    return build_internal_patient_rows([*appointments, *(h for h in holds if h.starts_at not in booked_starts)])
+
+
+@app.get("/admin/appointments/riziv")
+def admin_riziv_patient_list():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    ensure_appointment_schema()
+    rows = all_internal_patient_rows()
+    return jsonify(ok=True, total=len(rows),
+                   html=render_template("_riziv_patient_table.html", patient_rows=rows))
+
+
+@app.get("/admin/appointments/riziv.csv")
+def admin_riziv_patient_csv():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    ensure_appointment_schema()
+    output = StringIO(newline="")
+    writer = csv.writer(output, delimiter=";", lineterminator="\r\n")
+    writer.writerow(["N°", "Date", "Heure", "Patient", "N° registre national", "Examen", "Enregistrement"])
+    def safe_cell(value):
+        value = str(value)
+        # Prevent spreadsheet formula execution without changing the DB value.
+        return "'" + value if value.lstrip().startswith(("=", "+", "-", "@")) or value.startswith(("\t", "\r", "\n")) else value
+    for index, patient in enumerate(all_internal_patient_rows(), 1):
+        writer.writerow([index, patient["starts_at"].strftime("%d/%m/%Y"), patient["starts_at"].strftime("%H:%M"),
+            safe_cell(patient["name"]), patient["national_number"], safe_cell(patient["examination"]), patient["registration_label"]])
+    response = app.response_class("\ufeff" + output.getvalue(), mimetype="text/csv")
+    response.headers["Content-Disposition"] = f'attachment; filename="liste-riziv-{agenda_now().date().isoformat()}.csv"'
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
 @app.route("/admin/appointments")
 def admin_appointments():
     admin_redirect = admin_required()
@@ -4238,23 +4311,7 @@ def admin_appointments():
         day["has_slots"] = any(row["slots"][index] is not None for row in slot_rows)
     week_holds = [h for h in holds if week_start <= h.starts_at.date() < week_end
                   and h.starts_at not in {a.starts_at for a in appointments}]
-    records = sorted([*appointments, *week_holds], key=lambda item: item.starts_at)
-    keys = [appointment_report_key(item) for item in records]
-    reports = {r.context_key for r in db.session.query(AppointmentReport.context_key).filter(
-        AppointmentReport.context_key.in_(keys)).all()} if keys else {}
-    details = {d.context_key: d for d in AppointmentPatientDetails.query.filter(
-        AppointmentPatientDetails.context_key.in_(keys)).all()} if keys else {}
-    patient_rows = []
-    for record in records:
-        key = appointment_report_key(record)
-        booked = isinstance(record, Appointment)
-        code = (record.inami_code or record.appointment_type) if booked else record.draft.get("inami_code", "")
-        patient_rows.append(dict(appointment_id=record.id if booked else "",
-            reservation_start="" if booked else record.starts_at.isoformat(timespec="minutes"),
-            starts_at=record.starts_at, name=record.patient_name if booked else record.draft.get("patient_name", "À compléter"),
-            examination=PUBLIC_APPOINTMENT_LABELS.get(code, appointment_type_labels.get(code, "Examen à compléter")),
-            national_number=details[key].national_number if key in details else "",
-            has_prescription=bool(record.prescription_filename), has_report=key in reports))
+    patient_rows = build_internal_patient_rows([*appointments, *week_holds])
     # Keep financial aggregates request-private. They are deliberately not
     # passed to the template or rendered anywhere in the planner.
     g.appointment_financial_totals = calculate_daily_appointment_finances(

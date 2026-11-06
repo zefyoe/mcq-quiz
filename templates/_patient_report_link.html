@@ -1,0 +1,3 @@
+{% macro report_link(name, exam, starts_at, appointment_id='', reservation_start='', label='', action='report') -%}
+<button type="button" class="report-patient-link" data-report-patient="{{ name }}" data-report-exam="{{ exam }}" data-report-date="{{ starts_at.strftime('%d/%m/%Y à %H:%M') }}" data-report-appointment="{{ appointment_id }}" data-report-reservation="{{ reservation_start }}" data-report-action="{{ action }}" title="Ouvrir le dossier patient">{{ label or name }}</button>
+{%- endmacro %}

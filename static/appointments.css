@@ -521,6 +521,39 @@
 .patient-table td > .report-patient-link { color:#24558c; font-size:.86rem; }
 .patient-table small { color:var(--appointment-muted); max-width:300px; }
 .patient-row-time { font-size:.76rem; font-weight:750; color:#63708a; }
+.riziv-list-header { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; flex-wrap:wrap; }
+.riziv-list-tools { padding-top:0; }
+.riziv-list-notice { margin:0 24px 16px; color:#63708a; font-size:.8rem; line-height:1.6; max-width:850px; }
+#riziv-status { margin:0 24px 18px; font-size:.82rem; color:#336b57; }
+.riziv-patient-table td:first-child { width:auto; min-width:35px; color:#63708a; font-size:.8rem; }
+.riziv-patient-table td:nth-child(2) { min-width:115px; }
+.riziv-patient-table td:nth-child(3) { min-width:180px; }
+.riziv-patient-table td:last-child { color:#63708a; font-size:.78rem; }
+.riziv-view-active .day-summary { display:none; }
+@media print {
+  .printing-riziv { padding:0 !important; background:white; color:black; }
+  .printing-riziv .appointment-topbar,
+  .printing-riziv .appointment-hero,
+  .printing-riziv .day-summary,
+  .printing-riziv .internal-view-toolbar,
+  .printing-riziv #availability-feedback,
+  .printing-riziv #internal-calendar,
+  .printing-riziv #patient-list,
+  .printing-riziv #report-modal,
+  .printing-riziv #appointment-modal,
+  .printing-riziv .riziv-list-tools,
+  .printing-riziv #riziv-status { display:none !important; }
+  body.printing-riziv .appointment-shell { width:100%; margin:0; padding:0; }
+  .printing-riziv .riziv-list-card { border:0; border-radius:0; box-shadow:none; }
+  .printing-riziv .patient-table-scroll { overflow:visible; }
+  body.printing-riziv .riziv-patient-table { width:100%; min-width:0; table-layout:auto; font-size:9pt; }
+  body.printing-riziv .riziv-patient-table td,
+  body.printing-riziv .riziv-patient-table th { min-width:0; padding:7px 5px; overflow-wrap:anywhere; }
+  .printing-riziv .riziv-patient-table tr { break-inside:avoid; }
+  .printing-riziv .riziv-patient-table thead { display:table-header-group; }
+  .printing-riziv .riziv-patient-table .report-patient-link { border:0; padding:0; background:none; color:black; text-decoration:none; font:inherit; }
+  .printing-riziv .riziv-patient-table [data-report-action=identity] { display:none; }
+}
 .report-drawer { --drawer-pad:24px; position:fixed; top:0; right:0; bottom:0; z-index:25; width:var(--report-width, 560px);
   box-sizing:border-box; background:#fff; border-left:1px solid #ccd9e9; box-shadow:-12px 0 40px #1733531a;
   display:flex; flex-direction:column; animation:report-slide-in .18s ease-out; }

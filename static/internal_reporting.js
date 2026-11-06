@@ -17,12 +17,18 @@
     body.set('csrf_token', form.elements.csrf_token.value);
     return body;
   }
-  function currentRow() {
-    return [...document.querySelectorAll('[data-patient-row]')].find(row =>
+  function patientRows() {
+    const allPatients = byId('riziv-list');
+    return [...document.querySelectorAll(allPatients && !allPatients.hidden ? '#riziv-list [data-patient-row]' : '#patient-list [data-patient-row]')];
+  }
+  function matchingRows() {
+    return [...document.querySelectorAll('[data-patient-row]')].filter(row =>
       row.dataset.appointment === form.elements.appointment_id.value && row.dataset.reservation === form.elements.reservation_start.value);
   }
+  function currentRow() { return patientRows().find(row =>
+    row.dataset.appointment === form.elements.appointment_id.value && row.dataset.reservation === form.elements.reservation_start.value); }
   function navigation() {
-    const rows = [...document.querySelectorAll('[data-patient-row]')], index = rows.indexOf(currentRow());
+    const rows = patientRows(), index = rows.indexOf(currentRow());
     byId('patient-previous').disabled = busy || index <= 0;
     byId('patient-next').disabled = busy || index < 0 || index >= rows.length - 1;
   }
@@ -51,16 +57,17 @@
     byId('report-readonly-meta').textContent = savedReport.report_date + (savedReport.radiologist ? ' · ' + savedReport.radiologist : '');
     byId('patient-report-tab').textContent = 'Voir le compte rendu';
   }
-  function rowButton(label, action) {
-    const base = currentRow()?.querySelector('[data-report-patient]');
+  function rowButton(label, action, row = currentRow()) {
+    const base = row?.querySelector('[data-report-patient]');
     if (!base) return null;
     const button = base.cloneNode(true); button.textContent = label;
     button.dataset.reportAction = action; return button;
   }
   function updateRowReport() {
-    const cell = currentRow()?.querySelector('[data-report-actions]');
-    if (!cell) return;
-    cell.replaceChildren(rowButton('Voir le compte rendu', 'report'), rowButton('Modifier', 'edit'));
+    matchingRows().forEach(row => {
+      const cell = row.querySelector('[data-report-actions]');
+      if (cell) cell.replaceChildren(rowButton('Voir le compte rendu', 'report', row), rowButton('Modifier', 'edit', row));
+    });
   }
   function paintPrescription(value) {
     prescription = value;
@@ -72,11 +79,12 @@
       byId('patient-request-download').href = value.download_url;
       // Load the document only when its tab is opened.
       if (!byId('patient-request').hidden) frame.src = value.view_url;
-      const cell = currentRow()?.querySelector('[data-request-actions]');
-      if (cell) {
+      matchingRows().forEach(row => {
+        const cell = row.querySelector('[data-request-actions]');
+        if (!cell) return;
         const link = document.createElement('a'); link.textContent = 'Télécharger la demande'; link.href = value.download_url;
-        cell.replaceChildren(rowButton('Voir la demande', 'request'), link);
-      }
+        cell.replaceChildren(rowButton('Voir la demande', 'request', row), link);
+      });
     } else frame.removeAttribute('src');
   }
   function selectTab(tab) {
@@ -227,8 +235,10 @@
       const result = await request(panel.dataset.patientEndpoint, {method:'POST', body:data});
       identityDirty = detailsForm.elements.national_number.value !== sentValue;
       if (!identityDirty) detailsForm.elements.national_number.value = result.national_number;
-      const cell = currentRow()?.querySelector('[data-national-number]');
-      if (cell) cell.textContent = result.national_number || 'Non renseigné';
+      matchingRows().forEach(row => {
+        const cell = row.querySelector('[data-national-number]');
+        if (cell) cell.textContent = result.national_number || 'Non renseigné';
+      });
       byId('patient-details-status').textContent = identityDirty ? 'Version envoyée enregistrée. Dernières modifications non enregistrées.' : 'Identifiant enregistré.';
     } catch (error) { byId('patient-details-status').textContent = error.message; }
     finally { setBusy(false); }
@@ -265,12 +275,13 @@
     finally { setBusy(false); }
   });
   function movePatient(offset) {
-    const rows = [...document.querySelectorAll('[data-patient-row]')], index = rows.indexOf(currentRow());
+    const rows = patientRows(), index = rows.indexOf(currentRow());
     const target = rows[index + offset]?.querySelector('[data-report-patient]');
     if (index >= 0 && target) openPatient(target);
   }
   byId('patient-previous').addEventListener('click', () => movePatient(-1));
   byId('patient-next').addEventListener('click', () => movePatient(1));
+  document.addEventListener('internal-patient-list-updated', navigation);
   panel.addEventListener('keydown', event => {
     if (event.key === 'Escape') close();
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); saveReport(); }

@@ -1,5 +1,6 @@
 """Isolated integration checks; never touches the practice database or sends mail."""
 import io
+import csv
 import json
 import os
 import sys
@@ -127,8 +128,58 @@ try:
         assert booked_hold.prescription_data == pdf_bytes
         assert db.session.get(AppointmentPatientDetails,appointment_report_key(booked_hold)).national_number == "11111111111"
         assert AppointmentReport.query.filter_by(context_key=appointment_report_key(booked_hold)).one().report_text == "Rapport de réservation"
+    # The RIZIV overview is truly all-time, not tied to the selected day/week.
+    for route in ("/admin/appointments/riziv", "/admin/appointments/riziv.csv"):
+        assert anonymous.get(route).status_code == 302
+        assert student.get(route).status_code == 403
+    with app.app_context():
+        old = Appointment(starts_at=day-timedelta(days=60),patient_name="PATIENT FICTIF",patient_email="private@example.invalid",appointment_type="459712",insurance_status="bim")
+        future = Appointment(starts_at=day+timedelta(days=70),patient_name="=2+2",patient_email="",appointment_type="459712")
+        escaped = Appointment(starts_at=day+timedelta(days=71),patient_name='<img src=x onerror="alert(1)">',patient_email="",appointment_type="459712")
+        db.session.add_all([old,future,escaped]); db.session.flush(); old_id, future_id, escaped_id = old.id, future.id, escaped.id
+        db.session.add(AppointmentPatientDetails(context_key=appointment_report_key(old),national_number="00123456789"))
+        db.session.add(AppointmentHold(starts_at=day-timedelta(days=30),token="historical",expires_at=day,
+            draft_data=json.dumps({"patient_name":"RESERVATION HORS SEMAINE","inami_code":"459712"})))
+        # A leftover hold at an already confirmed timestamp must not duplicate it.
+        db.session.add(AppointmentHold(starts_at=old.starts_at,token="stale",expires_at=day,draft_data='{"patient_name":"DOUBLON CACHE"}'))
+        db.session.commit()
+    listing = admin.get("/admin/appointments/riziv?date="+date_string)
+    assert listing.status_code == 200 and listing.json["total"] == 7
+    assert listing.headers["Cache-Control"] == "private, no-store"
+    html = listing.json["html"]
+    assert html.index(f'data-appointment="{old_id}"') < html.index(f'data-appointment="{aid}"')
+    assert html.count('>PATIENT FICTIF</button>') == 2  # Repeat examinations remain separate.
+    assert "RESERVATION HORS SEMAINE" in html and "DOUBLON CACHE" not in html
+    assert '<img src=x' not in html and '&lt;img' in html
+    assert "private@example.invalid" not in html and "BIM" not in html
+    week_page = admin.get("/admin/appointments?date="+date_string)
+    assert f'data-appointment="{old_id}"'.encode() not in week_page.data
+    assert b"Liste RIZIV" in week_page.data
+    exported = admin.get("/admin/appointments/riziv.csv")
+    assert exported.status_code == 200 and exported.headers["Content-Disposition"].startswith("attachment;")
+    assert exported.headers["Cache-Control"] == "private, no-store"
+    csv_rows = list(csv.reader(io.StringIO(exported.data.decode("utf-8-sig")),delimiter=";"))
+    assert len(csv_rows) == 8 and csv_rows[1][4] == "00123456789"
+    assert csv_rows[1][3] == "PATIENT FICTIF" and csv_rows[-2][3] == "'=2+2"
+    assert "private@example.invalid" not in exported.data.decode("utf-8-sig")
+    assert len({tuple(row) for row in csv_rows[1:]}) == 7
+    assert b"RESERVATION HORS SEMAINE" not in anonymous.get("/agenda?date="+date_string).data
+    if "--serve" not in sys.argv:
+        with app.app_context():
+            history = [Appointment(starts_at=day+timedelta(days=100+i),patient_name=f"HISTORIQUE FICTIF {i}",
+                patient_email="",appointment_type="459712") for i in range(501)]
+            db.session.add_all(history); db.session.flush()
+            db.session.add(AppointmentPatientDetails(context_key=appointment_report_key(history[-1]),national_number="00000000000"))
+            db.session.commit()
+        large_list = admin.get("/admin/appointments/riziv")
+        assert large_list.json["total"] == 508 and "00000000000" in large_list.json["html"]
     print("PASS: private uploads/identifiers, saved reports/retries/conflicts/outage, PDF, day open/close, holds, public isolation.")
+    print("PASS: all-time RIZIV list/export, chronological order, repeat visits, historical reservations, access control, escaping, leading-zero identifiers and CSV formula protection.")
     if "--serve" in sys.argv:
+        with app.app_context():
+            db.session.get(Appointment, future_id).patient_name = "PATIENT FUTUR FICTIF"
+            db.session.get(Appointment, escaped_id).patient_name = "PATIENT DEMONSTRATION"
+            db.session.commit()
         print("Fictional preview: http://127.0.0.1:5057/admin/appointments?date="+date_string, flush=True)
         app.run(host="127.0.0.1", port=5057, debug=False)
 finally:

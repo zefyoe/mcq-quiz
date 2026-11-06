@@ -57,6 +57,35 @@
       if (menu !== except) menu.removeAttribute('open');
     });
   }
+  const riziv = document.getElementById('riziv-list');
+  let rizivLoading = null;
+  async function loadRiziv() {
+    if (rizivLoading) return rizivLoading;
+    const status = document.getElementById('riziv-status');
+    document.getElementById('riziv-refresh').disabled = true;
+    document.getElementById('riziv-print').disabled = true;
+    status.textContent = 'Chargement de tous les patients…';
+    rizivLoading = (async () => {
+      try {
+        const result = await request(riziv.dataset.endpoint);
+        // HTML is rendered by our authenticated, same-origin Jinja template;
+        // all patient-supplied values are escaped on the server.
+        document.getElementById('riziv-patients').innerHTML = result.html;
+        document.getElementById('riziv-total').textContent = result.total;
+        document.getElementById('riziv-print').disabled = false;
+        status.textContent = result.total ? 'Liste complète · ordre chronologique.' : 'Aucun patient enregistré.';
+        document.dispatchEvent(new Event('internal-patient-list-updated'));
+      } catch (error) { status.textContent = error.message + ' Cliquez sur Actualiser pour réessayer.'; }
+      finally { document.getElementById('riziv-refresh').disabled = false; rizivLoading = null; }
+    })();
+    return rizivLoading;
+  }
+  document.getElementById('riziv-refresh').addEventListener('click', loadRiziv);
+  document.getElementById('riziv-print').addEventListener('click', () => window.print());
+  window.addEventListener('beforeprint', () => {
+    document.body.classList.toggle('printing-riziv', !riziv.hidden);
+  });
+  window.addEventListener('afterprint', () => document.body.classList.remove('printing-riziv'));
   // Native exclusive details groups, with a fallback for older browsers and
   // assistive-technology toggles. Clicking outside also dismisses the menu.
   document.addEventListener('toggle', event => {
@@ -67,9 +96,14 @@
     const view = event.target.closest('[data-agenda-view]');
     if (view) {
       const patients = view.dataset.agendaView === 'patients';
+      const allPatients = view.dataset.agendaView === 'riziv';
       document.getElementById('patient-list').hidden = !patients;
-      document.getElementById('internal-calendar').hidden = patients;
+      document.getElementById('internal-calendar').hidden = patients || allPatients;
+      riziv.hidden = !allPatients;
+      document.body.classList.toggle('riziv-view-active', allPatients);
       document.querySelectorAll('[data-agenda-view]').forEach(b => b.setAttribute('aria-pressed', String(b === view)));
+      document.dispatchEvent(new Event('internal-patient-list-updated'));
+      if (allPatients) await loadRiziv();
     }
     const button = event.target.closest('[data-day-action]');
     if (!button || availabilityBusy) return;

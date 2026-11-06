@@ -39,6 +39,22 @@ the available screen. Existing reports open read-only; editing is explicit.
 **Copier le texte**, PDF/print/download and previous/next patient support manual
 transfer to another system. No transfer to another medical application is automatic.
 
+**Liste RIZIV · Tous les patients** loads an administrator-only chronological
+overview across all dates, independent of the current week. It includes registered
+appointments and reservations, including future dates, with one row per booking
+(repeat visits are not deduplicated by name). A stale hold at an already confirmed
+timestamp is not counted twice. This is an internal register, not proof that an
+examination was performed and not a validated official submission format.
+Patient names open the same side-panel dossier, with previous/next navigation
+scoped to the currently selected list. Editing an identifier updates both lists.
+**Imprimer** prints just this overview; **Télécharger le CSV** exports its current
+all-time database contents in chronological order. CSV uses UTF-8 with BOM and
+semicolon separators; identifier digits (including initial zeroes) remain intact
+in the file, so import that column as text in spreadsheet software. Names and exam
+labels are protected against spreadsheet formula injection. No prices, BIM status,
+e-mails, phone numbers, report text or attachments are included. The app does not
+send the register to RIZIV/INAMI or to any other recipient automatically.
+
 Each booking (including an existing reservation) can store one private examination
 request. **Scanner / importer la demande** imports a PDF produced by the scanner's
 own software; it does not directly operate scanner hardware. New imports are limited
