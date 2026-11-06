@@ -55,7 +55,7 @@
     paintDocuments(value.documents); showText();
   }
   async function loadList() {
-    $('history-list-status').textContent = 'Chargement des anciens dossiers…';
+    $('history-list-status').textContent = 'Chargement de XIMEO-RIZIV…';
     try {
       const result = await request(panel.dataset.endpoint);
       $('history-patients').innerHTML = result.html;

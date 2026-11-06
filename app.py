@@ -5404,7 +5404,7 @@ def logout():
 
 register_historical_dossiers(app, admin_required=admin_required, ensure_schema=ensure_appointment_schema,
     csrf_token=agenda_token, now=agenda_now, valid_name=is_valid_patient_name,
-    practice_address=APPOINTMENT_PRACTICE_ADDRESS)
+    practice_address=APPOINTMENT_PRACTICE_ADDRESS, all_patient_rows=all_internal_patient_rows)
 
 
 def initialize_database_schema():

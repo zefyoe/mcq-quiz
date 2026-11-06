@@ -19,7 +19,9 @@
   }
   function patientRows() {
     const allPatients = byId('riziv-list');
-    return [...document.querySelectorAll(allPatients && !allPatients.hidden ? '#riziv-list [data-patient-row]' : '#patient-list [data-patient-row]')];
+    const history = byId('history-list');
+    const selector = allPatients && !allPatients.hidden ? '#riziv-list' : history && !history.hidden ? '#history-list' : '#patient-list';
+    return [...document.querySelectorAll(selector + ' [data-patient-row]')];
   }
   function matchingRows() {
     return [...document.querySelectorAll('[data-patient-row]')].filter(row =>

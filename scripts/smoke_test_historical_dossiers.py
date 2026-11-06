@@ -108,7 +108,11 @@ try:
         assert HistoricalDossier.query.count()==2 and HistoricalDocument.query.count()==2
         assert Appointment.query.count()==1 and AppointmentHold.query.count()==0 and AppointmentSlotOverride.query.count()==0
     assert anonymous.get("/agenda").data==before  # No fake appointment/availability side effects.
-    listing=admin.get(url); assert listing.json["total"]==2 and b"Jo Jao" in listing.data
+    listing=admin.get(url); assert listing.json["total"]==3 and b"Jo Jao" in listing.data
+    assert "PATIENT CALENDRIER" in listing.json["html"]
+    assert 'data-report-appointment="1"' in listing.json["html"]
+    assert 'data-history-id="'+str(did)+'"' in listing.json["html"]
+    assert listing.json["html"].index("Jo Jao") < listing.json["html"].index("PATIENT CALENDRIER")
     assert listing.headers["Cache-Control"]=="private, no-store"
     all_patients=admin.get("/admin/appointments/riziv").json
     assert all_patients["total"]==3 and "Dossier historique" in all_patients["html"]
@@ -117,6 +121,24 @@ try:
     assert rows[1][2]=="" and rows[1][4]=="00123456789" and "historique" in rows[1][-1]
     assert "Texte de démonstration" not in exported.data.decode("utf-8-sig")
     assert b"Jo Jao" not in anonymous.get("/agenda").data
+    # Both views read the same records; a reservation remains linked to its source,
+    # and neither GET copies appointments into the historical tables.
+    with app.app_context():
+        import json
+        hold=AppointmentHold(starts_at=agenda_now()+timedelta(days=8),token=str(uuid4()),expires_at=datetime.utcnow()+timedelta(days=8),
+            draft_data=json.dumps({"patient_name":"PATIENT RESERVATION","inami_code":"459712"}))
+        db.session.add(hold); db.session.commit()
+        reservation_start=hold.starts_at.isoformat(timespec="minutes")
+    combined=admin.get(url).json
+    riziv=admin.get("/admin/appointments/riziv").json
+    assert combined["total"]==riziv["total"]==4
+    for name in ("PATIENT CALENDRIER","PATIENT RESERVATION","Jo Jao"):
+        assert name in combined["html"] and name in riziv["html"]
+    assert 'data-report-reservation="'+reservation_start+'"' in combined["html"]
+    assert "Texte de démonstration" not in combined["html"]
+    assert "XIMEO-RIZIV" in admin.get("/admin/appointments").text
+    with app.app_context():
+        assert HistoricalDossier.query.count()==2 and Appointment.query.count()==1
     if "--pdf-preview" in sys.argv:
         preview=Path("/private/tmp/historical-dossier-pdf-qa")
         preview.mkdir(exist_ok=True)

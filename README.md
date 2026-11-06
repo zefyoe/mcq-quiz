@@ -32,7 +32,13 @@ Current service settings from `render.yaml`:
 
 ### Internal patient workspace
 
-**Anciens dossiers** / **Ajouter un ancien dossier** registers paper-era records
+**XIMEO-RIZIV** shows all agenda patients/reservations and paper-era records in
+one chronological document workspace. The separate **Liste RIZIV** remains
+available with the same records. Agenda entries open their existing patient
+workspace and retain their original requests, reports and identifiers; displaying
+them here does not copy records or create historical dossiers.
+
+**Ajouter un ancien dossier** registers paper-era records
 in separate additive `historical_dossier` / `historical_document` tables. These
 records never create, occupy or reopen a booking slot. Enter the actual historical
 examination date (not a future date), name and examination; the national-register

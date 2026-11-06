@@ -56,7 +56,7 @@
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
 
-      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button><button type="button" data-agenda-view="riziv" aria-pressed="false">Liste RIZIV · Tous les patients</button><button type="button" data-agenda-view="history" aria-pressed="false">Anciens dossiers</button></div><button type="button" class="history-add-button" data-history-new>+ Ajouter un ancien dossier</button></div>
+      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button><button type="button" data-agenda-view="riziv" aria-pressed="false">Liste RIZIV · Tous les patients</button><button type="button" data-agenda-view="history" aria-pressed="false">XIMEO-RIZIV</button></div><button type="button" class="history-add-button" data-history-new>+ Ajouter un ancien dossier</button></div>
       <p id="availability-feedback" role="status" aria-live="polite" hidden></p>
       <section id="riziv-list" class="patient-list-card riziv-list-card" hidden aria-label="Liste RIZIV de tous les patients" data-endpoint="{{ url_for('admin_riziv_patient_list') }}">
         <header class="riziv-list-header">

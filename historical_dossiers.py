@@ -44,7 +44,7 @@ def historical_riziv_rows():
         for record in HistoricalDossier.query.order_by(HistoricalDossier.examined_on, HistoricalDossier.id).all()]
 
 
-def register_historical_dossiers(app, *, admin_required, ensure_schema, csrf_token, now, valid_name, practice_address):
+def register_historical_dossiers(app, *, admin_required, ensure_schema, csrf_token, now, valid_name, practice_address, all_patient_rows):
     def authorize(write=False):
         denied = admin_required()
         if denied:
@@ -68,7 +68,11 @@ def register_historical_dossiers(app, *, admin_required, ensure_schema, csrf_tok
             return denied
         if request.method == "GET":
             records = HistoricalDossier.query.order_by(HistoricalDossier.examined_on, HistoricalDossier.id).all()
-            rows = [dossier_payload(record, include_text=False) for record in records]
+            dossiers = {record.id: dossier_payload(record, include_text=False) for record in records}
+            rows = all_patient_rows()
+            for row in rows:
+                if row.get("historical_id"):
+                    row["dossier"] = dossiers[row["historical_id"]]
             return jsonify(ok=True, total=len(rows), html=render_template("_historical_patient_table.html", dossiers=rows))
         values = request.form
         dossier_id = values.get("dossier_id", type=int)
