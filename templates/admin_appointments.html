@@ -71,7 +71,7 @@
       <section id="patient-list" class="patient-list-card" hidden aria-label="Patients par ordre chronologique">
         <header><h2>Patients de la semaine</h2><p>Demandes, comptes rendus et copie manuelle, dans l’ordre des rendez-vous.</p></header>
         <div class="patient-table-scroll"><table class="patient-table">
-          <thead><tr><th scope="col">Patient / rendez-vous</th><th scope="col">N° registre national</th><th scope="col">Demande d’examen</th><th scope="col">Compte rendu</th></tr></thead>
+          <thead><tr><th scope="col">Patient / rendez-vous</th><th scope="col">N° dossier (registre national)</th><th scope="col">Demande d’examen</th><th scope="col">Compte rendu</th></tr></thead>
           <tbody>{% for patient in patient_rows %}
             <tr data-patient-row data-appointment="{{ patient.appointment_id }}" data-reservation="{{ patient.reservation_start }}">
               <td><span class="patient-row-time">{{ patient.starts_at.strftime('%d/%m/%Y · %H:%M') }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start) }}<small>{{ patient.examination }}</small></td>

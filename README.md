@@ -41,8 +41,12 @@ them here does not copy records or create historical dossiers.
 **Ajouter un ancien dossier** registers paper-era records
 in separate additive `historical_dossier` / `historical_document` tables. These
 records never create, occupy or reopen a booking slot. Enter the actual historical
-examination date (not a future date), name and examination; the national-register
-number is optional. A scanned request and scanned original report can each be
+examination date (not a future date), name and examination. The national-register
+number is the patient-facing dossier number and is required for new historical
+records (11 digits). It is deliberately not unique: several examinations of the
+same patient retain separate records and documents with the same dossier number.
+Older records without a number remain editable so they can be completed.
+A scanned request and scanned original report can each be
 uploaded as an unencrypted PDF (10 MiB / 200 pages maximum). Original files are
 kept separately in the private database and are not overwritten. Repeat uploads
 of identical bytes are safe. Word originals should be exported to PDF before upload.

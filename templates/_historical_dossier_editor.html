@@ -6,7 +6,8 @@
     <form id="history-form" class="appointment-booking-form" autocomplete="off">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="dossier_id"><input type="hidden" name="creation_key"><input type="hidden" name="revision" value="0">
       <label>Prénom et nom du patient<input name="patient_name" required minlength="5" maxlength="255" autocomplete="off"></label>
-      <div class="report-fields-row"><label>Date réelle de l’examen<input type="date" name="examined_on" max="{{ today.isoformat() }}" required></label><label>N° registre national (facultatif)<input name="national_number" inputmode="numeric" maxlength="15" placeholder="11 chiffres"></label></div>
+      <div class="report-fields-row"><label>Date réelle de l’examen<input type="date" name="examined_on" max="{{ today.isoformat() }}" required></label><label>N° dossier · registre national<input name="national_number" inputmode="numeric" maxlength="15" placeholder="11 chiffres" required></label></div>
+      <p class="history-help">Le numéro de dossier est le registre national du patient. Un même numéro peut être utilisé pour plusieurs examens ; chaque examen conserve ses propres documents.</p>
       <label>Examen<input name="examination" list="history-examinations" required maxlength="255" placeholder="Échographie abdominale…"></label>
       <datalist id="history-examinations">{% for label in historical_examinations %}<option value="{{ label }}">{% endfor %}</datalist>
       <label>Suivi du transfert<select name="transfer_status"><option value="todo">À compléter</option><option value="ready" disabled>Prêt à transférer</option><option value="transferred" disabled>Transféré manuellement</option></select></label>

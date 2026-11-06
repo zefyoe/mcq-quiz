@@ -46,6 +46,7 @@ try:
     assert admin.post(url,data=dict(payload,examined_on="")).status_code==400
     assert admin.post(url,data=dict(payload,examined_on=(date.today()+timedelta(days=30)).isoformat())).status_code==400
     assert admin.post(url,data=dict(payload,national_number="123")).status_code==400
+    assert admin.post(url,data=dict(payload,national_number="")).status_code==400
     assert admin.post(url,data=dict(payload,transfer_status="ready")).status_code==400
     created=admin.post(url,data=payload)
     assert created.status_code==200,created.data
@@ -102,8 +103,12 @@ try:
         failed=admin.post(url,data=dict(edit,examination="Examen modifié"))
     assert failed.status_code==503
     assert admin.get(url+f"/{did}").json["dossier"]["examination"]=="Échographie abdominale"
-    second=admin.post(url,data=dict(payload,creation_key=str(uuid4())))
+    second=admin.post(url,data=dict(payload,creation_key=str(uuid4()),examination="Échographie thyroïdienne"))
     assert second.status_code==200 and second.json["dossier"]["id"]!=did
+    assert second.json["dossier"]["national_number"]==original["national_number"]
+    assert second.json["dossier"]["report_text"]=="" and second.json["dossier"]["documents"]=={}
+    assert admin.get(url+f"/{did}").json["dossier"]["report_text"]==text
+    assert admin.post(url,data=dict(edit,national_number="")).status_code==400
     with app.app_context():
         assert HistoricalDossier.query.count()==2 and HistoricalDocument.query.count()==2
         assert Appointment.query.count()==1 and AppointmentHold.query.count()==0 and AppointmentSlotOverride.query.count()==0

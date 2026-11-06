@@ -50,6 +50,7 @@
     form.elements.revision.value = value.revision;
     editableKeys.forEach(key=>{ form.elements[key].value = value[key] || ''; });
     form.elements.report_reviewed.checked = value.report_reviewed;
+    form.elements.national_number.required = Boolean(value.national_number);
     form.elements.report_date.required = Boolean(value.report_text?.trim());
     $('history-title').textContent = value.patient_name;
     paintDocuments(value.documents); showText();
@@ -79,6 +80,7 @@
     if (!close() || (window.internalReporting && !window.internalReporting.close())) return;
     opener=button; record=null; dirty=false; documents={}; loading=false; form.reset(); clearPdf();
     form.elements.report_date.required=false;
+    form.elements.national_number.required=true;
     form.elements.creation_key.value = crypto.randomUUID(); form.elements.revision.value='0';
     form.elements.dossier_id.value='';
     panel.querySelectorAll('[data-history-file]').forEach(input=>{input.value='';});

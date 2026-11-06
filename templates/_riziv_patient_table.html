@@ -1,6 +1,6 @@
 {% from '_patient_report_link.html' import report_link %}
 <div class="patient-table-scroll"><table class="patient-table riziv-patient-table">
-  <thead><tr><th scope="col">N°</th><th scope="col">Date / heure</th><th scope="col">Patient</th><th scope="col">N° registre national</th><th scope="col">Examen</th><th scope="col">Enregistrement</th></tr></thead>
+  <thead><tr><th scope="col">N° ligne</th><th scope="col">Date / heure</th><th scope="col">Patient</th><th scope="col">N° dossier (registre national)</th><th scope="col">Examen</th><th scope="col">Enregistrement</th></tr></thead>
   <tbody>{% for patient in patient_rows %}
     <tr{% if not patient.historical_id %} data-patient-row data-appointment="{{ patient.appointment_id }}" data-reservation="{{ patient.reservation_start }}"{% endif %}>
       <td>{{ loop.index }}</td>

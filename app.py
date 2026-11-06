@@ -4237,7 +4237,7 @@ def admin_riziv_patient_csv():
     ensure_appointment_schema()
     output = StringIO(newline="")
     writer = csv.writer(output, delimiter=";", lineterminator="\r\n")
-    writer.writerow(["N°", "Date", "Heure", "Patient", "N° registre national", "Examen", "Enregistrement"])
+    writer.writerow(["N° ligne", "Date", "Heure", "Patient", "N° dossier (registre national)", "Examen", "Enregistrement"])
     def safe_cell(value):
         value = str(value)
         # Prevent spreadsheet formula execution without changing the DB value.

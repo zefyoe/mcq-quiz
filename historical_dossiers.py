@@ -98,6 +98,10 @@ def register_historical_dossiers(app, *, admin_required, ensure_schema, csrf_tok
             return jsonify(error="Un dossier historique ne peut pas porter une date future."), 400
         if not valid_name(patient_name) or len(patient_name) > 255:
             return jsonify(error="Indiquez le prénom et le nom complets (au moins 5 lettres)."), 400
+        # Identify the patient by their national number, while keeping one record
+        # per examination. Repeated numbers are intentional, never unique keys.
+        if not number and (record is None or record.national_number):
+            return jsonify(error="Indiquez le numéro de dossier : le registre national du patient (11 chiffres)."), 400
         if (number and not re.fullmatch(r"[0-9]{11}", number)) or not examination or len(examination) > 255:
             return jsonify(error="Vérifiez l’examen et le registre national (11 chiffres ou vide)."), 400
         if len(report_text) > 50000 or len(radiologist) > 255 or (report_text and not report_date):
