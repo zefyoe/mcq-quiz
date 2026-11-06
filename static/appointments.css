@@ -529,7 +529,32 @@
 .riziv-patient-table td:nth-child(2) { min-width:115px; }
 .riziv-patient-table td:nth-child(3) { min-width:180px; }
 .riziv-patient-table td:last-child { color:#63708a; font-size:.78rem; }
-.riziv-view-active .day-summary { display:none; }
+.riziv-view-active .day-summary, .history-view-active .day-summary { display:none; }
+.history-close { font-size:1.6rem !important; min-width:42px; padding:0 !important; flex-shrink:0; }
+.history-add-button { font:inherit; font-size:.86rem; padding:11px 15px; border:1px solid #bad0eb; border-radius:9px; background:#edf5ff; color:#214d83; font-weight:750; cursor:pointer; }
+.history-feedback { margin:0 24px 16px; color:#526682; font-size:.85rem; }
+.history-status { display:inline-flex !important; padding:5px 9px; border-radius:20px; font-size:.75rem; font-weight:750; background:#eef2f7; color:#59677d; }
+.history-status-ready { background:#e7f5ee; color:#24694f; }
+.history-status-transferred { background:#eaf1ff; color:#285aaa; }
+.history-editor-section { margin:20px 0; padding-top:12px; border-top:1px solid #dce5f0; scroll-margin-top:16px; }
+.history-editor-section h3 { font-size:1rem; }
+.history-help { font-size:.8rem; color:#63708a; line-height:1.6; }
+#history-status { font-size:.82rem; color:#336b57; }
+#history-error { color:#a32936; font-size:.85rem; line-height:1.6; }
+#history-error:empty { display:none; }
+#history-readonly-text { white-space:pre-wrap; overflow-wrap:anywhere; padding:18px; background:#f8fbff; border:1px solid #dce5f0; border-radius:10px; font-size:.96rem; line-height:1.8; user-select:text; }
+#history-text-editor { display:grid; gap:16px; }
+#history-text-editor textarea { font-weight:400; }
+.history-review { display:flex !important; align-items:flex-start; gap:10px !important; padding:12px; background:#edf5ff; border-radius:9px; font-size:.85rem; }
+.history-review input { width:19px !important; min-height:19px !important; height:19px; flex-shrink:0; margin:0; }
+.history-document { border:1px solid #dce5f0; padding:16px; border-radius:12px; margin:12px 0; }
+.history-document h4 { margin:0 0 12px; }
+.history-document [data-history-upload] { display:grid; gap:12px; }
+.history-document label { display:grid; gap:8px; font-size:.85rem; }
+.history-document input { max-width:100%; min-width:0; }
+.history-document small { color:#63708a; font-size:.75rem; }
+.history-document [data-history-filename] { font-size:.82rem; overflow-wrap:anywhere; }
+.history-table td small { margin-bottom:6px; }
 @media print {
   .printing-riziv { padding:0 !important; background:white; color:black; }
   .printing-riziv .appointment-topbar,
@@ -540,6 +565,8 @@
   .printing-riziv #internal-calendar,
   .printing-riziv #patient-list,
   .printing-riziv #report-modal,
+  .printing-riziv #history-panel,
+  .printing-riziv #history-list,
   .printing-riziv #appointment-modal,
   .printing-riziv .riziv-list-tools,
   .printing-riziv #riziv-status { display:none !important; }

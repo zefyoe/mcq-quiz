@@ -80,6 +80,7 @@
     })();
     return rizivLoading;
   }
+  window.internalAgenda.refreshRiziv = loadRiziv;
   document.getElementById('riziv-refresh').addEventListener('click', loadRiziv);
   document.getElementById('riziv-print').addEventListener('click', () => window.print());
   window.addEventListener('beforeprint', () => {
@@ -97,13 +98,17 @@
     if (view) {
       const patients = view.dataset.agendaView === 'patients';
       const allPatients = view.dataset.agendaView === 'riziv';
+      const history = view.dataset.agendaView === 'history';
       document.getElementById('patient-list').hidden = !patients;
-      document.getElementById('internal-calendar').hidden = patients || allPatients;
+      document.getElementById('internal-calendar').hidden = patients || allPatients || history;
       riziv.hidden = !allPatients;
+      document.getElementById('history-list').hidden = !history;
       document.body.classList.toggle('riziv-view-active', allPatients);
+      document.body.classList.toggle('history-view-active', history);
       document.querySelectorAll('[data-agenda-view]').forEach(b => b.setAttribute('aria-pressed', String(b === view)));
       document.dispatchEvent(new Event('internal-patient-list-updated'));
       if (allPatients) await loadRiziv();
+      if (history) await window.internalHistory?.loadList();
     }
     const button = event.target.closest('[data-day-action]');
     if (!button || availabilityBusy) return;

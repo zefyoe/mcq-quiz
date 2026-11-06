@@ -56,17 +56,18 @@
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
 
-      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button><button type="button" data-agenda-view="riziv" aria-pressed="false">Liste RIZIV · Tous les patients</button></div></div>
+      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button><button type="button" data-agenda-view="riziv" aria-pressed="false">Liste RIZIV · Tous les patients</button><button type="button" data-agenda-view="history" aria-pressed="false">Anciens dossiers</button></div><button type="button" class="history-add-button" data-history-new>+ Ajouter un ancien dossier</button></div>
       <p id="availability-feedback" role="status" aria-live="polite" hidden></p>
       <section id="riziv-list" class="patient-list-card riziv-list-card" hidden aria-label="Liste RIZIV de tous les patients" data-endpoint="{{ url_for('admin_riziv_patient_list') }}">
         <header class="riziv-list-header">
           <div><h2>Liste RIZIV</h2><p>Toutes les dates · du premier au dernier rendez-vous · <strong id="riziv-total">—</strong> enregistrement(s)</p></div>
           <div class="report-actions riziv-list-tools"><button type="button" id="riziv-refresh">Actualiser</button><button type="button" id="riziv-print" disabled>Imprimer</button><a href="{{ url_for('admin_riziv_patient_csv') }}">Télécharger le CSV</a></div>
         </header>
-        <p class="riziv-list-notice">Une ligne par rendez-vous ou réservation, y compris les dates futures. Les données manquantes restent à compléter. Cet aperçu ne confirme pas qu’un examen a été réalisé et n’est pas une déclaration officielle.</p>
+        <p class="riziv-list-notice">Une ligne par rendez-vous, réservation ou dossier historique saisi, y compris les dates futures. Les données manquantes restent à compléter. Cet aperçu ne confirme pas qu’un examen a été réalisé et n’est pas une déclaration officielle.</p>
         <p id="riziv-status" role="status" aria-live="polite"></p>
         <div id="riziv-patients"></div>
       </section>
+      {% include '_historical_dossiers.html' %}
       <section id="patient-list" class="patient-list-card" hidden aria-label="Patients par ordre chronologique">
         <header><h2>Patients de la semaine</h2><p>Demandes, comptes rendus et copie manuelle, dans l’ordre des rendez-vous.</p></header>
         <div class="patient-table-scroll"><table class="patient-table">
@@ -293,7 +294,9 @@
     </div>
 
     {% include '_appointment_reporting.html' %}
+    {% include '_historical_dossier_editor.html' %}
     <script src="{{ url_for('static', filename='internal_agenda.js', v=agenda_asset_version) }}" data-day-endpoint="{{ url_for('admin_close_appointment_day') }}" data-csrf="{{ csrf_token }}"></script>
     <script src="{{ url_for('static', filename='internal_reporting.js', v=report_asset_version) }}"></script>
+    <script src="{{ url_for('static', filename='internal_history.js', v=historical_asset_version) }}"></script>
   </body>
 </html>

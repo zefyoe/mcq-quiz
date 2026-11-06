@@ -32,6 +32,37 @@ Current service settings from `render.yaml`:
 
 ### Internal patient workspace
 
+**Anciens dossiers** / **Ajouter un ancien dossier** registers paper-era records
+in separate additive `historical_dossier` / `historical_document` tables. These
+records never create, occupy or reopen a booking slot. Enter the actual historical
+examination date (not a future date), name and examination; the national-register
+number is optional. A scanned request and scanned original report can each be
+uploaded as an unencrypted PDF (10 MiB / 200 pages maximum). Original files are
+kept separately in the private database and are not overwritten. Repeat uploads
+of identical bytes are safe. Word originals should be exported to PDF before upload.
+
+The same panel also has an editable plain-text report field: paste text recognized
+by the user's phone app, correct it, enter the actual report date and save. No OCR
+service is called by this app and no clinical findings are generated. A saved text
+opens read-only with an explicit edit action. Copy, print and download support
+manual transfer. Generating a text-based PDF requires the user's review checkbox;
+editing the text/date/radiologist clears that checkbox. The historical PDF displays
+the examination date only: no invented appointment time. The original scan is
+retained alongside the text, not replaced by the reconstructed PDF.
+
+Manual workflow flags are **À compléter**, **Prêt à transférer** and **Transféré
+manuellement**. The latter two require the request scan plus either an original
+report PDF or a reviewed text report. The flags do not send anything or prove that
+another system received data. Historical entries are included chronologically in
+the total RIZIV overview/export, explicitly labelled historical and with a blank
+time column. No tariffs/revenue are invented for them. Metadata/report saves use
+revision checks and creation retry keys; unsaved text stays in memory with an exit
+warning, never browser storage. All document access is admin-only and no-store.
+
+Historical flow checks: `python scripts/smoke_test_historical_dossiers.py`.
+Use `--serve` for a disposable localhost preview with synthetic data; `--pdf-preview`
+writes a synthetic report to `/private/tmp/historical-dossier-pdf-qa/` for rendering.
+
 The private agenda has **Agenda** and **Liste patients** views. The patient list
 is chronological within the selected week. Clicking a patient opens a side panel;
 on desktop the calendar remains usable beside it, and on phones the panel uses

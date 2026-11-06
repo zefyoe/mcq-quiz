@@ -10,7 +10,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 
 def create_radiology_report_pdf(*, patient_name, examination, starts_at,
-                                report_date, report_text, radiologist, practice_address):
+                                report_date, report_text, radiologist, practice_address, date_only=False):
     output = BytesIO()
     # Stable PDF bytes let the mail service deduplicate retries of the same report.
     document = SimpleDocTemplate(output, pagesize=A4, rightMargin=20*mm,
@@ -23,10 +23,12 @@ def create_radiology_report_pdf(*, patient_name, examination, starts_at,
                                   leading=19, textColor=colors.HexColor("#172b49"))
     address = Paragraph(escape(practice_address), meta_style)
     _, address_height = address.wrap(A4[0]-40*mm, A4[1])
+    examination_date = (f"<b>Date de l’examen :</b> {starts_at.strftime('%d/%m/%Y')}" if date_only
+                        else f"<b>Rendez-vous :</b> {starts_at.strftime('%d/%m/%Y à %H:%M')}")
     metadata = Paragraph(
         f"<b>Patient :</b> {escape(patient_name)}<br/>"
         f"<b>Examen :</b> {escape(examination)}<br/>"
-        f"<b>Rendez-vous :</b> {starts_at.strftime('%d/%m/%Y à %H:%M')}", meta_style)
+        + examination_date, meta_style)
     _, metadata_height = metadata.wrap(A4[0]-40*mm, A4[1])
     metadata_top = A4[1]-max(39*mm, 33*mm+address_height)
     document.topMargin = A4[1]-metadata_top+metadata_height+9*mm

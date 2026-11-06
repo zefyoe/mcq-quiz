@@ -1,0 +1,35 @@
+<aside id="history-panel" class="report-drawer" hidden role="region" aria-labelledby="history-title" data-endpoint="{{ url_for('admin_historical_dossiers') }}">
+  <header class="report-drawer-header"><div><p class="appointment-eyebrow">ARCHIVES · DOSSIER HISTORIQUE</p><h2 id="history-title">Ajouter un ancien dossier</h2></div><button type="button" id="history-close" class="history-close" aria-label="Fermer l’ancien dossier">×</button></header>
+  <div class="report-drawer-content">
+    <p class="report-notice">Scannez vos papiers avec votre scanner ou votre téléphone, puis importez les PDF. Vous pouvez aussi coller le texte reconnu par votre application Apple. Rien n’est envoyé à un autre logiciel.</p>
+    <p id="history-status" role="status"></p><p id="history-error" role="alert"></p>
+    <form id="history-form" class="appointment-booking-form" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="dossier_id"><input type="hidden" name="creation_key"><input type="hidden" name="revision" value="0">
+      <label>Prénom et nom du patient<input name="patient_name" required minlength="5" maxlength="255" autocomplete="off"></label>
+      <div class="report-fields-row"><label>Date réelle de l’examen<input type="date" name="examined_on" max="{{ today.isoformat() }}" required></label><label>N° registre national (facultatif)<input name="national_number" inputmode="numeric" maxlength="15" placeholder="11 chiffres"></label></div>
+      <label>Examen<input name="examination" list="history-examinations" required maxlength="255" placeholder="Échographie abdominale…"></label>
+      <datalist id="history-examinations">{% for label in historical_examinations %}<option value="{{ label }}">{% endfor %}</datalist>
+      <label>Suivi du transfert<select name="transfer_status"><option value="todo">À compléter</option><option value="ready" disabled>Prêt à transférer</option><option value="transferred" disabled>Transféré manuellement</option></select></label>
+      <section id="history-text-section" class="history-editor-section">
+        <div class="report-section-heading"><h3>Compte rendu · texte</h3><button type="button" id="history-edit-text" hidden>Modifier le texte</button></div>
+        <p class="history-help">Collez le texte reconnu sur votre iPhone/iPad. Relisez notamment les noms, chiffres, unités et négations. Le scan original reste séparé.</p>
+        <div id="history-readonly-text" hidden></div>
+        <div id="history-text-editor">
+          <div class="report-fields-row"><label>Date réelle du compte rendu<input type="date" name="report_date" max="{{ today.isoformat() }}"></label><label>Radiologue (facultatif)<input name="radiologist" maxlength="255" placeholder="Dr …"></label></div>
+          <label>Texte du compte rendu<textarea name="report_text" rows="16" maxlength="50000" spellcheck="true" lang="fr" placeholder="Collez ici le texte de votre ancien compte rendu…"></textarea></label>
+          <label class="history-review"><input type="checkbox" name="report_reviewed" value="1"> J’ai relu et corrigé ce texte avant utilisation.</label>
+        </div>
+      </section>
+      <div class="report-actions history-save-actions"><button type="submit">Enregistrer le dossier et le texte</button><button type="button" id="history-copy">Copier le texte</button><button type="button" id="history-pdf">PDF / imprimer</button></div>
+    </form>
+    <section id="history-documents" class="history-editor-section"><h3>Documents originaux scannés</h3>
+      {% for kind, title in [('request', 'Demande d’examen'), ('report', 'Compte rendu original')] %}
+      <section class="history-document" data-history-kind="{{ kind }}"><h4>{{ title }}</h4>
+        <div data-history-upload><label>Choisir le scan PDF<input type="file" accept=".pdf,application/pdf" data-history-file="{{ kind }}"></label><button type="button" data-history-upload="{{ kind }}">Importer {{ 'la demande' if kind == 'request' else 'le compte rendu original' }}</button><small>PDF non protégé · 10 Mo maximum.</small></div>
+        <div data-history-existing hidden><span data-history-filename></span><div class="report-actions"><button type="button" data-history-view="{{ kind }}">Voir le PDF</button><a data-history-download>Télécharger</a></div></div>
+      </section>{% endfor %}
+    </section>
+    <section id="history-pdf-output" hidden><p id="history-pdf-title"></p><iframe id="history-pdf-preview" title="PDF du dossier historique"></iframe><div class="report-actions"><a id="history-pdf-download">Télécharger le PDF</a><button type="button" id="history-print">Imprimer</button><button type="button" id="history-pdf-close">Fermer l’aperçu</button></div></section>
+    <p class="history-help">« Prêt à transférer » nécessite la demande et soit un compte rendu PDF, soit un texte relu. Le transfert dans votre autre logiciel reste manuel.</p>
+  </div>
+</aside>

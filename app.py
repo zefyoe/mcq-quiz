@@ -53,10 +53,11 @@ from inami_ultrasound_catalog import (
 )
 from appointment_confirmation import create_appointment_confirmation_pdf
 from radiology_report import create_radiology_report_pdf
+from historical_dossiers import register_historical_dossiers, historical_riziv_rows
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
                              verified_google_identity, token_cipher, send_gmail_report)
-from models import Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, AppointmentSlotOverride, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from models import Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -804,6 +805,8 @@ def ensure_appointment_schema() -> None:
     AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentReport.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentPatientDetails.__table__.create(bind=db.engine, checkfirst=True)
+    HistoricalDossier.__table__.create(bind=db.engine, checkfirst=True)
+    HistoricalDocument.__table__.create(bind=db.engine, checkfirst=True)
     GmailConnection.__table__.create(bind=db.engine, checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
     hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
@@ -4211,7 +4214,8 @@ def all_internal_patient_rows():
     booked_starts = {item.starts_at for item in appointments}
     holds = AppointmentHold.query.options(load_only(AppointmentHold.starts_at, AppointmentHold.token,
         AppointmentHold.draft_data, AppointmentHold.prescription_filename)).all()
-    return build_internal_patient_rows([*appointments, *(h for h in holds if h.starts_at not in booked_starts)])
+    rows = build_internal_patient_rows([*appointments, *(h for h in holds if h.starts_at not in booked_starts)])
+    return sorted([*rows, *historical_riziv_rows()], key=lambda item: item["starts_at"])
 
 
 @app.get("/admin/appointments/riziv")
@@ -4239,7 +4243,7 @@ def admin_riziv_patient_csv():
         # Prevent spreadsheet formula execution without changing the DB value.
         return "'" + value if value.lstrip().startswith(("=", "+", "-", "@")) or value.startswith(("\t", "\r", "\n")) else value
     for index, patient in enumerate(all_internal_patient_rows(), 1):
-        writer.writerow([index, patient["starts_at"].strftime("%d/%m/%Y"), patient["starts_at"].strftime("%H:%M"),
+        writer.writerow([index, patient["starts_at"].strftime("%d/%m/%Y"), "" if patient.get("date_only") else patient["starts_at"].strftime("%H:%M"),
             safe_cell(patient["name"]), patient["national_number"], safe_cell(patient["examination"]), patient["registration_label"]])
     response = app.response_class("\ufeff" + output.getvalue(), mimetype="text/csv")
     response.headers["Content-Disposition"] = f'attachment; filename="liste-riziv-{agenda_now().date().isoformat()}.csv"'
@@ -4325,6 +4329,8 @@ def admin_appointments():
         shift_date=shift_date,
         appointments_asset_version=os.stat(os.path.join(app.static_folder, 'appointments.css')).st_mtime_ns,
         report_asset_version=os.stat(os.path.join(app.static_folder, 'internal_reporting.js')).st_mtime_ns,
+        historical_asset_version=os.stat(os.path.join(app.static_folder, 'internal_history.js')).st_mtime_ns,
+        historical_examinations=tuple(PUBLIC_APPOINTMENT_LABELS.values()),
         google_oauth_ready=google_oauth_configured(),
         gmail_sender=(active_gmail_connection().email if active_gmail_connection() else None),
         week_start=week_start,
@@ -5395,6 +5401,11 @@ def logout():
 # -------------------------
 # Main
 # -------------------------
+
+register_historical_dossiers(app, admin_required=admin_required, ensure_schema=ensure_appointment_schema,
+    csrf_token=agenda_token, now=agenda_now, valid_name=is_valid_patient_name,
+    practice_address=APPOINTMENT_PRACTICE_ADDRESS)
+
 
 def initialize_database_schema():
     with app.app_context():

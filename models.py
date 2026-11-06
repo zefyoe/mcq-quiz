@@ -117,6 +117,37 @@ class AppointmentSlotOverride(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
+class HistoricalDossier(db.Model):
+    """Manually entered legacy examination; never occupies a calendar slot."""
+    id = db.Column(db.Integer, primary_key=True)
+    creation_key = db.Column(db.String(80), nullable=False, unique=True)
+    patient_name = db.Column(db.String(255), nullable=False)
+    national_number = db.Column(db.String(11), nullable=False, default="")
+    examined_on = db.Column(db.Date, nullable=False, index=True)
+    examination = db.Column(db.String(255), nullable=False)
+    transfer_status = db.Column(db.String(16), nullable=False, default="todo")
+    report_text = db.deferred(db.Column(db.Text, nullable=False, default=""))
+    report_date = db.Column(db.Date, nullable=True)
+    radiologist = db.Column(db.String(255), nullable=False, default="")
+    report_reviewed = db.Column(db.Boolean, nullable=False, default=False)
+    revision = db.Column(db.Integer, nullable=False, default=1)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    documents = db.relationship("HistoricalDocument", lazy="selectin", backref="dossier")
+    __mapper_args__ = {"version_id_col": revision}
+
+
+class HistoricalDocument(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dossier_id = db.Column(db.Integer, db.ForeignKey("historical_dossier.id"), nullable=False, index=True)
+    kind = db.Column(db.String(12), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    data = db.deferred(db.Column(db.LargeBinary, nullable=False))
+    sha256 = db.Column(db.String(64), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint("dossier_id", "kind", name="uq_historical_document_kind"),)
+
+
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

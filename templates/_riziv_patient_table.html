@@ -2,11 +2,11 @@
 <div class="patient-table-scroll"><table class="patient-table riziv-patient-table">
   <thead><tr><th scope="col">N°</th><th scope="col">Date / heure</th><th scope="col">Patient</th><th scope="col">N° registre national</th><th scope="col">Examen</th><th scope="col">Enregistrement</th></tr></thead>
   <tbody>{% for patient in patient_rows %}
-    <tr data-patient-row data-appointment="{{ patient.appointment_id }}" data-reservation="{{ patient.reservation_start }}">
+    <tr{% if not patient.historical_id %} data-patient-row data-appointment="{{ patient.appointment_id }}" data-reservation="{{ patient.reservation_start }}"{% endif %}>
       <td>{{ loop.index }}</td>
-      <td><span class="patient-row-time">{{ patient.starts_at.strftime('%d/%m/%Y') }}</span>{{ patient.starts_at.strftime('%H:%M') }}</td>
-      <td>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start) }}</td>
-      <td><span data-national-number>{{ patient.national_number or 'Non renseigné' }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Compléter / modifier', 'identity') }}</td>
+      <td><span class="patient-row-time">{{ patient.starts_at.strftime('%d/%m/%Y') }}</span>{% if not patient.date_only %}{{ patient.starts_at.strftime('%H:%M') }}{% endif %}</td>
+      <td>{% if patient.historical_id %}<button type="button" class="report-patient-link" data-history-id="{{ patient.historical_id }}">{{ patient.name }}</button>{% else %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start) }}{% endif %}</td>
+      <td><span data-national-number>{{ patient.national_number or 'Non renseigné' }}</span>{% if patient.historical_id %}<button type="button" class="report-patient-link" data-history-id="{{ patient.historical_id }}">Compléter / modifier</button>{% else %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Compléter / modifier', 'identity') }}{% endif %}</td>
       <td>{{ patient.examination }}</td>
       <td>{{ patient.registration_label }}</td>
     </tr>

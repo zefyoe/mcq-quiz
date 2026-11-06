@@ -99,6 +99,7 @@
   }
   async function openPatient(button) {
     if (busy || !mayLeave()) return;
+    if (window.internalHistory && !window.internalHistory.close()) return;
     opener = button; loaded = false; savedReport = null; dirty = false; identityDirty = false; requestDirty = false;
     emailEnabled = false; emailAttempt = null; prescription = null;
     discardPdf(); form.reset(); detailsForm.reset(); uploadForm.reset(); emailForm.reset();
@@ -151,12 +152,15 @@
   });
   byId('report-retry').addEventListener('click', () => openPatient(opener));
   function close() {
-    if (busy || !mayLeave()) return;
+    if (panel.hidden) return true;
+    if (busy || !mayLeave()) return false;
     discardPdf(); byId('patient-request-preview').removeAttribute('src');
     form.reset(); detailsForm.reset(); uploadForm.reset(); emailForm.reset();
     savedReport = null; dirty = false; identityDirty = false; requestDirty = false; loaded = false;
     panel.hidden = true; document.body.classList.remove('report-panel-open'); opener?.focus();
+    return true;
   }
+  window.internalReporting = {close};
   byId('report-close').addEventListener('click', close);
   byId('patient-request-tab').addEventListener('click', () => selectTab('request'));
   byId('patient-report-tab').addEventListener('click', () => selectTab('report'));
