@@ -4,6 +4,7 @@
   const panel = $('history-panel'), form = $('history-form');
   const request = window.internalAgenda.request;
   let busy = false, loading = false, dirty = false, record = null, documents = {}, opener = null, pdfUrl = null;
+  let removedView=false, rowBusy=false, lastRemovedKey=null, listRequestId=0;
   const editableKeys = ['patient_name','national_number','billing_code','examined_on','examination','transfer_status','report_text','report_date','radiologist'];
   const fingerprint = () => JSON.stringify([...editableKeys.map(key=>form.elements[key].value), form.elements.report_reviewed.checked]);
   const hasFiles = () => [...panel.querySelectorAll('[data-history-file]')].some(input=>input.files.length);
@@ -57,17 +58,50 @@
     paintDocuments(value.documents); showText();
   }
   async function loadList() {
+    const requestId=++listRequestId, viewingRemoved=removedView;
     $('history-list-status').textContent = 'Chargement de XIMEO-RIZIV…';
     try {
-      const result = await request(panel.dataset.endpoint);
+      const result = await request(panel.dataset.endpoint+(viewingRemoved?'?removed=1':''));
+      if(requestId!==listRequestId) return;
       $('history-patients').innerHTML = result.html;
-      $('history-list-status').textContent = result.total + ' dossier(s), classés par date d’examen.';
-    } catch (error) { $('history-list-status').textContent = error.message; }
+      $('history-list-status').textContent = result.total + (viewingRemoved?' ligne(s) retirée(s), restaurables.':' dossier(s), classés par date d’examen.');
+      $('history-removed-toggle').textContent=viewingRemoved?'Revenir aux dossiers actifs':'Lignes retirées · '+result.removed_total;
+      $('history-removed-toggle').setAttribute('aria-pressed',String(viewingRemoved));
+    } catch (error) { if(requestId===listRequestId) $('history-list-status').textContent = error.message; }
   }
   async function refreshLists() {
     await loadList();
     if (!$('riziv-list').hidden) await window.internalAgenda.refreshRiziv();
   }
+  $('history-removed-toggle').addEventListener('click',()=>{
+    if(rowBusy) return;
+    removedView=!removedView; loadList();
+  });
+  async function changeRow(key,action,button) {
+    if(rowBusy) return;
+    rowBusy=true;
+    const tools=$('history-list');
+    tools.querySelectorAll('[data-register-key],#history-removed-toggle,#history-row-undo').forEach(item=>{item.disabled=true;});
+    $('history-row-feedback').hidden=false; $('history-row-message').textContent='Enregistrement…';
+    const data=new FormData(); data.set('csrf_token',form.elements.csrf_token.value); data.set('key',key); data.set('action',action);
+    try {
+      await request(tools.dataset.rowEndpoint,{method:'POST',body:data});
+      button?.closest('tr')?.remove();
+      lastRemovedKey=action==='remove'?key:null;
+      $('history-row-undo').hidden=!lastRemovedKey;
+      $('history-row-message').textContent=action==='remove'?'Ligne retirée des deux listes et du CSV. Les documents et le rendez-vous sont conservés.':'Ligne restaurée dans les deux listes et le CSV.';
+      await refreshLists();
+    } catch(error) { $('history-row-message').textContent=error.message; }
+    finally {
+      rowBusy=false;
+      tools.querySelectorAll('[data-register-key],#history-removed-toggle,#history-row-undo').forEach(item=>{item.disabled=false;});
+    }
+  }
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('[data-register-key]');
+    if(button) changeRow(button.dataset.registerKey,button.dataset.registerAction,button);
+  });
+  $('history-row-undo').addEventListener('click',()=>{if(lastRemovedKey) changeRow(lastRemovedKey,'restore');});
   function close() {
     if (panel.hidden) return true;
     if (busy) return false;

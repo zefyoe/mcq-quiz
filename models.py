@@ -139,6 +139,14 @@ class HistoricalDossier(db.Model):
     __mapper_args__ = {"version_id_col": revision}
 
 
+class InternalRegisterExclusion(db.Model):
+    """Recoverable removal from both administrative lists, not the agenda."""
+    context_key = db.Column(db.String(64), primary_key=True)
+    is_removed = db.Column(db.Boolean, nullable=False, default=True)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_by = db.Column(db.Integer, nullable=False)
+
+
 class HistoricalDocument(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dossier_id = db.Column(db.Integer, db.ForeignKey("historical_dossier.id"), nullable=False, index=True)

@@ -562,6 +562,13 @@
 .billing-description { font-size:.84rem; line-height:1.6; color:#415775; overflow-wrap:anywhere; }
 .billing-copy-status { font-size:.8rem; color:#336b57; }
 .billing-copy-status:empty { display:none; }
+.history-register-tools { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:0 24px 16px; }
+.history-register-tools p { flex:1 1 300px; font-size:.8rem; color:#63708a; line-height:1.6; margin:0; }
+.history-register-tools button,.register-row-action button,.history-row-feedback button { font:inherit; padding:9px 12px; border:1px solid #cbd8e8; border-radius:8px; background:white; color:#214d83; cursor:pointer; font-size:.8rem; }
+.register-row-action button[data-register-action="remove"] { color:#973b46; border-color:#ebcbd0; }
+.history-row-feedback { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:0 24px 16px; padding:12px; background:#edf5ff; border-radius:9px; font-size:.83rem; }
+.history-row-feedback[hidden] { display:none; }
+.history-row-feedback span { flex:1 1 220px; }
 @media print {
   .printing-riziv { padding:0 !important; background:white; color:black; }
   .printing-riziv .appointment-topbar,

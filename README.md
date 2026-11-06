@@ -78,6 +78,14 @@ CSV. Copy buttons support manual transfer of the code and dossier number.
 Administrative coding does not change the public booking, original report,
 tariff snapshot or financial calculations. No prices are exposed in the picker.
 
+**Retirer la ligne** removes exactly one examination from both administrative
+registers and the RIZIV CSV. It never deletes the appointment, request, report or
+other examinations with the same national number. The private
+`internal_register_exclusion` table tracks each source record separately. Use
+**Annuler le retrait** or **Lignes retirées → Restaurer** to recover a row. These
+admin-only, CSRF-protected actions apply immediately without reloading the page;
+retries are idempotent. Removed examinations stay accessible in the agenda.
+
 Historical flow checks: `python scripts/smoke_test_historical_dossiers.py`.
 Use `--serve` for a disposable localhost preview with synthetic data; `--pdf-preview`
 writes a synthetic report to `/private/tmp/historical-dossier-pdf-qa/` for rendering.

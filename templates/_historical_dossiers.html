@@ -1,4 +1,6 @@
-<section id="history-list" class="patient-list-card" hidden aria-label="XIMEO-RIZIV · Tous les dossiers" data-endpoint="{{ url_for('admin_historical_dossiers') }}">
+<section id="history-list" class="patient-list-card" hidden aria-label="XIMEO-RIZIV · Tous les dossiers" data-endpoint="{{ url_for('admin_historical_dossiers') }}" data-row-endpoint="{{ url_for('admin_set_register_row') }}">
   <header class="riziv-list-header"><div><h2>XIMEO-RIZIV</h2><p>Tous les patients de l’agenda et les anciens dossiers, par ordre chronologique. Retrouvez leurs demandes et comptes rendus au même endroit.</p></div><div class="report-actions"><button type="button" data-history-new>Ajouter un ancien dossier</button><button type="button" id="history-refresh">Actualiser</button></div></header>
+  <div class="history-register-tools"><button type="button" id="history-removed-toggle" aria-pressed="false">Lignes retirées · 0</button><p>Retirer une ligne l’exclut de XIMEO-RIZIV, de la liste RIZIV et du CSV. Les rendez-vous et documents sont conservés.</p></div>
+  <div id="history-row-feedback" class="history-row-feedback" hidden><span id="history-row-message" role="status"></span><button type="button" id="history-row-undo" hidden>Annuler le retrait</button></div>
   <p id="history-list-status" class="history-feedback" role="status"></p><div id="history-patients"></div>
 </section>

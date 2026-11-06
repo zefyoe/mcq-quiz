@@ -39,7 +39,7 @@ def dossier_payload(record, include_text=True):
 
 
 def historical_riziv_rows():
-    return [dict(historical_id=record.id, appointment_id="", reservation_start="",
+    return [dict(historical_id=record.id, register_key=f"historical:{record.id}", appointment_id="", reservation_start="",
         starts_at=datetime.combine(record.examined_on, time.min), date_only=True,
         name=record.patient_name, examination=record.examination, national_number=record.national_number,
         billing_code=record.billing_code,
@@ -72,11 +72,14 @@ def register_historical_dossiers(app, *, admin_required, ensure_schema, csrf_tok
         if request.method == "GET":
             records = HistoricalDossier.query.order_by(HistoricalDossier.examined_on, HistoricalDossier.id).all()
             dossiers = {record.id: dossier_payload(record, include_text=False) for record in records}
-            rows = all_patient_rows()
+            all_rows = all_patient_rows(include_removed=True)
+            removed = request.args.get("removed") == "1"
+            rows = [row for row in all_rows if row["is_removed"] == removed]
             for row in rows:
                 if row.get("historical_id"):
                     row["dossier"] = dossiers[row["historical_id"]]
-            return jsonify(ok=True, total=len(rows), html=render_template("_historical_patient_table.html", dossiers=rows))
+            return jsonify(ok=True, total=len(rows), removed_total=sum(row["is_removed"] for row in all_rows),
+                html=render_template("_historical_patient_table.html", dossiers=rows, removed_view=removed))
         values = request.form
         dossier_id = values.get("dossier_id", type=int)
         record = record_or_404(dossier_id) if dossier_id else None

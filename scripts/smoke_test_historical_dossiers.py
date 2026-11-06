@@ -13,8 +13,8 @@ fixture = tempfile.TemporaryDirectory(prefix="historical-dossier-tests-")
 db_path = Path(fixture.name)/"test.db"
 os.environ.update(DATABASE_URL="sqlite:///"+str(db_path),SECRET_KEY="history-tests-only",PUBLIC_SITE_MODE="active")
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from app import app, db, agenda_now
-from models import Appointment, AppointmentHold, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, User
+from app import app, db, agenda_now, all_internal_patient_rows
+from models import Appointment, AppointmentHold, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, InternalRegisterExclusion, User
 from pypdf import PdfReader, PdfWriter
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import text as sql_text
@@ -164,6 +164,44 @@ try:
     assert "XIMEO-RIZIV" in admin.get("/admin/appointments").text
     with app.app_context():
         assert HistoricalDossier.query.count()==2 and Appointment.query.count()==1
+    row_url="/admin/appointments/register/row"
+    removal=dict(csrf_token=csrf,key=f"historical:{did}",action="remove")
+    assert anonymous.post(row_url,data=removal).status_code==302
+    assert student.post(row_url,data=removal).status_code==403
+    assert admin.post(row_url,data={"key":removal["key"],"action":"remove"}).status_code==400
+    assert admin.post(row_url,data=dict(removal,key="historical:999999")).status_code==404
+    assert admin.post(row_url,data=dict(removal,action="delete-all")).status_code==400
+    assert admin.post(row_url,data=removal).json["is_removed"] is True
+    assert admin.post(row_url,data=removal).status_code==200  # Retry targets the same exam.
+    active=admin.get(url).json
+    assert active["total"]==3 and active["removed_total"]==1
+    assert f'data-history-id="{did}"' not in active["html"]
+    assert f'data-history-id="{second.json["dossier"]["id"]}"' in active["html"]  # Same national number remains.
+    assert admin.get("/admin/appointments/riziv").json["total"]==3
+    assert len(list(csv.reader(io.StringIO(admin.get("/admin/appointments/riziv.csv").text),delimiter=";")))==4
+    trash=admin.get(url+"?removed=1").json
+    assert trash["total"]==1 and 'data-register-action="restore"' in trash["html"]
+    assert admin.get(url+f"/{did}").json["dossier"]["report_text"]==text
+    assert admin.get(url+f"/{did}/documents/request").data==scan
+    assert admin.post(row_url,data=dict(removal,action="restore")).json["is_removed"] is False
+    assert admin.post(row_url,data=dict(removal,action="restore")).status_code==200
+    assert admin.get(url).json["total"]==4
+    with patch.object(db.session,"commit",side_effect=OperationalError("test",{},Exception("offline"))):
+        assert admin.post(row_url,data=removal).status_code==503
+    assert admin.get(url).json["total"]==4
+    with app.app_context():
+        agenda_keys=[row["register_key"] for row in all_internal_patient_rows() if not row.get("historical_id")]
+        public_before_removal=anonymous.get("/agenda").data
+    for key in agenda_keys:  # Bookings and reservations are removed only from the register.
+        assert admin.post(row_url,data=dict(removal,key=key)).status_code==200
+        assert admin.get(url).json["total"]==admin.get("/admin/appointments/riziv").json["total"]==3
+        assert anonymous.get("/agenda").data==public_before_removal
+        assert admin.post(row_url,data=dict(removal,key=key,action="restore")).status_code==200
+    with app.app_context():
+        assert Appointment.query.count()==1 and AppointmentHold.query.count()==1
+        assert HistoricalDossier.query.count()==2 and HistoricalDocument.query.count()==2
+        assert InternalRegisterExclusion.query.filter_by(is_removed=True).count()==0
+    print("PASS: recoverable per-examination register removal/restoration, repeated identifiers, CSV filtering, access/CSRF, retries/outage, preserved documents and calendar.")
     if "--pdf-preview" in sys.argv:
         preview=Path("/private/tmp/historical-dossier-pdf-qa")
         preview.mkdir(exist_ok=True)

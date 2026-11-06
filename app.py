@@ -58,7 +58,7 @@ from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODE
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
                              verified_google_identity, token_cipher, send_gmail_report)
-from models import Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
+from models import Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, InternalRegisterExclusion, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
 try:
@@ -808,6 +808,7 @@ def ensure_appointment_schema() -> None:
     AppointmentPatientDetails.__table__.create(bind=db.engine, checkfirst=True)
     HistoricalDossier.__table__.create(bind=db.engine, checkfirst=True)
     HistoricalDocument.__table__.create(bind=db.engine, checkfirst=True)
+    InternalRegisterExclusion.__table__.create(bind=db.engine, checkfirst=True)
     for table_name in ("appointment_patient_details", "historical_dossier"):
         if "billing_code" not in {column["name"] for column in inspect(db.engine).get_columns(table_name)}:
             db.session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN billing_code VARCHAR(6) NOT NULL DEFAULT ''"))
@@ -4202,6 +4203,7 @@ def build_internal_patient_rows(records):
         booked = isinstance(record, Appointment)
         code = (record.inami_code or record.appointment_type) if booked else record.draft.get("inami_code", "")
         rows.append(dict(appointment_id=record.id if booked else "",
+            register_key=key,
             reservation_start="" if booked else record.starts_at.isoformat(timespec="minutes"),
             starts_at=record.starts_at,
             name=record.patient_name if booked else record.draft.get("patient_name") or "À compléter",
@@ -4213,7 +4215,7 @@ def build_internal_patient_rows(records):
     return rows
 
 
-def all_internal_patient_rows():
+def all_internal_patient_rows(include_removed=False):
     appointments = Appointment.query.options(load_only(
         Appointment.id, Appointment.starts_at, Appointment.patient_name, Appointment.created_at,
         Appointment.inami_code, Appointment.appointment_type, Appointment.prescription_filename)).all()
@@ -4221,7 +4223,40 @@ def all_internal_patient_rows():
     holds = AppointmentHold.query.options(load_only(AppointmentHold.starts_at, AppointmentHold.token,
         AppointmentHold.draft_data, AppointmentHold.prescription_filename)).all()
     rows = build_internal_patient_rows([*appointments, *(h for h in holds if h.starts_at not in booked_starts)])
-    return sorted([*rows, *historical_riziv_rows()], key=lambda item: item["starts_at"])
+    rows = sorted([*rows, *historical_riziv_rows()], key=lambda item: item["starts_at"])
+    removed = {item.context_key for item in InternalRegisterExclusion.query.filter_by(is_removed=True).all()}
+    for row in rows:
+        row["is_removed"] = row["register_key"] in removed
+    return rows if include_removed else [row for row in rows if not row["is_removed"]]
+
+
+@app.post("/admin/appointments/register/row")
+def admin_set_register_row():
+    denied = admin_required()
+    if denied:
+        return denied
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    key, action = request.form.get("key", ""), request.form.get("action", "")
+    if action not in {"remove", "restore"}:
+        abort(400)
+    if not any(row["register_key"] == key for row in all_internal_patient_rows(include_removed=True)):
+        abort(404)
+    marker = db.session.get(InternalRegisterExclusion, key)
+    target_removed = action == "remove"
+    if marker is None:
+        marker = InternalRegisterExclusion(context_key=key, updated_by=current_user.id)
+        db.session.add(marker)
+    marker.is_removed = target_removed
+    marker.updated_at = datetime.utcnow()
+    marker.updated_by = current_user.id
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(error="Modification non enregistrée. Réessayez ; la ligne reste accessible."), 503
+    return jsonify(ok=True, key=key, is_removed=target_removed)
 
 
 @app.get("/admin/appointments/riziv")
