@@ -69,6 +69,15 @@ time column. No tariffs/revenue are invented for them. Metadata/report saves use
 revision checks and creation retry keys; unsaved text stays in memory with an exit
 warning, never browser storage. All document access is admin-only and no-store.
 
+Both document panels offer a searchable **Code RIZIV / INAMI** field using only
+the supplied workbook's codes and French descriptions. Select the actual
+performed examination manually; no billing code is inferred from a booking.
+The practice's excluded elastography entries remain excluded. The code is stored
+per examination, displayed in XIMEO-RIZIV and the RIZIV list, and exported in the
+CSV. Copy buttons support manual transfer of the code and dossier number.
+Administrative coding does not change the public booking, original report,
+tariff snapshot or financial calculations. No prices are exposed in the picker.
+
 Historical flow checks: `python scripts/smoke_test_historical_dossiers.py`.
 Use `--serve` for a disposable localhost preview with synthetic data; `--pdf-preview`
 writes a synthetic report to `/private/tmp/historical-dossier-pdf-qa/` for rendering.

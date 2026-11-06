@@ -555,6 +555,13 @@
 .history-document small { color:#63708a; font-size:.75rem; }
 .history-document [data-history-filename] { font-size:.82rem; overflow-wrap:anywhere; }
 .history-table td small { margin-bottom:6px; }
+.internal-billing-picker { min-width:0; padding:14px; border:1px solid #dce5f0; border-radius:10px; background:#f8fbff; }
+.patient-identifier-form .internal-billing-picker { grid-column:1 / -1; }
+.internal-billing-picker label { display:grid; gap:8px; font-size:.85rem; font-weight:700; }
+.internal-billing-picker input { width:100%; box-sizing:border-box; }
+.billing-description { font-size:.84rem; line-height:1.6; color:#415775; overflow-wrap:anywhere; }
+.billing-copy-status { font-size:.8rem; color:#336b57; }
+.billing-copy-status:empty { display:none; }
 @media print {
   .printing-riziv { padding:0 !important; background:white; color:black; }
   .printing-riziv .appointment-topbar,

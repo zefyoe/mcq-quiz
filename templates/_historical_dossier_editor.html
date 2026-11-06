@@ -9,6 +9,7 @@
       <div class="report-fields-row"><label>Date réelle de l’examen<input type="date" name="examined_on" max="{{ today.isoformat() }}" required></label><label>N° dossier · registre national<input name="national_number" inputmode="numeric" maxlength="15" placeholder="11 chiffres" required></label></div>
       <p class="history-help">Le numéro de dossier est le registre national du patient. Un même numéro peut être utilisé pour plusieurs examens ; chaque examen conserve ses propres documents.</p>
       <label>Examen<input name="examination" list="history-examinations" required maxlength="255" placeholder="Échographie abdominale…"></label>
+      {% from '_internal_billing_picker.html' import billing_picker %}{{ billing_picker() }}
       <datalist id="history-examinations">{% for label in historical_examinations %}<option value="{{ label }}">{% endfor %}</datalist>
       <label>Suivi du transfert<select name="transfer_status"><option value="todo">À compléter</option><option value="ready" disabled>Prêt à transférer</option><option value="transferred" disabled>Transféré manuellement</option></select></label>
       <section id="history-text-section" class="history-editor-section">

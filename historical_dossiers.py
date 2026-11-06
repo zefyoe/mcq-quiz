@@ -13,6 +13,7 @@ from werkzeug.utils import secure_filename
 
 from models import db, HistoricalDossier, HistoricalDocument
 from radiology_report import create_radiology_report_pdf
+from inami_ultrasound_catalog import INTERNAL_INAMI_CODES
 
 STATUS_LABELS = {"todo": "À compléter", "ready": "Prêt à transférer", "transferred": "Transféré manuellement"}
 MAX_SCAN_BYTES = 10 * 1024 * 1024
@@ -24,6 +25,7 @@ def dossier_payload(record, include_text=True):
         "download_url": url_for("admin_historical_document", dossier_id=record.id, kind=item.kind)}
         for item in record.documents}
     result = dict(id=record.id, patient_name=record.patient_name, national_number=record.national_number,
+        billing_code=record.billing_code,
         examined_on=record.examined_on.isoformat(), examination=record.examination,
         transfer_status=record.transfer_status, status_label=STATUS_LABELS[record.transfer_status],
         revision=record.revision, report_date=record.report_date.isoformat() if record.report_date else "",
@@ -40,6 +42,7 @@ def historical_riziv_rows():
     return [dict(historical_id=record.id, appointment_id="", reservation_start="",
         starts_at=datetime.combine(record.examined_on, time.min), date_only=True,
         name=record.patient_name, examination=record.examination, national_number=record.national_number,
+        billing_code=record.billing_code,
         registration_label="Dossier historique — date saisie", has_prescription=False, has_report=False)
         for record in HistoricalDossier.query.order_by(HistoricalDossier.examined_on, HistoricalDossier.id).all()]
 
@@ -84,6 +87,9 @@ def register_historical_dossiers(app, *, admin_required, ensure_schema, csrf_tok
             record = HistoricalDossier.query.filter_by(creation_key=creation_key).first()
         patient_name = (values.get("patient_name") or "").strip()
         number = re.sub(r"[ .-]", "", values.get("national_number", "").strip())
+        billing_code = values.get("billing_code", record.billing_code if record else "").strip()
+        if billing_code and billing_code not in INTERNAL_INAMI_CODES:
+            return jsonify(error="Choisissez une prestation dans la liste des codes RIZIV / INAMI."), 400
         examination = (values.get("examination") or "").strip()
         report_text = (values.get("report_text") or "").strip()
         radiologist = (values.get("radiologist") or "").strip()
@@ -111,6 +117,7 @@ def register_historical_dossiers(app, *, admin_required, ensure_schema, csrf_tok
         if status not in STATUS_LABELS or (status != "todo" and not complete):
             return jsonify(error="Ajoutez la demande et un compte rendu (PDF ou texte relu) avant de marquer le dossier prêt ou transféré."), 400
         incoming = dict(patient_name=patient_name, national_number=number, examined_on=examined_on,
+            billing_code=billing_code,
             examination=examination, report_text=report_text, report_date=report_date,
             radiologist=radiologist, report_reviewed=reviewed, transfer_status=status)
         if record and all(getattr(record, key) == value for key, value in incoming.items()):

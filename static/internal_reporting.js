@@ -136,6 +136,8 @@
         byId('report-save-status').textContent = 'Enregistré · ' + new Date(savedReport.updated_at).toLocaleString('fr-BE');
       } else byId('report-save-status').textContent = 'Nouveau compte rendu · pas encore enregistré.';
       detailsForm.elements.national_number.value = patient.national_number;
+      detailsForm.elements.billing_code.value = patient.billing_code || '';
+      window.internalBilling.paint(detailsForm);
       paintPrescription(patient.prescription);
       loaded = true; showText();
     } catch (error) {
@@ -232,20 +234,26 @@
     try { await navigator.clipboard.writeText(savedReport.report_text); byId('report-save-status').textContent = 'Texte copié. Collez-le dans votre autre logiciel.'; }
     catch { getSelection().selectAllChildren(byId('report-readonly-text')); byId('report-save-status').textContent = 'Texte sélectionné : utilisez Ctrl+C pour le copier.'; }
   });
-  detailsForm.addEventListener('input', () => { identityDirty = true; byId('patient-details-status').textContent = 'Identifiant non enregistré.'; });
+  detailsForm.addEventListener('input', () => { identityDirty = true; byId('patient-details-status').textContent = 'Dossier / code non enregistré.'; });
   detailsForm.addEventListener('submit', async event => {
     event.preventDefault(); if (busy || !loaded) return;
     const data = contextData(), sentValue = detailsForm.elements.national_number.value;
+    const sentCode = detailsForm.elements.billing_code.value;
+    data.set('billing_code',sentCode);
     data.set('national_number', sentValue); setBusy(true);
     try {
       const result = await request(panel.dataset.patientEndpoint, {method:'POST', body:data});
-      identityDirty = detailsForm.elements.national_number.value !== sentValue;
+      identityDirty = detailsForm.elements.national_number.value !== sentValue || detailsForm.elements.billing_code.value !== sentCode;
       if (!identityDirty) detailsForm.elements.national_number.value = result.national_number;
+      if (!identityDirty) detailsForm.elements.billing_code.value = result.billing_code;
+      window.internalBilling.paint(detailsForm);
       matchingRows().forEach(row => {
         const cell = row.querySelector('[data-national-number]');
         if (cell) cell.textContent = result.national_number || 'Non renseigné';
+        const codeCell = row.querySelector('[data-billing-code]');
+        if (codeCell) codeCell.textContent = result.billing_code || 'À choisir';
       });
-      byId('patient-details-status').textContent = identityDirty ? 'Version envoyée enregistrée. Dernières modifications non enregistrées.' : 'Identifiant enregistré.';
+      byId('patient-details-status').textContent = identityDirty ? 'Version envoyée enregistrée. Dernières modifications non enregistrées.' : 'Dossier et code enregistrés.';
     } catch (error) { byId('patient-details-status').textContent = error.message; }
     finally { setBusy(false); }
   });

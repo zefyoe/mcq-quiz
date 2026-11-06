@@ -54,6 +54,7 @@ from inami_ultrasound_catalog import (
 from appointment_confirmation import create_appointment_confirmation_pdf
 from radiology_report import create_radiology_report_pdf
 from historical_dossiers import register_historical_dossiers, historical_riziv_rows
+from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
                              verified_google_identity, token_cipher, send_gmail_report)
@@ -807,6 +808,10 @@ def ensure_appointment_schema() -> None:
     AppointmentPatientDetails.__table__.create(bind=db.engine, checkfirst=True)
     HistoricalDossier.__table__.create(bind=db.engine, checkfirst=True)
     HistoricalDocument.__table__.create(bind=db.engine, checkfirst=True)
+    for table_name in ("appointment_patient_details", "historical_dossier"):
+        if "billing_code" not in {column["name"] for column in inspect(db.engine).get_columns(table_name)}:
+            db.session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN billing_code VARCHAR(6) NOT NULL DEFAULT ''"))
+    db.session.commit()
     GmailConnection.__table__.create(bind=db.engine, checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
     hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
@@ -4202,6 +4207,7 @@ def build_internal_patient_rows(records):
             name=record.patient_name if booked else record.draft.get("patient_name") or "À compléter",
             examination=labels.get(code, "Examen à compléter"),
             national_number=details[key].national_number if key in details else "",
+            billing_code=details[key].billing_code if key in details else "",
             has_prescription=bool(record.prescription_filename), has_report=key in reports,
             registration_label="Rendez-vous enregistré" if booked else "Réservation enregistrée"))
     return rows
@@ -4237,14 +4243,14 @@ def admin_riziv_patient_csv():
     ensure_appointment_schema()
     output = StringIO(newline="")
     writer = csv.writer(output, delimiter=";", lineterminator="\r\n")
-    writer.writerow(["N° ligne", "Date", "Heure", "Patient", "N° dossier (registre national)", "Examen", "Enregistrement"])
+    writer.writerow(["N° ligne", "Date", "Heure", "Patient", "N° dossier (registre national)", "Examen", "Enregistrement", "Code RIZIV"])
     def safe_cell(value):
         value = str(value)
         # Prevent spreadsheet formula execution without changing the DB value.
         return "'" + value if value.lstrip().startswith(("=", "+", "-", "@")) or value.startswith(("\t", "\r", "\n")) else value
     for index, patient in enumerate(all_internal_patient_rows(), 1):
         writer.writerow([index, patient["starts_at"].strftime("%d/%m/%Y"), "" if patient.get("date_only") else patient["starts_at"].strftime("%H:%M"),
-            safe_cell(patient["name"]), patient["national_number"], safe_cell(patient["examination"]), patient["registration_label"]])
+            safe_cell(patient["name"]), patient["national_number"], safe_cell(patient["examination"]), patient["registration_label"], patient.get("billing_code", "")])
     response = app.response_class("\ufeff" + output.getvalue(), mimetype="text/csv")
     response.headers["Content-Disposition"] = f'attachment; filename="liste-riziv-{agenda_now().date().isoformat()}.csv"'
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -4331,6 +4337,8 @@ def admin_appointments():
         report_asset_version=os.stat(os.path.join(app.static_folder, 'internal_reporting.js')).st_mtime_ns,
         historical_asset_version=os.stat(os.path.join(app.static_folder, 'internal_history.js')).st_mtime_ns,
         historical_examinations=tuple(PUBLIC_APPOINTMENT_LABELS.values()),
+        internal_billing_choices=INTERNAL_INAMI_CHOICES,
+        billing_asset_version=os.stat(os.path.join(app.static_folder, 'internal_billing.js')).st_mtime_ns,
         google_oauth_ready=google_oauth_configured(),
         gmail_sender=(active_gmail_connection().email if active_gmail_connection() else None),
         week_start=week_start,
@@ -4602,10 +4610,14 @@ def admin_patient_details():
         number = re.sub(r"[ .-]", "", raw)
         if number and not re.fullmatch(r"[0-9]{11}", number):
             return jsonify(error="Le numéro de registre national doit contenir 11 chiffres, ou rester vide."), 400
+        billing_code = request.form.get("billing_code", details.billing_code if details else "").strip()
+        if billing_code and billing_code not in INTERNAL_INAMI_CODES:
+            return jsonify(error="Choisissez une prestation dans la liste des codes RIZIV / INAMI."), 400
         if details is None:
             details = AppointmentPatientDetails(context_key=key)
             db.session.add(details)
         details.national_number = number
+        details.billing_code = billing_code
         details.updated_at = datetime.utcnow()
         try:
             db.session.commit()
@@ -4613,6 +4625,7 @@ def admin_patient_details():
             db.session.rollback()
             return jsonify(error="Identifiant non enregistré. Réessayez sans fermer le dossier."), 503
     return jsonify(ok=True, national_number=details.national_number if details else "",
+                   billing_code=details.billing_code if details else "",
                    prescription=private_prescription_links(record))
 
 

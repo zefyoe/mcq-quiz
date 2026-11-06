@@ -4,7 +4,7 @@
   const panel = $('history-panel'), form = $('history-form');
   const request = window.internalAgenda.request;
   let busy = false, loading = false, dirty = false, record = null, documents = {}, opener = null, pdfUrl = null;
-  const editableKeys = ['patient_name','national_number','examined_on','examination','transfer_status','report_text','report_date','radiologist'];
+  const editableKeys = ['patient_name','national_number','billing_code','examined_on','examination','transfer_status','report_text','report_date','radiologist'];
   const fingerprint = () => JSON.stringify([...editableKeys.map(key=>form.elements[key].value), form.elements.report_reviewed.checked]);
   const hasFiles = () => [...panel.querySelectorAll('[data-history-file]')].some(input=>input.files.length);
   function readiness() {
@@ -53,6 +53,7 @@
     form.elements.national_number.required = Boolean(value.national_number);
     form.elements.report_date.required = Boolean(value.report_text?.trim());
     $('history-title').textContent = value.patient_name;
+    window.internalBilling.paint(form);
     paintDocuments(value.documents); showText();
   }
   async function loadList() {
@@ -88,6 +89,7 @@
     $('history-error').textContent=''; $('history-status').textContent='Nouveau dossier · pas encore enregistré.';
     paintDocuments({}); showText(true); panel.hidden=false; document.body.classList.add('report-panel-open');
     setBusy(false);
+    window.internalBilling.paint(form);
     const id=button.dataset.historyId;
     if (id) {
       setBusy(true,true); $('history-status').textContent='Chargement du dossier…';

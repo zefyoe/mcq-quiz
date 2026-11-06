@@ -19,7 +19,8 @@
     <button type="button" id="report-retry" hidden>Réessayer le chargement</button>
     <form id="patient-details-form" class="patient-identifier-form" autocomplete="off">
       <label>N° dossier · registre national<input name="national_number" inputmode="numeric" maxlength="15" placeholder="11 chiffres"></label>
-      <button type="submit">Enregistrer l’identifiant</button><span id="patient-details-status" role="status"></span>
+      {% from '_internal_billing_picker.html' import billing_picker %}{{ billing_picker() }}
+      <button type="submit">Enregistrer le dossier et le code</button><span id="patient-details-status" role="status"></span>
     </form>
     <section id="patient-request" hidden aria-label="Demande d’examen">
       <h3>Demande d’examen</h3>

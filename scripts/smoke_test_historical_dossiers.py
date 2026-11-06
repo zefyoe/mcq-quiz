@@ -17,6 +17,7 @@ from app import app, db, agenda_now
 from models import Appointment, AppointmentHold, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, User
 from pypdf import PdfReader, PdfWriter
 from sqlalchemy.exc import OperationalError
+from sqlalchemy import text as sql_text
 
 app.config["TESTING"]=True
 writer=PdfWriter(); writer.add_blank_page(width=595,height=842)
@@ -26,6 +27,10 @@ url="/admin/appointments/history"
 try:
     with app.app_context():
         db.create_all()
+        # Exercise the additive migration from the already deployed schema.
+        for table in ("historical_dossier","appointment_patient_details"):
+            db.session.execute(sql_text(f"ALTER TABLE {table} DROP COLUMN billing_code"))
+        db.session.commit()
         for email,role in [("y@bymed.be",True),("student@example.invalid",False)]:
             user=User(email=email,is_admin=role); user.set_password("test-password"); db.session.add(user)
         db.session.add(Appointment(starts_at=agenda_now()+timedelta(days=7),patient_name="PATIENT CALENDRIER",patient_email="",appointment_type="459712"))
@@ -41,17 +46,20 @@ try:
         assert student.get(route).status_code==403
     assert admin.post(url,data={}).status_code==400
     payload=dict(csrf_token=csrf,creation_key=str(uuid4()),revision="0",patient_name="Jo Jao",
-        national_number="00123456789",examined_on="2026-01-14",examination="Échographie abdominale",
+        national_number="00123456789",billing_code="459712",examined_on="2026-01-14",examination="Échographie abdominale",
         report_text="",report_date="",radiologist="",transfer_status="todo")
     assert admin.post(url,data=dict(payload,examined_on="")).status_code==400
     assert admin.post(url,data=dict(payload,examined_on=(date.today()+timedelta(days=30)).isoformat())).status_code==400
     assert admin.post(url,data=dict(payload,national_number="123")).status_code==400
     assert admin.post(url,data=dict(payload,national_number="")).status_code==400
+    assert admin.post(url,data=dict(payload,billing_code="999999")).status_code==400
+    assert admin.post(url,data=dict(payload,billing_code="461974")).status_code==400
     assert admin.post(url,data=dict(payload,transfer_status="ready")).status_code==400
     created=admin.post(url,data=payload)
     assert created.status_code==200,created.data
     original=created.json["dossier"]; did=original["id"]
     assert original["national_number"]=="00123456789" and original["revision"]==1
+    assert original["billing_code"]=="459712"
     assert admin.post(url,data=payload).json["dossier"]["id"]==did
     assert admin.get(url+f"/{did}/report.pdf").status_code==400
     text="Texte de démonstration uniquement.\n\nConclusion : document fictif pour tester la mise en page."
@@ -103,9 +111,10 @@ try:
         failed=admin.post(url,data=dict(edit,examination="Examen modifié"))
     assert failed.status_code==503
     assert admin.get(url+f"/{did}").json["dossier"]["examination"]=="Échographie abdominale"
-    second=admin.post(url,data=dict(payload,creation_key=str(uuid4()),examination="Échographie thyroïdienne"))
+    second=admin.post(url,data=dict(payload,creation_key=str(uuid4()),examination="Échographie thyroïdienne",billing_code="460095"))
     assert second.status_code==200 and second.json["dossier"]["id"]!=did
     assert second.json["dossier"]["national_number"]==original["national_number"]
+    assert second.json["dossier"]["billing_code"]=="460095"
     assert second.json["dossier"]["report_text"]=="" and second.json["dossier"]["documents"]=={}
     assert admin.get(url+f"/{did}").json["dossier"]["report_text"]==text
     assert admin.post(url,data=dict(edit,national_number="")).status_code==400
@@ -123,9 +132,20 @@ try:
     assert all_patients["total"]==3 and "Dossier historique" in all_patients["html"]
     exported=admin.get("/admin/appointments/riziv.csv")
     rows=list(csv.reader(io.StringIO(exported.data.decode("utf-8-sig")),delimiter=";"))
-    assert rows[1][2]=="" and rows[1][4]=="00123456789" and "historique" in rows[1][-1]
+    assert rows[1][2]=="" and rows[1][4]=="00123456789" and "historique" in rows[1][6] and rows[1][7]=="459712"
     assert "Texte de démonstration" not in exported.data.decode("utf-8-sig")
     assert b"Jo Jao" not in anonymous.get("/agenda").data
+    patient_url="/admin/appointments/patient"
+    identity=dict(csrf_token=csrf,appointment_id=1,national_number="00123456789",billing_code="460294")
+    assert admin.post(patient_url,data=dict(identity,billing_code="not-a-code")).status_code==400
+    assert admin.post(patient_url,data=identity).json["billing_code"]=="460294"
+    assert admin.get(patient_url+"?appointment_id=1").json["billing_code"]=="460294"
+    assert admin.post(patient_url,data={key:value for key,value in identity.items() if key!="billing_code"}).json["billing_code"]=="460294"
+    assert "460294" in admin.get(url).json["html"]
+    assert "460294" in admin.get("/admin/appointments/riziv.csv").text
+    with app.app_context():
+        assert db.session.get(Appointment,1).inami_code is None  # Administrative selection never changes the booking.
+    assert anonymous.get("/agenda").data==before
     # Both views read the same records; a reservation remains linked to its source,
     # and neither GET copies appointments into the historical tables.
     with app.app_context():

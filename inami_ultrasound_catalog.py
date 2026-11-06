@@ -93,3 +93,13 @@ INAMI_ULTRASOUND_BY_CODE = {
     for _, _, entries in INAMI_ULTRASOUND_GROUPS
     for entry in entries
 }
+
+# Internal administrative choices: expose identifiers/descriptions only. The
+# practice previously excluded elastography from its offered examinations.
+INTERNAL_INAMI_CHOICES = tuple(
+    {"code": entry["code"], "label": entry["label_fr"]}
+    for group_fr, _, entries in INAMI_ULTRASOUND_GROUPS
+    if group_fr != "Élastographies"
+    for entry in entries
+)
+INTERNAL_INAMI_CODES = frozenset(item["code"] for item in INTERNAL_INAMI_CHOICES)

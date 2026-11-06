@@ -1,0 +1,8 @@
+{% macro billing_picker() -%}
+<div class="internal-billing-picker">
+  <label>Code RIZIV / INAMI<input name="billing_code" list="internal-billing-options" pattern="[0-9]{6}" maxlength="200" placeholder="Chercher un code ou un examen…" title="Sélectionnez un code à 6 chiffres dans la liste" autocomplete="off"></label>
+  <p class="billing-description" data-billing-description>Choisissez la prestation correspondant à l’examen réalisé.</p>
+  <div class="report-actions"><button type="button" data-copy-field="billing_code">Copier le code</button><button type="button" data-copy-field="national_number">Copier le n° dossier</button></div>
+  <p class="billing-copy-status" data-copy-status role="status"></p>
+</div>
+{%- endmacro %}

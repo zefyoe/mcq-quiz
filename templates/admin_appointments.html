@@ -295,6 +295,8 @@
 
     {% include '_appointment_reporting.html' %}
     {% include '_historical_dossier_editor.html' %}
+    <datalist id="internal-billing-options">{% for item in internal_billing_choices %}<option value="{{ item.code }}" label="{{ item.label }}">{% endfor %}</datalist>
+    <script src="{{ url_for('static', filename='internal_billing.js', v=billing_asset_version) }}"></script>
     <script src="{{ url_for('static', filename='internal_agenda.js', v=agenda_asset_version) }}" data-day-endpoint="{{ url_for('admin_close_appointment_day') }}" data-csrf="{{ csrf_token }}"></script>
     <script src="{{ url_for('static', filename='internal_reporting.js', v=report_asset_version) }}"></script>
     <script src="{{ url_for('static', filename='internal_history.js', v=historical_asset_version) }}"></script>

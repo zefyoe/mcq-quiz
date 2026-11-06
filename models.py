@@ -107,6 +107,7 @@ class AppointmentPatientDetails(db.Model):
     """Optional identifiers, private to a specific booking, never public."""
     context_key = db.Column(db.String(64), primary_key=True)
     national_number = db.Column(db.String(11), nullable=False, default="")
+    billing_code = db.Column(db.String(6), nullable=False, default="")
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
@@ -123,6 +124,7 @@ class HistoricalDossier(db.Model):
     creation_key = db.Column(db.String(80), nullable=False, unique=True)
     patient_name = db.Column(db.String(255), nullable=False)
     national_number = db.Column(db.String(11), nullable=False, default="")
+    billing_code = db.Column(db.String(6), nullable=False, default="")
     examined_on = db.Column(db.Date, nullable=False, index=True)
     examination = db.Column(db.String(255), nullable=False)
     transfer_status = db.Column(db.String(16), nullable=False, default="todo")
