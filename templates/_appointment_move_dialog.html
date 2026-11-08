@@ -1,0 +1,11 @@
+<div class="appointment-modal" id="move-appointment-dialog" data-endpoint="{{ url_for('admin_move_appointment') }}" data-csrf="{{ csrf_token }}" hidden>
+  <div class="appointment-modal-backdrop" data-cancel-move></div>
+  <section class="appointment-modal-card move-confirm-card" role="dialog" aria-modal="true" aria-labelledby="move-appointment-title">
+    <h2 id="move-appointment-title">Déplacer le rendez-vous ?</h2>
+    <p id="move-patient-name" class="move-patient-name"></p>
+    <dl class="move-time-comparison"><div><dt>Horaire actuel</dt><dd id="move-from-time"></dd></div><div><dt>Nouvel horaire</dt><dd id="move-to-time"></dd></div></dl>
+    <p>Le patient, l’examen, le statut, la demande et le compte rendu sont conservés. L’ancien créneau est libéré après confirmation.</p>
+    <p id="move-confirm-error" role="alert"></p>
+    <div class="report-actions"><button type="button" id="confirm-appointment-move">Oui, déplacer</button><button type="button" data-cancel-move>Non, annuler</button></div>
+  </section>
+</div>

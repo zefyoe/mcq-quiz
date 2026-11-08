@@ -15,10 +15,11 @@
               {% for row in slot_rows %}
                 <div class="appointment-time-column">{{ row.time_label }}</div>
                 {% for slot in row.slots %}
-                  <div class="appointment-slot-cell"{% if slot %} data-day="{{ slot.starts_at.date().isoformat() }}" data-start="{{ slot.starts_at.isoformat(timespec='minutes') }}"{% endif %}>
+                  <div class="appointment-slot-cell"{% if slot %} data-day="{{ slot.starts_at.date().isoformat() }}" data-start="{{ slot.starts_at.isoformat(timespec='minutes') }}" data-drop-state="{{ 'occupied' if slot.appointment or slot.reservation else ('closed' if slot.blocked else 'free') }}"{% endif %}>
                   {% if slot %}
                   {% if slot.appointment %}
-                    <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
+                    <article class="appointment-slot appointment-slot-booked" data-move-card data-move-kind="appointment" data-move-id="{{ slot.appointment.id }}" data-move-start="{{ slot.appointment.starts_at.isoformat() }}" data-move-key="{{ slot.move_key }}" data-move-name="{{ slot.appointment.patient_name }}" data-move-duration="{{ slot.appointment.duration_minutes }}" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
+                      <button type="button" class="appointment-move-handle" data-move-handle aria-label="Déplacer le rendez-vous de {{ slot.appointment.patient_name }}" title="Glisser vers une case libre, ou cliquer puis choisir un créneau">⠿ <span>Déplacer</span></button>
                       <span class="appointment-slot-time">{{ slot.appointment.starts_at.strftime('%H:%M') }} - {{ (slot.appointment.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
                       <strong>{{ report_link(slot.appointment.patient_name, appointment_type_labels.get(slot.appointment.inami_code or slot.appointment.appointment_type, slot.appointment.appointment_type), slot.appointment.starts_at, slot.appointment.id) }}</strong>
                       {% set appointment_label_key = slot.appointment.inami_code or slot.appointment.appointment_type %}
@@ -40,7 +41,8 @@
                     </article>
                   {% elif slot.reservation %}
                     {% set reservation_data = slot.reservation.draft %}
-                    <article class="appointment-slot appointment-slot-booked" aria-label="Réservation enregistrée">
+                    <article class="appointment-slot appointment-slot-booked" data-move-card data-move-kind="reservation" data-move-id="" data-move-start="{{ slot.reservation.starts_at.isoformat() }}" data-move-key="{{ slot.move_key }}" data-move-name="{{ reservation_data.get('patient_name') or 'Formulaire en cours' }}" data-move-duration="10" aria-label="Réservation enregistrée">
+                      <button type="button" class="appointment-move-handle" data-move-handle aria-label="Déplacer la réservation de {{ reservation_data.get('patient_name') or 'ce patient' }}" title="Glisser vers une case libre, ou cliquer puis choisir un créneau">⠿ <span>Déplacer</span></button>
                       <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }}</span>
                       <strong>{{ report_link(reservation_data.get('patient_name') or 'Formulaire en cours', appointment_type_labels.get(reservation_data.get('inami_code', ''), 'Examen à compléter'), slot.starts_at, reservation_start=slot.starts_at.isoformat(timespec='minutes')) }}</strong>
                       {% set reservation_code = reservation_data.get('inami_code', '') %}

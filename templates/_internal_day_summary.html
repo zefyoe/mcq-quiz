@@ -1,0 +1,16 @@
+{% from '_patient_report_link.html' import report_link %}
+      <details class="appointment-calendar-card day-summary">
+        <summary>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }} · {{ shift_appointments|length }} patient(s)</summary>
+        <div class="appointment-calendar-toolbar"><h2>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }}</h2>
+          <div class="day-quick-actions"><button type="button" data-day-action="open" data-day="{{ shift_date.isoformat() }}" {% if shift_date < today %}disabled data-past-day{% endif %}>Ouvrir la journée</button><button type="button" class="appointment-day-close-button" data-day-action="close" data-day="{{ shift_date.isoformat() }}" {% if shift_date < today %}disabled data-past-day{% endif %}>Fermer la journée</button></div>
+        </div>
+        {% for appointment in shift_appointments %}
+        <article style="padding:14px 0;border-bottom:1px solid #dfe7f1">
+          <strong>{{ appointment.starts_at.strftime('%H:%M') }} · {{ report_link(appointment.patient_name, appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type), appointment.starts_at, appointment.id) }}</strong>
+          <p>{{ appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type) }}</p>
+          <p>Statut : {{ 'BIM (VIPO)' if appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
+          <p>{{ appointment.patient_email }}{% if appointment.patient_phone %} · {{ appointment.patient_phone }}{% endif %} · Ordonnance : {{ 'reçue' if appointment.prescription_filename else 'non jointe' }}</p>
+          {% if appointment.prescription_filename %}<a href="{{ url_for('admin_download_appointment_prescription', appointment_id=appointment.id) }}">Télécharger l’ordonnance</a>{% endif %}
+        </article>
+        {% else %}<p>Aucun rendez-vous pour cette journée. Sélectionnez une date ci-dessous.</p>{% endfor %}
+      </details>

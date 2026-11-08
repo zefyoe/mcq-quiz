@@ -62,6 +62,19 @@ class Appointment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 
+class AppointmentMoveReceipt(db.Model):
+    """Atomic move receipt: safe retries and the previous scheduling position."""
+    token = db.Column(db.String(36), primary_key=True)
+    fingerprint = db.Column(db.String(64), nullable=False)
+    source_kind = db.Column(db.String(12), nullable=False)
+    appointment_id = db.Column(db.Integer, nullable=True)
+    previous_start = db.Column(db.DateTime, nullable=False)
+    target_start = db.Column(db.DateTime, nullable=False)
+    context_key = db.Column(db.String(64), nullable=False)
+    requested_by = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
 class AppointmentHold(db.Model):
     starts_at = db.Column(db.DateTime, primary_key=True)
     token = db.Column(db.String(80), nullable=False)

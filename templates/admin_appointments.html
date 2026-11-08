@@ -37,21 +37,7 @@
         <div class="appointment-alert appointment-alert-error" role="alert">{{ error }}</div>
       {% endif %}
 
-      <details class="appointment-calendar-card day-summary">
-        <summary>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }} · {{ shift_appointments|length }} patient(s)</summary>
-        <div class="appointment-calendar-toolbar"><h2>Votre journée · {{ shift_date.strftime('%d/%m/%Y') }}</h2>
-          <div class="day-quick-actions"><button type="button" data-day-action="open" data-day="{{ shift_date.isoformat() }}" {% if shift_date < today %}disabled data-past-day{% endif %}>Ouvrir la journée</button><button type="button" class="appointment-day-close-button" data-day-action="close" data-day="{{ shift_date.isoformat() }}" {% if shift_date < today %}disabled data-past-day{% endif %}>Fermer la journée</button></div>
-        </div>
-        {% for appointment in shift_appointments %}
-        <article style="padding:14px 0;border-bottom:1px solid #dfe7f1">
-          <strong>{{ appointment.starts_at.strftime('%H:%M') }} · {{ report_link(appointment.patient_name, appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type), appointment.starts_at, appointment.id) }}</strong>
-          <p>{{ appointment_type_labels.get(appointment.inami_code or appointment.appointment_type, appointment.appointment_type) }}</p>
-          <p>Statut : {{ 'BIM (VIPO)' if appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
-          <p>{{ appointment.patient_email }}{% if appointment.patient_phone %} · {{ appointment.patient_phone }}{% endif %} · Ordonnance : {{ 'reçue' if appointment.prescription_filename else 'non jointe' }}</p>
-          {% if appointment.prescription_filename %}<a href="{{ url_for('admin_download_appointment_prescription', appointment_id=appointment.id) }}">Télécharger l’ordonnance</a>{% endif %}
-        </article>
-        {% else %}<p>Aucun rendez-vous pour cette journée. Sélectionnez une date ci-dessous.</p>{% endfor %}
-      </details>
+      {% include '_internal_day_summary.html' %}
       {% if success %}
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
@@ -68,20 +54,7 @@
         <div id="riziv-patients"></div>
       </section>
       {% include '_historical_dossiers.html' %}
-      <section id="patient-list" class="patient-list-card" hidden aria-label="Patients par ordre chronologique">
-        <header><h2>Patients de la semaine</h2><p>Demandes, comptes rendus et copie manuelle, dans l’ordre des rendez-vous.</p></header>
-        <div class="patient-table-scroll"><table class="patient-table">
-          <thead><tr><th scope="col">Patient / rendez-vous</th><th scope="col">N° dossier (registre national)</th><th scope="col">Demande d’examen</th><th scope="col">Compte rendu</th></tr></thead>
-          <tbody>{% for patient in patient_rows %}
-            <tr data-patient-row data-appointment="{{ patient.appointment_id }}" data-reservation="{{ patient.reservation_start }}">
-              <td><span class="patient-row-time">{{ patient.starts_at.strftime('%d/%m/%Y · %H:%M') }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start) }}<small>{{ patient.examination }}</small></td>
-              <td><span data-national-number>{{ patient.national_number or 'Non renseigné' }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Compléter / modifier', 'identity') }}</td>
-              <td data-request-actions>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Voir la demande' if patient.has_prescription else 'Scanner / importer la demande', 'request') }}{% if patient.has_prescription %}<a href="{{ url_for('admin_patient_prescription', appointment_id=patient.appointment_id, reservation_start=patient.reservation_start) }}">Télécharger la demande</a>{% endif %}</td>
-              <td data-report-actions>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Voir le compte rendu' if patient.has_report else 'Créer un compte rendu') }}{% if patient.has_report %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Modifier', 'edit') }}{% endif %}</td>
-            </tr>
-          {% else %}<tr><td colspan="4">Aucun patient cette semaine. Choisissez une autre semaine dans l’agenda.</td></tr>{% endfor %}</tbody>
-        </table></div>
-      </section>
+      {% include '_internal_patient_list.html' %}
       <section class="appointment-dashboard" id="internal-calendar" aria-label="{{ l10n('Weekagenda', 'Weekly calendar', 'Agenda hebdomadaire') }}">
         <aside class="appointment-sidebar">
           <div class="appointment-side-heading">
@@ -211,12 +184,14 @@
     </div>
 
     {% include '_internal_availability_dialog.html' %}
+    {% include '_appointment_move_dialog.html' %}
     {% include '_appointment_reporting.html' %}
     {% include '_historical_dossier_editor.html' %}
     <datalist id="internal-billing-options">{% for item in internal_billing_choices %}<option value="{{ item.code }}" label="{{ item.label }}">{% endfor %}</datalist>
     <script src="{{ url_for('static', filename='internal_billing.js', v=billing_asset_version) }}"></script>
     <script src="{{ url_for('static', filename='internal_agenda.js', v=agenda_asset_version) }}" data-day-endpoint="{{ url_for('admin_internal_day_availability') }}" data-csrf="{{ csrf_token }}"></script>
     <script src="{{ url_for('static', filename='internal_reporting.js', v=report_asset_version) }}"></script>
+    <script src="{{ url_for('static', filename='internal_moves.js', v=move_asset_version) }}"></script>
     <script src="{{ url_for('static', filename='internal_history.js', v=historical_asset_version) }}"></script>
   </body>
 </html>

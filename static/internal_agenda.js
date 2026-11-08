@@ -65,10 +65,24 @@
       gridContainer.innerHTML = result.html;
       const counter=document.querySelector('[data-available-count]');
       if(counter) counter.textContent=result.available_count;
+      if(result.patient_list_html) {
+        const hidden=document.getElementById('patient-list').hidden;
+        document.getElementById('patient-list').outerHTML=result.patient_list_html;
+        document.getElementById('patient-list').hidden=hidden;
+        document.querySelector('[data-agenda-view="patients"]').textContent='Liste patients · '+result.patient_total;
+      }
+      if(result.day_summary_html) {
+        const previous=document.querySelector('.day-summary'), open=previous.open;
+        previous.outerHTML=result.day_summary_html;
+        document.querySelector('.day-summary').open=open;
+      }
+      document.dispatchEvent(new Event('internal-patient-list-updated'));
     } catch(error) {
-      throw new Error('Les horaires sont enregistrés, mais l’affichage n’a pas pu être actualisé. Actualisez l’agenda pour voir les changements. '+error.message);
+      throw new Error('La modification est enregistrée, mais l’affichage n’a pas pu être actualisé. Actualisez l’agenda pour voir les changements. '+error.message);
     }
   }
+  window.internalAgenda.refreshCalendar=refreshCalendar;
+  window.internalAgenda.availabilityIsBusy=()=>availabilityBusy;
   function closeHours() {
     hoursDialog.hidden=true; document.body.classList.remove('appointment-modal-open');
   }

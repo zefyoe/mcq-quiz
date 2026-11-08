@@ -54,6 +54,8 @@ from inami_ultrasound_catalog import (
 from appointment_confirmation import create_appointment_confirmation_pdf
 from radiology_report import create_radiology_report_pdf
 from historical_dossiers import register_historical_dossiers, historical_riziv_rows
+from appointment_moves import register_appointment_moves
+from models import AppointmentMoveReceipt
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
@@ -804,6 +806,7 @@ def ensure_appointment_schema() -> None:
     inspector = inspect(db.engine)
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
+    AppointmentMoveReceipt.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentReport.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentPatientDetails.__table__.create(bind=db.engine, checkfirst=True)
     HistoricalDossier.__table__.create(bind=db.engine, checkfirst=True)
@@ -4465,6 +4468,8 @@ def admin_appointments():
             slot['reservation'] = reservation_by_start.get(slot['starts_at']) if not slot['appointment'] else None
             slot['is_open'] = appointment_slot_is_open(slot['starts_at'], availability_overrides)
             slot['can_manage'] = not slot['appointment'] and not slot['reservation'] and slot['starts_at'] > agenda_now()
+            move_record = slot['appointment'] or slot['reservation']
+            slot['move_key'] = appointment_report_key(move_record) if move_record else ''
             slot['block_reason'] = (
                 'Réservation en cours' if slot['starts_at'] in reserved
                 else 'Fermé par le cabinet' if not slot['is_open']
@@ -4511,6 +4516,7 @@ def admin_appointments():
         historical_examinations=tuple(PUBLIC_APPOINTMENT_LABELS.values()),
         internal_billing_choices=INTERNAL_INAMI_CHOICES,
         billing_asset_version=os.stat(os.path.join(app.static_folder, 'internal_billing.js')).st_mtime_ns,
+        move_asset_version=os.stat(os.path.join(app.static_folder, 'internal_moves.js')).st_mtime_ns,
         google_oauth_ready=google_oauth_configured(),
         gmail_sender=(active_gmail_connection().email if active_gmail_connection() else None),
         week_start=week_start,
@@ -4532,7 +4538,9 @@ def admin_appointments():
     )
     if request.args.get("fragment") == "calendar":
         return jsonify(ok=True, html=render_template("_internal_calendar_grid.html", **context),
-                       available_count=context["available_count"])
+                       available_count=context["available_count"], patient_total=len(patient_rows),
+                       patient_list_html=render_template("_internal_patient_list.html", **context),
+                       day_summary_html=render_template("_internal_day_summary.html", **context))
     return render_template("admin_appointments.html", **context)
 
 
@@ -5586,6 +5594,10 @@ def logout():
 register_historical_dossiers(app, admin_required=admin_required, ensure_schema=ensure_appointment_schema,
     csrf_token=agenda_token, now=agenda_now, valid_name=is_valid_patient_name,
     practice_address=APPOINTMENT_PRACTICE_ADDRESS, all_patient_rows=all_internal_patient_rows)
+
+register_appointment_moves(app, admin_required=admin_required, ensure_schema=ensure_appointment_schema,
+    csrf_token=agenda_token, now=agenda_now, parse_slot=parse_appointment_slot,
+    slot_open=appointment_slot_is_open, claim_slot=claim_agenda_slot, record_key=appointment_report_key)
 
 
 def initialize_database_schema():

@@ -50,6 +50,22 @@ CSRF-protected and transactional; invalid ranges leave the schedule unchanged.
 Run `python scripts/smoke_test_schedule.py` for isolated exception/privacy checks,
 or add `--serve` for a synthetic localhost preview.
 
+**Déplacer** on a blue appointment/reservation card supports pointer dragging
+with a mouse or the touch grip on iPad. Clicking/tapping the grip and then a free
+cell is the keyboard/touch alternative. A free drop opens **Oui, déplacer / Non,
+annuler**; occupied/closed cells are rejected. The server rechecks the whole
+duration, claims every target slot with the public booking lock, and updates the
+original record transactionally. Patient/contact/insurance data, tariff snapshots,
+request bytes, report text/date and dossier identifiers stay attached. Report,
+identifier and register-exclusion keys migrate with the new scheduling position.
+UUID move receipts preserve the previous position and make retries safe. No data
+is stored in the browser; calendar cells, weekly patient list and daily summary
+refresh after confirmation without changing day-column widths. Existing reports
+must be saved/closed before confirming a move if their editor has unsaved changes.
+Run `python scripts/smoke_test_appointment_moves.py` for synthetic preservation,
+reservation, permission, stale request, overlapping-race, retry and rollback checks;
+`--serve` also starts the disposable drag/drop demonstration.
+
 **XIMEO-RIZIV** shows all agenda patients/reservations and paper-era records in
 one chronological document workspace. The separate **Liste RIZIV** remains
 available with the same records. Agenda entries open their existing patient
