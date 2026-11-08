@@ -1,0 +1,20 @@
+<div class="appointment-modal" id="day-hours-dialog" hidden>
+  <div class="appointment-modal-backdrop" data-close-day-hours></div>
+  <section class="appointment-modal-card day-hours-card" role="dialog" aria-modal="true" aria-labelledby="day-hours-title">
+    <button class="appointment-modal-close" type="button" aria-label="Fermer la gestion des horaires" data-close-day-hours>×</button>
+    <p class="appointment-eyebrow">GESTION DES HORAIRES</p>
+    <h2 id="day-hours-title">Ouvrir ou fermer une journée</h2>
+    <p class="day-hours-help">Vos disponibilités sont reprises dans l’agenda public. Les noms et dossiers des patients restent privés. Les rendez-vous existants sont conservés.</p>
+    <form id="day-hours-form" class="appointment-booking-form">
+      <label>Date<input type="date" name="day" min="{{ today.isoformat() }}" required></label>
+      <div class="report-fields-row">
+        <label>De<input type="time" name="start_time" min="08:00" max="20:50" step="600" value="18:30" required></label>
+        <label>À<input type="time" name="end_time" min="08:10" max="21:00" step="600" value="20:10" required></label>
+      </div>
+      <label>Action<select name="action"><option value="replace">Définir uniquement cette plage pour la journée</option><option value="open">Ajouter cette plage disponible</option><option value="close">Fermer cette plage</option></select></label>
+      <p class="day-hours-help">Horaires exceptionnels entre 08:00 et 21:00, par pas de 10 minutes. Vous pouvez ouvrir un jour habituellement fermé.</p>
+      <p id="day-hours-error" role="alert"></p>
+      <div class="report-actions"><button type="submit">Enregistrer les horaires</button><button type="button" data-hours-action="close">Fermer toute la journée</button><button type="button" data-hours-action="reset">Rétablir les horaires habituels</button></div>
+    </form>
+  </section>
+</div>

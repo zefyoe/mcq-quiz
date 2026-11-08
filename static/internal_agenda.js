@@ -52,6 +52,62 @@
     if (counter) counter.textContent = document.querySelectorAll('.appointment-slot-cell [data-slot]').length;
   }
   let availabilityBusy = false;
+  const hoursDialog = document.getElementById('day-hours-dialog');
+  const hoursForm = document.getElementById('day-hours-form');
+  const gridContainer = document.getElementById('internal-calendar-grid');
+  async function refreshCalendar(day) {
+    if(day && !gridContainer.querySelector('[data-day-action][data-day="'+day+'"]')) {
+      window.location.assign('/admin/appointments?date='+encodeURIComponent(day));
+      return;
+    }
+    try {
+      const result = await request(gridContainer.dataset.endpoint);
+      gridContainer.innerHTML = result.html;
+      const counter=document.querySelector('[data-available-count]');
+      if(counter) counter.textContent=result.available_count;
+    } catch(error) {
+      throw new Error('Les horaires sont enregistrés, mais l’affichage n’a pas pu être actualisé. Actualisez l’agenda pour voir les changements. '+error.message);
+    }
+  }
+  function closeHours() {
+    hoursDialog.hidden=true; document.body.classList.remove('appointment-modal-open');
+  }
+  function openHours(button) {
+    if(availabilityBusy) return;
+    closeDayMenus();
+    closeBooking();
+    hoursForm.elements.day.value=button.dataset.dayHours;
+    hoursForm.elements.start_time.value=button.dataset.startTime || '18:30';
+    hoursForm.elements.end_time.value=button.dataset.endTime || '20:10';
+    hoursForm.elements.action.value='replace';
+    document.getElementById('day-hours-error').textContent='';
+    hoursDialog.hidden=false; document.body.classList.add('appointment-modal-open');
+    hoursForm.elements.start_time.focus();
+  }
+  async function saveHours(action=null) {
+    if(availabilityBusy) return;
+    if(!action && !hoursForm.reportValidity()) return;
+    if(!hoursForm.elements.day.reportValidity()) return;
+    const body=new FormData(hoursForm); body.set('csrf_token',script.dataset.csrf);
+    if(action) {body.set('action',action);body.delete('start_time');body.delete('end_time');}
+    const day=body.get('day');
+    availabilityBusy=true;
+    const controls=[...hoursDialog.querySelectorAll('button,input,select')];
+    controls.forEach(item=>{item.disabled=true;});
+    document.getElementById('day-hours-error').textContent='';
+    let saved=false;
+    try {
+      const result=await request(script.dataset.dayEndpoint,{method:'POST',body});
+      saved=true;
+      await refreshCalendar(day);
+      notify('Horaires du '+new Date(day+'T12:00:00').toLocaleDateString('fr-BE')+' enregistrés. L’agenda public suit ces disponibilités. '+result.protected_count+' créneau(x) occupé(s) conservé(s).');
+      closeHours();
+    } catch(error) {document.getElementById('day-hours-error').textContent=error.message;if(saved) notify(error.message);}
+    finally {availabilityBusy=false;controls.forEach(item=>{item.disabled=false;});}
+  }
+  hoursForm.addEventListener('submit',event=>{event.preventDefault();saveHours();});
+  hoursDialog.querySelectorAll('[data-close-day-hours]').forEach(button=>button.addEventListener('click',()=>{if(!availabilityBusy) closeHours();}));
+  hoursDialog.querySelectorAll('[data-hours-action]').forEach(button=>button.addEventListener('click',()=>saveHours(button.dataset.hoursAction)));
   function closeDayMenus(except = null) {
     document.querySelectorAll('.day-menu[open]').forEach(menu => {
       if (menu !== except) menu.removeAttribute('open');
@@ -94,6 +150,8 @@
   }, true);
   document.addEventListener('click', async event => {
     closeDayMenus(event.target.closest('.day-menu'));
+    const hoursButton=event.target.closest('[data-day-hours]');
+    if(hoursButton) openHours(hoursButton);
     const view = event.target.closest('[data-agenda-view]');
     if (view) {
       const patients = view.dataset.agendaView === 'patients';
@@ -119,13 +177,13 @@
     const controls = [...document.querySelectorAll('[data-day-action]:not([data-past-day]), .appointment-slot-toggle button')];
     controls.forEach(b => { b.disabled = true; });
     const body = new FormData(); body.set('csrf_token', script.dataset.csrf);
-    body.set('day', day); body.set('is_open', open ? '1' : '0');
+    body.set('day', day); body.set('action', open ? 'open' : 'close');
     notify('Mise à jour de la journée…');
     try {
       const result = await request(script.dataset.dayEndpoint, {method:'POST', body});
-      result.changed_slots.forEach(start => updateSlot(start, result.is_open));
+      await refreshCalendar(day);
       notify(label + ' · ' + result.changed_slots.length + ' créneau(x) ' + (open ? 'ouvert(s).' : 'fermé(s).') +
-        ' Les rendez-vous existants sont conservés.' + (open && !result.changed_slots.length ? ' Aucun autre créneau prévu à ouvrir.' : ''));
+        ' L’agenda public suit ces disponibilités. Les rendez-vous existants sont conservés.');
       button.closest('details')?.removeAttribute('open');
     } catch (error) { notify(error.message); }
     finally { availabilityBusy = false; controls.forEach(b => { b.disabled = false; }); }
@@ -142,16 +200,16 @@
     const body = new FormData(form);
     try {
       const result = await request(form.action, {method:'POST', body});
-      updateSlot(result.starts_at, result.is_open);
+      await refreshCalendar();
       notify('Créneau de ' + result.starts_at.slice(11,16) + (result.is_open ? ' ouvert.' : ' fermé.'));
     } catch (error) { notify(error.message); }
     finally { availabilityBusy = false; buttons.forEach(b => { b.disabled = false; }); }
   }, true);
   const booking = document.getElementById('appointment-modal');
   function closeBooking() { booking.hidden = true; document.body.classList.remove('appointment-modal-open'); }
-  document.querySelector('.appointment-calendar-grid').addEventListener('click', event => {
+  document.addEventListener('click', event => {
     const button = event.target.closest('[data-slot]');
-    if (!button) return;
+    if (!button || !button.closest('#internal-calendar-grid')) return;
     document.getElementById('appointment-slot-start').value = button.dataset.slot;
     document.getElementById('appointment-selected-slot').textContent = button.dataset.slotLabel;
     booking.hidden = false; document.body.classList.add('appointment-modal-open');
@@ -162,6 +220,7 @@
     if (event.key !== 'Escape') return;
     closeDayMenus();
     if (!booking.hidden) closeBooking();
+    if (!hoursDialog.hidden && !availabilityBusy) closeHours();
   });
   const uploads = [...booking.querySelectorAll('[data-prescription-input]')];
   uploads.forEach(input => input.addEventListener('change', () => {

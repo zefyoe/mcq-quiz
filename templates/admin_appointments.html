@@ -132,8 +132,10 @@
             <div>
               <p class="appointment-eyebrow">{{ l10n('WEEKOVERZICHT', 'WEEKLY OVERVIEW', 'APERÇU DE LA SEMAINE') }}</p>
               <h2>{{ week_start.strftime('%d/%m/%Y') }} - {{ (week_end - timedelta(days=1)).strftime('%d/%m/%Y') }}</h2>
+              <p class="agenda-hours-notice">L’agenda public suit vos disponibilités. Les informations des patients restent uniquement internes.</p>
             </div>
             <div class="appointment-week-actions">
+              <button type="button" class="manage-hours-button" data-day-hours="{{ (shift_date if shift_date >= today else today).isoformat() }}">Gérer les horaires</button>
               <a href="{{ url_for('admin_appointments', date=(week_start - timedelta(days=7)).isoformat()) }}" aria-label="{{ l10n('Vorige week', 'Previous week', 'Semaine précédente') }}">{{ l10n('Vorige week', 'Previous week', 'Semaine précédente') }}</a>
               <a class="appointment-today-link" href="{{ url_for('admin_appointments') }}">{{ l10n('Vandaag', 'Today', 'Aujourd’hui') }}</a>
               <a href="{{ url_for('admin_appointments', date=(week_start + timedelta(days=7)).isoformat()) }}" aria-label="{{ l10n('Volgende week', 'Next week', 'Semaine suivante') }}">{{ l10n('Volgende week', 'Next week', 'Semaine suivante') }}</a>
@@ -141,92 +143,7 @@
           </div>
 
           <div class="appointment-calendar-scroll">
-            <div class="appointment-calendar-grid" style="--internal-columns:32px{% for day in days %} {{ 'minmax(100px,1fr)' if day.has_slots else '38px' }}{% endfor %}">
-              <div class="appointment-time-column appointment-grid-head">{{ l10n('Tijd', 'Time', 'Heure') }}</div>
-              {% for day in days %}
-                <details name="agenda-day-actions" class="appointment-day-header day-menu{% if day.date == today %} is-today{% endif %}">
-                  <summary aria-label="Gérer la journée du {{ day.date.strftime('%d/%m/%Y') }}"><span>{{ day.short_label }}</span><strong>{{ day.date.strftime('%d') }} <svg class="day-menu-chevron" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></strong></summary>
-                  <div class="day-menu-actions">
-                    <button type="button" data-day-action="open" data-day="{{ day.date.isoformat() }}" aria-label="Ouvrir les créneaux du {{ day.date.strftime('%d/%m/%Y') }}" title="Ouvrir les créneaux" {% if day.date < today %}disabled data-past-day{% endif %}><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M6 8V5a4 4 0 0 1 8 0M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Ouvrir</span></button>
-                    <button type="button" data-day-action="close" data-day="{{ day.date.isoformat() }}" aria-label="Fermer la journée du {{ day.date.strftime('%d/%m/%Y') }}" title="Fermer la journée" {% if day.date < today %}disabled data-past-day{% endif %}><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M6 8V5a4 4 0 0 1 8 0v3M5 8h10v9H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Fermer</span></button>
-                  </div>
-                </details>
-              {% endfor %}
-
-              {% for row in slot_rows %}
-                <div class="appointment-time-column">{{ row.time_label }}</div>
-                {% for slot in row.slots %}
-                  <div class="appointment-slot-cell"{% if slot %} data-day="{{ slot.starts_at.date().isoformat() }}" data-start="{{ slot.starts_at.isoformat(timespec='minutes') }}"{% endif %}>
-                  {% if slot %}
-                  {% if slot.appointment %}
-                    <article class="appointment-slot appointment-slot-booked" aria-label="{{ l10n('Ingeplande afspraak', 'Scheduled appointment', 'Rendez-vous planifié') }} {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m') }} {{ l10n('om', 'at', 'à') }} {{ slot.starts_at.strftime('%H:%M') }}">
-                      <span class="appointment-slot-time">{{ slot.appointment.starts_at.strftime('%H:%M') }} - {{ (slot.appointment.starts_at + timedelta(minutes=slot.appointment.duration_minutes)).strftime('%H:%M') }}</span>
-                      <strong>{{ report_link(slot.appointment.patient_name, appointment_type_labels.get(slot.appointment.inami_code or slot.appointment.appointment_type, slot.appointment.appointment_type), slot.appointment.starts_at, slot.appointment.id) }}</strong>
-                      {% set appointment_label_key = slot.appointment.inami_code or slot.appointment.appointment_type %}
-                      <span>{{ appointment_type_labels.get(appointment_label_key, slot.appointment.appointment_type) }}</span>
-                      <details>
-                        <summary>{{ l10n('Details', 'Details', 'Détails') }}</summary>
-                        <p>{{ slot.appointment.patient_email }}</p>
-                        <p>Statut : {{ 'BIM (VIPO)' if slot.appointment.insurance_status == 'bim' else ('Normal — sans intervention majorée' if slot.appointment.insurance_status == 'normal' else 'Non renseigné') }}</p>
-                        {% if slot.appointment.patient_phone %}<p>{{ slot.appointment.patient_phone }}</p>{% endif %}
-                        {% if slot.appointment.prescription_filename %}
-                          <p><a class="appointment-prescription-link" href="{{ url_for('admin_download_appointment_prescription', appointment_id=slot.appointment.id) }}">{{ l10n('Voorschrift downloaden', 'Download prescription', 'Télécharger l’ordonnance') }}</a></p>
-                        {% endif %}
-                        <form method="post" action="{{ url_for('admin_cancel_appointment', appointment_id=slot.appointment.id) }}" onsubmit='return confirm({{ "Annuler ce rendez-vous et libérer le créneau ?"|tojson }});'>
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                          <input type="hidden" name="week_date" value="{{ selected_date }}">
-                          <button type="submit" class="appointment-cancel-button">{{ l10n('Annuleer afspraak', 'Cancel appointment', 'Annuler le rendez-vous') }}</button>
-                        </form>
-                      </details>
-                    </article>
-                  {% elif slot.reservation %}
-                    {% set reservation_data = slot.reservation.draft %}
-                    <article class="appointment-slot appointment-slot-booked" aria-label="Réservation enregistrée">
-                      <span class="appointment-slot-time">{{ slot.starts_at.strftime('%H:%M') }}</span>
-                      <strong>{{ report_link(reservation_data.get('patient_name') or 'Formulaire en cours', appointment_type_labels.get(reservation_data.get('inami_code', ''), 'Examen à compléter'), slot.starts_at, reservation_start=slot.starts_at.isoformat(timespec='minutes')) }}</strong>
-                      {% set reservation_code = reservation_data.get('inami_code', '') %}
-                      {% if reservation_code %}<span>{{ appointment_type_labels.get(reservation_code, reservation_code) }}</span>{% else %}<span>Examen à compléter</span>{% endif %}
-                      <details>
-                        <summary>Informations enregistrées</summary>
-                        <p>E-mail : {{ reservation_data.get('patient_email') or 'Non renseigné' }}</p>
-                        <p>Téléphone : {{ reservation_data.get('patient_phone') or 'Non renseigné' }}</p>
-                        <p>Statut : {{ 'BIM (VIPO)' if reservation_data.get('insurance_status') == 'bim' else ('Normal — sans intervention majorée' if reservation_data.get('insurance_status') == 'normal' else 'À compléter') }}</p>
-                        {% if slot.reservation.prescription_filename %}<p>Ordonnance : {{ slot.reservation.prescription_filename }}</p>{% else %}<p>Ordonnance : non jointe</p>{% endif %}
-                        <p>Créneau réservé et enregistré dans la base de données.</p>
-                      </details>
-                    </article>
-                  {% elif slot.blocked %}
-                    <div class="appointment-slot appointment-slot-blocked">{{ slot.block_reason }}</div>
-                    {% if slot.can_manage %}
-                    <form class="appointment-slot-toggle" method="post" action="{{ url_for('admin_set_appointment_availability') }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="week_date" value="{{ selected_date }}">
-                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="1">
-                      <button type="submit">Ouvrir</button>
-                    </form>
-                    {% endif %}
-                  {% else %}
-                    <button
-                      class="appointment-slot appointment-slot-available"
-                      type="button"
-                      data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}"
-                      data-slot-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m') }}, {{ slot.starts_at.strftime('%H:%M') }} - {{ (slot.starts_at + timedelta(minutes=slot_duration_minutes)).strftime('%H:%M') }}"
-                    >
-                      <span>{{ l10n('Vrij', 'Available', 'Libre') }}</span>
-                      <small>{{ slot.starts_at.strftime('%H:%M') }}</small>
-                    </button>
-                    {% if slot.can_manage %}
-                    <form class="appointment-slot-toggle" method="post" action="{{ url_for('admin_set_appointment_availability') }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="week_date" value="{{ selected_date }}">
-                      <input type="hidden" name="slot_start" value="{{ slot.starts_at.isoformat(timespec='minutes') }}"><input type="hidden" name="is_open" value="0">
-                      <button type="submit">Fermer</button>
-                    </form>
-                    {% endif %}
-                  {% endif %}
-                  {% else %}<span class="appointment-slot-empty" aria-hidden="true"></span>{% endif %}
-                  </div>
-                {% endfor %}
-              {% endfor %}
-            </div>
+            <div id="internal-calendar-grid" data-endpoint="{{ url_for('admin_appointments', date=selected_date, fragment='calendar') }}">{% include '_internal_calendar_grid.html' %}</div>
           </div>
         </section>
       </section>
@@ -251,7 +168,7 @@
           </label>
           <label>
             {{ l10n('E-mail patiënt', 'Patient email', 'E-mail du patient') }}
-            <input name="patient_email" type="email" autocomplete="email" required maxlength="255">
+            <input name="patient_email" type="email" autocomplete="email" maxlength="255">
           </label>
           <label>
             {{ l10n('Telefoonnummer', 'Phone number', 'Numéro de téléphone') }} <span>{{ l10n('optioneel', 'optional', 'facultatif') }}</span>
@@ -293,11 +210,12 @@
       </section>
     </div>
 
+    {% include '_internal_availability_dialog.html' %}
     {% include '_appointment_reporting.html' %}
     {% include '_historical_dossier_editor.html' %}
     <datalist id="internal-billing-options">{% for item in internal_billing_choices %}<option value="{{ item.code }}" label="{{ item.label }}">{% endfor %}</datalist>
     <script src="{{ url_for('static', filename='internal_billing.js', v=billing_asset_version) }}"></script>
-    <script src="{{ url_for('static', filename='internal_agenda.js', v=agenda_asset_version) }}" data-day-endpoint="{{ url_for('admin_close_appointment_day') }}" data-csrf="{{ csrf_token }}"></script>
+    <script src="{{ url_for('static', filename='internal_agenda.js', v=agenda_asset_version) }}" data-day-endpoint="{{ url_for('admin_internal_day_availability') }}" data-csrf="{{ csrf_token }}"></script>
     <script src="{{ url_for('static', filename='internal_reporting.js', v=report_asset_version) }}"></script>
     <script src="{{ url_for('static', filename='internal_history.js', v=historical_asset_version) }}"></script>
   </body>

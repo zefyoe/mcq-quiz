@@ -32,6 +32,24 @@ Current service settings from `render.yaml`:
 
 ### Internal patient workspace
 
+**Gérer les horaires** (or a date header → **Horaires**) supports date-specific
+exceptions between 08:00 and 21:00 in 10-minute increments, including normally
+closed weekdays and the usual Saturday cutoff. Choose a precise daily range,
+add openings, close a range/the full day, or restore the normal schedule. Quick
+**Ouvrir** works even on Wednesdays with no default hours (18:30–20:10 initially;
+use **Horaires** to choose another range). Existing appointments and reservations
+are preserved. Manual admin bookings require a name and examination; email is optional.
+
+These administrative changes update the shared availability immediately; the
+public calendar follows them with its existing two-adjacent-slot release policy.
+Patient names, reports, identifiers, examination choices and insurance details
+stay internal. A server-rendered authenticated calendar fragment updates day
+columns after a change without a full reload within the displayed week. Choosing
+a date in another week navigates to that week after saving. Writes are admin-only,
+CSRF-protected and transactional; invalid ranges leave the schedule unchanged.
+Run `python scripts/smoke_test_schedule.py` for isolated exception/privacy checks,
+or add `--serve` for a synthetic localhost preview.
+
 **XIMEO-RIZIV** shows all agenda patients/reservations and paper-era records in
 one chronological document workspace. The separate **Liste RIZIV** remains
 available with the same records. Agenda entries open their existing patient

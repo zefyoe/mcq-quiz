@@ -3726,6 +3726,8 @@ def build_appointment_slot_grid(
     appointments: list[Appointment],
     language: str = "nl",
     availability_overrides: dict | None = None,
+    internal: bool = False,
+    reserved_starts=(),
 ) -> tuple[list[dict], list[dict]]:
     """Align each day's actual appointment slots by position in the weekly view."""
     appointments_by_start = {appointment.starts_at: appointment for appointment in appointments}
@@ -3754,8 +3756,11 @@ def build_appointment_slot_grid(
     for day in days:
         window = APPOINTMENT_WEEKLY_WINDOWS.get(day["date"].weekday())
         candidates = set(range(window[0], window[1], APPOINTMENT_SLOT_MINUTES)) if window else set()
-        for stamp in (availability_overrides or {}):
-            if stamp.date() == day["date"] and not appointment_slot_is_hard_closed(stamp):
+        for stamp, is_open in (availability_overrides or {}).items():
+            if stamp.date() == day["date"] and (is_open or not internal):
+                candidates.add(stamp.hour * 60 + stamp.minute)
+        for stamp in reserved_starts:
+            if stamp.date() == day["date"]:
                 candidates.add(stamp.hour * 60 + stamp.minute)
         for appointment in appointments:
             if appointment.starts_at.date() != day["date"]:
@@ -3785,14 +3790,14 @@ def build_appointment_slot_grid(
 
 
 def appointment_slot_is_open(starts_at, overrides=None):
-    if appointment_slot_is_hard_closed(starts_at):
-        return False
     if overrides is None:
         override = db.session.get(AppointmentSlotOverride, starts_at)
         if override is not None:
             return override.is_open
     elif starts_at in overrides:
         return overrides[starts_at]
+    if appointment_slot_is_hard_closed(starts_at):
+        return False
     window = APPOINTMENT_WEEKLY_WINDOWS.get(starts_at.weekday())
     minute = starts_at.hour * 60 + starts_at.minute
     return bool(window and window[0] <= minute and minute + 10 <= window[1]
@@ -3805,6 +3810,13 @@ def appointment_slot_is_hard_closed(starts_at):
         starts_at.weekday() in {1, 3} and minute in {18 * 60 + 10, 18 * 60 + 20})
 
 
+def appointment_availability_overrides(start, end):
+    """Date-specific administrative exceptions, shared by both calendars."""
+    return {item.starts_at: item.is_open
+              for item in AppointmentSlotOverride.query.filter(
+                  AppointmentSlotOverride.starts_at >= start, AppointmentSlotOverride.starts_at < end).all()}
+
+
 def bookable_appointment_slots(day, availability_overrides=None):
     """Expose two adjacent openings, advancing only past an occupied first slot."""
     if availability_overrides is None:
@@ -3814,7 +3826,7 @@ def bookable_appointment_slots(day, availability_overrides=None):
     window = APPOINTMENT_WEEKLY_WINDOWS.get(day.weekday())
     candidates = set(range(window[0], window[1], APPOINTMENT_SLOT_MINUTES)) if window else set()
     candidates.update(stamp.hour * 60 + stamp.minute for stamp, is_open in availability_overrides.items()
-                      if stamp.date() == day and is_open and not appointment_slot_is_hard_closed(stamp))
+                      if stamp.date() == day and is_open)
     appointments = Appointment.query.filter(
         Appointment.starts_at >= datetime.combine(day, time.min) - timedelta(hours=1),
         Appointment.starts_at < datetime.combine(day + timedelta(days=1), time.min)).all()
@@ -4184,6 +4196,117 @@ def admin_close_appointment_day():
     return redirect(url_for("admin_appointments", date=target_day.isoformat()))
 
 
+@app.post("/admin/appointments/internal/availability/day")
+def admin_internal_day_availability():
+    denied = admin_required()
+    if denied:
+        return denied
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    try:
+        target_day = date.fromisoformat(request.form.get("day", ""))
+    except ValueError:
+        return jsonify(error="Choisissez une date valide."), 400
+    action = request.form.get("action", "")
+    if target_day < agenda_now().date() or action not in {"open", "close", "replace", "reset"}:
+        return jsonify(error="Choisissez une journée actuelle ou future et une action valide."), 400
+    start = datetime.combine(target_day, time.min)
+    end = start + timedelta(days=1)
+    stored = {item.starts_at: item for item in AppointmentSlotOverride.query.filter(
+        AppointmentSlotOverride.starts_at >= start, AppointmentSlotOverride.starts_at < end).all()}
+    effective = {stamp: item.is_open for stamp, item in stored.items()}
+    window = APPOINTMENT_WEEKLY_WINDOWS.get(target_day.weekday())
+    candidates = set(range(window[0], window[1], 10)) if window else set()
+    candidates.update(stamp.hour * 60 + stamp.minute for stamp in effective)
+    first, last = request.form.get("start_time", ""), request.form.get("end_time", "")
+    custom = bool(first or last)
+    if custom:
+        try:
+            def minute_value(value):
+                if not re.fullmatch(r"[0-9]{2}:[0-9]{2}", value):
+                    raise ValueError()
+                hours, minutes = map(int, value.split(":"))
+                if minutes not in range(0, 60, 10):
+                    raise ValueError()
+                return hours * 60 + minutes
+            first_minute, last_minute = minute_value(first), minute_value(last)
+            if not 8 * 60 <= first_minute < last_minute <= 21 * 60:
+                raise ValueError()
+        except ValueError:
+            return jsonify(error="Indiquez une plage entre 08:00 et 21:00, par pas de 10 minutes, avec une fin après le début."), 400
+        selected = set(range(first_minute, last_minute, 10))
+    else:
+        usual = window or (18 * 60 + 30, 20 * 60 + 10)
+        selected = candidates if action == "close" else set(range(usual[0], usual[1], 10))
+    if action == "replace" and not custom:
+        return jsonify(error="Indiquez les heures de début et de fin."), 400
+    affected = candidates | selected if action == "replace" else selected
+    appointments = Appointment.query.filter(Appointment.starts_at < end,
+        Appointment.starts_at >= start - timedelta(days=1)).all()
+    holds = {item.starts_at for item in AppointmentHold.query.filter(
+        AppointmentHold.starts_at >= start, AppointmentHold.starts_at < end).all()}
+    protected = 0
+    changed = []
+    for minute in sorted(affected if action != "reset" else {stamp.hour * 60 + stamp.minute for stamp in stored}):
+        stamp = start + timedelta(minutes=minute)
+        if stamp <= agenda_now():
+            continue
+        if stamp in holds or any(item.starts_at < stamp + timedelta(minutes=10)
+                and item.starts_at + timedelta(minutes=item.duration_minutes) > stamp for item in appointments):
+            protected += 1
+            continue
+        item = stored.get(stamp)
+        if action == "reset":
+            if item:
+                db.session.delete(item)
+                changed.append(stamp.isoformat(timespec="minutes"))
+            continue
+        target_open = minute in selected if action == "replace" else action == "open"
+        if item and item.is_open == target_open:
+            continue
+        if item is None:
+            item = AppointmentSlotOverride(starts_at=stamp)
+            db.session.add(item)
+        item.is_open = target_open
+        item.updated_at = datetime.utcnow()
+        changed.append(stamp.isoformat(timespec="minutes"))
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(error="Les horaires n’ont pas été enregistrés. Réessayez."), 503
+    return jsonify(ok=True, day=target_day.isoformat(), changed_slots=changed,
+                   protected_count=protected, scope="shared")
+
+
+@app.post("/admin/appointments/internal/availability")
+def admin_internal_slot_availability():
+    denied = admin_required()
+    if denied:
+        return denied
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    stamp = parse_appointment_slot(request.form.get("slot_start"))
+    if stamp is None or stamp <= agenda_now() or request.form.get("is_open") not in {"0", "1"}:
+        return jsonify(error="Choisissez un créneau futur valide."), 400
+    if slot_is_booked(stamp) or db.session.get(AppointmentHold, stamp):
+        return jsonify(error="Ce créneau contient déjà un rendez-vous ou une réservation."), 409
+    item = db.session.get(AppointmentSlotOverride, stamp)
+    if item is None:
+        item = AppointmentSlotOverride(starts_at=stamp)
+        db.session.add(item)
+    item.is_open = request.form["is_open"] == "1"
+    item.updated_at = datetime.utcnow()
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(error="Créneau non enregistré. Réessayez."), 503
+    return jsonify(ok=True, starts_at=stamp.isoformat(timespec="minutes"), is_open=item.is_open, scope="shared")
+
+
 def build_internal_patient_rows(records):
     """One chronological row per booking; never merge people by their names."""
     records = sorted(records, key=lambda item: item.starts_at)
@@ -4306,9 +4429,8 @@ def admin_appointments():
         shift_date = agenda_now().date()
     week_start = get_appointment_week_start(requested_date)
     week_end = week_start + timedelta(days=7)
-    availability_overrides = {item.starts_at: item.is_open for item in AppointmentSlotOverride.query.filter(
-        AppointmentSlotOverride.starts_at >= datetime.combine(week_start, time.min),
-        AppointmentSlotOverride.starts_at < datetime.combine(week_end, time.min)).all()}
+    availability_overrides = appointment_availability_overrides(datetime.combine(week_start, time.min),
+                                                          datetime.combine(week_end, time.min))
     appointments = (
         Appointment.query
         .options(defer(Appointment.prescription_data))
@@ -4319,16 +4441,17 @@ def admin_appointments():
         .order_by(Appointment.starts_at.asc())
         .all()
     )
+    holds = AppointmentHold.query.options(defer(AppointmentHold.prescription_data)).filter(
+        AppointmentHold.starts_at >= datetime.combine(week_start, time.min),
+        AppointmentHold.starts_at < datetime.combine(week_end, time.min)).all()
     language = get_current_language()
     days, slot_rows = build_appointment_slot_grid(
         week_start,
         appointments,
         language=language,
         availability_overrides=availability_overrides,
+        internal=True, reserved_starts=[hold.starts_at for hold in holds],
     )
-    holds = AppointmentHold.query.options(defer(AppointmentHold.prescription_data)).filter(
-        AppointmentHold.starts_at >= datetime.combine(week_start, time.min),
-        AppointmentHold.starts_at < datetime.combine(week_end, time.min)).all()
     reserved = {hold.starts_at for hold in holds}
     reservation_by_start = {hold.starts_at: hold for hold in holds}
     for row in slot_rows:
@@ -4354,6 +4477,21 @@ def admin_appointments():
     appointment_groups = get_localized_inami_appointment_groups(language)
     for index, day in enumerate(days):
         day["has_slots"] = any(row["slots"][index] is not None for row in slot_rows)
+        window = APPOINTMENT_WEEKLY_WINDOWS.get(day["date"].weekday(), (18 * 60 + 30, 20 * 60 + 10))
+        # Prefill one contiguous opening, never a span across closed gaps or old
+        # overrides. An isolated booked slot must not expand the suggested hours.
+        openings = sorted(slot["starts_at"].hour * 60 + slot["starts_at"].minute
+            for row in slot_rows if (slot := row["slots"][index]) is not None and slot["is_open"])
+        groups = []
+        for minute in openings:
+            if groups and minute == groups[-1][-1] + 10:
+                groups[-1].append(minute)
+            else:
+                groups.append([minute])
+        longest = max(groups, key=len) if groups else None
+        first, last = (longest[0], longest[-1] + 10) if longest else window
+        day["start_time"] = f"{first // 60:02d}:{first % 60:02d}"
+        day["end_time"] = f"{last // 60:02d}:{last % 60:02d}"
     week_holds = [h for h in holds if week_start <= h.starts_at.date() < week_end
                   and h.starts_at not in {a.starts_at for a in appointments}]
     patient_rows = build_internal_patient_rows([*appointments, *week_holds])
@@ -4362,8 +4500,7 @@ def admin_appointments():
     g.appointment_financial_totals = calculate_daily_appointment_finances(
         appointments
     )
-    return render_template(
-        "admin_appointments.html",
+    context = dict(
         patient_rows=patient_rows,
         agenda_asset_version=os.stat(os.path.join(app.static_folder, 'internal_agenda.js')).st_mtime_ns,
         shift_appointments=[a for a in appointments if a.starts_at.date() == shift_date],
@@ -4393,6 +4530,10 @@ def admin_appointments():
         error=(request.args.get("error") or "").strip(),
         success=(request.args.get("success") or "").strip(),
     )
+    if request.args.get("fragment") == "calendar":
+        return jsonify(ok=True, html=render_template("_internal_calendar_grid.html", **context),
+                       available_count=context["available_count"])
+    return render_template("admin_appointments.html", **context)
 
 
 @app.post("/agenda/book", endpoint="public_book_appointment")
@@ -4437,17 +4578,7 @@ def admin_book_appointment():
             error=l10n("Vul de volledige voor- en achternaam in (minstens 5 letters).",
                        "Enter the full first and last name (at least 5 letters).",
                        "Indiquez le prénom et le nom complets (au moins 5 lettres).")))
-    if not public and not patient_email:
-        return redirect(url_for(
-            "admin_appointments",
-            date=week_date,
-            error=l10n(
-                "Kies een geldig tijdstip en vul naam en e-mailadres in.",
-                "Choose a valid time and enter the name and email address.",
-                "Choisissez une heure valide et indiquez le nom et l'adresse e-mail.",
-            ),
-        ))
-    if not appointment_slot_is_open(starts_at):
+    if not (appointment_slot_is_open(starts_at) if public else appointment_slot_is_open(starts_at)):
         return redirect(url_for('admin_appointments', date=week_date,
                                 error='Ce créneau se situe en dehors des horaires de consultation.'))
     if patient_email and "@" not in patient_email:
@@ -4538,7 +4669,9 @@ def admin_book_appointment():
             prescription_attached=bool(prescription_filename),
         ) if public else None)
         db.session.add(appointment)
-        hold = db.session.get(AppointmentHold, starts_at) if public else None
+        # The slot claim must also be consumed for a manual admin booking;
+        # otherwise it leaves a second, phantom reservation on the same slot.
+        hold = db.session.get(AppointmentHold, starts_at)
         if hold:
             saved_report = AppointmentReport.query.filter_by(context_key=appointment_report_key(hold)).first()
             if saved_report:

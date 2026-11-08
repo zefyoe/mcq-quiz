@@ -506,6 +506,13 @@
 .day-menu-actions [data-day-action=close] { color:#9a3b48; background:#fff4f4; border-color:#eed6db; }
 .day-menu-actions button:hover { filter:brightness(.97); }
 .day-menu-actions button:disabled { opacity:.45; cursor:default; }
+.agenda-hours-notice,.day-hours-help { color:#63708a; font-size:.82rem; line-height:1.6; }
+.manage-hours-button { font:inherit; padding:10px 14px; color:#214d83; background:#edf5ff; border:1px solid #bad0eb; border-radius:9px; cursor:pointer; font-weight:700; }
+.day-hours-card { max-width:620px; }
+#internal-calendar-grid .appointment-calendar-grid { grid-template-columns:var(--internal-columns); min-width:600px; }
+.appointment-calendar-toolbar:has(.manage-hours-button) { flex-wrap:wrap; }
+#day-hours-error { color:#a32936; font-size:.85rem; }
+#day-hours-error:empty { display:none; }
 @container (max-width:75px) { .day-menu-actions button span { display:none; } .day-menu-actions button { gap:0; } }
 .patient-list-card { background:white; border:1px solid var(--appointment-border); border-radius:18px; overflow:hidden; }
 .patient-list-card header { padding:20px 24px; }
