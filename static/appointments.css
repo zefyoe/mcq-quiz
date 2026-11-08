@@ -410,6 +410,18 @@
 .appointment-slot-cell.move-target-valid { outline:3px solid #26a36d; outline-offset:-3px; background:#ddf7e9; }
 .appointment-slot-cell.move-target-invalid { outline:3px solid #cf4759; outline-offset:-3px; background:#ffe6e9; }
 .appointment-drag-ghost { position:fixed; z-index:100; pointer-events:none; width:200px; padding:15px; box-sizing:border-box; color:white; background:#28579e; border-radius:10px; box-shadow:0 10px 26px #10243e55; font-weight:700; font-size:.85rem; }
+.appointment-trash-drop { display:none; position:fixed; z-index:101; bottom:max(24px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:210px; min-height:104px; align-items:center; justify-content:center; flex-direction:column; gap:4px; border:2px dashed #cf5364; border-radius:18px; background:#fff4f5; color:#a32e40; box-shadow:0 8px 32px #65203230; font:inherit; font-weight:750; touch-action:none; }
+.appointment-dragging .appointment-trash-drop,.appointment-picking .appointment-trash-drop { display:flex; }
+.appointment-trash-drop small { font-size:.72rem; font-weight:500; }
+.appointment-trash-drop.is-target { background:#b32e43; color:white; border-style:solid; border-color:#b32e43; box-shadow:0 0 0 7px #e5aab280,0 8px 32px #65203230; }
+.trash-confirm-button { background:#ac3041 !important; color:white !important; border-color:#ac3041 !important; }
+.appointment-trash-items { display:grid; gap:10px; margin:18px 0; }
+.appointment-trash-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px; border:1px solid #dce5f0; border-radius:12px; }
+.appointment-trash-row div { min-width:0; overflow-wrap:anywhere; }
+.appointment-trash-row strong,.appointment-trash-row small { display:block; }
+.appointment-trash-row small { color:#6a7890; margin-top:5px; font-size:.78rem; }
+.appointment-trash-row button { min-height:44px; flex-shrink:0; border:1px solid #b8c9df; color:#28579e; background:white; border-radius:8px; padding:8px 12px; font:inherit; font-size:.8rem; font-weight:650; cursor:pointer; }
+@media(max-width:480px) { .appointment-trash-drop { width:180px; min-height:90px; bottom:max(14px,env(safe-area-inset-bottom)); } .appointment-trash-row { align-items:flex-start; flex-direction:column; } }
 .appointment-picking .appointment-slot-cell[data-drop-state=free] { box-shadow:inset 0 0 0 2px #78c5a1; cursor:copy; }
 .move-feedback-error,#move-confirm-error { color:#a32936; }
 .move-confirm-card { max-width:580px; }

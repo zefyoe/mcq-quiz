@@ -13,6 +13,16 @@ from sqlalchemy.orm import load_only
 from models import db, Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, InternalRegisterExclusion, AppointmentMoveReceipt
 
 
+def is_empty_legacy_claim(claim, record_key):
+    if (claim.draft_data or "").strip() not in {"", "{}", "null"} or any((
+            claim.prescription_data,claim.prescription_filename,claim.prescription_mimetype)):
+        return False
+    key=record_key(claim)
+    return (AppointmentReport.query.filter_by(context_key=key).first() is None
+            and db.session.get(AppointmentPatientDetails,key) is None
+            and db.session.get(InternalRegisterExclusion,key) is None)
+
+
 def register_appointment_moves(app, *, admin_required, ensure_schema, csrf_token, now, parse_slot, slot_open, claim_slot, record_key):
     def receipt_payload(receipt):
         return dict(ok=True, starts_at=receipt.target_start.isoformat(timespec="minutes"),
@@ -80,6 +90,16 @@ def register_appointment_moves(app, *, admin_required, ensure_schema, csrf_token
                 return fail("Choisissez un autre créneau.",400)
             if target<=now():
                 return fail("Choisissez un créneau futur.",400)
+            source_claim=None
+            if aid:
+                source_claim=AppointmentHold.query.filter_by(starts_at=expected).with_for_update().first()
+                if source_claim:
+                    # Older manual bookings retained an empty booking lock at
+                    # their start. It must leave with the appointment, or the
+                    # calendar exposes a phantom reservation at the old time.
+                    # A separate populated reservation is never discarded.
+                    if not is_empty_legacy_claim(source_claim,record_key):
+                        return fail("Une réservation distincte contient encore des données à cet horaire. Le déplacement n’a pas été effectué afin de conserver ces informations.")
             duration=record.duration_minutes if aid else 10
             finish=target+timedelta(minutes=duration)
             if duration<=0 or finish>datetime.combine(target.date(),time(21)):
@@ -105,6 +125,8 @@ def register_appointment_moves(app, *, admin_required, ensure_schema, csrf_token
                     return fail("Ce rendez-vous vient d’être déplacé. Actualisez l’agenda.")
                 db.session.refresh(record)
                 new_key=record_key(record)
+                if source_claim:
+                    db.session.delete(source_claim)
                 AppointmentHold.query.filter(AppointmentHold.starts_at.in_(stamps),AppointmentHold.token=="move:"+token).delete(synchronize_session=False)
             else:
                 # The claimed target row becomes the original reservation, with

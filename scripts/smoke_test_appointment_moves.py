@@ -39,7 +39,10 @@ try:
         a=Appointment(starts_at=day,patient_name="PATIENT FICTIF",patient_email="private@example.invalid",patient_phone="TEST",insurance_status="bim",notes="Texte privé fictif",appointment_type="459712",inami_code="459712",inami_invoice_total_cents=10295,duration_minutes=20,prescription_filename="demande.pdf",prescription_mimetype="application/pdf",prescription_data=scan)
         b=Appointment(starts_at=thu,patient_name="AUTRE PATIENT",patient_email="",appointment_type="460095")
         hold=AppointmentHold(starts_at=thu+timedelta(minutes=10),token="owner-token",expires_at=thu+timedelta(days=365),draft_data=json.dumps({"patient_name":"RESERVATION FICTIVE","inami_code":"459712","insurance_status":"bim","patient_phone":"PRIVATE"}),prescription_filename="hold.pdf",prescription_mimetype="application/pdf",prescription_data=scan)
-        db.session.add_all([a,b,hold]);db.session.flush();aid,bid=a.id,b.id;old_key=appointment_report_key(a);hold_key=appointment_report_key(hold)
+        # Older manual bookings left their empty slot claim alongside the
+        # appointment. Moving must consume it, otherwise the source stays busy.
+        legacy_claim=AppointmentHold(starts_at=day,token="legacy-admin-claim",expires_at=day+timedelta(days=365))
+        db.session.add_all([a,b,hold,legacy_claim]);db.session.flush();aid,bid=a.id,b.id;old_key=appointment_report_key(a);hold_key=appointment_report_key(hold)
         for record,key in ((a,old_key),(hold,hold_key)):
             db.session.add(AppointmentReport(context_key=key,patient_name="FICTIF",examination="Examen fictif",starts_at=record.starts_at,report_date=day.date(),report_text="Rapport fictif à conserver.",radiologist="Dr Test"))
             db.session.add(AppointmentPatientDetails(context_key=key,national_number="00123456789",billing_code="459712"))
@@ -70,13 +73,29 @@ try:
         assert report.report_text=="Rapport fictif à conserver." and report.report_date==day.date() and report.radiologist=="Dr Test" and report.starts_at==target
         assert db.session.get(InternalRegisterExclusion,new_key).is_removed is True
         assert AppointmentHold.query.count()==1 and AppointmentMoveReceipt.query.count()==1
+        assert db.session.get(AppointmentHold,day) is None
+        assert Appointment.query.filter_by(starts_at=day).count()==0
         assert bookable_appointment_slots(day.date())[:2]==(day,day+timedelta(minutes=10))
+    fragment=admin.get("/admin/appointments?date="+day.date().isoformat()+"&fragment=calendar").json
+    old_cell=fragment["html"].split('data-start="'+day.isoformat(timespec="minutes")+'"',1)[1].split('</div>',1)[0]
+    assert 'data-drop-state="free"' in old_cell and 'data-move-card' not in old_cell
+    assert 'data-slot="'+day.isoformat(timespec="minutes")+'"' in old_cell
     assert admin.post(route,data=payload).status_code==200  # Lost response retry is idempotent.
     assert admin.post(route,data=dict(payload,target_start=target.replace(minute=30).isoformat())).status_code==409
     assert admin.post(route,data=dict(payload,move_token=str(uuid4()),target_start=target.replace(minute=30).isoformat())).status_code==409
     for value in ("PATIENT FICTIF","00123456789","private@example.invalid","Rapport fictif","Texte privé fictif"):
         assert value not in public.get("/agenda?date="+day.date().isoformat()).text
     next_payload=dict(payload,move_token=str(uuid4()),expected_start=target.isoformat(),expected_key=new_key,target_start=target.replace(minute=30).isoformat())
+    # Do not mistake a distinct, populated reservation for an empty old lock.
+    with app.app_context():
+        db.session.add(AppointmentHold(starts_at=target,token="distinct-reservation",expires_at=target+timedelta(days=365),draft_data='{"patient_name":"AUTRE RESERVATION"}'))
+        db.session.commit()
+    assert admin.post(route,data=next_payload).status_code==409
+    with app.app_context():
+        assert db.session.get(Appointment,aid).starts_at==target
+        protected=db.session.get(AppointmentHold,target)
+        assert protected.draft["patient_name"]=="AUTRE RESERVATION"
+        db.session.delete(protected);db.session.commit()
     with patch.object(db.session,"commit",side_effect=OperationalError("test",{},Exception("offline"))):
         assert admin.post(route,data=next_payload).status_code==503
     with app.app_context():

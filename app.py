@@ -55,7 +55,8 @@ from appointment_confirmation import create_appointment_confirmation_pdf
 from radiology_report import create_radiology_report_pdf
 from historical_dossiers import register_historical_dossiers, historical_riziv_rows
 from appointment_moves import register_appointment_moves
-from models import AppointmentMoveReceipt
+from appointment_trash import register_appointment_trash
+from models import AppointmentMoveReceipt, AppointmentTrash
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
@@ -807,6 +808,7 @@ def ensure_appointment_schema() -> None:
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentMoveReceipt.__table__.create(bind=db.engine, checkfirst=True)
+    AppointmentTrash.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentReport.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentPatientDetails.__table__.create(bind=db.engine, checkfirst=True)
     HistoricalDossier.__table__.create(bind=db.engine, checkfirst=True)
@@ -4526,7 +4528,7 @@ def admin_appointments():
         timedelta=timedelta,
         days=days,
         slot_rows=slot_rows,
-        booked_count=len(appointments) + len(holds),
+        booked_count=len(patient_rows),
         available_count=sum(not slot['blocked'] and not slot['appointment']
                             for row in slot_rows for slot in row['slots'] if slot is not None),
         appointment_groups=appointment_groups,
@@ -4538,7 +4540,7 @@ def admin_appointments():
     )
     if request.args.get("fragment") == "calendar":
         return jsonify(ok=True, html=render_template("_internal_calendar_grid.html", **context),
-                       available_count=context["available_count"], patient_total=len(patient_rows),
+                       available_count=context["available_count"], booked_count=context["booked_count"], patient_total=len(patient_rows),
                        patient_list_html=render_template("_internal_patient_list.html", **context),
                        day_summary_html=render_template("_internal_day_summary.html", **context))
     return render_template("admin_appointments.html", **context)
@@ -5598,6 +5600,9 @@ register_historical_dossiers(app, admin_required=admin_required, ensure_schema=e
 register_appointment_moves(app, admin_required=admin_required, ensure_schema=ensure_appointment_schema,
     csrf_token=agenda_token, now=agenda_now, parse_slot=parse_appointment_slot,
     slot_open=appointment_slot_is_open, claim_slot=claim_agenda_slot, record_key=appointment_report_key)
+
+register_appointment_trash(app, admin_required=admin_required, ensure_schema=ensure_appointment_schema,
+    csrf_token=agenda_token, now=agenda_now, claim_slot=claim_agenda_slot, record_key=appointment_report_key)
 
 
 def initialize_database_schema():

@@ -76,7 +76,7 @@
           <div class="appointment-stats" aria-label="{{ l10n('Overzicht deze week', 'Overview this week', 'Aperçu de cette semaine') }}">
             <div>
               <span>{{ l10n('Ingepland', 'Scheduled', 'Planifiés') }}</span>
-              <strong>{{ booked_count }}</strong>
+              <strong data-booked-count>{{ booked_count }}</strong>
             </div>
             <div>
               <span>{{ l10n('Beschikbaar', 'Available', 'Disponibles') }}</span>
@@ -108,6 +108,7 @@
               <p class="agenda-hours-notice">L’agenda public suit vos disponibilités. Les informations des patients restent uniquement internes.</p>
             </div>
             <div class="appointment-week-actions">
+              <button type="button" class="manage-hours-button" id="open-appointment-trash">Corbeille</button>
               <button type="button" class="manage-hours-button" data-day-hours="{{ (shift_date if shift_date >= today else today).isoformat() }}">Gérer les horaires</button>
               <a href="{{ url_for('admin_appointments', date=(week_start - timedelta(days=7)).isoformat()) }}" aria-label="{{ l10n('Vorige week', 'Previous week', 'Semaine précédente') }}">{{ l10n('Vorige week', 'Previous week', 'Semaine précédente') }}</a>
               <a class="appointment-today-link" href="{{ url_for('admin_appointments') }}">{{ l10n('Vandaag', 'Today', 'Aujourd’hui') }}</a>

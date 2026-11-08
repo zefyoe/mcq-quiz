@@ -65,6 +65,8 @@
       gridContainer.innerHTML = result.html;
       const counter=document.querySelector('[data-available-count]');
       if(counter) counter.textContent=result.available_count;
+      const booked=document.querySelector('[data-booked-count]');
+      if(booked) booked.textContent=result.booked_count;
       if(result.patient_list_html) {
         const hidden=document.getElementById('patient-list').hidden;
         document.getElementById('patient-list').outerHTML=result.patient_list_html;

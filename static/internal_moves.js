@@ -1,7 +1,7 @@
 /* Pointer-based drag/drop (mouse, iPad touch, pen) plus a keyboard/tap fallback. */
 (() => {
   const $=id=>document.getElementById(id), dialog=$('move-appointment-dialog');
-  const agenda=window.internalAgenda;
+  const agenda=window.internalAgenda, trashDrop=$('appointment-trash-drop'), trashDialog=$('appointment-trash-dialog');
   let gesture=null, picked=null, pending=null, busy=false, ignoreClickUntil=0;
   const stampLabel=stamp=>new Date(stamp).toLocaleString('fr-BE',{dateStyle:'full',timeStyle:'short'});
   function notify(message,error=false) {
@@ -15,6 +15,7 @@
   function clearHighlights() {
     document.querySelectorAll('.move-target-valid,.move-target-invalid,.move-source').forEach(e=>e.classList.remove('move-target-valid','move-target-invalid','move-source'));
     document.body.classList.remove('appointment-picking');
+    trashDrop.classList.remove('is-target');
   }
   function clearPick() {picked=null;clearHighlights();}
   function highlightSource(source) {
@@ -54,10 +55,32 @@
     if(agenda.availabilityIsBusy()) {notify('Attendez la fin de la modification des horaires.',true);return;}
     if(window.internalReporting&&!window.internalReporting.close()) return;
     if(window.internalHistory&&!window.internalHistory.close()) return;
-    pending={source,target:cell.dataset.start,token:crypto.randomUUID(),attempted:false};
+    pending={source,target:cell.dataset.start,mode:'move',token:crypto.randomUUID(),attempted:false};
+    $('move-appointment-title').textContent='Déplacer le rendez-vous ?';
+    $('confirm-appointment-move').textContent='Oui, déplacer';
+    $('confirm-appointment-move').classList.remove('trash-confirm-button');
+    $('move-to-time').closest('div').hidden=false;
+    $('move-confirm-description').textContent='Le patient, l’examen, le statut, la demande et le compte rendu sont conservés. L’ancien créneau est libéré après confirmation.';
     $('move-patient-name').textContent=source.name;
     $('move-from-time').textContent=stampLabel(source.start);
     $('move-to-time').textContent=stampLabel(pending.target);
+    $('move-confirm-error').textContent='';
+    dialog.hidden=false;document.body.classList.add('appointment-modal-open');
+    dialog.querySelector('button[data-cancel-move]').focus();
+  }
+  function proposeTrash(source) {
+    clearPick();
+    if(agenda.availabilityIsBusy()) {notify('Attendez la fin de la modification des horaires.',true);return;}
+    if(window.internalReporting&&!window.internalReporting.close()) return;
+    if(window.internalHistory&&!window.internalHistory.close()) return;
+    pending={source,mode:'trash',token:crypto.randomUUID(),attempted:false};
+    $('move-appointment-title').textContent='Retirer ce rendez-vous de l’agenda ?';
+    $('confirm-appointment-move').textContent='Oui, mettre à la corbeille';
+    $('confirm-appointment-move').classList.add('trash-confirm-button');
+    $('move-patient-name').textContent=source.name;
+    $('move-from-time').textContent=stampLabel(source.start);
+    $('move-to-time').closest('div').hidden=true;
+    $('move-confirm-description').textContent='Le créneau sera libéré. Les données du patient, la demande et le compte rendu seront conservés dans la corbeille. Vous pourrez rétablir le rendez-vous.';
     $('move-confirm-error').textContent='';
     dialog.hidden=false;document.body.classList.add('appointment-modal-open');
     dialog.querySelector('button[data-cancel-move]').focus();
@@ -68,22 +91,61 @@
     const operation=pending, source=operation.source, body=new FormData();
     body.set('csrf_token',dialog.dataset.csrf);body.set('move_token',operation.token);
     body.set('appointment_id',source.id);body.set('reservation_start',source.kind==='reservation'?source.start:'');
-    body.set('expected_start',source.start);body.set('expected_key',source.key);body.set('target_start',operation.target);
+    body.set('expected_start',source.start);body.set('expected_key',source.key);
+    if(operation.mode==='move') body.set('target_start',operation.target);
     dialog.querySelectorAll('button').forEach(e=>{e.disabled=true;});
-    $('move-confirm-error').textContent='Déplacement en cours…';
+    const trash=operation.mode==='trash';
+    $('move-confirm-error').textContent=trash?'Retrait en cours…':'Déplacement en cours…';
     let saved=false;
     try {
-      await agenda.request(dialog.dataset.endpoint,{method:'POST',body});saved=true;
-      await agenda.refreshCalendar(operation.target.slice(0,10));
+      await agenda.request(trash?dialog.dataset.trashEndpoint:dialog.dataset.endpoint,{method:'POST',body});saved=true;
+      await agenda.refreshCalendar((operation.target||source.start).slice(0,10));
       pending=null;dialog.hidden=true;document.body.classList.remove('appointment-modal-open');
-      notify('Rendez-vous déplacé au '+stampLabel(operation.target)+'. Toutes les données ont été conservées.');
+      notify(trash?'Rendez-vous retiré de l’agenda. Le créneau est libre. Les données restent dans la corbeille.':'Rendez-vous déplacé au '+stampLabel(operation.target)+'. L’ancien créneau est libéré. Toutes les données ont été conservées.');
     } catch(error) {
-      if(saved) {pending=null;dialog.hidden=true;document.body.classList.remove('appointment-modal-open');notify('Le rendez-vous a été déplacé. '+error.message,true);}
+      if(saved) {pending=null;dialog.hidden=true;document.body.classList.remove('appointment-modal-open');notify((trash?'Le rendez-vous est dans la corbeille. ':'Le rendez-vous a été déplacé. ')+error.message,true);}
       else $('move-confirm-error').textContent=error.message;
     } finally {busy=false;dialog.querySelectorAll('button').forEach(e=>{e.disabled=false;});}
   }
   $('confirm-appointment-move').addEventListener('click',confirmMove);
   dialog.querySelectorAll('[data-cancel-move]').forEach(e=>e.addEventListener('click',cancel));
+
+  async function loadTrash() {
+    $('appointment-trash-status').textContent='Chargement…';
+    $('appointment-trash-items').replaceChildren();
+    try {
+      const result=await agenda.request(dialog.dataset.trashEndpoint);
+      $('appointment-trash-status').textContent=result.items.length?result.items.length+' rendez-vous dans la corbeille.':'La corbeille est vide.';
+      result.items.forEach(item=>{
+        const row=document.createElement('div'), info=document.createElement('div'), name=document.createElement('strong'), date=document.createElement('small'), button=document.createElement('button');
+        row.className='appointment-trash-row';name.textContent=item.patient_name;date.textContent=stampLabel(item.starts_at);
+        info.append(name,date);button.type='button';button.textContent='Rétablir';button.dataset.restoreTrash=item.token;
+        row.append(info,button);$('appointment-trash-items').append(row);
+      });
+    } catch(error) {$('appointment-trash-status').textContent=error.message;}
+  }
+  $('open-appointment-trash').addEventListener('click',()=>{
+    if(busy||pending||agenda.availabilityIsBusy()) return;
+    if(window.internalReporting&&!window.internalReporting.close()) return;
+    if(window.internalHistory&&!window.internalHistory.close()) return;
+    clearPick();trashDialog.hidden=false;document.body.classList.add('appointment-modal-open');
+    trashDialog.querySelector('button[data-close-trash]').focus();loadTrash();
+  });
+  function closeTrash() {if(busy) return;trashDialog.hidden=true;document.body.classList.remove('appointment-modal-open');}
+  trashDialog.querySelectorAll('[data-close-trash]').forEach(button=>button.addEventListener('click',closeTrash));
+  trashDialog.addEventListener('click',async event=>{
+    const button=event.target.closest('[data-restore-trash]');
+    if(!button||busy) return;
+    busy=true;trashDialog.querySelectorAll('button').forEach(b=>{b.disabled=true;});
+    const body=new FormData();body.set('csrf_token',dialog.dataset.csrf);
+    let saved=false;
+    try {
+      await agenda.request(dialog.dataset.trashEndpoint+'/'+encodeURIComponent(button.dataset.restoreTrash)+'/restore',{method:'POST',body});saved=true;
+      await agenda.refreshCalendar();await loadTrash();
+      $('appointment-trash-status').textContent='Rendez-vous rétabli à son horaire initial.';
+    } catch(error) {$('appointment-trash-status').textContent=(saved?'Le rendez-vous est rétabli. ':'')+error.message;}
+    finally {busy=false;trashDialog.querySelectorAll('button').forEach(b=>{b.disabled=false;});}
+  });
 
   function endGesture() {
     const previous=gesture;if(!previous) return null;
@@ -103,13 +165,15 @@
       if(dx||dy) scroll.scrollBy(dx,dy);
     }
     if(y<35) window.scrollBy(0,-10);else if(y>innerHeight-35) window.scrollBy(0,10);
-    const cell=document.elementFromPoint(x,y)?.closest('.appointment-slot-cell');
+    const hit=document.elementFromPoint(x,y), overTrash=Boolean(hit?.closest('#appointment-trash-drop'));
+    trashDrop.classList.toggle('is-target',overTrash);
+    const cell=hit?.closest('.appointment-slot-cell');
     preview(source,cell);
     gesture.frame=requestAnimationFrame(animate);
   }
   document.addEventListener('pointerdown',event=>{
     const card=event.target.closest('[data-move-card]');
-    if(!card||busy||pending||agenda.availabilityIsBusy()||event.button!==0) return;
+    if(!card||busy||pending||!trashDialog.hidden||agenda.availabilityIsBusy()||event.button!==0) return;
     const handle=event.target.closest('[data-move-handle]');
     if(picked&&!handle) return;
     if(!handle&&(event.pointerType!=='mouse'||event.target.closest('button,a,input,select,summary,details'))) return;
@@ -130,19 +194,20 @@
   },{passive:false});
   document.addEventListener('pointerup',event=>{
     if(!gesture||gesture.id!==event.pointerId) return;
-    const cell=document.elementFromPoint(event.clientX,event.clientY)?.closest('.appointment-slot-cell');
+    const hit=document.elementFromPoint(event.clientX,event.clientY), cell=hit?.closest('.appointment-slot-cell'), overTrash=Boolean(hit?.closest('#appointment-trash-drop'));
     const previous=endGesture();
-    if(previous.active) {ignoreClickUntil=performance.now()+500;event.preventDefault();propose(previous.source,cell);}
+    if(previous.active) {ignoreClickUntil=performance.now()+500;event.preventDefault();if(overTrash) proposeTrash(previous.source);else propose(previous.source,cell);}
   });
   document.addEventListener('pointercancel',()=>{endGesture();});
   window.addEventListener('blur',()=>{endGesture();});
   document.addEventListener('dragstart',event=>{if(event.target.closest('[data-move-card]')) event.preventDefault();});
   document.addEventListener('click',event=>{
+    if(event.target.closest('#appointment-trash-drop')&&picked) {event.preventDefault();event.stopImmediatePropagation();proposeTrash(picked);return;}
     if(performance.now()<ignoreClickUntil&&event.target.closest('.appointment-calendar-grid')) {event.preventDefault();event.stopImmediatePropagation();return;}
     const handle=event.target.closest('[data-move-handle]');
     if(handle) {
       event.preventDefault();event.stopImmediatePropagation();
-      if(busy||pending||agenda.availabilityIsBusy()) return;
+      if(busy||pending||!trashDialog.hidden||agenda.availabilityIsBusy()) return;
       clearPick();picked=sourceOf(handle.closest('[data-move-card]'));highlightSource(picked);
       document.body.classList.add('appointment-picking');
       notify('Choisissez une case libre pour '+picked.name+', ou appuyez sur Échap pour annuler.');return;
@@ -151,9 +216,10 @@
     if(picked&&cell) {event.preventDefault();event.stopImmediatePropagation();propose(picked,cell);}
   },true);
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape') {endGesture();cancel();clearPick();}
-    if(event.key==='Tab'&&!dialog.hidden) {
-      const buttons=[...dialog.querySelectorAll('button:not([disabled])')];
+    if(event.key==='Escape') {endGesture();cancel();closeTrash();clearPick();}
+    const modal=!dialog.hidden?dialog:!trashDialog.hidden?trashDialog:null;
+    if(event.key==='Tab'&&modal) {
+      const buttons=[...modal.querySelectorAll('button:not([disabled])')];
       const index=buttons.indexOf(document.activeElement);
       if(buttons.length&&((event.shiftKey&&index<=0)||(!event.shiftKey&&index===buttons.length-1))) {
         event.preventDefault();buttons[event.shiftKey?buttons.length-1:0].focus();

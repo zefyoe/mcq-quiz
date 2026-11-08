@@ -55,7 +55,9 @@ with a mouse or the touch grip on iPad. Clicking/tapping the grip and then a fre
 cell is the keyboard/touch alternative. A free drop opens **Oui, déplacer / Non,
 annuler**; occupied/closed cells are rejected. The server rechecks the whole
 duration, claims every target slot with the public booking lock, and updates the
-original record transactionally. Patient/contact/insurance data, tariff snapshots,
+original record transactionally. The old slot is released, including an empty
+legacy claim left by older manual bookings; a separate populated reservation is
+protected instead of discarded. Patient/contact/insurance data, tariff snapshots,
 request bytes, report text/date and dossier identifiers stay attached. Report,
 identifier and register-exclusion keys migrate with the new scheduling position.
 UUID move receipts preserve the previous position and make retries safe. No data
@@ -65,6 +67,17 @@ must be saved/closed before confirming a move if their editor has unsaved change
 Run `python scripts/smoke_test_appointment_moves.py` for synthetic preservation,
 reservation, permission, stale request, overlapping-race, retry and rollback checks;
 `--serve` also starts the disposable drag/drop demonstration.
+
+Dragging also reveals a **Corbeille** target. Dropping there (or tapping the
+grip and then the bin) asks for confirmation before removing the booking from
+the active agenda and freeing its original slot. The complete original record
+and prescription bytes are retained privately in `appointment_trash`; its report,
+patient details and register state keep their keys. **Corbeille** in the calendar
+toolbar lists removed bookings with **Rétablir**. Restoration checks every slot
+and never replaces another patient. It also rekeys related records if SQLite
+has reused the old numeric id. The removal UUID makes lost-response retries
+safe. Both appointments and persistent reservations are supported. Nothing is
+sent by email or exposed to the public calendar.
 
 **XIMEO-RIZIV** shows all agenda patients/reservations and paper-era records in
 one chronological document workspace. The separate **Liste RIZIV** remains

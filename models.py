@@ -75,6 +75,20 @@ class AppointmentMoveReceipt(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
+class AppointmentTrash(db.Model):
+    """Recoverable internal cancellation; original documents remain private."""
+    token = db.Column(db.String(36), primary_key=True)
+    fingerprint = db.Column(db.String(64), nullable=False)
+    source_kind = db.Column(db.String(12), nullable=False)
+    context_key = db.Column(db.String(64), nullable=False)
+    starts_at = db.Column(db.DateTime, nullable=False, index=True)
+    record_data = db.deferred(db.Column(db.Text, nullable=False))
+    prescription_data = db.deferred(db.Column(db.LargeBinary, nullable=True))
+    deleted_by = db.Column(db.Integer, nullable=False)
+    deleted_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    restored_at = db.Column(db.DateTime, nullable=True)
+
+
 class AppointmentHold(db.Model):
     starts_at = db.Column(db.DateTime, primary_key=True)
     token = db.Column(db.String(80), nullable=False)

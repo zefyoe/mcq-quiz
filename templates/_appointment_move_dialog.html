@@ -1,11 +1,25 @@
-<div class="appointment-modal" id="move-appointment-dialog" data-endpoint="{{ url_for('admin_move_appointment') }}" data-csrf="{{ csrf_token }}" hidden>
+<button type="button" id="appointment-trash-drop" class="appointment-trash-drop" aria-label="Déposer le rendez-vous dans la corbeille">
+  <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 10v7m4-7v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span>Corbeille</span><small>Déposer pour retirer</small>
+</button>
+<div class="appointment-modal" id="move-appointment-dialog" data-endpoint="{{ url_for('admin_move_appointment') }}" data-trash-endpoint="{{ url_for('admin_trash_appointment') }}" data-csrf="{{ csrf_token }}" hidden>
   <div class="appointment-modal-backdrop" data-cancel-move></div>
   <section class="appointment-modal-card move-confirm-card" role="dialog" aria-modal="true" aria-labelledby="move-appointment-title">
     <h2 id="move-appointment-title">Déplacer le rendez-vous ?</h2>
     <p id="move-patient-name" class="move-patient-name"></p>
     <dl class="move-time-comparison"><div><dt>Horaire actuel</dt><dd id="move-from-time"></dd></div><div><dt>Nouvel horaire</dt><dd id="move-to-time"></dd></div></dl>
-    <p>Le patient, l’examen, le statut, la demande et le compte rendu sont conservés. L’ancien créneau est libéré après confirmation.</p>
+    <p id="move-confirm-description">Le patient, l’examen, le statut, la demande et le compte rendu sont conservés. L’ancien créneau est libéré après confirmation.</p>
     <p id="move-confirm-error" role="alert"></p>
     <div class="report-actions"><button type="button" id="confirm-appointment-move">Oui, déplacer</button><button type="button" data-cancel-move>Non, annuler</button></div>
+  </section>
+</div>
+<div class="appointment-modal" id="appointment-trash-dialog" hidden>
+  <div class="appointment-modal-backdrop" data-close-trash></div>
+  <section class="appointment-modal-card move-confirm-card" role="dialog" aria-modal="true" aria-labelledby="appointment-trash-title">
+    <h2 id="appointment-trash-title">Corbeille des rendez-vous</h2>
+    <p>Les rendez-vous retirés libèrent leur créneau. Leurs demandes, comptes rendus et autres données sont conservés. Vous pouvez les rétablir si l’ancien créneau est libre.</p>
+    <p id="appointment-trash-status" role="status" aria-live="polite"></p>
+    <div id="appointment-trash-items" class="appointment-trash-items"></div>
+    <div class="report-actions"><button type="button" data-close-trash>Fermer</button></div>
   </section>
 </div>
