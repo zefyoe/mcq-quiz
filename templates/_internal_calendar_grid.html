@@ -1,5 +1,5 @@
 {% from '_patient_report_link.html' import report_link %}
-            <div class="appointment-calendar-grid" style="--internal-columns:32px{% for day in days %} {{ 'minmax(100px,1fr)' if day.has_slots else '38px' }}{% endfor %}">
+            <div class="appointment-calendar-grid" style="--internal-columns:48px repeat(7,minmax(112px,1fr))">
               <div class="appointment-time-column appointment-grid-head">{{ l10n('Tijd', 'Time', 'Heure') }}</div>
               {% for day in days %}
                 <details name="agenda-day-actions" class="appointment-day-header day-menu{% if day.date == today %} is-today{% endif %}">
