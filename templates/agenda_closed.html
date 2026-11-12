@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Le cabinet est temporairement fermé. Nous déménageons vers un nouveau lieu et reviendrons prochainement avec la nouvelle adresse et la date de reprise des consultations.">
   <title>Fermeture temporaire · {{ practice_name }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='agenda_closed.css', v='2') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='agenda_closed.css', v='3') }}">
 </head>
 <body>
   <header><span class="brand">{{ practice_short_name }}</span><span>Cabinet de radiologie</span></header>
@@ -19,6 +19,7 @@
       <p class="closure-moving">Nous déménageons vers un nouveau lieu.</p>
       <p class="closure-copy">Nous reviendrons vers vous prochainement pour vous communiquer la nouvelle adresse et la date de reprise des consultations.</p>
       <div class="booking-notice"><span aria-hidden="true"></span>La prise de rendez-vous est suspendue.</div>
+      <p class="closure-contact">Renseignements : <a href="tel:+32456652189">+32 456 65 21 89</a></p>
       <p class="thanks">Merci pour votre patience, votre confiance et votre compréhension.</p>
     </section>
   </main>
