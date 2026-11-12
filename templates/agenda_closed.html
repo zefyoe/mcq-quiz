@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Le cabinet est temporairement fermé. Les informations concernant la reprise des consultations seront communiquées prochainement.">
+  <meta name="description" content="Le cabinet est temporairement fermé. Nous déménageons vers un nouveau lieu et reviendrons prochainement avec la nouvelle adresse et la date de reprise des consultations.">
   <title>Fermeture temporaire · {{ practice_name }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='agenda_closed.css', v='1') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='agenda_closed.css', v='2') }}">
 </head>
 <body>
   <header><span class="brand">{{ practice_short_name }}</span><span>Cabinet de radiologie</span></header>
   <main>
     <section class="closure-card" aria-labelledby="closure-title">
-      <span class="closure-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 3v4m8-4v4M4 10h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="m10 14 4 4m0-4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <div class="closure-illustration" aria-hidden="true">
+        <span class="closure-mark">😔</span>
+        <svg class="moving-illustration" viewBox="0 0 180 72" fill="none" focusable="false"><path d="M8 65h164" stroke="#dbe4ef" stroke-width="2" stroke-linecap="round"/><rect x="21" y="31" width="46" height="34" rx="4" fill="#edf3fa" stroke="#91a8c7" stroke-width="1.5"/><path d="M39 32v12l5-3 5 3V32" stroke="#91a8c7" stroke-width="1.5" stroke-linejoin="round"/><rect x="62" y="13" width="42" height="33" rx="4" fill="#f8faff" stroke="#91a8c7" stroke-width="1.5"/><path d="M78 14v11l5-3 5 3V14" stroke="#91a8c7" stroke-width="1.5" stroke-linejoin="round"/><rect x="72" y="44" width="39" height="21" rx="3" fill="#e1eaf6" stroke="#91a8c7" stroke-width="1.5"/><path d="M89 45v8h6v-8" stroke="#91a8c7" stroke-width="1.5"/><path d="M121 45c0-18 27-18 27-34m-5 4 5-5 5 5" stroke="#6b89b1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 5"/><path d="M136 65V50m-7-8c8-2 13 3 7 10-8 1-11-4-7-10Zm14 3c-5 0-9 4-7 9 6 1 10-3 7-9Z" fill="#dcebe6" stroke="#8bad9f" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
       <p class="eyebrow">INFORMATION AUX PATIENTS</p>
       <h1 id="closure-title">Le cabinet est<br>temporairement fermé.</h1>
-      <p class="closure-copy">La date de reprise des consultations et la nouvelle adresse seront communiquées prochainement.</p>
+      <p class="closure-moving">Nous déménageons vers un nouveau lieu.</p>
+      <p class="closure-copy">Nous reviendrons vers vous prochainement pour vous communiquer la nouvelle adresse et la date de reprise des consultations.</p>
       <div class="booking-notice"><span aria-hidden="true"></span>La prise de rendez-vous est suspendue.</div>
-      <p class="thanks">Nous vous remercions pour votre compréhension.</p>
+      <p class="thanks">Merci pour votre patience, votre confiance et votre compréhension.</p>
     </section>
   </main>
   <footer>{{ practice_name }} · Cabinet de radiologie</footer>
