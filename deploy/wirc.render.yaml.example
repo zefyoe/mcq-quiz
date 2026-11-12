@@ -40,5 +40,7 @@ databases:
   - name: wirc-agenda-db
     region: frankfurt
     plan: 0.1c-256mb
+    diskSizeGB: 5
+    storageAutoscalingEnabled: false
     databaseName: wirc_agenda
     ipAllowList: []

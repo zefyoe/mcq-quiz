@@ -24,6 +24,9 @@
    format in its [Blueprint reference](https://render.com/docs/blueprint-spec).
    Do not store patient data in a trial database: Render's
    [free database expires after 30 days](https://render.com/docs/free).
+   The owner authorized up to €20/month for the new application and database.
+   The initial database is capped at 5 GB with automatic storage growth disabled;
+   check the live Render estimate before creating resources or increasing limits.
 3. Create the new service and database from this separate Blueprint. Do not
    clone/restore the former database or copy its `DATABASE_URL`/`SECRET_KEY`.
    `PRACTICE_PROFILE=wirc` requires `WIRC_DATABASE_URL`; it refuses the default old
