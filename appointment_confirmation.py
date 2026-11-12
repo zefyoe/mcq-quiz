@@ -10,6 +10,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
+from practice_settings import PRACTICE_NAME, PRACTICE_SHORT_NAME
 
 
 NAVY = colors.HexColor("#172b49")
@@ -26,8 +27,8 @@ def create_appointment_confirmation_pdf(
     """Return a private PDF without tariff, INAMI code or insurance details."""
     output = BytesIO()
     page = canvas.Canvas(output, pagesize=A4, pageCompression=1)
-    page.setTitle("Confirmation de rendez-vous - Bymed Radiologie")
-    page.setAuthor("Bymed Radiologie")
+    page.setTitle("Confirmation de rendez-vous - " + PRACTICE_NAME)
+    page.setAuthor(PRACTICE_NAME)
     width, height = A4
     margin = 54
 
@@ -45,7 +46,7 @@ def create_appointment_confirmation_pdf(
 
     page.setFillColor(NAVY)
     page.rect(0, height - 116, width, 116, fill=1, stroke=0)
-    paragraph("BYMED", margin, height - 42, width - 2 * margin,
+    paragraph(PRACTICE_SHORT_NAME.upper(), margin, height - 42, width - 2 * margin,
               size=24, leading=28, color=colors.white, bold=True)
     paragraph("CABINET PRIVÉ DE RADIOLOGIE", margin, height - 75,
               width - 2 * margin, size=9, leading=13, color=colors.HexColor("#c7daef"))
@@ -70,7 +71,7 @@ def create_appointment_confirmation_pdf(
         ("PATIENT", patient_name),
         ("EXAMEN", examination),
         ("DATE ET HEURE", starts_at.strftime("%d/%m/%Y à %H:%M")),
-        ("LIEU", practice_address or "Cabinet Bymed Radiologie"),
+        ("LIEU", practice_address or "Adresse à confirmer"),
     ]
     for label, value in details:
         cursor = paragraph(label, x, cursor, inner_width, size=8, leading=11,

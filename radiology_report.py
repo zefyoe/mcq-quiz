@@ -7,6 +7,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from practice_settings import PRACTICE_NAME
 
 
 def create_radiology_report_pdf(*, patient_name, examination, starts_at,
@@ -15,7 +16,7 @@ def create_radiology_report_pdf(*, patient_name, examination, starts_at,
     # Stable PDF bytes let the mail service deduplicate retries of the same report.
     document = SimpleDocTemplate(output, pagesize=A4, rightMargin=20*mm,
         leftMargin=20*mm, topMargin=66*mm, bottomMargin=22*mm,
-        title="Compte rendu radiologique", author=radiologist or "Bymed Radiologie", invariant=True)
+        title="Compte rendu radiologique", author=radiologist or PRACTICE_NAME, invariant=True)
     body_style = ParagraphStyle("report", fontName="Helvetica", fontSize=11,
                                leading=16, spaceAfter=8, splitLongWords=True)
     meta_style = ParagraphStyle("metadata", fontName="Helvetica", fontSize=10, leading=14)
@@ -38,7 +39,7 @@ def create_radiology_report_pdf(*, patient_name, examination, starts_at,
         width, height = A4
         page.setFillColor(colors.HexColor("#172b49"))
         page.setFont("Helvetica-Bold", 18)
-        page.drawString(20*mm, height-23*mm, "BYMED - RADIOLOGIE")
+        page.drawString(20*mm, height-23*mm, PRACTICE_NAME)
         address.drawOn(page, 20*mm, height-28*mm-address_height)
         metadata.drawOn(page, 20*mm, metadata_top-metadata_height)
         page.setStrokeColor(colors.HexColor("#d3dfed"))

@@ -6,6 +6,7 @@ import re
 from email.utils import parseaddr
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from practice_settings import PRACTICE_NAME, PRACTICE_ADDRESS
 
 
 class ReportMailError(Exception):
@@ -25,8 +26,8 @@ def send_report_pdf(*, recipient, pdf, idempotency_key):
     payload = {
         "from": os.environ["REPORT_EMAIL_FROM"].strip(),
         "to": [recipient],
-        "subject": "Compte rendu radiologique - Bymed",
-        "text": "Bonjour,\n\nVeuillez trouver en pièce jointe le compte rendu radiologique.\n\nBymed Radiologie\nCentre Echographie de Pavillon, Rue Gaillait 35",
+        "subject": "Compte rendu radiologique - " + PRACTICE_NAME,
+        "text": "Bonjour,\n\nVeuillez trouver en pièce jointe le compte rendu radiologique.\n\n" + PRACTICE_NAME + ("\n"+PRACTICE_ADDRESS if PRACTICE_ADDRESS else ""),
         "attachments": [{"filename": "compte-rendu-radiologique.pdf",
                          "content": base64.b64encode(pdf).decode("ascii")}],
     }

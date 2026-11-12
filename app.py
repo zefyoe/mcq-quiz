@@ -57,6 +57,8 @@ from historical_dossiers import register_historical_dossiers, historical_riziv_r
 from appointment_moves import register_appointment_moves
 from appointment_trash import register_appointment_trash
 from models import AppointmentMoveReceipt, AppointmentTrash
+from practice_settings import (AGENDA_ONLY, PRACTICE_NAME, PRACTICE_SHORT_NAME,
+    PRACTICE_ENGLISH_NAME, PUBLIC_CLOSURE_MESSAGE, PUBLIC_BOOKING_ENABLED, practice_address)
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
@@ -76,7 +78,12 @@ except ImportError:
 # -------------------------
 
 def build_database_uri() -> str:
-    uri = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
+    if AGENDA_ONLY:
+        uri = os.environ.get("WIRC_DATABASE_URL", "").strip()
+        if not uri or uri == os.environ.get("DATABASE_URL"):
+            raise RuntimeError("WIRC requires its own WIRC_DATABASE_URL. Do not reuse the former practice database.")
+    else:
+        uri = os.environ.get("DATABASE_URL", "sqlite:///quiz.db")
 
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
@@ -107,6 +114,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me")
+app.config["APPOINTMENT_BOOKING_ENABLED"] = PUBLIC_BOOKING_ENABLED
 app.config["UPLOAD_FOLDER"] = os.path.join(app.static_folder, "uploads", "questions")
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(days=7)
@@ -396,6 +404,18 @@ login_manager.init_app(app)
 
 @app.before_request
 def route_core_domain():
+    # A cached form or direct POST must not bypass the public closure. Serve
+    # this notice before database/auth work so it remains available during moves.
+    if request.endpoint in {"public_agenda", "public_agenda_hold", "public_agenda_draft", "public_book_appointment"} and not app.config["APPOINTMENT_BOOKING_ENABLED"]:
+        if request.endpoint == "public_agenda":
+            return render_template("agenda_closed.html", practice_name=PRACTICE_NAME,
+                practice_short_name=PRACTICE_SHORT_NAME, closure_message=PUBLIC_CLOSURE_MESSAGE)
+        return jsonify(ok=False,error=PUBLIC_CLOSURE_MESSAGE),423
+    if AGENDA_ONLY:
+        allowed=(request.path in {"/", "/login", "/logout", "/health", "/admin"}
+            or request.path.startswith(("/static/", "/agenda", "/admin/appointments", "/auth/google/")))
+        if not allowed:
+            abort(404)
     if SITE_OFFLINE and request.endpoint != "health" and not request.path.startswith("/static/"):
         return render_template(
             "maintenance.html",
@@ -403,6 +423,8 @@ def route_core_domain():
             maintenance_until=MAINTENANCE_UNTIL,
         ), 503
     ensure_auth_schema_ready()
+    if AGENDA_ONLY and request.path in {"/", "/admin"}:
+        return redirect(url_for("admin_appointments" if current_user.is_authenticated and user_has_admin_access(current_user) else "public_agenda"))
     if current_user.is_authenticated:
         sync_user_admin_flag(current_user)
         if request.path == "/core" or request.path.startswith("/core/"):
@@ -500,6 +522,8 @@ def normalize_category(s: str) -> str:
 
 
 def get_current_language() -> str:
+    if AGENDA_ONLY:
+        return "fr"
     if request.endpoint in {"public_agenda", "public_agenda_hold", "public_book_appointment",
                             "admin_appointments", "admin_book_appointment", "admin_cancel_appointment"}:
         return "fr"
@@ -627,6 +651,11 @@ def inject_language_helpers():
         "localize_quiz_title": localize_quiz_title,
         "asset_version": app.config["STATIC_ASSET_VERSION"],
         "can_access_core": user_has_core_access(current_user),
+        "agenda_only": AGENDA_ONLY,
+        "practice_name": PRACTICE_NAME,
+        "practice_short_name": PRACTICE_SHORT_NAME,
+        "practice_english_name": PRACTICE_ENGLISH_NAME,
+        "practice_address": practice_address(),
     }
 
 
@@ -3654,9 +3683,7 @@ PUBLIC_APPOINTMENT_GROUPS = (
 PUBLIC_APPOINTMENT_LABELS = {
     code: label for _, entries in PUBLIC_APPOINTMENT_GROUPS for code, label in entries
 }
-APPOINTMENT_PRACTICE_ADDRESS = os.environ.get(
-    "APPOINTMENT_PRACTICE_ADDRESS", "Rue Gaillait 35, Centre d'Echographie de Pavillon"
-)
+APPOINTMENT_PRACTICE_ADDRESS = practice_address()
 
 
 def get_localized_inami_appointment_groups(language: str) -> tuple:
@@ -3988,7 +4015,7 @@ def claim_agenda_slot(starts_at, token):
 
 @app.after_request
 def private_agenda_cache(response):
-    if request.path.startswith(("/agenda", "/admin/appointments")):
+    if request.path.startswith(("/agenda", "/admin/appointments")) or (AGENDA_ONLY and not request.path.startswith("/static/")):
         response.headers["Cache-Control"] = "private, no-store"
     if request.path.startswith("/auth/google/") or request.path == "/login":
         response.headers["Cache-Control"] = "private, no-store"
@@ -5484,6 +5511,8 @@ def login():
             )
         elif not user or not user.check_password(password):
             field_errors["password"] = tr("Incorrect email or password.")
+        elif AGENDA_ONLY and not user_has_admin_access(user):
+            field_errors["password"] = "Ce compte n’est pas autorisé dans l’environnement interne."
         else:
             sync_user_admin_flag(user)
             user.last_login_at = datetime.utcnow()

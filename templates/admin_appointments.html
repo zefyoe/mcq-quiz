@@ -12,7 +12,7 @@
   <body class="appointments-page">
     <header class="admin-topbar appointment-topbar">
       <div class="admin-topbar-inner">
-        <a class="appointment-brand" href="{{ url_for('admin_home') }}">Radius <span>{{ l10n('Privépraktijk', 'Private Practice', 'Cabinet privé') }}</span></a>
+        <a class="appointment-brand" href="{{ url_for('admin_home') }}">{{ practice_short_name }} <span>{{ l10n('Privépraktijk', 'Private Practice', 'Cabinet privé') }}</span></a>
         <div class="admin-topbar-actions">
           <div class="admin-topbar-badge">{{ l10n('Afsprakenplanner', 'Appointment planner', 'Planificateur de rendez-vous') }}</div>
           <a class="admin-link-button admin-topbar-link" href="{{ url_for('admin_home') }}">Admin</a>

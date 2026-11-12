@@ -11,7 +11,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 fixture=tempfile.TemporaryDirectory(prefix="appointment-move-tests-")
-os.environ.update(DATABASE_URL="sqlite:///"+str(Path(fixture.name)/"test.db"),SECRET_KEY="move-tests-only",PUBLIC_SITE_MODE="active")
+os.environ.update(DATABASE_URL="sqlite:///"+str(Path(fixture.name)/"test.db"),SECRET_KEY="move-tests-only",PUBLIC_SITE_MODE="active",APPOINTMENT_BOOKING_ENABLED="1")
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from app import app, db, agenda_now, appointment_report_key, bookable_appointment_slots
 from models import User, Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, InternalRegisterExclusion, AppointmentMoveReceipt

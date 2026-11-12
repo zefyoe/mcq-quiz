@@ -11,7 +11,7 @@ from uuid import uuid4
 
 fixture = tempfile.TemporaryDirectory(prefix="historical-dossier-tests-")
 db_path = Path(fixture.name)/"test.db"
-os.environ.update(DATABASE_URL="sqlite:///"+str(db_path),SECRET_KEY="history-tests-only",PUBLIC_SITE_MODE="active")
+os.environ.update(DATABASE_URL="sqlite:///"+str(db_path),SECRET_KEY="history-tests-only",PUBLIC_SITE_MODE="active",APPOINTMENT_BOOKING_ENABLED="1")
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from app import app, db, agenda_now, all_internal_patient_rows
 from models import Appointment, AppointmentHold, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, InternalRegisterExclusion, User

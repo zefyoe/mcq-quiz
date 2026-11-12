@@ -3,24 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{{ tr("Login") }} • Bymed</title>
+  <title>{{ tr("Login") }} • {{ practice_short_name }}</title>
   {% include "_favicon.html" %}
   <link rel="preload" as="image" href="{{ url_for('static', filename='images/login-rx-background.jpg') }}" fetchpriority="high">
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css', v=asset_version) }}">
 </head>
 <body>
   <a class="agenda-button" style="position:absolute;top:18px;left:18px;z-index:21;width:auto;padding:12px 24px" href="{{ url_for('public_agenda') }}">AGENDA</a>
-  {% include "_language_switcher.html" %}
+  {% if not agenda_only %}{% include "_language_switcher.html" %}{% endif %}
   <div class="login-page">
     <div class="login-shell">
 
       <section class="login-hero">
         <div class="login-hero-overlay"></div>
         <div class="login-hero-content">
-          <p class="eyebrow">Anatomy / CORE</p>
-          <h1>Radius</h1>
+          <p class="eyebrow">{{ 'CABINET DE RADIOLOGIE' if agenda_only else 'Anatomy / CORE' }}</p>
+          <h1>{{ practice_short_name if agenda_only else 'Radius' }}</h1>
           <p class="hero-text">
-            {{ tr("Your private medical question bank.") }}
+            {% if agenda_only %}{{ practice_name }}{% if practice_english_name %}<br><small>{{ practice_english_name }}</small>{% endif %}{% else %}{{ tr("Your private medical question bank.") }}{% endif %}
             
           </p>
         </div>
@@ -63,10 +63,10 @@
             {% if not google_oauth_ready %}<p style="font-size:12px;color:#60718a">Connexion Google en attente de configuration.</p>{% endif %}
           </form>
 
-          <p style="margin-top:18px; text-align:center; font-size:14px;">
+          {% if not agenda_only %}<p style="margin-top:18px; text-align:center; font-size:14px;">
             {{ l10n("Heb je nog geen account?", "Don't have an account?", "Vous n’avez pas encore de compte ?") }}
             <a href="{{ url_for('register') }}" style="font-weight:600;">{{ l10n("Account aanmaken", "Create account", "Créer un compte") }}</a>
-          </p>
+          </p>{% endif %}
 
         </div>
       </section>

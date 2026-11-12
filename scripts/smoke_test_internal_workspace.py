@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 fd, database_path = tempfile.mkstemp(prefix="internal-workspace-", suffix=".db")
 os.close(fd)
-os.environ.update(DATABASE_URL="sqlite:///" + database_path, SECRET_KEY="workspace-tests-only", PUBLIC_SITE_MODE="active")
+os.environ.update(DATABASE_URL="sqlite:///" + database_path, SECRET_KEY="workspace-tests-only", PUBLIC_SITE_MODE="active",APPOINTMENT_BOOKING_ENABLED="1")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app import app, db, appointment_report_key, ensure_appointment_schema
 from models import Appointment, AppointmentHold, AppointmentReport, AppointmentSlotOverride, AppointmentPatientDetails, User

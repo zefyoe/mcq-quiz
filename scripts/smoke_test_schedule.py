@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 fixture = tempfile.TemporaryDirectory(prefix="schedule-exception-tests-")
-os.environ.update(DATABASE_URL="sqlite:///"+str(Path(fixture.name)/"test.db"), SECRET_KEY="schedule-tests-only", PUBLIC_SITE_MODE="active")
+os.environ.update(DATABASE_URL="sqlite:///"+str(Path(fixture.name)/"test.db"), SECRET_KEY="schedule-tests-only", PUBLIC_SITE_MODE="active",APPOINTMENT_BOOKING_ENABLED="1")
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from app import app, db, agenda_now, appointment_slot_is_open, bookable_appointment_slots
 from models import User, Appointment, AppointmentHold, AppointmentSlotOverride

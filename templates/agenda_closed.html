@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Le cabinet est temporairement fermé. Les informations concernant la reprise des consultations seront communiquées prochainement.">
+  <title>Fermeture temporaire · {{ practice_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='agenda_closed.css', v='1') }}">
+</head>
+<body>
+  <header><span class="brand">{{ practice_short_name }}</span><span>Cabinet de radiologie</span></header>
+  <main>
+    <section class="closure-card" aria-labelledby="closure-title">
+      <span class="closure-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 3v4m8-4v4M4 10h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="m10 14 4 4m0-4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <p class="eyebrow">INFORMATION AUX PATIENTS</p>
+      <h1 id="closure-title">Le cabinet est<br>temporairement fermé.</h1>
+      <p class="closure-copy">La date de reprise des consultations et la nouvelle adresse seront communiquées prochainement.</p>
+      <div class="booking-notice"><span aria-hidden="true"></span>La prise de rendez-vous est suspendue.</div>
+      <p class="thanks">Nous vous remercions pour votre compréhension.</p>
+    </section>
+  </main>
+  <footer>{{ practice_name }} · Cabinet de radiologie</footer>
+</body>
+</html>

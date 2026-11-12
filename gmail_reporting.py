@@ -14,6 +14,7 @@ from google.auth.exceptions import GoogleAuthError
 import requests
 
 from report_mail import ReportMailError
+from practice_settings import PRACTICE_NAME
 
 GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.send"
 SCOPES = ["openid", "https://www.googleapis.com/auth/userinfo.email", GMAIL_SCOPE]
@@ -63,9 +64,9 @@ def send_gmail_report(*, connection, secret, recipient, pdf, message_key):
     message = EmailMessage()
     message["From"] = connection.email
     message["To"] = recipient
-    message["Subject"] = "Compte rendu radiologique - Bymed"
-    message["Message-ID"] = f"<{message_key}@bymed.be>"
-    message.set_content("Bonjour,\n\nVeuillez trouver en pièce jointe le compte rendu radiologique.\n\nBymed Radiologie")
+    message["Subject"] = "Compte rendu radiologique - " + PRACTICE_NAME
+    message["Message-ID"] = f"<{message_key}@{connection.email.rsplit('@',1)[-1]}>"
+    message.set_content("Bonjour,\n\nVeuillez trouver en pièce jointe le compte rendu radiologique.\n\n" + PRACTICE_NAME)
     message.add_attachment(pdf, maintype="application", subtype="pdf", filename="compte-rendu-radiologique.pdf")
     raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
     try:
