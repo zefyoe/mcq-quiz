@@ -232,7 +232,7 @@
   .agenda-quick-slots { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .agenda-quick-slots button { min-height: 48px; font-size: 14px; }
   .agenda-more-dates { margin-top: 18px; }
-  .agenda-practice-card { order: 2; }
+  .agenda-practice-card { order: -4; }
   .agenda-sidebar-footnote { order: 3; }
   .agenda-app-page .appointment-calendar-toolbar { flex-direction: row; align-items: center; }
   .agenda-app-page .appointment-week-actions { width: auto; }
