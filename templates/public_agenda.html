@@ -18,7 +18,7 @@
 <div class="agenda-controls"><form class="appointment-date-form" method="get"><label for="date">Choisir une date</label><input id="date" name="date" type="date" value="{{ week_start.isoformat() }}"><button>Afficher</button></form>
 <div class="agenda-key" aria-label="Légende"><span><i class="agenda-key-free"></i>Disponible</span><span><i class="agenda-key-busy"></i>Indisponible</span></div></div>
 <div class="appointment-compact-week-wrap">
-<p class="appointment-mobile-closed-days">Fermé le lundi, mercredi, vendredi et dimanche.</p>
+<p class="appointment-mobile-closed-days">Jours fermés cette semaine : {% for day in consultation_days if not day.slots %}{{ day.day_name }}{{ ', ' if not loop.last else '.' }}{% endfor %}</p>
 <table class="appointment-compact-week" aria-label="Agenda hebdomadaire — horaires par jour">
 <colgroup>{% for day in consultation_days %}<col class="{{ 'agenda-closed-col' if not day.slots else 'agenda-open-col' }}">{% endfor %}</colgroup>
 <thead><tr>{% for day in consultation_days %}<th scope="col" class="{{ 'appointment-closed-column' if not day.slots else 'agenda-open-day' }}"><span>{{ day.day_name|capitalize }}</span><strong>{{ day.date.strftime('%d/%m') }}</strong>{% if day.slots %}<small>{{ day.slots[0].starts_at.strftime('%H:%M') }}–{{ (day.slots[-1].starts_at+timedelta(minutes=10)).strftime('%H:%M') }}</small>{% else %}<small>Fermé</small>{% endif %}</th>{% endfor %}</tr></thead>

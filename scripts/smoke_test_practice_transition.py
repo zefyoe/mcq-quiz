@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import re
 from datetime import timedelta
 from pathlib import Path
 
@@ -18,7 +19,7 @@ if wirc:
 else:
     os.environ["DATABASE_URL"]=uri
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from app import app, db, agenda_now, build_database_uri
+from app import app, db, agenda_now, build_database_uri, appointment_slot_is_open
 from models import User, Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, HistoricalDossier, GmailConnection
 from practice_settings import PRACTICE_NAME
 from radiology_report import create_radiology_report_pdf
@@ -79,6 +80,30 @@ try:
         confirmation=PdfReader(io.BytesIO(create_appointment_confirmation_pdf(patient_name="PATIENT FICTIF WIRC",starts_at=day,
             examination="Examen fictif",practice_address="Adresse fictive WIRC")))
         assert "WIRC" in confirmation.pages[0].extract_text() and confirmation.metadata.author==PRACTICE_NAME
+        # WIRC opens Thursday mornings, with the existing two-adjacent-slot
+        # policy and ten-minute visits. Other former practice hours stay shut.
+        thursday=(day+timedelta(days=2)).replace(hour=8,minute=0)
+        with app.app_context():
+            assert all(appointment_slot_is_open(thursday+timedelta(minutes=10*i)) for i in range(24))
+            assert not appointment_slot_is_open(thursday.replace(hour=12))
+            assert not appointment_slot_is_open(day)
+            assert not appointment_slot_is_open(day+timedelta(days=4))
+        app.config["APPOINTMENT_BOOKING_ENABLED"]=True
+        opened=public.get("/agenda?date="+thursday.date().isoformat(),base_url=base)
+        assert opened.status_code==200 and 'Prendre rendez-vous' in opened.text
+        assert re.findall(r'data-slot="([^"]+)"',opened.text)==[
+            thursday.isoformat(timespec="minutes"),(thursday+timedelta(minutes=10)).isoformat(timespec="minutes")]
+        assert 'Adresse fictive WIRC' in opened.text and '18:30' not in opened.text
+        assert 'Gaillait' not in opened.text and 'Pavillon' not in opened.text
+        csrf=re.search(r'name="csrf_token" value="([^"]+)"',opened.text)[1]
+        booked=public.post('/agenda/book',base_url=base,data=dict(csrf_token=csrf,slot_start=thursday.isoformat(),
+            patient_name='PATIENT FICTIF WIRC',inami_code='459712',insurance_status='normal'))
+        assert booked.status_code==200 and booked.mimetype=='application/pdf'
+        assert 'Adresse fictive WIRC' in PdfReader(io.BytesIO(booked.data)).pages[0].extract_text()
+        assert 'PATIENT FICTIF WIRC' not in public.get('/agenda?date='+thursday.date().isoformat(),base_url=base).text
+        with app.app_context():
+            record=Appointment.query.one();assert record.starts_at==thursday and record.duration_minutes==10
+            db.session.delete(record);db.session.commit()
     else:
         assert "PATIENT ARCHIVE FICTIF" in internal.text
     with app.app_context():

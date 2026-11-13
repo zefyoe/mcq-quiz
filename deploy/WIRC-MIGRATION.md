@@ -8,7 +8,8 @@
 - Former internal agenda: existing accounts, appointments, reports, requests,
   registers, documents and recoverable trash stay available in the former database.
 - WIRC: separate service, separate database, separate secret and sessions; no
-  patient, document, user, password or Gmail-token import. No old location in new
+  patient, document or Gmail-token import. The owner requested reuse of the two
+  allowlisted administrator logins and Google sign-in. No other users are copied. No old location in new
   PDF/mail headers. The former application's `render.yaml` is unchanged.
 - WIRC contains the existing scheduling, admin hours, drag/move/trash, reporting,
   PDF, request uploads, XIMEO-RIZIV and Gmail integration features. Student quiz,
@@ -30,7 +31,10 @@
 3. Create the new service and database from this separate Blueprint. Do not
    clone/restore the former database or copy its `DATABASE_URL`/`SECRET_KEY`.
    `PRACTICE_PROFILE=wirc` requires `WIRC_DATABASE_URL`; it refuses the default old
-   database setting. Leave public booking disabled (`APPOINTMENT_BOOKING_ENABLED=0`).
+   database setting. The WIRC Blueprint now enables public booking at Centre
+   Médical Azalys, Lenneke Marelaan 12, 1932 Woluwe-Saint-Étienne, with Thursday
+   08:00–12:00 only, in ten-minute slots. The existing two-adjacent-slot release
+   policy is preserved. Legacy Bymed remains publicly closed.
 4. In the new service's shell, run `python scripts/create_wirc_admin.py`. Enter
    an approved admin address and a new password interactively. No credentials
    belong in this file, Git, a command argument or chat.
@@ -41,10 +45,9 @@
    authorized redirect URIs after domain ownership is verified. Configure the
    new service's Google client variables privately. Log in/connect Gmail anew;
    former encrypted Gmail credentials are deliberately not transferred.
-7. Enter the new `APPOINTMENT_PRACTICE_ADDRESS`; review opening hours, upload,
-   reporting/PDF and recovery with fictitious data. WIRC refuses public booking
-   activation while its address is missing. Activate booking explicitly when
-   ready. There is no automatic reopening date.
+7. Review opening hours, upload, reporting/PDF and recovery with fictitious data.
+   WIRC refuses public booking activation while its address is missing. The old
+   practice has no automatic reopening date and receives no link to WIRC.
 
 ## Local verification
 

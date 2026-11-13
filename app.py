@@ -192,9 +192,10 @@ LANGUAGE_SWITCHER_ENABLED = os.environ.get("ENABLE_LANGUAGE_SWITCHER", "1").stri
 AUTH_SCHEMA_READY = False
 APPOINTMENT_SCHEMA_READY = False
 APPOINTMENT_SLOT_MINUTES = 10
-APPOINTMENT_WEEKLY_WINDOWS = {1: (18 * 60 + 30, 20 * 60 + 10),
-                              3: (18 * 60 + 30, 20 * 60 + 10),
-                              5: (10 * 60, 13 * 60)}
+APPOINTMENT_WEEKLY_WINDOWS = ({3: (8 * 60, 12 * 60)} if AGENDA_ONLY else {
+    1: (18 * 60 + 30, 20 * 60 + 10),
+    3: (18 * 60 + 30, 20 * 60 + 10),
+    5: (10 * 60, 13 * 60)})
 APPOINTMENT_OPENING_HOUR = 8
 APPOINTMENT_CLOSING_HOUR = 21
 APPOINTMENT_SLOTS_PER_DAY = (
@@ -3837,6 +3838,8 @@ def appointment_slot_is_open(starts_at, overrides=None):
 
 
 def appointment_slot_is_hard_closed(starts_at):
+    if AGENDA_ONLY:
+        return False
     minute = starts_at.hour * 60 + starts_at.minute
     return (starts_at.weekday() == 5 and minute >= 13 * 60) or (
         starts_at.weekday() in {1, 3} and minute in {18 * 60 + 10, 18 * 60 + 20})

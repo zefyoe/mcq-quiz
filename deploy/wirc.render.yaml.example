@@ -25,11 +25,11 @@ services:
       - key: RUN_STARTUP_MIGRATIONS
         value: "1"
       - key: APPOINTMENT_BOOKING_ENABLED
-        value: "0"
+        value: "1"
       - key: PUBLIC_SITE_MODE
         value: active
       - key: APPOINTMENT_PRACTICE_ADDRESS
-        value: ""
+        value: "Centre Médical Azalys, Lenneke Marelaan 12, 1932 Woluwe-Saint-Étienne"
       - key: GOOGLE_OAUTH_CLIENT_ID
         sync: false
       - key: GOOGLE_OAUTH_CLIENT_SECRET
