@@ -1,0 +1,26 @@
+{% from '_agenda_icons.html' import icon %}
+<a class="agenda-skip-link" href="#agenda-main">Aller au contenu</a>
+<header class="agenda-app-header">
+  <div class="agenda-app-identity"><strong>{{ practice_short_name }}</strong><span class="agenda-app-divider"></span><span>{{ 'Espace praticien' if internal_agenda else 'Rendez-vous en ligne' }}</span></div>
+  <div class="agenda-header-note">{{ icon('shield',16) }}<span>{{ 'Accès réservé au cabinet' if internal_agenda else 'Réservation sécurisée' }}</span>{% if internal_agenda %}<a class="agenda-mobile-account" href="{{ url_for('admin_home') }}" aria-label="Admin">{{ icon('settings',18) }}</a><a class="agenda-mobile-account" href="{{ url_for('logout') }}" aria-label="Se déconnecter">{{ icon('logout',18) }}</a>{% endif %}</div>
+</header>
+
+<aside class="agenda-rail" aria-label="{{ 'Navigation interne' if internal_agenda else 'Navigation des rendez-vous' }}">
+  <{{ 'a' if internal_agenda else 'span' }} class="agenda-rail-brand"{% if internal_agenda %} href="{{ url_for('admin_home') }}" aria-label="Accueil {{ practice_short_name }}"{% endif %}>{{ practice_short_name[:1] }}<span></span></{{ 'a' if internal_agenda else 'span' }}>
+  <nav aria-label="{{ 'Votre espace' if internal_agenda else 'Votre rendez-vous' }}">
+    {% if internal_agenda %}
+    <button type="button" class="agenda-rail-item" data-agenda-view="calendar" aria-pressed="true">{{ icon('calendar') }}<span>Agenda</span></button>
+    <button type="button" class="agenda-rail-item" data-agenda-view="patients" aria-pressed="false" aria-label="Liste patients · {{ patient_rows|length }}">{{ icon('patients') }}<span data-view-label>Patients</span></button>
+    <button type="button" class="agenda-rail-item" data-agenda-view="riziv" aria-pressed="false" aria-label="Liste RIZIV · Tous les patients">{{ icon('list') }}<span>RIZIV</span></button>
+    <button type="button" class="agenda-rail-item" data-agenda-view="history" aria-pressed="false" aria-label="XIMEO-RIZIV">{{ icon('archive') }}<span>XIMEO</span></button>
+    {% else %}
+    <a class="agenda-rail-item is-active" href="#appointment-calendar">{{ icon('calendar') }}<span>Agenda</span></a>
+    <a class="agenda-rail-item" href="#availability-panel">{{ icon('clock') }}<span>Créneaux</span></a>
+    <a class="agenda-rail-item" href="#practice-details">{{ icon('pin') }}<span>Accès</span></a>
+    {% endif %}
+  </nav>
+  <div class="agenda-rail-bottom">
+    {% if internal_agenda %}<a class="agenda-rail-item" href="{{ url_for('admin_home') }}">{{ icon('settings') }}<span>Admin</span></a><a class="agenda-rail-item" href="{{ url_for('logout') }}" aria-label="Se déconnecter">{{ icon('logout') }}<span>Quitter</span></a>
+    {% else %}<span class="agenda-rail-secure" title="Informations des patients confidentielles">{{ icon('shield',18) }}<span>Privé</span></span>{% endif %}
+  </div>
+</aside>

@@ -1,5 +1,6 @@
 """Deployment identity. WIRC uses a separate database, never a patient import."""
 import os
+from datetime import date
 
 AGENDA_ONLY = os.environ.get("PRACTICE_PROFILE", "legacy").strip().lower() == "wirc"
 PRACTICE_NAME = os.environ.get("PRACTICE_NAME", "WIRC · Cabinet de radiologie" if AGENDA_ONLY else "Bymed Radiologie").strip()
@@ -8,6 +9,7 @@ PRACTICE_ENGLISH_NAME = os.environ.get("PRACTICE_ENGLISH_NAME", "").strip()
 PRACTICE_ADDRESS = os.environ.get("APPOINTMENT_PRACTICE_ADDRESS", "").strip()
 PUBLIC_CLOSURE_MESSAGE = "Le cabinet est temporairement fermé. Nous déménageons vers un nouveau lieu. Nous reviendrons vers vous prochainement pour vous communiquer la nouvelle adresse et la date de reprise des consultations."
 PUBLIC_BOOKING_ENABLED = os.environ.get("APPOINTMENT_BOOKING_ENABLED", "0").strip().lower() in {"1", "true", "yes"}
+BOOKING_START_DATE = date.fromisoformat(os.environ.get("APPOINTMENT_BOOKING_START_DATE", "2026-12-03")) if AGENDA_ONLY else None
 if AGENDA_ONLY and PUBLIC_BOOKING_ENABLED and not PRACTICE_ADDRESS:
     raise RuntimeError("Set WIRC's new APPOINTMENT_PRACTICE_ADDRESS before opening public bookings.")
 

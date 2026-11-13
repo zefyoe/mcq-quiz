@@ -8,31 +8,12 @@
     {% include "_favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v=appointments_asset_version) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='agenda_app.css', v=agenda_app_asset_version) }}">
   </head>
-  <body class="appointments-page">
-    <header class="admin-topbar appointment-topbar">
-      <div class="admin-topbar-inner">
-        <a class="appointment-brand" href="{{ url_for('admin_home') }}">{{ practice_short_name }} <span>{{ l10n('Privépraktijk', 'Private Practice', 'Cabinet privé') }}</span></a>
-        <div class="admin-topbar-actions">
-          <div class="admin-topbar-badge">{{ l10n('Afsprakenplanner', 'Appointment planner', 'Planificateur de rendez-vous') }}</div>
-          <a class="admin-link-button admin-topbar-link" href="{{ url_for('admin_home') }}">Admin</a>
-          <a class="admin-link-button admin-topbar-link" href="{{ url_for('logout') }}">{{ l10n('Uitloggen', 'Log out', 'Se déconnecter') }}</a>
-        </div>
-      </div>
-    </header>
-
-    <main class="appointment-shell">
-      <section class="appointment-hero">
-        <div>
-          <p class="appointment-eyebrow">{{ l10n('PRIVÉPRAKTIJK RADIOLOGIE', 'PRIVATE RADIOLOGY PRACTICE', 'CABINET PRIVÉ DE RADIOLOGIE') }}</p>
-          <h1>Agenda interne · Patients</h1>
-        </div>
-        <div class="appointment-hero-note">
-          <span class="appointment-note-dot"></span>
-          {{ l10n('Alleen zichtbaar voor de beheerder', 'Visible to the administrator only', 'Visible uniquement par l’administrateur') }}
-        </div>
-      </section>
-
+  <body class="appointments-page agenda-app-page internal-agenda-page">
+    {% set internal_agenda = true %}{% include '_agenda_app_chrome.html' %}
+    <main class="appointment-shell agenda-app-main" id="agenda-main">
+      <div class="agenda-page-heading"><div><p class="agenda-breadcrumb">Espace praticien <span>/</span> Organisation</p><h1>Agenda interne <span class="agenda-heading-label">Patients</span></h1><p>Votre planning, vos patients et leurs documents, au même endroit.</p></div><button type="button" class="agenda-primary-action" data-history-new>+ Ajouter un ancien dossier</button></div>
       {% if error %}
         <div class="appointment-alert appointment-alert-error" role="alert">{{ error }}</div>
       {% endif %}
@@ -42,7 +23,6 @@
         <div class="appointment-alert appointment-alert-success" role="status">{{ success }}</div>
       {% endif %}
 
-      <div class="internal-view-toolbar"><div role="group" aria-label="Affichage"><button type="button" data-agenda-view="calendar" aria-pressed="true">Agenda</button><button type="button" data-agenda-view="patients" aria-pressed="false">Liste patients · {{ patient_rows|length }}</button><button type="button" data-agenda-view="riziv" aria-pressed="false">Liste RIZIV · Tous les patients</button><button type="button" data-agenda-view="history" aria-pressed="false">XIMEO-RIZIV</button></div><button type="button" class="history-add-button" data-history-new>+ Ajouter un ancien dossier</button></div>
       <p id="availability-feedback" role="status" aria-live="polite" hidden></p>
       <section id="riziv-list" class="patient-list-card riziv-list-card" hidden aria-label="Liste RIZIV de tous les patients" data-endpoint="{{ url_for('admin_riziv_patient_list') }}">
         <header class="riziv-list-header">
@@ -57,21 +37,17 @@
       {% include '_internal_patient_list.html' %}
       <section class="appointment-dashboard" id="internal-calendar" aria-label="{{ l10n('Weekagenda', 'Weekly calendar', 'Agenda hebdomadaire') }}">
         <aside class="appointment-sidebar">
-          <div class="appointment-side-heading">
-            <p class="appointment-eyebrow">AGENDA</p>
-            <h2>{{ l10n('Plan een onderzoek', 'Schedule an examination', 'Planifier un examen') }}</h2>
-            <p>{{ l10n(
-              'Kies een datum om naar de juiste week te gaan. Klik vervolgens op een vrij kwartier.',
-              'Choose a date to open the correct week, then click an available slot.',
-              'Choisissez une date pour afficher votre journée et la semaine correspondante. Les créneaux durent 10 minutes.'
-            ) }}</p>
-          </div>
-
+          <div class="appointment-side-heading"><p class="appointment-eyebrow">VOTRE PLANNING</p><h2>Organiser la semaine</h2></div>
           <form class="appointment-date-form" method="get" action="{{ url_for('admin_appointments') }}">
             <label for="appointment-date">{{ l10n('Ga naar datum', 'Go to date', 'Aller à la date') }}</label>
             <input id="appointment-date" name="date" type="date" value="{{ selected_date }}" required>
             <button type="submit">{{ l10n('Toon week', 'Show week', 'Afficher la semaine') }}</button>
           </form>
+
+          <section class="agenda-internal-availability" aria-labelledby="internal-availability-title">
+            <h3 id="internal-availability-title">Créneaux disponibles</h3>
+            <div id="internal-quick-slots" aria-live="polite"></div>
+          </section>
 
           <div class="appointment-stats" aria-label="{{ l10n('Overzicht deze week', 'Overview this week', 'Aperçu de cette semaine') }}">
             <div>
@@ -90,7 +66,7 @@
           </div>
 
           <section class="report-notice" aria-label="Connexion Gmail">
-            {% if gmail_sender %}<p>Gmail connecté : <strong>{{ gmail_sender }}</strong></p>{% else %}<p>Connectez votre compte Google pour envoyer les comptes rendus avec Gmail.</p>{% endif %}
+            {% if gmail_sender %}<p>Gmail connecté<br><strong>{{ gmail_sender }}</strong></p>{% else %}<p>Connectez votre compte Google pour envoyer les comptes rendus avec Gmail.</p>{% endif %}
             <form method="post" action="{{ url_for('google_login_start') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
               <button class="appointment-day-close-button" type="submit" {% if not google_oauth_ready %}disabled{% endif %}>{{ 'Reconnecter Gmail' if gmail_sender else 'Connecter Google / Gmail' }}</button>
@@ -103,16 +79,16 @@
         <section class="appointment-calendar-card">
           <div class="appointment-calendar-toolbar">
             <div>
-              <p class="appointment-eyebrow">{{ l10n('WEEKOVERZICHT', 'WEEKLY OVERVIEW', 'APERÇU DE LA SEMAINE') }}</p>
+              <p class="appointment-eyebrow">Le calendrier</p>
               <h2>{{ week_start.strftime('%d/%m/%Y') }} - {{ (week_end - timedelta(days=1)).strftime('%d/%m/%Y') }}</h2>
-              <p class="agenda-hours-notice">L’agenda public suit vos disponibilités. Les informations des patients restent uniquement internes.</p>
+
             </div>
             <div class="appointment-week-actions">
               <button type="button" class="manage-hours-button" id="open-appointment-trash">Corbeille</button>
               <button type="button" class="manage-hours-button" data-day-hours="{{ (shift_date if shift_date >= today else today).isoformat() }}">Gérer les horaires</button>
-              <a href="{{ url_for('admin_appointments', date=(week_start - timedelta(days=7)).isoformat()) }}" aria-label="{{ l10n('Vorige week', 'Previous week', 'Semaine précédente') }}">{{ l10n('Vorige week', 'Previous week', 'Semaine précédente') }}</a>
+              <a href="{{ url_for('admin_appointments', date=(week_start - timedelta(days=7)).isoformat()) }}" aria-label="{{ l10n('Vorige week', 'Previous week', 'Semaine précédente') }}"><span aria-hidden="true">‹</span></a>
               <a class="appointment-today-link" href="{{ url_for('admin_appointments') }}">{{ l10n('Vandaag', 'Today', 'Aujourd’hui') }}</a>
-              <a href="{{ url_for('admin_appointments', date=(week_start + timedelta(days=7)).isoformat()) }}" aria-label="{{ l10n('Volgende week', 'Next week', 'Semaine suivante') }}">{{ l10n('Volgende week', 'Next week', 'Semaine suivante') }}</a>
+              <a href="{{ url_for('admin_appointments', date=(week_start + timedelta(days=7)).isoformat()) }}" aria-label="{{ l10n('Volgende week', 'Next week', 'Semaine suivante') }}"><span aria-hidden="true">›</span></a>
             </div>
           </div>
 
@@ -135,7 +111,7 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="slot_start" id="appointment-slot-start">
           <input type="hidden" name="week_date" value="{{ selected_date }}">
-          <label>Statut du patient<select name="insurance_status"><option value="">Non renseigné</option><option value="bim">BIM (VIPO)</option><option value="normal">Normal — sans intervention majorée</option></select></label>
+
           <label>
             {{ l10n('Naam patiënt', 'Patient name', 'Nom du patient') }}
             <input name="patient_name" type="text" autocomplete="name" required minlength="5" maxlength="255">
@@ -194,5 +170,6 @@
     <script src="{{ url_for('static', filename='internal_reporting.js', v=report_asset_version) }}"></script>
     <script src="{{ url_for('static', filename='internal_moves.js', v=move_asset_version) }}"></script>
     <script src="{{ url_for('static', filename='internal_history.js', v=historical_asset_version) }}"></script>
+    <script src="{{ url_for('static', filename='agenda_app.js', v=agenda_app_asset_version) }}"></script>
   </body>
 </html>

@@ -1,22 +1,25 @@
+{% from '_agenda_icons.html' import icon %}
 <!doctype html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Agenda — {{ practice_name }}</title>{% include '_favicon.html' %}
 <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v=agenda_asset_version) }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='public_agenda.css', v=agenda_asset_version) }}"></head>
-<body class="appointments-page public-agenda-page">
-<header class="admin-topbar appointment-topbar"><div class="admin-topbar-inner"><span class="appointment-brand">{{ practice_short_name }} <span>Cabinet privé de radiologie</span></span><span>Prendre rendez-vous</span></div></header>
-<main class="appointment-shell">
-<address class="agenda-location"><span>Lieu du rendez-vous</span><strong>{{ practice_address }}</strong></address>
-<section class="appointment-hero"><div><p class="appointment-eyebrow">CABINET DE RADIOLOGIE · ÉCHOGRAPHIE</p><h1>Prendre rendez-vous</h1><p>Sélectionnez un horaire, puis renseignez le patient et l’examen souhaité.</p></div></section>
+<link rel="stylesheet" href="{{ url_for('static', filename='public_agenda.css', v=agenda_asset_version) }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='agenda_app.css', v=agenda_app_asset_version) }}"></head>
+<body class="appointments-page public-agenda-page agenda-app-page">
+{% set internal_agenda = false %}{% include '_agenda_app_chrome.html' %}
+<main class="appointment-shell agenda-app-main" id="agenda-main">
+<div class="agenda-page-heading"><div><p class="agenda-breadcrumb">{{ practice_short_name }} <span>/</span> Échographie</p><h1>Votre rendez-vous, simplement.</h1><p>Choisissez le moment qui vous convient.</p></div><ol class="agenda-booking-steps" aria-label="Étapes de réservation"><li class="is-current" aria-current="step"><span>1</span> Horaire</li><li><span>2</span> Vos informations</li><li><span>3</span> Confirmation</li></ol></div>
+<div class="agenda-public-workspace">
 {% if success %}<p class="appointment-alert appointment-alert-success" role="status">Le rendez-vous est confirmé.</p>{% endif %}
 <p id="calendar-error" role="alert"></p>
-<section class="appointment-calendar-card appointment-dashboard agenda-week-panel">
-<div class="appointment-calendar-toolbar"><div><p class="appointment-eyebrow">VOTRE SEMAINE</p><h2>{{ week_start.strftime('%d/%m/%Y') }} – {{ (week_end-timedelta(days=1)).strftime('%d/%m/%Y') }}</h2></div><nav class="appointment-week-actions" aria-label="Navigation entre les semaines">
-<a class="agenda-arrow" aria-label="Semaine précédente" title="Semaine précédente" href="{{ url_for('public_agenda', date=(week_start-timedelta(days=7)).isoformat()) }}">&#8249;</a><a class="appointment-today-link" href="{{ url_for('public_agenda') }}">Aujourd’hui</a><a class="agenda-arrow" aria-label="Semaine suivante" title="Semaine suivante" href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">&#8250;</a></nav></div>
+<section class="appointment-calendar-card appointment-dashboard agenda-week-panel" id="appointment-calendar" aria-label="Choisir une disponibilité">
+<div class="appointment-calendar-toolbar"><div><p class="appointment-eyebrow">Le calendrier</p><h2>{{ week_start.strftime('%d/%m/%Y') }} – {{ (week_end-timedelta(days=1)).strftime('%d/%m/%Y') }}</h2></div><nav class="appointment-week-actions" aria-label="Navigation entre les semaines">
+<a class="agenda-arrow" aria-label="Semaine précédente" title="Semaine précédente" href="{{ url_for('public_agenda', date=(week_start-timedelta(days=7)).isoformat()) }}">&#8249;</a><a class="appointment-today-link" href="{{ url_for('public_agenda') }}">Prochaines dates</a><a class="agenda-arrow" aria-label="Semaine suivante" title="Semaine suivante" href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">&#8250;</a></nav></div>
 <div class="agenda-controls"><form class="appointment-date-form" method="get"><label for="date">Choisir une date</label><input id="date" name="date" type="date" value="{{ week_start.isoformat() }}"><button>Afficher</button></form>
 <div class="agenda-key" aria-label="Légende"><span><i class="agenda-key-free"></i>Disponible</span><span><i class="agenda-key-busy"></i>Indisponible</span></div></div>
+{% if consultation_days|selectattr('slots')|list %}
 <div class="appointment-compact-week-wrap">
 <p class="appointment-mobile-closed-days">Jours fermés cette semaine : {% for day in consultation_days if not day.slots %}{{ day.day_name }}{{ ', ' if not loop.last else '.' }}{% endfor %}</p>
 <table class="appointment-compact-week" aria-label="Agenda hebdomadaire — horaires par jour">
@@ -30,15 +33,30 @@
 <strong>{{ slot.starts_at.strftime('%H:%M') }}</strong><small>{{ 'Indisponible' if slot.unavailable else 'Libre' }}</small></button>
 {% endif %}
 </td>{% elif index == 0 %}<td rowspan="{{ calendar_row_count }}" class="appointment-closed-cell appointment-closed-column"><span class="agenda-closed-mark" aria-hidden="true">—</span></td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody></table>
-</div><p class="agenda-privacy-note">Les informations des patients sont uniquement visibles par le cabinet.</p></section></main>
-<div class="appointment-modal" id="booking-modal" hidden><div class="appointment-modal-backdrop"></div><section class="appointment-modal-card" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="appointment-modal-close" id="close" aria-label="Fermer">×</button><h2 id="booking-title">Planifier un rendez-vous</h2><p id="selected-slot" class="appointment-selected-slot"></p><p>Renseignez le patient et l’examen, puis confirmez le rendez-vous.</p><p id="booking-error" role="alert"></p>
+</div>{% else %}<div class="agenda-empty-week">Aucune consultation prévue cette semaine. Choisissez une autre date.</div>{% endif %}<p class="agenda-privacy-note">{{ icon('shield',14) }} Vos informations restent confidentielles.</p></section>
+<aside class="agenda-availability" id="availability-panel" aria-labelledby="availability-title">
+  <section class="agenda-availability-card">
+    <div class="agenda-panel-icon">{{ icon('clock',22) }}</div>
+    <p class="appointment-eyebrow">EN QUELQUES CLICS</p><h2 id="availability-title">Choisissez une disponibilité</h2><p class="agenda-panel-description">Les prochains horaires de cette semaine.</p>
+    {% set choices = namespace(count=0) %}
+    {% for day in consultation_days %}{% set free = day.slots|rejectattr('unavailable')|list %}{% if free %}
+    <div class="agenda-quick-day"><h3>{% if day.date == today %}Aujourd’hui{% elif day.date == today+timedelta(days=1) %}Demain{% else %}{{ day.day_name|capitalize }} {{ day.date.strftime('%d/%m') }}{% endif %}</h3><div class="agenda-quick-slots">
+      {% for slot in free %}{% set choices.count = choices.count+1 %}<button type="button" data-slot-choice="{{ slot.starts_at.isoformat(timespec='minutes') }}" aria-label="Choisir {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m à %H:%M') }}">{{ slot.starts_at.strftime('%Hh%M') }}{{ icon('arrow',16) }}</button>{% endfor %}
+    </div></div>{% endif %}{% endfor %}
+    {% if not choices.count %}<div class="agenda-no-availability">Aucun créneau disponible cette semaine.<a href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">Voir la semaine suivante {{ icon('arrow',16) }}</a></div>{% endif %}
+    <a class="agenda-more-dates" href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">Plus de dates {{ icon('arrow',16) }}</a>
+  </section>
+  <section class="agenda-practice-card" id="practice-details">{{ icon('pin',20) }}<div><h2>Votre lieu de rendez-vous</h2><address>{{ practice_address }}</address>{% if booking_start_date and today < booking_start_date %}<p class="agenda-opening-date">Premières consultations le {{ booking_start_date.strftime('%d/%m/%Y') }}</p>{% endif %}</div></section>
+  <p class="agenda-sidebar-footnote">{{ icon('shield',15) }} Une confirmation à imprimer vous sera remise à la fin de votre réservation.</p>
+</aside></div></main>
+<div class="appointment-modal" id="booking-modal" hidden><div class="appointment-modal-backdrop"></div><section class="appointment-modal-card" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="appointment-modal-close" id="close" aria-label="Fermer">×</button><p class="appointment-eyebrow">VOTRE RENDEZ-VOUS</p><h2 id="booking-title">Vos informations</h2><p id="selected-slot" class="appointment-selected-slot"></p><p>Renseignez le patient et l’examen, puis confirmez le rendez-vous.</p><p id="booking-error" role="alert"></p>
 <form id="booking-form" class="appointment-booking-form" action="{{ url_for('public_book_appointment') }}" method="post" enctype="multipart/form-data">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="slot_start" id="slot-start">
 <label>Quel examen souhaitez-vous ? <span>(obligatoire)</span><select name="inami_code" required><option value="" selected disabled>Choisissez un examen</option>{% for group, entries in appointment_groups %}<optgroup label="{{ group }}">{% for code,label in entries %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</optgroup>{% endfor %}</select></label>
 <label class="agenda-half-field">Prénom et nom complets<input name="patient_name" required minlength="5" maxlength="255" autocomplete="name" aria-describedby="patient-name-help"></label><small id="patient-name-help">Indiquez au moins le prénom et le nom (5 lettres minimum).</small>
 <label class="agenda-half-field">E-mail (facultatif)<input name="patient_email" type="email" maxlength="255" autocomplete="email"></label>
 <label class="agenda-half-field">Téléphone du patient (facultatif)<input name="patient_phone" type="tel" maxlength="80" autocomplete="off"></label>
-<fieldset><legend>Statut du patient</legend><label><input type="radio" name="insurance_status" value="bim" required> BIM (VIPO)</label><label><input type="radio" name="insurance_status" value="normal" required> Normal — sans intervention majorée</label></fieldset>
+
 <label>Ordonnance <span>facultative · PDF, JPG, PNG ou WEBP · maximum 10 Mo</span><input type="file" name="prescription_file" accept=".pdf,image/jpeg,image/png,image/webp"></label>
 <button class="appointment-submit-button" type="submit">Confirmer le rendez-vous</button></form></section></div>
 <div class="appointment-modal agenda-confirmation-modal" id="confirmation-modal" hidden>
@@ -66,6 +84,10 @@ form.addEventListener('invalid',event=>{
  if(event.target===examSelect)document.getElementById('booking-error').textContent='Choisissez un examen pour confirmer le rendez-vous.';
  else if(event.target===patientName)document.getElementById('booking-error').textContent='Indiquez le prénom et le nom complets (au moins 5 lettres).';
 },true);
+document.querySelectorAll('[data-slot-choice]').forEach(choice=>choice.addEventListener('click',()=>{
+ const source=[...document.querySelectorAll('[data-slot]')].find(button=>button.dataset.slot===choice.dataset.slotChoice);
+ if(source && !source.disabled)source.click();
+}));
 document.querySelectorAll('[data-slot]').forEach(button=>button.addEventListener('click',()=>{
  form.reset();patientName.setCustomValidity('');lastSlotButton=button;form.elements.slot_start.value=button.dataset.slot;
  document.getElementById('booking-error').textContent='';document.getElementById('selected-slot').textContent=button.dataset.label;

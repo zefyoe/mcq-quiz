@@ -1,0 +1,307 @@
+/* Shared appointment workspace. The booking and clinical workflows remain unchanged. */
+.agenda-app-page {
+  --appointment-ink: #223b3a;
+  --appointment-muted: #758580;
+  --appointment-panel: #fff;
+  --appointment-canvas: #f5f7f6;
+  --appointment-border: #e3e9e6;
+  --appointment-blue: #176b60;
+  --appointment-blue-soft: #edf5f1;
+  --appointment-green: #28776a;
+  --appointment-green-soft: #edf6f1;
+  --agenda-accent: #176b60;
+  --agenda-rail-width: 84px;
+  margin: 0;
+  background: var(--appointment-canvas);
+  color: var(--appointment-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.agenda-app-page *, .agenda-app-page *::before, .agenda-app-page *::after { box-sizing: border-box; }
+.agenda-app-page [hidden] { display: none !important; }
+.agenda-app-page button, .agenda-app-page input, .agenda-app-page select, .agenda-app-page textarea { font-family: inherit; }
+.agenda-app-page button, .agenda-app-page a, .agenda-app-page input, .agenda-app-page select { -webkit-tap-highlight-color: transparent; }
+.agenda-app-page :focus-visible { outline: 3px solid #278b79; outline-offset: 3px; }
+.agenda-skip-link { position: fixed; top: -80px; left: 100px; z-index: 100; padding: 12px 18px; background: #fff; color: var(--agenda-accent); border-radius: 8px; }
+.agenda-skip-link:focus { top: 12px; }
+.agenda-rail { position: fixed; z-index: 10; inset: 0 auto 0 0; width: var(--agenda-rail-width); display: flex; flex-direction: column; align-items: center; background: #fff; border-right: 1px solid var(--appointment-border); }
+.agenda-rail-brand { position: relative; display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin: 20px 0 29px; border-radius: 13px; background: #1f504b; color: white; font-size: 23px; font-weight: 720; letter-spacing: -.09em; text-decoration: none; }
+.agenda-rail-brand > span { position: absolute; right: 7px; top: 8px; width: 5px; height: 5px; border-radius: 2px; background: #9bd9c1; }
+.agenda-rail nav, .agenda-rail-bottom { display: grid; justify-items: center; gap: 8px; width: 100%; }
+.agenda-rail-bottom { margin-top: auto; padding-bottom: 22px; }
+.agenda-rail-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; width: 64px; min-height: 62px; padding: 9px 2px; border: 0; border-radius: 12px; color: #66786f; background: transparent; text-decoration: none; font: inherit; font-size: 10px; font-weight: 600; cursor: pointer; transition: background .16s, color .16s; }
+.agenda-rail-item:hover { background: #f4f7f5; color: #2b5f55; }
+.agenda-rail-item[aria-pressed="true"], .agenda-rail-item.is-active { background: #eaf3ee; color: #1b6759; }
+.agenda-rail-secure { display: grid; justify-items: center; gap: 7px; color: #9ca8a2; font-size: 10px; }
+.agenda-app-header { min-height: 70px; margin-left: var(--agenda-rail-width); padding: 15px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--appointment-border); background: #ffffffed; }
+.agenda-app-identity { display: flex; align-items: center; gap: 16px; color: #677a70; font-size: 13px; }
+.agenda-app-identity > strong { color: #244b42; font-size: 20px; letter-spacing: -.6px; }
+.agenda-app-divider { width: 1px; height: 18px; background: #e3e9e6; }
+.agenda-header-note { display: flex; align-items: center; gap: 7px; color: #62776b; font-size: 11px; }
+.agenda-app-page .appointment-shell.agenda-app-main { width: calc(100% - var(--agenda-rail-width) - 64px); max-width: 1640px; margin: 0 32px 0 calc(var(--agenda-rail-width) + 32px); padding: 26px 0 40px; }
+.agenda-page-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 25px; }
+.agenda-breadcrumb { margin: 0 0 11px; color: #728479; font-size: 11px; font-weight: 500; }
+.agenda-breadcrumb > span { padding: 0 8px; color: #c0c9c3; }
+.agenda-page-heading h1 { margin: 0; color: #243e36; font-size: clamp(23px, 2.4vw, 31px); line-height: 1.25; letter-spacing: -.85px; font-weight: 650; }
+.agenda-page-heading h1 .agenda-heading-label { color: #a2afa8; font-weight: 450; }
+.agenda-page-heading p:not(.agenda-breadcrumb) { margin: 8px 0 0; color: #63796c; font-size: 13px; line-height: 1.5; }
+.agenda-booking-steps { display: flex; align-items: center; gap: 20px; margin: 0; padding: 0; list-style: none; }
+.agenda-booking-steps li { display: flex; align-items: center; gap: 7px; color: #a6b0aa; font-size: 11px; white-space: nowrap; }
+.agenda-booking-steps li > span { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid #dfe6e0; border-radius: 50%; font-size: 10px; }
+.agenda-booking-steps li.is-current { color: #26735f; font-weight: 650; }
+.agenda-booking-steps li.is-current > span { color: white; background: #317b66; border-color: #317b66; }
+.agenda-public-workspace { display: grid; grid-template-columns: minmax(0,1fr) 310px; gap: 22px; align-items: start; }
+.agenda-public-workspace > .appointment-alert, .agenda-public-workspace > #calendar-error { grid-column: 1 / -1; }
+.agenda-app-page .appointment-eyebrow { font-size: 10px; font-weight: 650; letter-spacing: .11em; color: #6a8070; margin-bottom: 7px; }
+.agenda-app-page .appointment-calendar-toolbar { gap: 14px; margin-bottom: 18px; align-items: center; }
+.agenda-app-page .appointment-calendar-toolbar h2 { font-size: clamp(16px,1.5vw,21px); letter-spacing: -.55px; font-weight: 650; }
+.agenda-app-page.public-agenda-page .agenda-week-panel { padding: 22px; border: 1px solid var(--appointment-border); border-radius: 16px; box-shadow: 0 3px 15px #223b3a03; }
+.agenda-app-page .appointment-week-actions a, .agenda-app-page .manage-hours-button { min-height: 36px; border: 1px solid #e0e7e2; border-radius: 8px; background: white; color: #697c70; font-size: 11px; font-weight: 550; text-decoration: none; padding: 8px 12px; }
+.agenda-app-page .appointment-week-actions a:hover, .agenda-app-page .manage-hours-button:hover { color: #216b55; background: #edf5f0; border-color: #bcd4c5; }
+.agenda-app-page .appointment-week-actions .appointment-today-link { color: #37745e; background: #f0f6f1; border-color: #dae8dd; }
+.agenda-app-page .appointment-week-actions .agenda-arrow { width: 36px; padding: 0; font-size: 23px; }
+.agenda-app-page .agenda-controls { border-color: #edf0ed; padding: 12px 0; margin-bottom: 8px; }
+.agenda-app-page .appointment-date-form label { color: #657b68; font-size: 11px; font-weight: 550; }
+.agenda-app-page .appointment-date-form input { border-color: #e0e7e0; border-radius: 8px; color: #465e4c; background: #fff; min-height: 38px; font-size: 12px; }
+.agenda-app-page .appointment-date-form button, .agenda-primary-action, .agenda-app-page .appointment-submit-button { border: 1px solid #236b59; border-radius: 8px; background: #236b59; color: #fff; font-size: 12px; font-weight: 550; box-shadow: none; cursor: pointer; }
+.agenda-app-page .appointment-date-form button:hover, .agenda-primary-action:hover, .agenda-app-page .appointment-submit-button:hover { background: #185746; }
+.agenda-primary-action { min-height: 40px; padding: 10px 16px; white-space: nowrap; }
+.agenda-app-page .agenda-key { color: #687f6b; font-size: 10px; gap: 12px; }
+.agenda-app-page .agenda-key i { width: 6px; height: 6px; }
+.agenda-app-page .agenda-key-free { background: #4d9c76; }
+.agenda-app-page .appointment-compact-week-wrap { border-color: #e6eae4; border-radius: 10px; }
+.agenda-app-page .appointment-compact-week th { padding: 13px 3px; border-color: #e8ece6; background: #fafbf9; }
+.agenda-app-page .appointment-compact-week th span { font-size: 10px; color: #6b8067; font-weight: 500; margin-bottom: 6px; }
+.agenda-app-page .appointment-compact-week th strong { color: #657d5d; font-size: 16px; font-weight: 600; }
+.agenda-app-page .appointment-compact-week th small { font-size: 9px; color: #7b8d70; }
+.agenda-app-page .appointment-compact-week th.agenda-open-day { border-top: 2px solid #3d876c; background: #eef5ed; }
+.agenda-app-page .appointment-compact-week th.agenda-open-day strong, .agenda-app-page .appointment-compact-week th.agenda-open-day small { color: #3b6f50; }
+.agenda-app-page .appointment-compact-week td { height: 36px; border-color: #edf0e9; padding: 3px 6px; }
+.agenda-app-page .appointment-compact-week td.appointment-closed-cell { background: #fbfcfa; padding-top: 12px; }
+.agenda-app-page .agenda-closed-mark { color: #d0d8cc; font-size: 12px; }
+.agenda-app-page .appointment-compact-week .appointment-slot { min-height: 29px; padding: 5px 9px; border-radius: 6px; border-color: #d7e5d3; color: #3b7350; background: #f1f7ed; }
+.agenda-app-page .appointment-compact-week .appointment-slot strong { font-size: 12px; font-weight: 600; }
+.agenda-app-page .appointment-compact-week .appointment-slot small { color: #7e9a79; font-size: 9px; }
+.agenda-app-page .appointment-compact-week .appointment-slot:disabled { background: #f7f8f5; border-color: #eef0e9; color: #aeb9a7; }
+.agenda-app-page .appointment-compact-week .appointment-slot:disabled small { color: #aeb9a7; }
+.agenda-app-page .appointment-compact-week .appointment-slot:hover:not(:disabled) { background: #e1edda; border-color: #8eb384; }
+.agenda-app-page .agenda-privacy-note { display: flex; align-items: center; gap: 7px; font-size: 10px; color: #708268; margin-top: 14px; }
+.agenda-availability { display: grid; gap: 16px; position: sticky; top: 22px; scroll-margin-top: 20px; }
+.agenda-availability-card { padding: 24px; border: 1px solid #dfe6dc; border-radius: 16px; background: white; box-shadow: 0 3px 15px #223b3a03; }
+.agenda-panel-icon { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 20px; color: #407b5d; border-radius: 13px; background: #eef5e9; }
+.agenda-availability-card h2 { margin: 0; font-size: 22px; font-weight: 650; line-height: 1.3; letter-spacing: -.6px; }
+.agenda-panel-description { margin: 9px 0 24px; color: #6d7f63; font-size: 12px; line-height: 1.6; }
+.agenda-quick-day + .agenda-quick-day { margin-top: 21px; }
+.agenda-quick-day h3 { margin: 0 0 11px; color: #6e7f64; font-weight: 550; font-size: 12px; }
+.agenda-quick-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.agenda-quick-slots button { display: flex; align-items: center; justify-content: space-between; gap: 5px; min-height: 49px; border: 1px solid #dde6d6; border-radius: 9px; padding: 10px 13px; background: #fff; color: #3e6847; font-size: 15px; font-weight: 550; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
+.agenda-quick-slots button svg { color: #a4b79a; }
+.agenda-quick-slots button:hover { border-color: #7eab76; background: #f1f7ed; transform: translateY(-1px); }
+.agenda-more-dates { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 23px; padding-top: 17px; border-top: 1px solid #edf0e8; color: #568153; font-size: 12px; font-weight: 550; text-decoration: none; }
+.agenda-more-dates:hover { color: #1f5b39; }
+.agenda-practice-card { display: flex; align-items: start; gap: 13px; padding: 21px; border: 1px solid #e3e8dd; border-radius: 14px; background: #eff3e9; scroll-margin-top: 20px; }
+.agenda-practice-card > svg { flex-shrink: 0; margin-top: 2px; color: #8d9f78; }
+.agenda-practice-card h2 { margin: 0 0 9px; color: #4f6a42; font-size: 11px; font-weight: 600; }
+.agenda-practice-card address { color: #526e43; font-size: 12px; font-style: normal; line-height: 1.8; }
+.agenda-opening-date { border-top: 1px solid #dce5d0; padding-top: 12px; margin: 12px 0 0; color: #5e794d; font-size: 10px; line-height: 1.6; }
+.agenda-sidebar-footnote { display: flex; align-items: start; gap: 9px; margin: 0; padding: 0 8px; color: #6f8661; font-size: 10px; line-height: 1.6; }
+.agenda-sidebar-footnote svg { flex-shrink: 0; margin-top: 2px; }
+.agenda-no-availability { padding: 16px 0; color: #657e56; font-size: 13px; line-height: 1.6; }
+.agenda-no-availability a { display: block; margin-top: 10px; color: #357454; }
+/* The booking panel slides in without replacing the calendar. */
+.agenda-app-page #booking-modal { justify-content: flex-end; padding: 16px; }
+.agenda-app-page #booking-modal .appointment-modal-backdrop { background: #1b302e30; backdrop-filter: blur(2px); }
+.agenda-app-page #booking-modal .appointment-modal-card { width: min(500px,100%); max-height: calc(100dvh - 32px); border: 1px solid #d9e4dc; border-radius: 16px; padding: 30px; box-shadow: 0 24px 100px #173b3830; animation: agenda-panel-in .22s ease-out; }
+.agenda-app-page .appointment-modal-card h2 { color: #2b463b; font-size: 24px; font-weight: 650; letter-spacing: -.5px; }
+.agenda-app-page .appointment-modal-card > p { color: #647d54; font-size: 12px; line-height: 1.7; }
+.agenda-app-page .appointment-modal-card .appointment-selected-slot { display: inline-flex; border: 1px solid #e0e9d7; background: #f2f7ec; color: #5c7e4e; border-radius: 7px; padding: 9px 12px; font-size: 13px; }
+.agenda-app-page .appointment-booking-form { gap: 16px; }
+.agenda-app-page .appointment-booking-form label { color: #425f44; font-size: 12px; font-weight: 550; }
+.agenda-app-page .appointment-booking-form input, .agenda-app-page .appointment-booking-form select, .agenda-app-page .appointment-booking-form textarea { border-color: #dce5d7; background: #fdfefc; color: #355138; border-radius: 8px; }
+.agenda-app-page .appointment-booking-form small, .agenda-app-page .appointment-booking-form label > span { color: #728564; font-size: 10px; }
+.agenda-app-page .appointment-modal-close { color: #8b9b85; border-color: #e7ece1; background: #f7f9f3; }
+@keyframes agenda-panel-in { from { transform: translateX(24px); opacity: .5; } to { transform: translateX(0); opacity: 1; } }
+/* Internal calendar: same visual language, full administrator control. */
+.agenda-app-page.internal-agenda-page .agenda-page-heading { margin-bottom: 18px; }
+.agenda-app-page.internal-agenda-page .day-summary { margin: 0 0 18px; padding: 13px 18px; border: 1px solid #e2e9df; border-radius: 10px; background: white; color: #73866b; }
+.agenda-app-page.internal-agenda-page .day-summary > summary { padding: 0; font-size: 12px; font-weight: 550; }
+.agenda-app-page.internal-agenda-page .appointment-dashboard { grid-template-columns: 218px minmax(0,1fr); border-radius: 14px; box-shadow: 0 3px 15px #223b3a03; }
+.agenda-app-page.internal-agenda-page .appointment-sidebar { padding: 24px 19px; background: #fbfcf9; border-color: #e5ebe0; }
+.agenda-app-page.internal-agenda-page .appointment-side-heading h2 { color: #334f3a; font-size: 16px; font-weight: 600; letter-spacing: -.3px; }
+.agenda-app-page.internal-agenda-page .appointment-date-form { gap: 8px; margin: 22px 0; }
+.agenda-app-page.internal-agenda-page .appointment-date-form button { padding: 9px 12px; min-height: 38px; }
+.agenda-app-page.internal-agenda-page .appointment-calendar-card:not(.day-summary) { padding: 22px; }
+.agenda-app-page.internal-agenda-page .appointment-week-actions { gap: 5px; justify-content: flex-end; }
+.agenda-app-page.internal-agenda-page .appointment-week-actions a[aria-label] { min-width: 35px; padding: 4px 10px; font-size: 24px; line-height: 1; }
+.agenda-app-page.internal-agenda-page .appointment-calendar-toolbar { flex-wrap: wrap; }
+.agenda-app-page.internal-agenda-page .appointment-stats { gap: 12px; margin: 20px 0; }
+.agenda-app-page.internal-agenda-page .appointment-stats > div { background: #f2f5ed; border-color: #e4eadb; padding: 13px; border-radius: 10px; }
+.agenda-app-page.internal-agenda-page .appointment-stats strong { font-size: 23px; font-weight: 600; color: #607b4f; }
+.agenda-app-page.internal-agenda-page .appointment-stats span { font-size: 10px; color: #476a35; }
+.agenda-app-page.internal-agenda-page .appointment-legend { font-size: 10px; color: #6b825a; gap: 10px; }
+.agenda-app-page.internal-agenda-page .report-notice { margin-top: 25px; border: 1px solid #e3eadd; border-radius: 10px; background: white; color: #5e784f; font-size: 11px; line-height: 1.7; padding: 13px; }
+.agenda-app-page.internal-agenda-page .report-notice p { margin-top: 0; }
+.agenda-app-page.internal-agenda-page .report-notice strong { font-size: 11px; font-weight: 550; color: #496c38; overflow-wrap: anywhere; }
+.agenda-app-page.internal-agenda-page .report-notice button { background: #f7f9f3; border-color: #e0e8d6; color: #5d7b4a; font-size: 10px; min-height: 32px; padding: 6px; }
+.agenda-internal-availability { border-top: 1px solid #e7ecdf; padding-top: 18px; }
+.agenda-internal-availability h3 { font-size: 12px; font-weight: 600; color: #4a6d39; margin: 0 0 12px; }
+#internal-quick-slots { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; max-height: 360px; overflow-y: auto; padding: 3px; }
+.agenda-quick-date { grid-column: 1/-1; font-size: 10px; color: #657f50; margin: 5px 0 3px; text-transform: capitalize; }
+.agenda-internal-choice { min-height: 36px; padding: 6px; border: 1px solid #dce6d3; border-radius: 7px; background: #fff; color: #477233; font-size: 12px; cursor: pointer; }
+.agenda-internal-choice:hover { border-color: #8eb77b; background: #edf6e7; }
+.agenda-quick-more { grid-column: 1/-1; border: 0; background: none; color: #4f793d; font-size: 10px; padding: 10px; cursor: pointer; }
+.agenda-quick-empty { grid-column: 1/-1; margin: 0; color: #6b8554; font-size: 11px; line-height: 1.7; }
+.agenda-app-page.internal-agenda-page .appointment-calendar-scroll { border: 1px solid #e2e8dc; border-radius: 10px; max-height: min(760px,calc(100dvh - 300px)); scrollbar-color: #cbd7c2 transparent; }
+.agenda-app-page.internal-agenda-page .appointment-calendar-grid { border: 0; }
+.agenda-app-page.internal-agenda-page .appointment-day-header, .agenda-app-page.internal-agenda-page .appointment-grid-head { background: #f8faf5; border-color: #e7edde; min-height: 68px; }
+.agenda-app-page.internal-agenda-page .appointment-day-header span { color: #6d8558; font-size: 10px; font-weight: 550; }
+.agenda-app-page.internal-agenda-page .appointment-day-header strong { color: #476a35; font-weight: 600; }
+.agenda-app-page.internal-agenda-page .appointment-day-header.is-today { background: #eff6e8; box-shadow: inset 0 2px 0 #7da568; }
+.agenda-app-page.internal-agenda-page .appointment-slot-cell { border-color: #edf1e7; background: #fcfdfa; }
+.agenda-app-page.internal-agenda-page .appointment-slot-available { border-color: #e7eddf; color: #5a8144; background: #f8fcf3; border-radius: 6px; }
+.agenda-app-page.internal-agenda-page .appointment-slot-available:hover { background: #edf6e4; box-shadow: none; }
+.agenda-app-page.internal-agenda-page .appointment-slot-blocked { background: #f5f7f1; color: #b1bea4; }
+.agenda-app-page.internal-agenda-page .appointment-slot-booked { background: #edf5e6; border-color: #cddfbc; color: #527a3d; border-radius: 7px; }
+.agenda-app-page.internal-agenda-page .appointment-slot-toggle button { color: #6a8654; border-color: #e2ead7; background: #fff; font-size: 9px; }
+.agenda-app-page .day-menu-actions { border-color: #dce6d3; background: #fff; box-shadow: 0 7px 22px #29442314; }
+.agenda-app-page .day-menu-actions button { color: #7b9b64; background: #fff; border-color: #e2ebd8; }
+.agenda-app-page .day-menu-actions button:hover { background: #f1f7e9; }
+.agenda-app-page .patient-list-card { border-color: #e2e8db; border-radius: 14px; box-shadow: 0 3px 15px #223b3a03; }
+.agenda-app-page .patient-list-card h2 { color: #29473d; font-size: 22px; font-weight: 600; }
+.agenda-app-page .patient-table th { background: #f6f9f1; color: #5f7c47; border-color: #e1e9d8; }
+.agenda-app-page .patient-table td { border-color: #e7edde; }
+.agenda-app-page .report-drawer { border-color: #dce6d3; }
+.agenda-app-page.report-panel-open .appointment-dashboard { grid-template-columns: minmax(0,1fr); }
+.agenda-app-page.report-panel-open .agenda-primary-action { display: none; }
+.agenda-app-page.report-panel-open .agenda-page-heading p:not(.agenda-breadcrumb), .agenda-app-page.report-panel-open .agenda-heading-label { display: none; }
+.agenda-app-page.report-panel-open .agenda-page-heading h1 { font-size: 22px; }
+@media (min-width: 1025px) { .agenda-app-page.public-agenda-page .appointment-booking-form { grid-template-columns: 1fr; gap: 14px; } }
+@media (max-width: 1200px) {
+  .agenda-app-page { --agenda-rail-width: 72px; }
+  .agenda-app-page .appointment-shell.agenda-app-main { width: calc(100% - var(--agenda-rail-width) - 40px); margin-left: calc(var(--agenda-rail-width) + 20px); margin-right: 20px; }
+  .agenda-app-header { padding-inline: 20px; }
+  .agenda-public-workspace { grid-template-columns: minmax(0,1fr) 280px; gap: 16px; }
+  .agenda-availability-card { padding: 20px; }
+  .agenda-booking-steps { gap: 10px; }
+  .agenda-booking-steps li:not(.is-current) { font-size: 0; gap: 0; }
+  .agenda-app-page.internal-agenda-page .appointment-dashboard { grid-template-columns: 190px minmax(0,1fr); }
+  .agenda-app-page.internal-agenda-page .appointment-sidebar { padding: 20px 14px; }
+  .agenda-app-page.internal-agenda-page .appointment-calendar-card:not(.day-summary) { padding: 18px; }
+}
+@media (max-width: 1000px) {
+  .agenda-public-workspace { grid-template-columns: minmax(0,1fr) 250px; gap: 14px; }
+  .agenda-app-page .agenda-controls { align-items: flex-start; }
+  .agenda-app-page .agenda-key { width: 100%; }
+  .agenda-app-page.public-agenda-page .agenda-week-panel { padding: 16px; }
+  .agenda-app-page .appointment-compact-week th { padding-inline: 2px; }
+  .agenda-app-page .appointment-compact-week th span { font-size: 9px; }
+  .agenda-app-page .appointment-compact-week th strong { font-size: 13px; }
+  .agenda-app-page .appointment-compact-week .appointment-slot { flex-direction: column; min-height: 44px; justify-content: center; padding-inline: 2px; }
+  .agenda-app-page.internal-agenda-page .appointment-dashboard { grid-template-columns: minmax(0,1fr); }
+  .agenda-app-page.internal-agenda-page .appointment-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; border-right: 0; border-bottom: 1px solid var(--appointment-border); }
+  .agenda-app-page.internal-agenda-page .appointment-sidebar .appointment-side-heading { display: none; }
+  .agenda-app-page.internal-agenda-page .appointment-date-form { margin: 0; }
+  .agenda-app-page.internal-agenda-page .appointment-stats { margin: 0; grid-column: 2; grid-row: 1; align-self: end; }
+  .agenda-app-page.internal-agenda-page .agenda-internal-availability { grid-column: 1/-1; border-top: 1px solid #e3e9dc; }
+  .agenda-app-page.internal-agenda-page .report-notice { display: none; }
+  #internal-quick-slots { grid-template-columns: repeat(6,minmax(0,1fr)); max-height: 180px; }
+  .agenda-app-page.internal-agenda-page .appointment-legend { display: none; }
+}
+@media (max-width: 760px) {
+  .agenda-app-page { --agenda-rail-width: 0px; }
+  .agenda-rail { display: none; }
+  .agenda-app-header { min-height: 60px; padding: 14px 20px; }
+  .agenda-app-identity { gap: 12px; font-size: 11px; }
+  .agenda-app-identity > strong { font-size: 18px; }
+  .agenda-header-note { font-size: 0; }
+  .agenda-header-note svg { width: 18px; height: 18px; }
+  .agenda-app-page .appointment-shell.agenda-app-main { width: calc(100% - 32px); margin: 0 16px; padding-top: 22px; }
+  .agenda-page-heading { gap: 16px; margin-bottom: 22px; align-items: flex-start; }
+  .agenda-page-heading h1 { font-size: 25px; }
+  .agenda-page-heading p:not(.agenda-breadcrumb) { font-size: 12px; }
+  .agenda-booking-steps { padding-top: 28px; }
+  .agenda-booking-steps li { font-size: 0 !important; gap: 0; }
+  .agenda-booking-steps li > span { width: 21px; height: 21px; font-size: 9px; }
+  .agenda-public-workspace { display: flex; flex-direction: column; }
+  .agenda-public-workspace > * { width: 100%; }
+  .agenda-availability { order: -1; position: static; display: contents; }
+  .agenda-availability-card { order: -3; padding: 20px; }
+  .agenda-availability-card h2 { font-size: 21px; }
+  .agenda-panel-icon, .agenda-availability-card > .appointment-eyebrow { display: none; }
+  .agenda-panel-description { margin: 7px 0 17px; }
+  .agenda-quick-slots { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .agenda-quick-slots button { min-height: 48px; font-size: 14px; }
+  .agenda-more-dates { margin-top: 18px; }
+  .agenda-practice-card { order: 2; }
+  .agenda-sidebar-footnote { order: 3; }
+  .agenda-app-page .appointment-calendar-toolbar { flex-direction: row; align-items: center; }
+  .agenda-app-page .appointment-week-actions { width: auto; }
+  .agenda-app-page .appointment-week-actions a { flex: none; min-height: 40px; }
+  .agenda-app-page .appointment-compact-week .appointment-slot { min-height: 44px; flex-direction: row; justify-content: space-between; padding: 6px 10px; }
+  .agenda-app-page .appointment-compact-week .appointment-slot strong { font-size: 13px; }
+  .agenda-app-page .appointment-compact-week .appointment-slot small { font-size: 10px; }
+  .agenda-app-page .appointment-date-form input { min-height: 44px; font-size: 16px; }
+  .agenda-app-page .appointment-date-form button { min-height: 44px; }
+  .agenda-app-page .appointment-mobile-closed-days { font-size: 10px; line-height: 1.6; }
+  .agenda-app-page #booking-modal { padding: 8px; }
+  .agenda-app-page #booking-modal .appointment-modal-card { width: 100%; max-height: calc(100dvh - 16px); padding: 28px 20px; }
+  .agenda-app-page .appointment-booking-form input, .agenda-app-page .appointment-booking-form select { font-size: 16px; }
+  .agenda-app-page.internal-agenda-page .agenda-rail { position: sticky; top: 0; width: 100%; height: 67px; border-right: 0; border-bottom: 1px solid var(--appointment-border); display: block; background: #fff; }
+  .internal-agenda-page .agenda-rail-brand, .internal-agenda-page .agenda-rail-bottom { display: none; }
+  .internal-agenda-page .agenda-rail nav { display: flex; justify-content: space-around; gap: 3px; padding: 3px 8px; }
+  .internal-agenda-page .agenda-rail-item { flex: 1; min-height: 58px; max-width: 95px; font-size: 10px; padding: 6px; gap: 4px; border-radius: 8px; }
+  .internal-agenda-page .agenda-app-header { border-bottom: 0; }
+  .agenda-app-page.internal-agenda-page .agenda-page-heading { display: block; }
+  .agenda-primary-action { margin-top: 14px; font-size: 11px; }
+  .agenda-app-page.internal-agenda-page .appointment-calendar-toolbar { align-items: flex-start; }
+  .agenda-app-page.internal-agenda-page .appointment-week-actions { width: 100%; justify-content: flex-start; }
+  .agenda-app-page.internal-agenda-page .appointment-sidebar { gap: 15px; }
+  .agenda-app-page.internal-agenda-page .appointment-date-form { grid-template-columns: 1fr; }
+  .agenda-app-page.internal-agenda-page .appointment-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .agenda-app-page.internal-agenda-page .appointment-stats > div { padding: 12px 8px; }
+  #internal-quick-slots { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .agenda-app-page.internal-agenda-page .appointment-calendar-scroll { max-height: 600px; }
+  .agenda-app-page .appointment-booking-form input, .agenda-app-page .appointment-booking-form select, .agenda-app-page .appointment-booking-form textarea { font-size: 16px; }
+}
+@media (max-width: 400px) {
+  .agenda-booking-steps { display: none; }
+  .agenda-quick-slots { grid-template-columns: 1fr 1fr; }
+  .agenda-app-page .appointment-calendar-toolbar h2 { font-size: 15px; }
+  .agenda-app-page .appointment-week-actions { gap: 3px; }
+  .agenda-app-page .appointment-week-actions .appointment-today-link { font-size: 9px; padding-inline: 7px; }
+}
+@media (prefers-reduced-motion: reduce) { .agenda-app-page *, .agenda-app-page *::before, .agenda-app-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@media print {
+  .agenda-rail, .agenda-app-header, .agenda-page-heading, .agenda-skip-link { display: none !important; }
+  .agenda-app-page .appointment-shell.agenda-app-main { width: 100%; margin: 0; padding: 0; }
+}
+/* Keep clinical cards and touch controls readable within the compact shell. */
+.agenda-mobile-account { display: none; }
+.agenda-app-page.internal-agenda-page .appointment-move-handle { color: #4b7345; background: #e3eedb; border-color: #cdddc1; font-weight: 550; }
+.agenda-app-page.internal-agenda-page .appointment-slot-booked .appointment-slot-time { color: #52724a; }
+.agenda-app-page.internal-agenda-page .appointment-slot-booked > span:not(.appointment-slot-time) { color: #67835c; }
+.agenda-app-page.internal-agenda-page .appointment-slot-booked details { color: #5b7b4e; }
+.agenda-app-page.internal-agenda-page .appointment-slot-booked .appointment-cancel-button { color: #954654; background: #fff5f6; border-color: #e6c4cb; }
+.agenda-app-page #booking-modal { display: flex; align-items: stretch; }
+.agenda-app-page #booking-modal .appointment-modal-card { height: calc(100dvh - 32px); }
+.agenda-app-page #booking-modal .appointment-booking-form > .agenda-half-field { grid-column: 1 / -1; }
+.agenda-app-page .appointment-compact-week .appointment-slot { min-height: 36px; }
+.agenda-app-page .appointment-compact-week th small { font-size: 10px; }
+.agenda-app-page .agenda-privacy-note, .agenda-sidebar-footnote { font-size: 11px; }
+.agenda-app-page .appointment-date-form label, .agenda-app-page .agenda-key { font-size: 11px; }
+@media(max-width: 760px) {
+  .agenda-mobile-account { display: grid; place-items: center; width: 38px; height: 38px; color: #526e5c; border: 1px solid #e4eae1; border-radius: 8px; }
+  .agenda-app-page #booking-modal .appointment-modal-card { height: calc(100dvh - 16px); }
+}
+@media(max-width: 760px) {
+  .agenda-app-page .agenda-public-workspace { align-items: stretch; }
+  .agenda-availability-card, .agenda-practice-card, .agenda-sidebar-footnote { width: 100%; }
+  .agenda-app-page .appointment-compact-week .appointment-slot { min-height: 44px; }
+}
+.agenda-empty-week { padding: 36px 22px; background: #f7faf4; border: 1px solid #e1e8da; border-radius: 10px; color: #657c57; font-size: 13px; line-height: 1.8; }
+@media(max-width:1000px) {
+  .agenda-app-page .agenda-closed-col, .agenda-app-page .appointment-compact-week .appointment-closed-column { display: none; }
+  .agenda-app-page .agenda-open-col { width: auto; }
+  .agenda-app-page .appointment-mobile-closed-days { display: block; padding-inline: 8px; font-size: 10px; line-height: 1.7; }
+  .agenda-app-page.internal-agenda-page .report-notice { display: block; grid-column: 1/-1; margin-top: 0; }
+}

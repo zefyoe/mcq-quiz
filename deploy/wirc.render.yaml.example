@@ -26,6 +26,8 @@ services:
         value: "1"
       - key: APPOINTMENT_BOOKING_ENABLED
         value: "1"
+      - key: APPOINTMENT_BOOKING_START_DATE
+        value: "2026-12-03"
       - key: PUBLIC_SITE_MODE
         value: active
       - key: APPOINTMENT_PRACTICE_ADDRESS

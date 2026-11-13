@@ -71,7 +71,9 @@
         const hidden=document.getElementById('patient-list').hidden;
         document.getElementById('patient-list').outerHTML=result.patient_list_html;
         document.getElementById('patient-list').hidden=hidden;
-        document.querySelector('[data-agenda-view="patients"]').textContent='Liste patients · '+result.patient_total;
+        const patientView=document.querySelector('[data-agenda-view="patients"]');
+        patientView.setAttribute('aria-label','Liste patients · '+result.patient_total);
+        (patientView.querySelector('[data-view-label]') || patientView).textContent='Patients · '+result.patient_total;
       }
       if(result.day_summary_html) {
         const previous=document.querySelector('.day-summary'), open=previous.open;

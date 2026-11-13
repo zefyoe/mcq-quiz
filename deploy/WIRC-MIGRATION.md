@@ -15,7 +15,12 @@
   PDF, request uploads, XIMEO-RIZIV and Gmail integration features. Student quiz,
   registration and payment routes are unavailable in the WIRC profile.
 
-## Launch steps still needed
+## Deployment reference
+
+WIRC is provisioned on Render and `wirc.be` / `www.wirc.be` are verified.
+The two approved administrator logins were preserved without importing patients;
+Google login and Gmail were connected separately in WIRC. The Blueprint source
+remains `deploy/wirc.render.yaml.example`; do not create a second service.
 
 1. The owner selected `wirc.be` at Wix. Verify ownership/registration in that
    account. This code change does not purchase, transfer or register a domain.
@@ -33,11 +38,14 @@
    `PRACTICE_PROFILE=wirc` requires `WIRC_DATABASE_URL`; it refuses the default old
    database setting. The WIRC Blueprint now enables public booking at Centre
    Médical Azalys, Lenneke Marelaan 12, 1932 Woluwe-Saint-Étienne, with Thursday
-   08:00–12:00 only, in ten-minute slots. The existing two-adjacent-slot release
+   08:00–12:00 only, **starting 3 December 2026**, in ten-minute slots.
+   `APPOINTMENT_BOOKING_START_DATE=2026-12-03` also rejects earlier bookings on
+   the server. The existing two-adjacent-slot release
    policy is preserved. Legacy Bymed remains publicly closed.
-4. In the new service's shell, run `python scripts/create_wirc_admin.py`. Enter
-   an approved admin address and a new password interactively. No credentials
-   belong in this file, Git, a command argument or chat.
+4. The approved administrators already exist. Do not recreate or replace them.
+   For a new independent installation only, `scripts/create_wirc_admin.py`
+   creates an allowlisted administrator interactively. No credentials belong
+   in this file, Git, a command argument or chat.
 5. Add `wirc.be` to the **new** Render service; use the exact DNS values shown by
    Render at the registrar, then verify HTTPS. Do not add it to the former
    service. Follow [Render's domain instructions](https://render.com/docs/custom-domains).

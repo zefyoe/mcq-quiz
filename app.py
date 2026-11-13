@@ -58,7 +58,7 @@ from appointment_moves import register_appointment_moves
 from appointment_trash import register_appointment_trash
 from models import AppointmentMoveReceipt, AppointmentTrash
 from practice_settings import (AGENDA_ONLY, PRACTICE_NAME, PRACTICE_SHORT_NAME,
-    PRACTICE_ENGLISH_NAME, PUBLIC_CLOSURE_MESSAGE, PUBLIC_BOOKING_ENABLED, practice_address)
+    PRACTICE_ENGLISH_NAME, PUBLIC_CLOSURE_MESSAGE, PUBLIC_BOOKING_ENABLED, BOOKING_START_DATE, practice_address)
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
@@ -657,6 +657,8 @@ def inject_language_helpers():
         "practice_short_name": PRACTICE_SHORT_NAME,
         "practice_english_name": PRACTICE_ENGLISH_NAME,
         "practice_address": practice_address(),
+        "booking_start_date": BOOKING_START_DATE,
+        "agenda_app_asset_version": os.stat(os.path.join(app.static_folder, 'agenda_app.css')).st_mtime_ns,
     }
 
 
@@ -3788,6 +3790,8 @@ def build_appointment_slot_grid(
     slots_by_day = []
     for day in days:
         window = APPOINTMENT_WEEKLY_WINDOWS.get(day["date"].weekday())
+        if BOOKING_START_DATE and day["date"] < BOOKING_START_DATE:
+            window = None
         candidates = set(range(window[0], window[1], APPOINTMENT_SLOT_MINUTES)) if window else set()
         for stamp, is_open in (availability_overrides or {}).items():
             if stamp.date() == day["date"] and (is_open or not internal):
@@ -3823,6 +3827,8 @@ def build_appointment_slot_grid(
 
 
 def appointment_slot_is_open(starts_at, overrides=None):
+    if BOOKING_START_DATE and starts_at.date() < BOOKING_START_DATE:
+        return False
     if overrides is None:
         override = db.session.get(AppointmentSlotOverride, starts_at)
         if override is not None:
@@ -3835,6 +3841,18 @@ def appointment_slot_is_open(starts_at, overrides=None):
     minute = starts_at.hour * 60 + starts_at.minute
     return bool(window and window[0] <= minute and minute + 10 <= window[1]
                 and (minute - window[0]) % 10 == 0)
+
+
+def default_appointment_date():
+    """Land WIRC on its next consultation, including the initial opening date."""
+    current = agenda_now()
+    first = max(current.date(), BOOKING_START_DATE or current.date())
+    for offset in range(8):
+        candidate = first + timedelta(days=offset)
+        window = APPOINTMENT_WEEKLY_WINDOWS.get(candidate.weekday())
+        if window and (candidate > current.date() or current.hour * 60 + current.minute < window[1]):
+            return candidate.isoformat()
+    return first.isoformat()
 
 
 def appointment_slot_is_hard_closed(starts_at):
@@ -4031,13 +4049,7 @@ def public_agenda():
     ensure_appointment_schema()
     selected_date = request.args.get("date")
     if AGENDA_ONLY and not selected_date:
-        current = agenda_now()
-        for offset in range(8):
-            candidate = current.date() + timedelta(days=offset)
-            window = APPOINTMENT_WEEKLY_WINDOWS.get(candidate.weekday())
-            if window and (offset or current.hour * 60 + current.minute < window[1]):
-                selected_date = candidate.isoformat()
-                break
+        selected_date = default_appointment_date()
     start = get_appointment_week_start(selected_date)
     end = start + timedelta(days=7)
     # Only timestamps and durations are selected for the public calendar.
@@ -4070,7 +4082,8 @@ def public_agenda():
         consultation_days.append(dict(day, slots=day_slots))
     return render_template("public_agenda.html", consultation_days=consultation_days,
         agenda_asset_version=os.stat(os.path.join(app.static_folder, 'public_agenda.css')).st_mtime_ns,
-        calendar_row_count=max(len(day['slots']) for day in consultation_days),
+        calendar_row_count=max(1, max(len(day['slots']) for day in consultation_days)),
+        today=agenda_now().date(),
         week_start=start, week_end=end, timedelta=timedelta,
         appointment_groups=PUBLIC_APPOINTMENT_GROUPS,
         csrf_token=agenda_token(), success=request.args.get("success") == "1")
@@ -4467,6 +4480,8 @@ def admin_appointments():
 
     ensure_appointment_schema()
     requested_date = request.args.get("date")
+    if AGENDA_ONLY and not requested_date:
+        requested_date = default_appointment_date()
     try:
         shift_date = date.fromisoformat(requested_date or "")
     except ValueError:
@@ -4606,9 +4621,8 @@ def admin_book_appointment():
     notes = (request.form.get("notes") or "").strip()
     doctor = (request.form.get("referring_doctor") or "").strip()
     insurance = request.form.get("insurance_status")
-    if public and (not starts_at or starts_at <= agenda_now() or not appointment_slot_is_open(starts_at)
-                   or insurance not in {"bim", "normal"}):
-        return jsonify(error="Choisissez votre statut et un créneau futur valide."), 400
+    if public and (not starts_at or starts_at <= agenda_now() or not appointment_slot_is_open(starts_at)):
+        return jsonify(error="Choisissez un créneau futur parmi les horaires disponibles."), 400
     if any(len(value) > limit for value, limit in (
         (patient_name, 255), (patient_email, 255), (patient_phone, 80), (doctor, 255), (notes, 2000)
     )):

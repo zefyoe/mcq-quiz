@@ -89,20 +89,42 @@ try:
             assert not appointment_slot_is_open(day)
             assert not appointment_slot_is_open(day+timedelta(days=4))
         app.config["APPOINTMENT_BOOKING_ENABLED"]=True
+        # WIRC starts on 3 December. Neither crafted requests nor an explicit
+        # older-week URL may book the earlier Thursday, even with an override.
+        from datetime import datetime
+        from unittest.mock import patch
+        from models import AppointmentSlotOverride
+        with patch('app.agenda_now',return_value=datetime(2026,11,14,9,0)):
+            assert '2026-12-03T08:00' in public.get('/agenda',base_url=base).text
+            assert 'value="2026-12-03"' in admin.get('/admin/appointments',base_url=base).text
+        early=datetime(2026,11,26,8,0)
+        with app.app_context():
+            db.session.add(AppointmentSlotOverride(starts_at=early,is_open=True));db.session.commit()
+            assert not appointment_slot_is_open(early)
+            db.session.delete(db.session.get(AppointmentSlotOverride,early));db.session.commit()
+        early_page=public.get('/agenda?date=2026-11-26',base_url=base)
+        assert 'data-slot=' not in early_page.text and 'data-slot-choice=' not in early_page.text
+        early_csrf=re.search(r'name="csrf_token" value="([^"]+)"',early_page.text)[1]
+        assert public.post('/agenda/book',base_url=base,data=dict(csrf_token=early_csrf,
+            slot_start=early.isoformat(),patient_name='Patient Trop Tot',inami_code='459712')).status_code==400
         opened=public.get("/agenda?date="+thursday.date().isoformat(),base_url=base)
-        assert opened.status_code==200 and 'Prendre rendez-vous' in opened.text
+        assert opened.status_code==200 and 'Choisissez une disponibilité' in opened.text
         assert re.findall(r'data-slot="([^"]+)"',opened.text)==[
             thursday.isoformat(timespec="minutes"),(thursday+timedelta(minutes=10)).isoformat(timespec="minutes")]
         assert 'Adresse fictive WIRC' in opened.text and '18:30' not in opened.text
         assert 'Gaillait' not in opened.text and 'Pavillon' not in opened.text
+        assert 'name="insurance_status"' not in opened.text
+        assert 'name="insurance_status"' not in internal.text
+        assert re.findall(r'data-slot-choice="([^"]+)"',opened.text)==re.findall(r'data-slot="([^"]+)"',opened.text)
         csrf=re.search(r'name="csrf_token" value="([^"]+)"',opened.text)[1]
         booked=public.post('/agenda/book',base_url=base,data=dict(csrf_token=csrf,slot_start=thursday.isoformat(),
-            patient_name='PATIENT FICTIF WIRC',inami_code='459712',insurance_status='normal'))
+            patient_name='PATIENT FICTIF WIRC',inami_code='459712'))
         assert booked.status_code==200 and booked.mimetype=='application/pdf'
         assert 'Adresse fictive WIRC' in PdfReader(io.BytesIO(booked.data)).pages[0].extract_text()
         assert 'PATIENT FICTIF WIRC' not in public.get('/agenda?date='+thursday.date().isoformat(),base_url=base).text
         with app.app_context():
             record=Appointment.query.one();assert record.starts_at==thursday and record.duration_minutes==10
+            assert record.insurance_status is None
             db.session.delete(record);db.session.commit()
             # The one-time credential transfer preserves password hashes only
             # for the two allowlisted admins, rejects other users, and is safe
