@@ -4029,7 +4029,16 @@ def private_agenda_cache(response):
 @app.get("/agenda")
 def public_agenda():
     ensure_appointment_schema()
-    start = get_appointment_week_start(request.args.get("date"))
+    selected_date = request.args.get("date")
+    if AGENDA_ONLY and not selected_date:
+        current = agenda_now()
+        for offset in range(8):
+            candidate = current.date() + timedelta(days=offset)
+            window = APPOINTMENT_WEEKLY_WINDOWS.get(candidate.weekday())
+            if window and (offset or current.hour * 60 + current.minute < window[1]):
+                selected_date = candidate.isoformat()
+                break
+    start = get_appointment_week_start(selected_date)
     end = start + timedelta(days=7)
     # Only timestamps and durations are selected for the public calendar.
     occupied = db.session.query(Appointment.starts_at, Appointment.duration_minutes).filter(

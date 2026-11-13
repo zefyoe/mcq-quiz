@@ -104,6 +104,25 @@ try:
         with app.app_context():
             record=Appointment.query.one();assert record.starts_at==thursday and record.duration_minutes==10
             db.session.delete(record);db.session.commit()
+            # The one-time credential transfer preserves password hashes only
+            # for the two allowlisted admins, rejects other users, and is safe
+            # to repeat. Patient records and Gmail connections stay empty.
+            from scripts.transfer_practice_admins import import_accounts,PURPOSE
+            from cryptography.fernet import Fernet
+            import json
+            key=Fernet.generate_key();cipher=Fernet(key)
+            original_hash=User.query.filter_by(email='y@bymed.be').one().password_hash
+            def envelope(accounts):
+                return cipher.encrypt(json.dumps(dict(purpose=PURPOSE,accounts=accounts)).encode()).decode()
+            accounts=[dict(email=email,password_hash=original_hash) for email in ('y@bymed.be','ybahkani@gmail.com')]
+            try:
+                import_accounts(key,envelope([dict(email='unapproved@example.invalid',password_hash=original_hash)]))
+            except ValueError: pass
+            else: raise AssertionError('Unapproved account was imported')
+            assert import_accounts(key,envelope(accounts))==['y@bymed.be','ybahkani@gmail.com']
+            assert import_accounts(key,envelope(accounts))==['y@bymed.be','ybahkani@gmail.com']
+            assert User.query.count()==2 and all(u.check_password('test-password') and u.is_admin for u in User.query.all())
+            assert GmailConnection.query.count()==0 and Appointment.query.count()==0
     else:
         assert "PATIENT ARCHIVE FICTIF" in internal.text
     with app.app_context():
