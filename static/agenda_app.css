@@ -305,3 +305,16 @@
   .agenda-app-page .appointment-mobile-closed-days { display: block; padding-inline: 8px; font-size: 10px; line-height: 1.7; }
   .agenda-app-page.internal-agenda-page .report-notice { display: block; grid-column: 1/-1; margin-top: 0; }
 }
+/* Public booking stays focused on the calendar and time choices. */
+.agenda-app-page.public-agenda-page { --agenda-rail-width: 0px; }
+.agenda-app-brand-copy { display: grid; gap: 3px; font-size: 11px; line-height: 1.4; }
+.agenda-app-full-name { color: #466257; font-size: 13px; font-weight: 550; }
+.agenda-app-page .appointment-compact-week .agenda-afternoon-closed { padding: 17px 9px; background: #f1f3ef; text-align: center; color: #6b7866; border-top: 2px solid #dce3d7; }
+.agenda-afternoon-closed > * { display: block; }
+.agenda-afternoon-closed > span { margin-bottom: 5px; font-size: 10px; color: #7e8b78; }
+.agenda-afternoon-closed > strong { font-size: 13px; font-weight: 600; }
+.agenda-afternoon-closed > small { margin-top: 5px; font-size: 10px; color: #83917c; }
+.agenda-app-page .appointment-compact-week .agenda-afternoon-other { background: #fbfcfa; color: #c4cec0; text-align: center; }
+@media(max-width:760px) { .agenda-app-full-name { font-size: 11px; } .agenda-app-brand-copy { font-size: 10px; } }
+.agenda-quick-closure { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 0; padding: 11px 10px; border: 1px solid #e6eae2; border-radius: 7px; color: #78816e; background: #f7f8f4; font-size: 10px; }
+.agenda-quick-closure span { font-size: 9px; color: #8b9481; white-space: nowrap; }

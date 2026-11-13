@@ -113,6 +113,16 @@ try:
             thursday.isoformat(timespec="minutes"),(thursday+timedelta(minutes=10)).isoformat(timespec="minutes")]
         assert 'Adresse fictive WIRC' in opened.text and '18:30' not in opened.text
         assert 'Gaillait' not in opened.text and 'Pavillon' not in opened.text
+        assert 'Woluwe Imaging Radiology' in opened.text
+        assert 'Premières consultations' not in opened.text and '<aside class="agenda-rail"' not in opened.text
+        assert 'Après-midi' in opened.text and '12:00–20:00' in opened.text
+        # An exceptional afternoon opened internally must never be labelled shut.
+        afternoon=thursday.replace(hour=13)
+        with app.app_context():
+            db.session.add(AppointmentSlotOverride(starts_at=afternoon,is_open=True));db.session.commit()
+        assert '12:00–20:00' not in public.get('/agenda?date='+thursday.date().isoformat(),base_url=base).text
+        with app.app_context():
+            db.session.delete(db.session.get(AppointmentSlotOverride,afternoon));db.session.commit()
         assert 'name="insurance_status"' not in opened.text
         assert 'name="insurance_status"' not in internal.text
         assert re.findall(r'data-slot-choice="([^"]+)"',opened.text)==re.findall(r'data-slot="([^"]+)"',opened.text)

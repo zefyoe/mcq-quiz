@@ -32,7 +32,11 @@
 {% if slot.unavailable %}disabled{% else %}data-slot="{{ slot.starts_at.isoformat(timespec='minutes') }}" data-label="{{ slot.day_name|capitalize }} {{ slot.starts_at.strftime('%d/%m/%Y à %H:%M') }}"{% endif %}>
 <strong>{{ slot.starts_at.strftime('%H:%M') }}</strong><small>{{ 'Indisponible' if slot.unavailable else 'Libre' }}</small></button>
 {% endif %}
-</td>{% elif index == 0 %}<td rowspan="{{ calendar_row_count }}" class="appointment-closed-cell appointment-closed-column"><span class="agenda-closed-mark" aria-hidden="true">—</span></td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody></table>
+</td>{% elif index == 0 %}<td rowspan="{{ calendar_row_count }}" class="appointment-closed-cell appointment-closed-column"><span class="agenda-closed-mark" aria-hidden="true">—</span></td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody>
+{% if agenda_only %}<tfoot><tr>{% for day in consultation_days %}
+{% if day.slots and day.slots[-1].starts_at.hour < 12 %}<td class="agenda-afternoon-closed"><span>Après-midi</span><strong>Fermé</strong><small>12:00–20:00</small></td>
+{% else %}<td class="{{ 'appointment-closed-column' if not day.slots else '' }} agenda-afternoon-other"><span aria-hidden="true">—</span></td>{% endif %}
+{% endfor %}</tr></tfoot>{% endif %}</table>
 </div>{% else %}<div class="agenda-empty-week">Aucune consultation prévue cette semaine. Choisissez une autre date.</div>{% endif %}<p class="agenda-privacy-note">{{ icon('shield',14) }} Vos informations restent confidentielles.</p></section>
 <aside class="agenda-availability" id="availability-panel" aria-labelledby="availability-title">
   <section class="agenda-availability-card">
@@ -42,11 +46,11 @@
     {% for day in consultation_days %}{% set free = day.slots|rejectattr('unavailable')|list %}{% if free %}
     <div class="agenda-quick-day"><h3>{% if day.date == today %}Aujourd’hui{% elif day.date == today+timedelta(days=1) %}Demain{% else %}{{ day.day_name|capitalize }} {{ day.date.strftime('%d/%m') }}{% endif %}</h3><div class="agenda-quick-slots">
       {% for slot in free %}{% set choices.count = choices.count+1 %}<button type="button" data-slot-choice="{{ slot.starts_at.isoformat(timespec='minutes') }}" aria-label="Choisir {{ slot.day_name }} {{ slot.starts_at.strftime('%d/%m à %H:%M') }}">{{ slot.starts_at.strftime('%Hh%M') }}{{ icon('arrow',16) }}</button>{% endfor %}
-    </div></div>{% endif %}{% endfor %}
+    </div>{% if agenda_only and day.slots[-1].starts_at.hour < 12 %}<p class="agenda-quick-closure">Après-midi fermé <span>12:00–20:00</span></p>{% endif %}</div>{% endif %}{% endfor %}
     {% if not choices.count %}<div class="agenda-no-availability">Aucun créneau disponible cette semaine.<a href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">Voir la semaine suivante {{ icon('arrow',16) }}</a></div>{% endif %}
     <a class="agenda-more-dates" href="{{ url_for('public_agenda', date=week_end.isoformat()) }}">Plus de dates {{ icon('arrow',16) }}</a>
   </section>
-  <section class="agenda-practice-card" id="practice-details">{{ icon('pin',20) }}<div><h2>Votre lieu de rendez-vous</h2><address>{{ practice_address }}</address>{% if booking_start_date and today < booking_start_date %}<p class="agenda-opening-date">Premières consultations le {{ booking_start_date.strftime('%d/%m/%Y') }}</p>{% endif %}</div></section>
+  <section class="agenda-practice-card" id="practice-details">{{ icon('pin',20) }}<div><h2>Votre lieu de rendez-vous</h2><address>{{ practice_address }}</address></div></section>
   <p class="agenda-sidebar-footnote">{{ icon('shield',15) }} Une confirmation à imprimer vous sera remise à la fin de votre réservation.</p>
 </aside></div></main>
 <div class="appointment-modal" id="booking-modal" hidden><div class="appointment-modal-backdrop"></div><section class="appointment-modal-card" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="appointment-modal-close" id="close" aria-label="Fermer">×</button><p class="appointment-eyebrow">VOTRE RENDEZ-VOUS</p><h2 id="booking-title">Vos informations</h2><p id="selected-slot" class="appointment-selected-slot"></p><p>Renseignez le patient et l’examen, puis confirmez le rendez-vous.</p><p id="booking-error" role="alert"></p>

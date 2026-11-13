@@ -3,7 +3,7 @@ import os
 from datetime import date
 
 AGENDA_ONLY = os.environ.get("PRACTICE_PROFILE", "legacy").strip().lower() == "wirc"
-PRACTICE_NAME = os.environ.get("PRACTICE_NAME", "WIRC · Cabinet de radiologie" if AGENDA_ONLY else "Bymed Radiologie").strip()
+PRACTICE_NAME = os.environ.get("PRACTICE_NAME", "WIRC · Woluwe Imaging Radiology" if AGENDA_ONLY else "Bymed Radiologie").strip()
 PRACTICE_SHORT_NAME = os.environ.get("PRACTICE_SHORT_NAME", "WIRC" if AGENDA_ONLY else "Bymed").strip()
 PRACTICE_ENGLISH_NAME = os.environ.get("PRACTICE_ENGLISH_NAME", "").strip()
 PRACTICE_ADDRESS = os.environ.get("APPOINTMENT_PRACTICE_ADDRESS", "").strip()
