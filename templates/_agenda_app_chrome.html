@@ -15,4 +15,10 @@
   </nav>
   <div class="agenda-rail-bottom"><a class="agenda-rail-item" href="{{ url_for('admin_home') }}">{{ icon('settings') }}<span>Admin</span></a><a class="agenda-rail-item" href="{{ url_for('logout') }}" aria-label="Se déconnecter">{{ icon('logout') }}<span>Quitter</span></a></div>
 </aside>
+{% else %}
+<aside class="agenda-rail" aria-label="Navigation des rendez-vous">
+  <span class="agenda-rail-brand" aria-label="{{ practice_short_name }}">{{ practice_short_name[:1] }}<span></span></span>
+  <nav aria-label="Votre rendez-vous"><a class="agenda-rail-item is-active" href="#appointment-calendar" aria-current="page">{{ icon('calendar') }}<span>Agenda</span></a></nav>
+  <div class="agenda-rail-bottom"><span class="agenda-rail-secure" title="Informations des patients confidentielles">{{ icon('shield',18) }}<span>Privé</span></span></div>
+</aside>
 {% endif %}

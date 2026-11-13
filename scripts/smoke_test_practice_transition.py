@@ -114,7 +114,8 @@ try:
         assert 'Adresse fictive WIRC' in opened.text and '18:30' not in opened.text
         assert 'Gaillait' not in opened.text and 'Pavillon' not in opened.text
         assert 'Woluwe Imaging Radiology' in opened.text
-        assert 'Premières consultations' not in opened.text and '<aside class="agenda-rail"' not in opened.text
+        assert 'Premières consultations' not in opened.text and '<aside class="agenda-rail"' in opened.text
+        assert '>Créneaux</span>' not in opened.text and '>Accès</span>' not in opened.text
         assert 'Après-midi' in opened.text and '12:00–20:00' in opened.text
         # An exceptional afternoon opened internally must never be labelled shut.
         afternoon=thursday.replace(hour=13)

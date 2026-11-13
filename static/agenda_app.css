@@ -305,8 +305,7 @@
   .agenda-app-page .appointment-mobile-closed-days { display: block; padding-inline: 8px; font-size: 10px; line-height: 1.7; }
   .agenda-app-page.internal-agenda-page .report-notice { display: block; grid-column: 1/-1; margin-top: 0; }
 }
-/* Public booking stays focused on the calendar and time choices. */
-.agenda-app-page.public-agenda-page { --agenda-rail-width: 0px; }
+/* Public booking keeps the full navigation rail with Agenda as its only link. */
 .agenda-app-brand-copy { display: grid; gap: 3px; font-size: 11px; line-height: 1.4; }
 .agenda-app-full-name { color: #466257; font-size: 13px; font-weight: 550; }
 .agenda-app-page .appointment-compact-week .agenda-afternoon-closed { padding: 17px 9px; background: #f1f3ef; text-align: center; color: #6b7866; border-top: 2px solid #dce3d7; }
