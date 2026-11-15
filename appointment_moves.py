@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm.exc import StaleDataError
 from sqlalchemy.orm import load_only
 
-from models import db, Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, InternalRegisterExclusion, AppointmentMoveReceipt
+from models import db, Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, InternalRegisterExclusion, AppointmentMoveReceipt, PatientInvoice
 
 
 def is_empty_legacy_claim(claim, record_key):
@@ -20,6 +20,7 @@ def is_empty_legacy_claim(claim, record_key):
     key=record_key(claim)
     return (AppointmentReport.query.filter_by(context_key=key).first() is None
             and db.session.get(AppointmentPatientDetails,key) is None
+            and PatientInvoice.query.filter_by(context_key=key).first() is None
             and db.session.get(InternalRegisterExclusion,key) is None)
 
 
@@ -118,6 +119,7 @@ def register_appointment_moves(app, *, admin_required, ensure_schema, csrf_token
             old_key=record_key(record)
             report=AppointmentReport.query.filter_by(context_key=old_key).with_for_update().first()
             details=db.session.get(AppointmentPatientDetails,old_key)
+            invoice=PatientInvoice.query.filter_by(context_key=old_key).with_for_update().first()
             exclusion=db.session.get(InternalRegisterExclusion,old_key)
             if aid:
                 count=Appointment.query.filter_by(id=aid,starts_at=expected).update({Appointment.starts_at:target},synchronize_session=False)
@@ -148,6 +150,11 @@ def register_appointment_moves(app, *, admin_required, ensure_schema, csrf_token
                 report.starts_at=target
             if details:
                 details.context_key=new_key
+            if invoice:
+                invoice.context_key=new_key
+                if invoice.state=='draft':
+                    data=json.loads(invoice.data_json);data['examination_date']=target.date().isoformat()
+                    invoice.data_json=json.dumps(data,ensure_ascii=False)
             if exclusion:
                 exclusion.context_key=new_key
             receipt=AppointmentMoveReceipt(token=token,fingerprint=fingerprint,source_kind="appointment" if aid else "reservation",

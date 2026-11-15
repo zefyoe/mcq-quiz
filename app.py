@@ -56,13 +56,15 @@ from radiology_report import create_radiology_report_pdf
 from historical_dossiers import register_historical_dossiers, historical_riziv_rows
 from appointment_moves import register_appointment_moves
 from appointment_trash import register_appointment_trash
+from internal_invoices import register_internal_invoices
 from models import AppointmentMoveReceipt, AppointmentTrash
 from practice_settings import (AGENDA_ONLY, PRACTICE_NAME, PRACTICE_SHORT_NAME,
     PRACTICE_ENGLISH_NAME, PUBLIC_CLOSURE_MESSAGE, PUBLIC_BOOKING_ENABLED, BOOKING_START_DATE, practice_address)
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
 from report_mail import ReportMailError, report_mail_configured, send_report_pdf
 from gmail_reporting import (GMAIL_SCOPE, google_oauth_configured, google_flow,
-                             verified_google_identity, token_cipher, send_gmail_report)
+                             verified_google_identity, token_cipher, send_gmail_report, send_gmail_invoice)
+from models import InvoiceSettings, PatientInvoice, InvoiceSequence, InvoiceDelivery
 from models import Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, AppointmentSlotOverride, HistoricalDossier, HistoricalDocument, InternalRegisterExclusion, GmailConnection, LoginEvent, QuestionProgress, QuizAttempt, db, Question, User
 from questions_data import questions
 
@@ -659,6 +661,7 @@ def inject_language_helpers():
         "practice_address": practice_address(),
         "booking_start_date": BOOKING_START_DATE,
         "agenda_app_asset_version": os.stat(os.path.join(app.static_folder, 'agenda_app.css')).st_mtime_ns,
+        "invoice_asset_version": max(os.stat(os.path.join(app.static_folder,name)).st_mtime_ns for name in ('internal_invoices.js','internal_invoices.css')),
     }
 
 
@@ -851,6 +854,8 @@ def ensure_appointment_schema() -> None:
             db.session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN billing_code VARCHAR(6) NOT NULL DEFAULT ''"))
     db.session.commit()
     GmailConnection.__table__.create(bind=db.engine, checkfirst=True)
+    for model in (InvoiceSettings,PatientInvoice,InvoiceSequence,InvoiceDelivery):
+        model.__table__.create(bind=db.engine,checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
     hold_binary_type = "BYTEA" if db.engine.dialect.name == "postgresql" else "BLOB"
     for name, kind in (("draft_data", "TEXT"), ("prescription_filename", "VARCHAR(255)"),
@@ -4742,6 +4747,9 @@ def admin_book_appointment():
             patient_details = db.session.get(AppointmentPatientDetails, appointment_report_key(hold))
             if patient_details:
                 patient_details.context_key = appointment_report_key(appointment)
+            patient_invoice = PatientInvoice.query.filter_by(context_key=appointment_report_key(hold)).first()
+            if patient_invoice:
+                patient_invoice.context_key = appointment_report_key(appointment)
             db.session.delete(hold)
         db.session.commit()
     except Exception:
@@ -5658,6 +5666,11 @@ register_appointment_moves(app, admin_required=admin_required, ensure_schema=ens
 
 register_appointment_trash(app, admin_required=admin_required, ensure_schema=ensure_appointment_schema,
     csrf_token=agenda_token, now=agenda_now, claim_slot=claim_agenda_slot, record_key=appointment_report_key)
+
+register_internal_invoices(app,admin_required=admin_required,ensure_schema=ensure_appointment_schema,
+    csrf_token=agenda_token,now=agenda_now,record_key=appointment_report_key,
+    gmail_connection=active_gmail_connection,
+    send_invoice=lambda **kwargs:send_gmail_invoice(**kwargs))
 
 
 def initialize_database_schema():

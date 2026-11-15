@@ -8,10 +8,18 @@
 <aside class="agenda-rail" aria-label="Navigation interne">
   <a class="agenda-rail-brand" href="{{ url_for('admin_home') }}" aria-label="Accueil {{ practice_short_name }}">{{ practice_short_name[:1] }}<span></span></a>
   <nav aria-label="Votre espace">
+    {% if billing_page|default(false) %}
+    <a class="agenda-rail-item" href="{{ url_for('admin_appointments') }}">{{ icon('calendar') }}<span>Agenda</span></a>
+    <a class="agenda-rail-item" href="{{ url_for('admin_appointments',view='patients') }}">{{ icon('patients') }}<span>Patients</span></a>
+    <a class="agenda-rail-item" href="{{ url_for('admin_appointments',view='riziv') }}">{{ icon('list') }}<span>RIZIV</span></a>
+    <a class="agenda-rail-item" href="{{ url_for('admin_appointments',view='history') }}">{{ icon('archive') }}<span>XIMEO</span></a>
+    {% else %}
     <button type="button" class="agenda-rail-item" data-agenda-view="calendar" aria-pressed="true">{{ icon('calendar') }}<span>Agenda</span></button>
     <button type="button" class="agenda-rail-item" data-agenda-view="patients" aria-pressed="false" aria-label="Liste patients · {{ patient_rows|length }}">{{ icon('patients') }}<span data-view-label>Patients</span></button>
     <button type="button" class="agenda-rail-item" data-agenda-view="riziv" aria-pressed="false" aria-label="Liste RIZIV · Tous les patients">{{ icon('list') }}<span>RIZIV</span></button>
     <button type="button" class="agenda-rail-item" data-agenda-view="history" aria-pressed="false" aria-label="XIMEO-RIZIV">{{ icon('archive') }}<span>XIMEO</span></button>
+    {% endif %}
+    <a class="agenda-rail-item{{ ' is-active' if billing_page|default(false) else '' }}" href="{{ url_for('admin_invoice_list') }}"{% if billing_page|default(false) %} aria-current="page"{% endif %}>{{ icon('list') }}<span>Factures</span></a>
   </nav>
   <div class="agenda-rail-bottom"><a class="agenda-rail-item" href="{{ url_for('admin_home') }}">{{ icon('settings') }}<span>Admin</span></a><a class="agenda-rail-item" href="{{ url_for('logout') }}" aria-label="Se déconnecter">{{ icon('logout') }}<span>Quitter</span></a></div>
 </aside>

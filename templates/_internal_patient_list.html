@@ -1,4 +1,5 @@
 {% from '_patient_report_link.html' import report_link %}
+{% from '_invoice_button.html' import invoice_button %}
       <section id="patient-list" class="patient-list-card" hidden aria-label="Patients par ordre chronologique">
         <header><h2>Patients de la semaine</h2><p>Demandes, comptes rendus et copie manuelle, dans l’ordre des rendez-vous.</p></header>
         <div class="patient-table-scroll"><table class="patient-table">
@@ -8,7 +9,7 @@
               <td><span class="patient-row-time">{{ patient.starts_at.strftime('%d/%m/%Y · %H:%M') }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start) }}<small>{{ patient.examination }}</small></td>
               <td><span data-national-number>{{ patient.national_number or 'Non renseigné' }}</span>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Compléter / modifier', 'identity') }}</td>
               <td data-request-actions>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Voir la demande' if patient.has_prescription else 'Scanner / importer la demande', 'request') }}{% if patient.has_prescription %}<a href="{{ url_for('admin_patient_prescription', appointment_id=patient.appointment_id, reservation_start=patient.reservation_start) }}">Télécharger la demande</a>{% endif %}</td>
-              <td data-report-actions>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Voir le compte rendu' if patient.has_report else 'Créer un compte rendu') }}{% if patient.has_report %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Modifier', 'edit') }}{% endif %}</td>
+              <td data-report-actions>{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Voir le compte rendu' if patient.has_report else 'Créer un compte rendu') }}{% if patient.has_report %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Modifier', 'edit') }}{% endif %}{{ invoice_button(patient.appointment_id,patient.reservation_start) }}</td>
             </tr>
           {% else %}<tr><td colspan="4">Aucun patient cette semaine. Choisissez une autre semaine dans l’agenda.</td></tr>{% endfor %}</tbody>
         </table></div>

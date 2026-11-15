@@ -51,7 +51,7 @@ def token_cipher(secret):
     return Fernet(base64.urlsafe_b64encode(key))
 
 
-def send_gmail_report(*, connection, secret, recipient, pdf, message_key):
+def send_gmail_attachment(*, connection, secret, recipient, pdf, message_key, subject, body, filename):
     try:
         refresh_token = token_cipher(secret).decrypt(connection.encrypted_refresh_token.encode()).decode()
         credentials = Credentials(token=None, refresh_token=refresh_token,
@@ -64,10 +64,10 @@ def send_gmail_report(*, connection, secret, recipient, pdf, message_key):
     message = EmailMessage()
     message["From"] = connection.email
     message["To"] = recipient
-    message["Subject"] = "Compte rendu radiologique - " + PRACTICE_NAME
+    message["Subject"] = subject
     message["Message-ID"] = f"<{message_key}@{connection.email.rsplit('@',1)[-1]}>"
-    message.set_content("Bonjour,\n\nVeuillez trouver en pièce jointe le compte rendu radiologique.\n\n" + PRACTICE_NAME)
-    message.add_attachment(pdf, maintype="application", subtype="pdf", filename="compte-rendu-radiologique.pdf")
+    message.set_content(body)
+    message.add_attachment(pdf, maintype="application", subtype="pdf", filename=filename)
     raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
     try:
         response = requests.post("https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
@@ -79,3 +79,17 @@ def send_gmail_report(*, connection, secret, recipient, pdf, message_key):
     except (requests.RequestException, ValueError):
         raise ReportMailError("Gmail n’a pas confirmé l’envoi. Vérifiez les messages envoyés avant de réessayer.") from None
     return result["id"]
+
+
+def send_gmail_report(*, connection, secret, recipient, pdf, message_key):
+    return send_gmail_attachment(connection=connection,secret=secret,recipient=recipient,pdf=pdf,message_key=message_key,
+        subject="Compte rendu radiologique - "+PRACTICE_NAME,
+        body="Bonjour,\n\nVeuillez trouver en pièce jointe le compte rendu radiologique.\n\n"+PRACTICE_NAME,
+        filename="compte-rendu-radiologique.pdf")
+
+
+def send_gmail_invoice(*, connection, secret, recipient, pdf, number, message_key):
+    return send_gmail_attachment(connection=connection,secret=secret,recipient=recipient,pdf=pdf,message_key=message_key,
+        subject="Votre facture "+number+" - "+PRACTICE_NAME,
+        body="Bonjour,\n\nVeuillez trouver votre facture en pièce jointe. Les coordonnées bancaires, la communication et l’échéance figurent sur le document.\n\n"+PRACTICE_NAME,
+        filename="facture-"+number+".pdf")

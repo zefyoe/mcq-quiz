@@ -1,4 +1,5 @@
 {% from '_patient_report_link.html' import report_link %}
+{% from '_invoice_button.html' import invoice_button %}
             <div class="appointment-calendar-grid" style="--internal-columns:36px {% for day in days %}{{ 'minmax(200px,3fr)' if day.has_slots else 'minmax(66px,1fr)' }} {% endfor %}">
               <div class="appointment-time-column appointment-grid-head">{{ l10n('Tijd', 'Time', 'Heure') }}</div>
               {% for day in days %}
@@ -24,6 +25,7 @@
                       <strong>{{ report_link(slot.appointment.patient_name, appointment_type_labels.get(slot.appointment.inami_code or slot.appointment.appointment_type, slot.appointment.appointment_type), slot.appointment.starts_at, slot.appointment.id) }}</strong>
                       {% set appointment_label_key = slot.appointment.inami_code or slot.appointment.appointment_type %}
                       <span>{{ appointment_type_labels.get(appointment_label_key, slot.appointment.appointment_type) }}</span>
+                      {{ invoice_button(appointment_id=slot.appointment.id) }}
                       <details>
                         <summary>{{ l10n('Details', 'Details', 'Détails') }}</summary>
                         <p>{{ slot.appointment.patient_email }}</p>
@@ -47,6 +49,7 @@
                       <strong>{{ report_link(reservation_data.get('patient_name') or 'Formulaire en cours', appointment_type_labels.get(reservation_data.get('inami_code', ''), 'Examen à compléter'), slot.starts_at, reservation_start=slot.starts_at.isoformat(timespec='minutes')) }}</strong>
                       {% set reservation_code = reservation_data.get('inami_code', '') %}
                       {% if reservation_code %}<span>{{ appointment_type_labels.get(reservation_code, reservation_code) }}</span>{% else %}<span>Examen à compléter</span>{% endif %}
+                      {{ invoice_button(reservation_start=slot.starts_at.isoformat(timespec='minutes')) }}
                       <details>
                         <summary>Informations enregistrées</summary>
                         <p>E-mail : {{ reservation_data.get('patient_email') or 'Non renseigné' }}</p>

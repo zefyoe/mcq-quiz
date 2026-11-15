@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import load_only
 
 from appointment_moves import is_empty_legacy_claim
-from models import db, Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, InternalRegisterExclusion, AppointmentTrash
+from models import db, Appointment, AppointmentHold, AppointmentReport, AppointmentPatientDetails, InternalRegisterExclusion, AppointmentTrash, PatientInvoice
 
 
 def register_appointment_trash(app, *, admin_required, ensure_schema, csrf_token, now, claim_slot, record_key):
@@ -168,7 +168,8 @@ def register_appointment_trash(app, *, admin_required, ensure_schema, csrf_token
                 report=AppointmentReport.query.filter_by(context_key=row.context_key).with_for_update().first()
                 details=db.session.get(AppointmentPatientDetails,row.context_key)
                 exclusion=db.session.get(InternalRegisterExclusion,row.context_key)
-                for item in (report,details,exclusion):
+                invoice=PatientInvoice.query.filter_by(context_key=row.context_key).with_for_update().first()
+                for item in (report,details,exclusion,invoice):
                     if item:
                         item.context_key=new_key
             row.restored_at=now()

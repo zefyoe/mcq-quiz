@@ -2,8 +2,8 @@
 
 Source: Echographies_INAMI_art17bis_2026.xlsx supplied by the practice.
 Tariffs apply from 2026-01-01 to conventioned ambulatory care without
-preferential status. Amounts are stored as integer euro cents and must never
-be rendered in the appointment planner.
+preferential status. Amounts are stored as integer euro cents and may only be
+shown in the private invoice workspace, after checking the applicable tariff.
 """
 
 INAMI_TARIFF_EFFECTIVE_DATE = "2026-01-01"

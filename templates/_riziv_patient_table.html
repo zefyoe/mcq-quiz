@@ -1,3 +1,4 @@
+{% from '_invoice_button.html' import invoice_button %}
 {% from '_patient_report_link.html' import report_link %}
 <div class="patient-table-scroll"><table class="patient-table riziv-patient-table">
   <thead><tr><th scope="col">N° ligne</th><th scope="col">Date / heure</th><th scope="col">Patient</th><th scope="col">N° dossier (registre national)</th><th scope="col">Examen</th><th scope="col">Enregistrement</th></tr></thead>
@@ -8,7 +9,7 @@
       <td>{% if patient.historical_id %}<button type="button" class="report-patient-link" data-history-id="{{ patient.historical_id }}">{{ patient.name }}</button>{% else %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start) }}{% endif %}</td>
       <td><span data-national-number>{{ patient.national_number or 'Non renseigné' }}</span>{% if patient.historical_id %}<button type="button" class="report-patient-link" data-history-id="{{ patient.historical_id }}">Compléter / modifier</button>{% else %}{{ report_link(patient.name, patient.examination, patient.starts_at, patient.appointment_id, patient.reservation_start, 'Compléter / modifier', 'identity') }}{% endif %}</td>
       <td>{{ patient.examination }}<small>Code RIZIV : <span data-billing-code>{{ patient.billing_code or 'À choisir' }}</span></small></td>
-      <td>{{ patient.registration_label }}</td>
+      <td>{{ patient.registration_label }}{{ invoice_button(patient.appointment_id,patient.reservation_start,patient.historical_id) }}</td>
     </tr>
   {% else %}<tr><td colspan="6">Aucun patient enregistré dans l’agenda.</td></tr>{% endfor %}</tbody>
 </table></div>

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='admin_new_question.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='appointments.css', v=appointments_asset_version) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='agenda_app.css', v=agenda_app_asset_version) }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='internal_invoices.css',v=invoice_asset_version) }}">
   </head>
   <body class="appointments-page agenda-app-page internal-agenda-page">
     {% set internal_agenda = true %}{% include '_agenda_app_chrome.html' %}
@@ -160,6 +161,7 @@
       </section>
     </div>
 
+    {% include '_invoice_editor.html' %}
     {% include '_internal_availability_dialog.html' %}
     {% include '_appointment_move_dialog.html' %}
     {% include '_appointment_reporting.html' %}

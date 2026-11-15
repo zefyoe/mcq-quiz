@@ -185,6 +185,50 @@ class HistoricalDocument(db.Model):
     __table_args__ = (db.UniqueConstraint("dossier_id", "kind", name="uq_historical_document_kind"),)
 
 
+class InvoiceSettings(db.Model):
+    """Private issuer/payment settings, independent for each practice database."""
+    id = db.Column(db.Integer, primary_key=True)
+    data_json = db.Column(db.Text, nullable=False, default="{}")
+    revision = db.Column(db.Integer, nullable=False, default=1)
+    __mapper_args__ = {"version_id_col": revision}
+
+
+class PatientInvoice(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    context_key = db.Column(db.String(64), unique=True, nullable=False)
+    state = db.Column(db.String(12), nullable=False, default="draft", index=True)
+    data_json = db.Column(db.Text, nullable=False)
+    issuer_json = db.Column(db.Text, nullable=False, default="{}")
+    number = db.Column(db.String(40), unique=True, nullable=True)
+    invoice_date = db.Column(db.Date, nullable=True)
+    due_date = db.Column(db.Date, nullable=True)
+    pdf_data = db.deferred(db.Column(db.LargeBinary, nullable=True))
+    paid_on = db.Column(db.Date, nullable=True)
+    email_state = db.Column(db.String(16), nullable=False, default="idle")
+    last_recipient = db.Column(db.String(254), nullable=False, default="")
+    last_sent_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    revision = db.Column(db.Integer, nullable=False, default=1)
+    __mapper_args__ = {"version_id_col": revision}
+
+
+class InvoiceSequence(db.Model):
+    year = db.Column(db.Integer, primary_key=True)
+    next_value = db.Column(db.Integer, nullable=False, default=0)
+
+
+class InvoiceDelivery(db.Model):
+    """Persistent receipt prevents duplicate sends and records ambiguous outcomes."""
+    token = db.Column(db.String(36), primary_key=True)
+    invoice_id = db.Column(db.String(36), db.ForeignKey("patient_invoice.id"), nullable=False, index=True)
+    recipient = db.Column(db.String(254), nullable=False)
+    status = db.Column(db.String(16), nullable=False, default="pending")
+    provider_id = db.Column(db.String(255), nullable=False, default="")
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

@@ -125,7 +125,7 @@ try:
         with app.app_context():
             db.session.delete(db.session.get(AppointmentSlotOverride,afternoon));db.session.commit()
         assert 'name="insurance_status"' not in opened.text
-        assert 'name="insurance_status"' not in internal.text
+        assert 'Statut du patient<select name="insurance_status"' not in internal.text
         assert re.findall(r'data-slot-choice="([^"]+)"',opened.text)==re.findall(r'data-slot="([^"]+)"',opened.text)
         csrf=re.search(r'name="csrf_token" value="([^"]+)"',opened.text)[1]
         booked=public.post('/agenda/book',base_url=base,data=dict(csrf_token=csrf,slot_start=thursday.isoformat(),

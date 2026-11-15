@@ -240,6 +240,10 @@
     if (!booking.hidden) closeBooking();
     if (!hoursDialog.hidden && !availabilityBusy) closeHours();
   });
+  window.addEventListener('load',()=>{
+    const requestedView=new URLSearchParams(window.location.search).get('view');
+    if(['patients','riziv','history'].includes(requestedView)) document.querySelector('[data-agenda-view="'+requestedView+'"]')?.click();
+  });
   const uploads = [...booking.querySelectorAll('[data-prescription-input]')];
   uploads.forEach(input => input.addEventListener('change', () => {
     if (!input.files.length) return;
