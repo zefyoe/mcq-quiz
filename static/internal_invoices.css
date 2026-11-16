@@ -3,6 +3,25 @@
 .invoice-create-button:hover { background:#e4f2e7; border-color:#83ad95; }
 .invoice-create-button:disabled { opacity:.6; cursor:wait; }
 .invoice-page .agenda-page-heading { margin-bottom:20px; }
+.invoice-heading-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; flex-shrink:0; }
+.invoice-settings-action { min-height:42px; padding:10px 14px; border:1px solid #d5e2da; border-radius:8px; color:#536f60; background:white; font:inherit; font-size:12px; cursor:pointer; }
+.invoice-settings-action:hover { background:#f0f6f2; }
+.invoice-patient-search { padding:22px; margin-bottom:20px; background:white; border:1px solid #dce6df; border-radius:14px; }
+.invoice-patient-search h2 { margin:0; color:#294d40; font-size:18px; font-weight:650; }
+.invoice-patient-search > div > p { margin:7px 0 18px; font-size:12px; color:#738375; }
+.invoice-patient-search form { max-width:640px; }
+.invoice-patient-search label { display:block; margin-bottom:7px; font-size:12px; color:#526d5b; font-weight:600; }
+.invoice-search-input { display:flex; gap:10px; }
+.invoice-search-input input { flex:1; min-width:0; min-height:44px; padding:11px 14px; border:1px solid #cbded3; border-radius:8px; background:#fafcfb; color:#294d40; font:inherit; font-size:14px; }
+.invoice-search-input button { min-height:44px; padding:10px 16px; border:1px solid #bad1c3; border-radius:8px; color:#29624f; background:#edf5f0; font:inherit; font-size:12px; cursor:pointer; }
+#invoice-search-status { margin:12px 0 0; color:#758775; font-size:12px; line-height:1.6; }
+#invoice-patient-results { list-style:none; padding:0; margin:18px 0 0; max-height:440px; overflow:auto; border-top:1px solid #e3ebe5; }
+#invoice-patient-results li { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:16px 0; border-bottom:1px solid #e9efea; }
+#invoice-patient-results li > div { min-width:0; }
+#invoice-patient-results strong { display:block; color:#2b503e; font-size:14px; }
+#invoice-patient-results span { display:block; margin-top:5px; color:#607c69; font-size:12px; }
+#invoice-patient-results p { margin:7px 0 0; color:#7b8a7a; font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+#invoice-patient-results button { flex-shrink:0; margin:0; min-height:42px; }
 .invoice-list-notice { color:#6d7e70; font-size:12px; line-height:1.6; margin:12px 0 20px; }
 .invoice-warning { padding:12px 15px; margin:12px 20px; color:#785529; border:1px solid #ead8b7; border-radius:8px; background:#fff9ec; font-size:12px; line-height:1.7; }
 .invoice-warning button { padding:4px 8px; margin:2px 3px; font:inherit; border:1px solid #d7c19e; border-radius:5px; background:white; color:#715124; cursor:pointer; }
@@ -70,6 +89,13 @@
 .invoice-settings-form > p { color:#71885c; font-size:11px; line-height:1.7; }
 @media(max-width:1000px) { .invoice-editor-grid { grid-template-columns:minmax(0,1fr); } .invoice-form-column { border-right:0; border-bottom:1px solid #e1e9db; } .invoice-preview-column iframe { height:600px; } }
 @media(max-width:760px) {
+  .invoice-page .agenda-page-heading { flex-direction:column; align-items:stretch; }
+  .invoice-heading-actions { justify-content:space-between; }
+  .invoice-heading-actions > button { flex:1; font-size:11px; min-height:44px; }
+  .invoice-patient-search { padding:18px; }
+  .invoice-search-input input { font-size:16px; }
+  #invoice-patient-results li { align-items:stretch; flex-direction:column; gap:12px; }
+  #invoice-patient-results button { align-self:start; }
   .internal-agenda-page .agenda-rail nav { overflow-x:auto; justify-content:space-between; }
   .internal-agenda-page .agenda-rail-item { min-width:56px; }
   .invoice-dialog { width:calc(100% - 12px); max-height:calc(100dvh - 12px); border-radius:12px; }

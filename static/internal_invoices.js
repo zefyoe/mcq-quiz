@@ -10,8 +10,10 @@
   const currency=cents=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR'}).format(cents/100);
   const cents=value=>Math.round(Number(String(value).replace(',','.'))*100);
   function feedback(message,error=false){$('invoice-feedback').textContent=message;$('invoice-feedback').classList.toggle('is-error',error);}
-  async function request(url,body=null,format='json') {
+  async function request(url,body=null,signal=null) {
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),25000);
+    const abort=()=>controller.abort();
+    if(signal){signal.addEventListener('abort',abort,{once:true});if(signal.aborted)controller.abort();}
     try {
       const response=await fetch(url,{method:body?'POST':'GET',body,cache:'no-store',signal:controller.signal,headers:{'X-Requested-With':'XMLHttpRequest'}});
       if(response.redirected || [401,403].includes(response.status))throw new Error('Votre session a expiré. Gardez ce formulaire ouvert et reconnectez-vous dans un autre onglet.');
@@ -19,7 +21,7 @@
       if(!response.ok || result.ok===false || result.error)throw new Error(result.error || 'Action non confirmée. Vos saisies restent dans le formulaire.');
       return result;
     }catch(error){if(error.name==='AbortError')throw new Error('Réponse trop lente. Vos saisies restent ici. Rechargez la facture avant de réessayer une émission ou un envoi.');throw error;}
-    finally{clearTimeout(timer);}
+    finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
   }
   function body(fields={}){const result=new FormData();result.set('csrf_token',csrf);for(const [key,value] of Object.entries(fields))result.set(key,value??'');return result;}
   function amounts(){const patient=cents(form.elements.patient_amount.value),ticket=cents(form.elements.ticket_amount.value),insurance=cents(form.elements.insurance_amount.value);
@@ -146,5 +148,46 @@
     finally{clicked.disabled=false;}
   });
   window.addEventListener('beforeunload',event=>{if(editor.open&&dirty){event.preventDefault();event.returnValue='';}});
+  const patientSearch=$('invoice-patient-search-form');
+  if(patientSearch){
+    const query=$('invoice-patient-query'),results=$('invoice-patient-results'),status=$('invoice-search-status');
+    let timer=null,controller=null,generation=0;
+    const reset=()=>{clearTimeout(timer);controller?.abort();controller=null;generation++;results.replaceChildren();results.hidden=true;results.removeAttribute('aria-busy');};
+    async function search(){
+      reset();const term=query.value.trim().replace(/\s+/g,' '),current=generation;
+      if(term.length<2){status.textContent='Saisissez au moins 2 caractères du prénom ou du nom.';return;}
+      controller=new AbortController();status.textContent='Recherche des rendez-vous…';results.setAttribute('aria-busy','true');
+      try{
+        const data=await request(base+'/patients/search',body({q:term}),controller.signal);
+        if(current!==generation)return;
+        for(const patient of data.patients){
+          const row=document.createElement('li'),identity=document.createElement('div');
+          const name=document.createElement('strong'),details=document.createElement('span'),exam=document.createElement('p');
+          name.textContent=patient.patient_name;
+          const date=new Date(patient.starts_at.length===10?patient.starts_at+'T12:00':patient.starts_at);
+          const options={day:'2-digit',month:'2-digit',year:'numeric'};
+          if(patient.starts_at.length>10)Object.assign(options,{hour:'2-digit',minute:'2-digit'});
+          details.textContent=patient.kind+' · '+new Intl.DateTimeFormat('fr-BE',options).format(date);
+          exam.textContent=patient.examination;identity.append(name,details,exam);
+          const button=document.createElement('button');button.type='button';button.className='invoice-create-button';
+          if(patient.invoice_id){button.dataset.invoiceOpen=patient.invoice_id;button.textContent=patient.invoice_state==='issued'?'Voir la facture':'Compléter le brouillon';}
+          else{
+            button.dataset.invoiceCreate='';button.textContent='Créer une facture';
+            if(patient.appointment_id)button.dataset.invoiceAppointment=patient.appointment_id;
+            if(patient.historical_id)button.dataset.invoiceHistorical=patient.historical_id;
+            if(patient.reservation_start)button.dataset.invoiceReservation=patient.reservation_start;
+          }
+          row.append(identity,button);results.append(row);
+        }
+        results.hidden=!data.patients.length;
+        status.textContent=data.patients.length?data.patients.length+' rendez-vous / dossier(s) trouvé(s).'+(data.limited?' Précisez le nom pour affiner les résultats.':''):'Aucun rendez-vous trouvé. Vérifiez le prénom ou le nom.';
+      }catch(error){if(current===generation)status.textContent=error.message;}
+      finally{if(current===generation){results.removeAttribute('aria-busy');controller=null;}}
+    }
+    query.addEventListener('input',()=>{reset();status.textContent=query.value.trim().length<2?'Saisissez au moins 2 caractères du prénom ou du nom.':'Recherche des rendez-vous…';timer=setTimeout(search,300);});
+    patientSearch.addEventListener('submit',event=>{event.preventDefault();search();});
+    $('invoice-new').addEventListener('click',()=>{patientSearch.closest('section').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});query.focus({preventScroll:true});});
+    window.addEventListener('pagehide',reset);
+  }
   if(location.hash==='#settings')openSettings().catch(error=>{$('invoice-list-feedback').textContent=error.message;});
 })();

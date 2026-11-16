@@ -34,12 +34,40 @@ try:
  def post(url,**values):return owner.post(url,data={'csrf_token':csrf,**values})
  assert anon.get(base).status_code==302 and anon.post(base).status_code==302
  assert anon.get(base+'/tariff/459712').status_code==302
+ assert anon.post(base+'/patients/search',data={'q':'Patient'}).status_code==302
  assert owner.get(base+'/tariff/459712').json['insurance_cents']==6598
  assert owner.get(base+'/tariff/461974').status_code==404
  assert post(base,appointment_id=aid,csrf_token='bad').status_code==400
  # Unapproved WIRC users cannot even establish a private session.
  student.post('/login',data={'email':'student@example.invalid','password':'test-password'})
  assert student.get(base).status_code in {302,403}
+ assert student.post(base+'/patients/search',data={'q':'Patient'}).status_code in {302,403}
+ assert post(base+'/patients/search',q='Patient',csrf_token='bad').status_code==400
+ assert post(base+'/patients/search',q='P').json['patients']==[]
+ assert post(base+'/patients/search',q='x'*121).status_code==400
+ # Search returns distinct exams, including reservations and old dossiers,
+ # without downloading scans/reports or treating SQL wildcards as a name.
+ stamp=datetime(2026,12,3,10)
+ with app.app_context():
+  twin=Appointment(starts_at=stamp+timedelta(hours=1),patient_name='Patient Fictif',patient_email='',appointment_type='459734',inami_code='459734')
+  db.session.add(twin)
+  db.session.add_all([
+   AppointmentHold(starts_at=stamp,token='search-test',expires_at=stamp,draft_data=json.dumps({'patient_name':'Patient Réservé','inami_code':'459712'})),
+   AppointmentHold(starts_at=stamp+timedelta(minutes=10),token='empty-search',expires_at=stamp,draft_data='{}'),
+   AppointmentHold(starts_at=stamp+timedelta(minutes=20),token='old-search',expires_at=stamp,draft_data='not valid JSON')])
+  db.session.commit();twin_id=twin.id
+ found=post(base+'/patients/search',q='  patient  ').json['patients']
+ assert len(found)==5 and len({row['patient_name'] for row in found})==4
+ assert any(row.get('historical_id')==hid for row in found)
+ assert any(row.get('reservation_start')=='2026-12-03T10:00' for row in found)
+ assert all('report_text' not in row and 'national_number' not in row and 'patient_email' not in row for row in found)
+ repeated=post(base+'/patients/search',q='  FICTIF   patient ').json['patients']
+ assert len(repeated)==2 and repeated[0]['appointment_id']==aid and repeated[0]['starts_at']!=repeated[1]['starts_at']
+ assert post(base+'/patients/search',q='%_').json['patients']==[]
+ assert post(base+'/patients/search',q='Absent Inconnu').json['patients']==[]
+ with app.app_context():
+  AppointmentHold.query.filter(AppointmentHold.starts_at>=stamp).delete();db.session.commit()
+  Appointment.query.filter_by(id=twin_id).delete();db.session.commit()
  settings=owner.get(base+'/settings').json
  assert settings['settings']['default_patient_cents']==2000 and settings['missing']
  created=post(base,appointment_id=aid)
@@ -47,6 +75,9 @@ try:
  inv=created.json['invoice'];iid=inv['id'];url=base+'/'+iid
  assert inv['state']=='draft' and not inv['number'] and inv['data']['patient_cents']==2000
  assert post(base,appointment_id=aid).json['invoice']['id']==iid
+ found=post(base+'/patients/search',q='patient fictif')
+ assert found.headers['Cache-Control']=='private, no-store'
+ assert found.json['patients'][0]['invoice_id']==iid
  assert owner.get(base).status_code==200
  assert post(url+'/issue',revision=inv['revision'],performed='1',verified='1').status_code==400
  # Protect every invoice endpoint, including raw PDF and sending controls.
@@ -145,6 +176,8 @@ try:
  move=post('/admin/appointments/move',appointment_id=fid,expected_start='2026-12-03T08:00:00',expected_key=key,target_start='2026-12-03T08:10',move_token=str(uuid.uuid4()))
  assert move.status_code==200,move.data
  assert post(base,appointment_id=fid).json['invoice']['id']==future_inv['id']
+ moved=post(base+'/patients/search',q='patient futur').json['patients'][0]
+ assert moved['starts_at']=='2026-12-03T08:10' and moved['invoice_id']==future_inv['id']
  # Parallel clicks and concurrent issuance cannot create duplicate drafts or numbers.
  from concurrent.futures import ThreadPoolExecutor
  from threading import Barrier
@@ -181,11 +214,14 @@ try:
   output.write_bytes(create_invoice_pdf(data=example_data,issuer=issuer,number='WIRC-EXEMPLE-001',invoice_date=date(2026,11,15)))
  if '--serve' in sys.argv:
   # Never connect a preview to a real account. Remove the dummy Gmail connection.
-  with app.app_context():GmailConnection.query.delete();db.session.commit()
+  with app.app_context():
+   GmailConnection.query.delete()
+   db.session.add(Appointment(starts_at=datetime(2026,11,15,10),patient_name='Test Test',patient_email='',appointment_type='459734',inami_code='459734'))
+   db.session.commit()
   app.jinja_env.auto_reload=True
   app.jinja_env.cache=None
   app.run(host='127.0.0.1',port=5059,debug=False)
- print('PASS: private billing, draft deduplication, editable patient amount, BIM/supplement guards, immutable numbered PDF, 30-day due date, provider settings snapshots, future exam guard, Gmail idempotency/uncertain-send recovery, payment tracking, historical/repeat exams and move continuity.')
+ print('PASS: private patient search (repeat exams, historical dossiers, reservations, matching existing invoices), draft deduplication, editable patient amount, BIM/supplement guards, immutable numbered PDF, 30-day due date, provider settings snapshots, future exam guard, Gmail idempotency/uncertain-send recovery, payment tracking and move continuity.')
 finally:
  with app.app_context():db.session.remove();db.engine.dispose()
  fixture.cleanup()

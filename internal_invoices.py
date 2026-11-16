@@ -150,6 +150,61 @@ def register_internal_invoices(app, *, admin_required, ensure_schema, csrf_token
         return jsonify(ok=True,code=code,label=tariff['label_fr'],ticket_cents=tariff['exam_patient_share_cents'],
             insurance_cents=tariff['exam_reimbursement_cents'],reference='2026-01-01')
 
+    @app.post('/admin/appointments/invoices/patients/search')
+    def admin_invoice_patient_search():
+        denied=authorize(True)
+        if denied:return denied
+        # Keep patient search terms out of URLs and access logs. Fetch only
+        # identity/exam columns; scans and report contents are never loaded.
+        term=' '.join(request.form.get('q','').split())
+        if len(term)>120:return failure('La recherche est trop longue.')
+        if len(term)<2:return jsonify(ok=True,patients=[],limited=False)
+        words=term.split();limit=40;matches=[]
+        appointments=db.session.query(Appointment.id,Appointment.starts_at,Appointment.patient_name,
+            Appointment.inami_code,Appointment.appointment_type,Appointment.created_at)
+        history=db.session.query(HistoricalDossier.id,HistoricalDossier.examined_on,
+            HistoricalDossier.patient_name,HistoricalDossier.examination)
+        for word in words:
+            appointments=appointments.filter(Appointment.patient_name.icontains(word,autoescape=True))
+            history=history.filter(HistoricalDossier.patient_name.icontains(word,autoescape=True))
+        for record in appointments.order_by(Appointment.starts_at,Appointment.id).limit(limit+1):
+            code=record.inami_code or record.appointment_type
+            key=record_key(Appointment(id=record.id,starts_at=record.starts_at,patient_name=record.patient_name,created_at=record.created_at))
+            matches.append(dict(appointment_id=record.id,context_key=key,
+                patient_name=record.patient_name,starts_at=record.starts_at.isoformat(timespec='minutes'),
+                examination=INAMI_ULTRASOUND_BY_CODE.get(code,{}).get('label_fr') or record.appointment_type or 'Examen échographique',
+                kind='Rendez-vous'))
+        for record in history.order_by(HistoricalDossier.examined_on,HistoricalDossier.id).limit(limit+1):
+            matches.append(dict(historical_id=record.id,context_key='historical:'+str(record.id),
+                patient_name=record.patient_name,starts_at=record.examined_on.isoformat(),
+                examination=record.examination,kind='Ancien dossier'))
+        # Older reservations store names in JSON text. Read that small field
+        # safely, including legacy malformed entries, and ignore booking claims.
+        booked=db.session.query(Appointment.id).filter(Appointment.starts_at==AppointmentHold.starts_at).exists()
+        holds=db.session.query(AppointmentHold.starts_at,AppointmentHold.token,AppointmentHold.draft_data).filter(~booked).order_by(AppointmentHold.starts_at)
+        found=0
+        for stamp,token,raw in holds.yield_per(200):
+            try:draft=unpack(raw)
+            except (ValueError,TypeError):continue
+            if not isinstance(draft,dict):continue
+            name=str(draft.get('patient_name') or '')
+            if not name.strip() or not all(word.casefold() in name.casefold() for word in words):continue
+            code=draft.get('inami_code','')
+            matches.append(dict(reservation_start=stamp.isoformat(timespec='minutes'),
+                context_key=record_key(AppointmentHold(starts_at=stamp,token=token)),patient_name=name,
+                starts_at=stamp.isoformat(timespec='minutes'),
+                examination=INAMI_ULTRASOUND_BY_CODE.get(code,{}).get('label_fr') or 'Examen échographique',kind='Rendez-vous'))
+            found+=1
+            if found>limit:break
+        matches.sort(key=lambda item:(item['starts_at'],item['patient_name'],item['context_key']))
+        limited=len(matches)>limit;matches=matches[:limit]
+        keys=[item['context_key'] for item in matches]
+        invoices={item.context_key:item for item in PatientInvoice.query.filter(PatientInvoice.context_key.in_(keys)).all()} if keys else {}
+        for item in matches:
+            existing=invoices.get(item.pop('context_key'))
+            if existing:item.update(invoice_id=existing.id,invoice_number=existing.number or '',invoice_state=existing.state)
+        return jsonify(ok=True,patients=matches,limited=limited)
+
     @app.post('/admin/appointments/invoices')
     def admin_invoice_create():
         denied=authorize(True)
