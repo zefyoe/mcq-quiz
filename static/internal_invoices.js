@@ -8,6 +8,7 @@
   const steps=['patient','exam','amounts'];let currentStep='patient';
   let invoice=null, dirty=false, busy=false, settingsRevision=0, gmailReady=false, attempt=null, missingSettings=[];
   let listChanged=false;
+  let listController=null,listVersion=0;
   let settingsDirty=false,settingsSaving=false;
   const currency=cents=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR'}).format(cents/100);
   const cents=value=>Math.round(Number(String(value).replace(',','.'))*100);
@@ -81,7 +82,15 @@
     if(invoice.state==='issued')showPdf();
     if(invoice.state==='draft')form.elements.patient_name.focus();
   }
-  function close(force=false){if(busy)return;if(dirty&&!force){$('invoice-unsaved').hidden=false;return;}editor.close();invoice=null;dirty=false;preview.removeAttribute('src');if(listChanged && document.body.classList.contains('invoice-page'))location.reload();}
+  function close(force=false){if(busy)return;if(dirty&&!force){$('invoice-unsaved').hidden=false;return;}editor.close();invoice=null;dirty=false;preview.removeAttribute('src');if(listChanged && document.body.classList.contains('invoice-page')){listChanged=false;refreshList();}}
+  async function refreshList(url=location.href,replaceUrl=false){
+    const workspace=$('invoice-list-workspace');if(!workspace)return;
+    listController?.abort();listController=new AbortController();const version=++listVersion;
+    workspace.classList.add('is-loading');workspace.setAttribute('aria-busy','true');
+    try{const target=new URL(url,location.href);target.searchParams.set('fragment','1');const result=await request(target.href,null,listController.signal);if(version!==listVersion)return;workspace.innerHTML=result.html;target.searchParams.delete('fragment');if(replaceUrl)history.replaceState(null,'',target.href);$('invoice-list-feedback').textContent='';}
+    catch(error){if(version===listVersion)$('invoice-list-feedback').textContent=error.message;}
+    finally{if(version===listVersion){workspace.classList.remove('is-loading');workspace.removeAttribute('aria-busy');}}
+  }
   editor.addEventListener('cancel',event=>{event.preventDefault();close();});
   document.querySelector('[data-invoice-close]').addEventListener('click',()=>close());
   $('invoice-discard-close').addEventListener('click',()=>close(true));$('invoice-keep-editing').addEventListener('click',()=>{$('invoice-unsaved').hidden=true;});
@@ -104,8 +113,8 @@
     const data=new FormData(form);data.set('csrf_token',csrf);data.set('revision',invoice.revision);
     const result=await request(base+'/'+invoice.id,data);invoice=result.invoice;dirty=false;listChanged=true;state();feedback('Brouillon enregistré.');
   }
-  async function run(action){if(busy)return;busy=true;editor.setAttribute('aria-busy','true');editor.querySelector('.invoice-editor-grid').inert=true;for(const id of ['invoice-save','invoice-issue','invoice-preview-button'])$(id).disabled=true;
-    try{await action();}catch(error){feedback(error.message,true);}finally{busy=false;editor.removeAttribute('aria-busy');editor.querySelector('.invoice-editor-grid').inert=false;for(const id of ['invoice-save','invoice-issue','invoice-preview-button'])$(id).disabled=false;}
+  async function run(action){if(busy)return;busy=true;editor.setAttribute('aria-busy','true');editor.querySelector('[data-invoice-close]').disabled=true;editor.querySelector('.invoice-editor-grid').inert=true;for(const id of ['invoice-save','invoice-issue','invoice-preview-button'])$(id).disabled=true;
+    try{await action();}catch(error){feedback(error.message,true);}finally{busy=false;editor.removeAttribute('aria-busy');editor.querySelector('[data-invoice-close]').disabled=false;editor.querySelector('.invoice-editor-grid').inert=false;for(const id of ['invoice-save','invoice-issue','invoice-preview-button'])$(id).disabled=false;}
   }
   form.addEventListener('submit',event=>{event.preventDefault();run(save);});
   preview.addEventListener('load',()=>{$('invoice-print').disabled=false;});
@@ -144,6 +153,7 @@
     try{const data=new FormData(settingsForm);data.set('csrf_token',csrf);data.set('revision',settingsRevision);const result=await request(base+'/settings',data);settingsRevision=result.revision;
       if(invoice?.state==='draft'){if(!form.elements.doctor_name.value)form.elements.doctor_name.value=result.settings.doctor_name;if(!form.elements.doctor_inami.value)form.elements.doctor_inami.value=result.settings.doctor_inami;dirty=true;}
       missingSettings=result.missing;settingsDirty=false;$('invoice-settings-discard').hidden=true;if(invoice)state();
+      if(!result.missing.length){document.querySelector('.invoice-setup-chip')?.remove();document.querySelector('.invoice-settings-action i')?.remove();}
       $('invoice-settings-feedback').textContent=result.missing.length?'Coordonnées enregistrées. Certains champs restent à compléter.':'Coordonnées et IBAN enregistrés.';
     }catch(error){$('invoice-settings-feedback').textContent=error.message;}finally{button.disabled=false;settingsSaving=false;settingsForm.inert=false;}
   });
@@ -213,14 +223,8 @@
     window.addEventListener('pagehide',reset);
   }
   const workspace=$('invoice-list-workspace');
-  if(workspace){let filterController=null,filterVersion=0;
-    document.addEventListener('click',async event=>{const link=event.target.closest('[data-invoice-list-url]');if(!link||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();
-      filterController?.abort();filterController=new AbortController();const version=++filterVersion;
-      workspace.classList.add('is-loading');workspace.setAttribute('aria-busy','true');
-      try{const target=new URL(link.href);target.searchParams.set('fragment','1');const result=await request(target.href,null,filterController.signal);if(version!==filterVersion)return;workspace.innerHTML=result.html;target.searchParams.delete('fragment');history.replaceState(null,'',target.href);$('invoice-list-feedback').textContent='';}
-      catch(error){if(version===filterVersion)$('invoice-list-feedback').textContent=error.message;}
-      finally{if(version===filterVersion){workspace.classList.remove('is-loading');workspace.removeAttribute('aria-busy');}}
-    });
+  if(workspace){
+    document.addEventListener('click',event=>{const link=event.target.closest('[data-invoice-list-url]');if(!link||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();refreshList(link.href,true);});
   }
   if(location.hash==='#settings')openSettings().catch(error=>{$('invoice-list-feedback').textContent=error.message;});
 })();
