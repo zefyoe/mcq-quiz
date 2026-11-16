@@ -2,7 +2,7 @@
 <a class="agenda-skip-link" href="#agenda-main">Aller au contenu</a>
 <header class="agenda-app-header">
   <div class="agenda-app-identity"><strong>{{ practice_short_name }}</strong><span class="agenda-app-divider"></span><div class="agenda-app-brand-copy">{% if agenda_only %}<span class="agenda-app-full-name">Woluwe Imaging Radiology</span>{% endif %}<span>{{ 'Espace praticien' if internal_agenda else 'Rendez-vous en ligne' }}</span></div></div>
-  <div class="agenda-header-note">{{ icon('shield',16) }}<span>{{ 'Accès réservé au cabinet' if internal_agenda else 'Réservation sécurisée' }}</span>{% if internal_agenda %}<a class="agenda-mobile-account" href="{{ url_for('admin_home') }}" aria-label="Admin">{{ icon('settings',18) }}</a><a class="agenda-mobile-account" href="{{ url_for('logout') }}" aria-label="Se déconnecter">{{ icon('logout',18) }}</a>{% endif %}</div>
+  <div class="agenda-header-note">{{ icon('shield',16) }}<span>{{ 'Accès réservé au cabinet' if internal_agenda else 'Réservation sécurisée' }}</span>{% if internal_agenda %}<a class="agenda-mobile-account" href="{{ url_for('admin_home') }}" aria-label="Admin">{{ icon('settings',18) }}</a><a class="agenda-mobile-account" href="{{ url_for('logout') }}" aria-label="Se déconnecter">{{ icon('logout',18) }}</a>{% else %}<a class="agenda-login-link" href="{{ url_for('admin_appointments') }}">Log in</a>{% endif %}</div>
 </header>
 {% if internal_agenda %}
 <aside class="agenda-rail" aria-label="Navigation interne">

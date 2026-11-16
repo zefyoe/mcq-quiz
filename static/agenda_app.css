@@ -38,6 +38,8 @@
 .agenda-app-identity > strong { color: #244b42; font-size: 20px; letter-spacing: -.6px; }
 .agenda-app-divider { width: 1px; height: 18px; background: #e3e9e6; }
 .agenda-header-note { display: flex; align-items: center; gap: 7px; color: #62776b; font-size: 11px; }
+.agenda-login-link { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; min-height: 44px; padding: 10px 18px; margin-left: 12px; border: 1px solid #cdded5; border-radius: 9px; background: #edf5f1; color: #176b60; font-size: 13px; font-weight: 600; line-height: 1.2; text-decoration: none; white-space: nowrap; }
+.agenda-login-link:hover { background: #dfeee6; border-color: #9cbfaf; }
 .agenda-app-page .appointment-shell.agenda-app-main { width: calc(100% - var(--agenda-rail-width) - 64px); max-width: 1640px; margin: 0 32px 0 calc(var(--agenda-rail-width) + 32px); padding: 26px 0 40px; }
 .agenda-page-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 25px; }
 .agenda-breadcrumb { margin: 0 0 11px; color: #728479; font-size: 11px; font-weight: 500; }
@@ -215,6 +217,8 @@
   .agenda-app-identity > strong { font-size: 18px; }
   .agenda-header-note { font-size: 0; }
   .agenda-header-note svg { width: 18px; height: 18px; }
+  .public-agenda-page .agenda-header-note > svg, .public-agenda-page .agenda-header-note > span { display: none; }
+  .agenda-login-link { margin-left: 0; padding-inline: 14px; font-size: 12px; }
   .agenda-app-page .appointment-shell.agenda-app-main { width: calc(100% - 32px); margin: 0 16px; padding-top: 22px; }
   .agenda-page-heading { gap: 16px; margin-bottom: 22px; align-items: flex-start; }
   .agenda-page-heading h1 { font-size: 25px; }
