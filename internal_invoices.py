@@ -100,14 +100,27 @@ def register_internal_invoices(app, *, admin_required, ensure_schema, csrf_token
         denied=authorize()
         if denied: return denied
         page=max(1,request.args.get('page',1,type=int));size=40
-        total=PatientInvoice.query.count()
-        items=PatientInvoice.query.order_by(PatientInvoice.created_at.desc(),PatientInvoice.id).offset((page-1)*size).limit(size).all()
+        status=request.args.get('status','all')
+        if status not in {'all','draft','outstanding','paid'}:status='all'
+        query=PatientInvoice.query
+        counts=dict(all=query.count(),draft=query.filter_by(state='draft').count(),
+            outstanding=query.filter(PatientInvoice.state=='issued',PatientInvoice.paid_on.is_(None)).count(),
+            paid=query.filter(PatientInvoice.paid_on.is_not(None)).count())
+        if status=='draft':query=query.filter_by(state='draft')
+        elif status=='outstanding':query=query.filter(PatientInvoice.state=='issued',PatientInvoice.paid_on.is_(None))
+        elif status=='paid':query=query.filter(PatientInvoice.paid_on.is_not(None))
+        total=counts[status]
+        page=min(page,max(1,(total+size-1)//size))
+        items=query.order_by(PatientInvoice.created_at.desc(),PatientInvoice.id).offset((page-1)*size).limit(size).all()
+        listing=dict(invoices=[invoice_payload(item) for item in items],page=page,total=total,page_size=size,
+            invoice_status=status,invoice_counts=counts,today=now().date(),euro=euro)
+        if request.args.get('fragment')=='1':
+            return jsonify(ok=True,html=render_template('_invoice_list.html',**listing))
         settings,revision=settings_data()
         return render_template('internal_invoices.html',internal_agenda=True,billing_page=True,
-            invoices=[invoice_payload(item) for item in items],page=page,total=total,page_size=size,
-            csrf_token=csrf_token(),today=now().date(),invoice_settings=settings,settings_revision=revision,
+            **listing,csrf_token=csrf_token(),invoice_settings=settings,settings_revision=revision,
             invoice_settings_missing=settings_missing(settings),gmail_ready=bool(gmail_connection()),
-            billing_choices=INTERNAL_INAMI_CHOICES,euro=euro)
+            billing_choices=INTERNAL_INAMI_CHOICES)
 
     @app.route('/admin/appointments/invoices/settings',methods=['GET','POST'])
     def admin_invoice_settings():

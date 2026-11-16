@@ -207,6 +207,14 @@ try:
  with app.app_context():
   assert PatientInvoice.query.count()==4 and InvoiceSequence.query.one().next_value==2
   assert InvoiceDelivery.query.count()==2
+ # Segmented views filter the entire private register, not only a browser page.
+ assert anon.get(base+'?status=draft&fragment=1').status_code==302
+ for status,expected in [('all',4),('draft',2),('outstanding',1),('paid',1)]:
+  fragment=owner.get(base+'?status='+status+'&fragment=1')
+  assert fragment.status_code==200 and fragment.headers['Cache-Control']=='private, no-store'
+  assert fragment.json['html'].count('class="invoice-patient-card"')==expected
+ assert 'Patient Fictif' in owner.get(base+'?status=paid&fragment=1').json['html']
+ assert 'Patient Futur' not in owner.get(base+'?status=paid&fragment=1').json['html']
  # Optional local preview is synthetic; provider remains unavailable for real sending.
  if '--pdf-example' in sys.argv:
   example_data=dict(inv['data'],_example=True)

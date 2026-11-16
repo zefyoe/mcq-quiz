@@ -1,0 +1,26 @@
+<nav class="invoice-segments" aria-label="Filtrer les factures">
+  {% for value,label in [('all','Toutes'),('draft','Brouillons'),('outstanding','À payer'),('paid','Réglées')] %}
+  <a href="{{ url_for('admin_invoice_list',status=value) }}" data-invoice-list-url{% if invoice_status==value %} aria-current="page"{% endif %}>{{ label }}<span>{{ invoice_counts[value] }}</span></a>
+  {% endfor %}
+</nav>
+{% if invoices %}
+<div class="invoice-cards" aria-label="Factures patients">
+{% for invoice in invoices %}
+{% set names=(invoice.data.patient_name or 'Patient').split() %}
+<button type="button" class="invoice-patient-card" data-invoice-open="{{ invoice.id }}" aria-label="Ouvrir la facture de {{ invoice.data.patient_name }} · {{ invoice.data.examination_date }}">
+  <span class="invoice-avatar" aria-hidden="true">{{ names[0][:1] }}{{ names[-1][:1] if names|length>1 else '' }}</span>
+  <span class="invoice-card-patient"><strong>{{ invoice.data.patient_name or 'Patient à compléter' }}</strong><span class="invoice-card-exam">{{ invoice.data.examination }}</span><small>{{ invoice.data.examination_date[8:10] }}/{{ invoice.data.examination_date[5:7] }}/{{ invoice.data.examination_date[:4] }} · {{ invoice.number or 'Brouillon' }}</small></span>
+  <span class="invoice-card-date"><small>Examen</small><strong>{{ invoice.data.examination_date[8:10] }}/{{ invoice.data.examination_date[5:7] }}/{{ invoice.data.examination_date[:4] }}</strong>{% if invoice.due_date and not invoice.paid_on %}<small>Échéance {{ invoice.due_date[8:10] }}/{{ invoice.due_date[5:7] }}</small>{% endif %}</span>
+  <span class="invoice-card-payment"><strong>{{ euro(invoice.data.patient_cents).replace(' EUR',' €') }}</strong><span class="invoice-state is-{{ 'paid' if invoice.paid_on else invoice.state }}">{{ 'Réglée' if invoice.paid_on else ('À payer' if invoice.state=='issued' else 'Brouillon') }}</span></span>
+  <span class="invoice-card-arrow" aria-hidden="true">›</span>
+</button>
+{% endfor %}
+</div>
+{% else %}
+<div class="invoice-blank">
+  <div class="invoice-blank-icon" aria-hidden="true">{% from '_agenda_icons.html' import icon %}{{ icon('list',38) }}</div>
+  <h2>{{ 'Votre première facture' if invoice_status=='all' else 'Aucune facture ici' }}</h2>
+  {% if invoice_status=='all' %}<button type="button" class="agenda-primary-action" data-invoice-new>Nouvelle facture {{ '→' }}</button>{% endif %}
+</div>
+{% endif %}
+{% if page>1 or page*page_size<total %}<nav class="invoice-pagination" aria-label="Pages de factures">{% if page>1 %}<a href="{{ url_for('admin_invoice_list',status=invoice_status,page=page-1) }}" data-invoice-list-url>← Précédentes</a>{% endif %}<span>{{ page }}</span>{% if page*page_size<total %}<a href="{{ url_for('admin_invoice_list',status=invoice_status,page=page+1) }}" data-invoice-list-url>Suivantes →</a>{% endif %}</nav>{% endif %}

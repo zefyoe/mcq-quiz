@@ -19,13 +19,21 @@ examination/INAMI code and insurer, and adjust amounts where appropriate. A chan
 code offers the existing 2026 normal-status tariff reference; it is not a live
 MyCareNet tariff or an eligibility check. A consultation is not added automatically.
 
-On **Factures**, **Nouvelle facture** focuses the always-visible **Chercher patient**
-search. Results list each appointment/reservation/historical exam separately with
+On **Factures**, **Nouvelle facture** and the compact **Chercher patient** control
+open a patient selection sheet. Results list each appointment/reservation/historical exam separately with
 its date and examination, and open an existing invoice instead of duplicating it.
 Search requires two characters, accepts name words in either order and returns at
 most 40 results. It is an authenticated, CSRF-protected POST so patient names do
 not appear in request URLs. Scans, reports and patient email addresses are not
 included in search results. Nothing from this search is available publicly.
+
+The main workspace uses selectable patient cards and four segmented views: all,
+drafts, outstanding and paid. Counts and filtering apply to the entire register;
+switching a view updates the list without a full-page reload. Editing opens a
+side sheet with Patient / Examen / Montants steps. Required-field validation
+reveals the relevant step, while saving a partial draft stays available. Issued
+invoices open as a read-only summary with PDF, delivery and payment actions.
+Tariff and insurer-transmission explanations sit in expandable details.
 
 The default **patient amount is EUR 20**, adjustable with **Adapter les montants**.
 It is not declared to be the statutory ticket modérateur. The draft separately

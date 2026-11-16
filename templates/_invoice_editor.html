@@ -1,25 +1,33 @@
 <dialog id="invoice-editor" class="invoice-dialog" aria-labelledby="invoice-title">
-  <header class="invoice-dialog-header"><div><p class="appointment-eyebrow">FACTURATION · INTERNE</p><h2 id="invoice-title">Facture patient</h2><p id="invoice-document-meta"></p></div><button type="button" data-invoice-close aria-label="Fermer la facture">×</button></header>
+  <header class="invoice-dialog-header"><div><p class="appointment-eyebrow">FACTURE PATIENT</p><h2 id="invoice-title">Facture patient</h2><p id="invoice-document-meta"></p></div><div class="invoice-editor-header-actions"><button type="button" id="invoice-preview-button" aria-label="Aperçu PDF">{% from '_agenda_icons.html' import icon %}{{ icon('list',18) }}<span>PDF</span></button><button type="button" data-invoice-close aria-label="Fermer la facture">×</button></div></header>
   <p id="invoice-feedback" class="invoice-feedback" role="status" aria-live="polite"></p>
   <div id="invoice-unsaved" class="invoice-warning" hidden>Des modifications ne sont pas enregistrées. <button type="button" id="invoice-keep-editing">Continuer la saisie</button><button type="button" id="invoice-discard-close">Fermer sans enregistrer</button></div>
   <div class="invoice-editor-grid">
     <div class="invoice-form-column">
+      <p id="invoice-settings-note" class="invoice-warning"><button type="button" data-invoice-settings>Compléter le cabinet {{ '›' }}</button></p>
+      <div id="invoice-issued-summary" class="invoice-issued-summary" hidden><span id="invoice-summary-name"></span><strong id="invoice-summary-amount"></strong><p id="invoice-summary-exam"></p></div>
+      <nav class="invoice-step-tabs" id="invoice-step-tabs" aria-label="Étapes de facturation"><button type="button" data-invoice-step-tab="patient" aria-current="step"><span>1</span> Patient</button><button type="button" data-invoice-step-tab="exam"><span>2</span> Examen</button><button type="button" data-invoice-step-tab="amounts"><span>3</span> Montants</button></nav>
       <form id="invoice-form" autocomplete="off">
-        <fieldset id="invoice-fields"><legend>Patient et examen</legend>
+        <fieldset id="invoice-fields"><legend class="invoice-visually-hidden">Patient et examen</legend>
+        <section class="invoice-step" data-invoice-step="patient">
           <div class="invoice-fields-grid">
             <label class="invoice-wide">Prénom et nom<input name="patient_name" maxlength="255" required></label>
             <label class="invoice-wide">Rue, numéro et boîte<input name="patient_street" maxlength="255" required autocomplete="street-address"></label>
             <label>Code postal<input name="patient_postcode" maxlength="20" required></label><label>Localité<input name="patient_city" maxlength="120" required></label>
             <label>Pays<input name="patient_country" maxlength="80"></label><label>N° dossier · registre national<input name="national_number" maxlength="15" inputmode="numeric"></label>
             <label class="invoice-wide">E-mail du patient<input name="patient_email" type="email" maxlength="254"></label>
+          </div>
+        </section>
+        <section class="invoice-step" data-invoice-step="exam" hidden><div class="invoice-fields-grid">
             <label>Date de l’examen<input name="examination_date" type="date" required></label>
             <label>Code INAMI<select name="billing_code" required><option value="">Choisissez un code</option>{% for item in internal_billing_choices|default(billing_choices) %}<option value="{{ item.code }}">{{ item.code }} · {{ item.label }}</option>{% endfor %}</select></label>
             <label class="invoice-wide">Examen réalisé<textarea name="examination" maxlength="1000" rows="2" required></textarea></label>
-            <label>Radiologue<input name="doctor_name" maxlength="255" required></label><label>N° INAMI du radiologue<input name="doctor_inami" maxlength="40" required></label>
-            <label class="invoice-wide">Médecin prescripteur (facultatif)<input name="prescriber_name" maxlength="255"></label>
+            <details class="invoice-wide invoice-doctor-details"><summary>Médecin</summary><div class="invoice-fields-grid"><label>Radiologue<input name="doctor_name" maxlength="255" required></label><label>N° INAMI<input name="doctor_inami" maxlength="40" required></label><label class="invoice-wide">Prescripteur · facultatif<input name="prescriber_name" maxlength="255"></label></div></details>
             <label>Mutualité / organisme assureur<input name="mutuality" maxlength="150" required></label>
             <label>Assurabilité vérifiée<select name="insurance_status" required><option value="">À vérifier</option><option value="normal">Normal</option><option value="bim">BIM</option></select></label>
           </div>
+        </section>
+        <section class="invoice-step" data-invoice-step="amounts" hidden>
           <section class="invoice-amounts"><header><h3>Montants</h3><button type="button" id="invoice-adapt-amounts">Adapter les montants</button></header>
             <div class="invoice-fields-grid">
               <label>À payer par le patient · EUR<input name="patient_amount" type="number" min="0" max="10000" step="0.01" readonly required></label>
@@ -27,17 +35,18 @@
               <label>Dont ticket modérateur légal · EUR<input name="ticket_amount" type="number" min="0" max="10000" step="0.01" readonly required></label>
               <div class="invoice-calculated"><span>Supplément patient</span><strong id="invoice-supplement">—</strong></div>
             </div>
-            <p class="invoice-reference">Les montants mutualité/ticket proposés viennent du catalogue 2026 pour un patient non BIM. Vérifiez le tarif à la date de l’examen. Le montant patient de 20 EUR est une proposition du cabinet.</p>
+            <details class="invoice-reference"><summary>Référence tarifaire</summary><p>Catalogue 2026, hors BIM. Vérifiez les tarifs applicables. Le montant patient proposé peut inclure un supplément.</p></details>
             <p class="invoice-total">Honoraires totaux <strong id="invoice-total">—</strong></p>
           </section>
-          <section class="invoice-issue-checks"><h3>Avant d’émettre</h3>
-            <label><input type="checkbox" name="performed" value="1"> L’examen a été réalisé à la date indiquée.</label>
-            <label><input type="checkbox" name="verified" value="1"> J’ai vérifié le code, l’assurabilité et la répartition des montants.</label>
-            <label id="invoice-supplement-check"><input type="checkbox" name="supplement_confirmed" value="1"> Le supplément est autorisé pour ce patient et cette prestation.</label>
-            <p>La facture émise est numérotée et figée. Le patient dispose de 30 jours pour payer sa part.</p>
+          <section class="invoice-issue-checks"><h3>Validation</h3>
+            <label><input type="checkbox" name="performed" value="1"> Examen réalisé</label>
+            <label><input type="checkbox" name="verified" value="1"> Code, droits et montants vérifiés</label>
+            <label id="invoice-supplement-check"><input type="checkbox" name="supplement_confirmed" value="1"> Supplément autorisé pour cette prestation</label>
+            <p>Facture définitive · Paiement à 30 jours</p>
           </section>
+        </section>
         </fieldset>
-        <div class="invoice-form-actions"><button type="submit" id="invoice-save" formnovalidate>Enregistrer le brouillon</button><button type="button" class="agenda-primary-action" id="invoice-issue">Émettre la facture</button></div>
+        <div class="invoice-form-actions"><button type="submit" id="invoice-save" formnovalidate>Enregistrer</button><button type="button" class="agenda-primary-action" id="invoice-next">Continuer {{ '→' }}</button><button type="button" class="agenda-primary-action" id="invoice-issue" hidden>Émettre la facture</button></div>
       </form>
       <section id="invoice-mail-panel" class="invoice-mail-panel" hidden><h3>Envoyer au patient</h3><form id="invoice-mail-form">
         <label>Adresse e-mail du destinataire<input type="email" name="recipient" maxlength="254" required></label>
@@ -45,14 +54,13 @@
         <label class="invoice-check" id="invoice-resend-check" hidden><input type="checkbox" name="resend_confirmed" value="1"> Je souhaite renvoyer cette facture déjà envoyée.</label>
         <button type="submit" class="agenda-primary-action" id="invoice-send">Envoyer la facture PDF</button>
       </form><p id="invoice-email-status"></p><button type="button" id="invoice-reset-delivery" hidden>J’ai vérifié Gmail : aucun envoi, réactiver</button></section>
-      <section id="invoice-payment-panel" class="invoice-payment-panel" hidden><h3>Suivi du paiement patient</h3><form id="invoice-payment-form"><label>Date de réception du paiement<input type="date" name="paid_on"></label><button type="submit">Enregistrer le paiement</button></form><p>Suivi manuel après vérification de votre compte bancaire. Laissez la date vide pour annuler le marquage.</p></section>
+      <section id="invoice-payment-panel" class="invoice-payment-panel" hidden><h3>Paiement reçu</h3><form id="invoice-payment-form"><label>Date du paiement<input type="date" name="paid_on"></label><button type="submit">Enregistrer</button></form></section>
     </div>
-    <aside class="invoice-preview-column"><div class="invoice-preview-toolbar"><h3>Document A4</h3><button type="button" id="invoice-preview-button">Aperçu PDF</button></div>
-      <p id="invoice-settings-note" class="invoice-warning">Complétez les coordonnées du cabinet avant émission. <button type="button" data-invoice-settings>Paramètres du cabinet</button></p>
+    <aside class="invoice-preview-column" hidden><div class="invoice-preview-toolbar"><h3>Document A4</h3></div>
       <iframe id="invoice-pdf-preview" title="Aperçu de la facture PDF" hidden></iframe>
-      <p id="invoice-preview-empty">Enregistrez votre brouillon puis affichez la lettre au format A4.</p>
+      <p id="invoice-preview-empty">Aperçu du document</p>
       <div class="invoice-pdf-actions" id="invoice-pdf-actions" hidden><button type="button" id="invoice-print">Imprimer</button><a id="invoice-download">Télécharger</a><a id="invoice-open-pdf" target="_blank" rel="noopener">Ouvrir le PDF</a></div>
-      <p class="invoice-efact-note">La part mutualité doit être traitée dans votre logiciel eFact/MyCareNet. Cette application prépare la facture patient et n’effectue pas cette transmission.</p>
+      <details class="invoice-efact-note"><summary>Part mutualité</summary><p>Transmission séparée via eFact/MyCareNet. Seule la facture patient est préparée ici.</p></details>
     </aside>
   </div>
 </dialog>
