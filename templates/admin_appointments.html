@@ -142,6 +142,48 @@
               </button>
             </form>
           </section>
+          <section class="public-booking-mode booking-alerts" id="google-calendar" aria-labelledby="google-calendar-label">
+            <div>
+              <strong id="google-calendar-label">Google Agenda</strong>
+              {% if google_calendar %}
+              {% set calendar_status = {
+                'pending': 'Synchronisation en cours',
+                'creating': 'Création de l’agenda…',
+                'synced': 'Agenda WIRC synchronisé',
+                'paused': 'Synchronisation suspendue',
+                'api_disabled': 'API Google Calendar à activer',
+                'creation_unknown': 'Création à vérifier dans Google Agenda',
+                'reconnect': 'Reconnectez votre compte Google',
+                'retry': 'Synchronisation en attente'
+              } %}
+              <span class="agenda-setting-status">{{ calendar_status.get(google_calendar.status, 'Synchronisation en cours') }}</span>
+              <span class="agenda-setting-status">{{ google_calendar.email }}</span>
+              {% else %}
+              <span class="agenda-setting-status">Rendez-vous WIRC sur votre téléphone</span>
+              {% endif %}
+            </div>
+            {% if calendar_owner and (not google_calendar or not google_calendar.encrypted_refresh_token or google_calendar.status == 'reconnect') %}
+            <form method="post" action="{{ url_for('google_calendar_start') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="booking-alert-connect" {% if not google_oauth_ready %}disabled{% endif %}>
+                {{ 'Reconnecter' if google_calendar else 'Connecter' }}
+              </button>
+            </form>
+            {% endif %}
+            {% if google_calendar and google_calendar.calendar_id %}
+            <a class="booking-alert-connect google-calendar-link" href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+            {% endif %}
+            {% if google_calendar and google_calendar.status == 'api_disabled' and calendar_owner %}
+            <a class="booking-alert-connect google-calendar-link" href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" rel="noopener noreferrer">Activer l’API</a>
+            {% endif %}
+            {% if calendar_owner and google_calendar and google_calendar.encrypted_refresh_token %}
+            <form method="post" action="{{ url_for('google_calendar_pause') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="week_date" value="{{ selected_date }}">
+              <button type="submit" class="booking-alert-connect">Suspendre</button>
+            </form>
+            {% endif %}
+          </section>
           {% endif %}
           </div>
 

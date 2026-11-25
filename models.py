@@ -135,6 +135,28 @@ class BookingAlert(db.Model):
     __table_args__ = (db.Index("ix_booking_alert_queue", "subscription", "status", "created_at"),)
 
 
+class GoogleCalendarConnection(db.Model):
+    """Private one-way calendar connection for the practice."""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    google_subject = db.Column(db.String(255), nullable=False)
+    encrypted_refresh_token = db.Column(db.Text, nullable=True)
+    calendar_id = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(24), nullable=False, default="pending")
+    lease_id = db.Column(db.String(36), nullable=True)
+    lease_until = db.Column(db.DateTime, nullable=True)
+
+
+class GoogleCalendarEvent(db.Model):
+    """Stable provider ID and last mirrored timing for a booking."""
+    booking_key = db.Column(db.String(64), primary_key=True)
+    event_id = db.Column(db.String(32), nullable=False, unique=True)
+    starts_at = db.Column(db.DateTime, nullable=False)
+    duration_minutes = db.Column(db.Integer, nullable=False)
+    synced = db.Column(db.Boolean, nullable=False, default=False)
+
+
 class AppointmentReport(db.Model):
     """Private report linked to a specific booking, with an identity snapshot."""
     id = db.Column(db.Integer, primary_key=True)

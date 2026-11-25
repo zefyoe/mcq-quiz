@@ -394,3 +394,8 @@
   font-size: 12px;
   cursor: pointer;
 }
+.booking-alert-connect.google-calendar-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}

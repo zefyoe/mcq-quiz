@@ -61,7 +61,14 @@ from booking_alerts import (
     alert_settings, alert_status, queue_booking_alert, set_alert_mailbox,
     start_booking_alert_worker, wake_booking_alert_worker,
 )
-from models import AppointmentBookingSettings, AppointmentMoveReceipt, AppointmentTrash, BookingAlert, BookingAlertSettings
+from wirc_google_calendar import (
+    CALENDAR_SCOPE, CALENDAR_SCOPES, CalendarError, calendar_connection,
+    start_calendar_worker, store_calendar_consent,
+)
+from models import (
+    AppointmentBookingSettings, AppointmentMoveReceipt, AppointmentTrash,
+    BookingAlert, BookingAlertSettings, GoogleCalendarConnection, GoogleCalendarEvent,
+)
 from practice_settings import (AGENDA_ONLY, PRACTICE_NAME, PRACTICE_SHORT_NAME,
     PRACTICE_ENGLISH_NAME, PUBLIC_CLOSURE_MESSAGE, PUBLIC_BOOKING_ENABLED, BOOKING_START_DATE, practice_address)
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
@@ -862,6 +869,8 @@ def ensure_appointment_schema() -> None:
     if AGENDA_ONLY:
         BookingAlertSettings.__table__.create(bind=db.engine, checkfirst=True)
         BookingAlert.__table__.create(bind=db.engine, checkfirst=True)
+        GoogleCalendarConnection.__table__.create(bind=db.engine, checkfirst=True)
+        GoogleCalendarEvent.__table__.create(bind=db.engine, checkfirst=True)
     for model in (InvoiceSettings,PatientInvoice,InvoiceSequence,InvoiceDelivery):
         model.__table__.create(bind=db.engine,checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
@@ -4668,8 +4677,11 @@ def admin_appointments():
                        day_summary_html=render_template("_internal_day_summary.html", **context))
     if AGENDA_ONLY:
         settings = alert_settings()
+        google_calendar = calendar_connection()
         context.update(booking_alert_email=settings.email if settings else None,
-                       booking_alert_status=alert_status(settings))
+                       booking_alert_status=alert_status(settings),
+                       google_calendar=google_calendar,
+                       calendar_owner=google_calendar is None or google_calendar.user_id == current_user.id)
     return render_template("admin_appointments.html", **context)
 
 
@@ -5543,6 +5555,55 @@ def google_login_start():
     return redirect(authorization_url)
 
 
+@app.post("/auth/google/calendar/start")
+def google_calendar_start():
+    denied = admin_required()
+    if denied:
+        return denied
+    if not AGENDA_ONLY:
+        abort(404)
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    if not google_oauth_configured():
+        return redirect(url_for("admin_appointments", error="La connexion Google n’est pas encore configurée.",
+                                _anchor="google-calendar"))
+    ensure_appointment_schema()
+    connection = calendar_connection()
+    if connection is not None and connection.user_id != current_user.id:
+        abort(403)
+    nonce = secrets.token_urlsafe(32)
+    flow = google_flow(scopes=CALENDAR_SCOPES)
+    authorization_url, state = flow.authorization_url(
+        access_type="offline", prompt="consent", include_granted_scopes="false",
+        nonce=nonce, login_hint=current_user.email)
+    session["google_reporting_oauth"] = {
+        "state": state, "nonce": nonce, "verifier": flow.code_verifier, "calendar": True,
+        "started": datetime.now(ZoneInfo("UTC")).timestamp(), "user_id": current_user.id,
+    }
+    return redirect(authorization_url)
+
+
+@app.post("/admin/appointments/google-calendar/pause")
+def google_calendar_pause():
+    denied = admin_required()
+    if denied:
+        return denied
+    if not AGENDA_ONLY:
+        abort(404)
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    ensure_appointment_schema()
+    connection = calendar_connection()
+    if connection is None or connection.user_id != current_user.id:
+        abort(403)
+    connection.encrypted_refresh_token = None
+    # Preserve recovery state if Google may already have created the calendar.
+    if connection.status not in {"creating", "creation_unknown"}:
+        connection.status = "paused"
+    db.session.commit()
+    return redirect(url_for("admin_appointments", date=request.form.get("week_date"), _anchor="google-calendar"))
+
+
 @app.get("/auth/google/callback")
 def google_login_callback():
     pending = session.pop("google_reporting_oauth", None)
@@ -5550,13 +5611,21 @@ def google_login_callback():
             or datetime.now(ZoneInfo("UTC")).timestamp() - pending["started"] > 600
             or not secrets.compare_digest(request.args.get("state", ""), pending["state"])):
         abort(400)
+    calendar = pending.get("calendar") is True
+    if calendar and (not AGENDA_ONLY or not user_has_admin_access(current_user)
+                     or current_user.id != pending["user_id"]):
+        abort(403)
     target = "admin_appointments" if current_user.is_authenticated else "login"
     def fail(message):
-        return redirect(url_for(target, **{"error" if target == "admin_appointments" else "google_error": message}))
+        query = {"error" if target == "admin_appointments" else "google_error": message}
+        if calendar:
+            query["_anchor"] = "google-calendar"
+        return redirect(url_for(target, **query))
     if request.args.get("error") or not request.args.get("code"):
         return fail("Connexion Google annulée. Vous pouvez réessayer.")
     try:
-        flow = google_flow(state=pending["state"], verifier=pending["verifier"])
+        flow_options = {"scopes": CALENDAR_SCOPES} if calendar else {}
+        flow = google_flow(state=pending["state"], verifier=pending["verifier"], **flow_options)
         flow.fetch_token(code=request.args["code"], timeout=20)
         credentials = flow.credentials
         claims = verified_google_identity(credentials, pending["nonce"])
@@ -5566,6 +5635,19 @@ def google_login_callback():
             return fail("Ce compte Google n’est pas autorisé dans l’environnement interne.")
         if pending["user_id"] is not None and (not current_user.is_authenticated or user.id != pending["user_id"] or current_user.id != user.id):
             return fail("Connectez le compte Google correspondant à votre compte administrateur.")
+        if calendar:
+            granted = credentials.granted_scopes if credentials.granted_scopes is not None else credentials.scopes
+            if CALENDAR_SCOPE not in (granted or ()) or not credentials.refresh_token:
+                return fail("Autorisez la création et la gestion de l’agenda WIRC pour activer la synchronisation.")
+            ensure_appointment_schema()
+            encrypted = token_cipher(app.secret_key).encrypt(credentials.refresh_token.encode()).decode()
+            try:
+                store_calendar_consent(user_id=user.id, email=email, subject=claims["sub"],
+                                       encrypted_refresh_token=encrypted)
+            except CalendarError:
+                return fail("Reconnectez le compte Google qui a créé l’agenda WIRC.")
+            return redirect(url_for("admin_appointments", success="Google Agenda connecté. Synchronisation en cours.",
+                                    _anchor="google-calendar"))
         if GMAIL_SCOPE not in (credentials.granted_scopes or credentials.scopes or []):
             session["google_force_consent"] = True
             return fail("Autorisez l’envoi Gmail pour connecter ce compte, puis réessayez.")
@@ -5764,6 +5846,7 @@ if not os.environ.get("RENDER") or os.environ.get("RUN_STARTUP_MIGRATIONS") == "
 
 if AGENDA_ONLY and os.environ.get("RENDER") and google_oauth_configured():
     start_booking_alert_worker(app, user_has_admin_access)
+    start_calendar_worker(app, user_has_admin_access, agenda_now)
 
 if __name__ == "__main__":
     app.run(debug=True)

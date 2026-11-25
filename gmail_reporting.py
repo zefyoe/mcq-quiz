@@ -25,13 +25,13 @@ def google_oauth_configured():
         "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_REDIRECT_URI"))
 
 
-def google_flow(*, state=None, verifier=None):
+def google_flow(*, state=None, verifier=None, scopes=SCOPES):
     return Flow.from_client_config({"web": {
         "client_id": os.environ["GOOGLE_OAUTH_CLIENT_ID"],
         "client_secret": os.environ["GOOGLE_OAUTH_CLIENT_SECRET"],
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
-    }}, scopes=SCOPES, state=state,
+    }}, scopes=scopes, state=state,
         redirect_uri=os.environ["GOOGLE_OAUTH_REDIRECT_URI"],
         code_verifier=verifier, autogenerate_code_verifier=verifier is None)
 
