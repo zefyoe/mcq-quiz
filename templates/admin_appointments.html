@@ -93,12 +93,14 @@
             </div>
           </div>
 
+          <div class="agenda-public-controls">
+          <div>
           <form id="public-booking-mode" class="public-booking-mode" method="post" action="{{ url_for('admin_set_public_booking_mode') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="week_date" value="{{ selected_date }}">
             <div>
               <strong id="public-booking-mode-label">Créneaux publics par deux</strong>
-              <span id="public-booking-mode-status">{{ 'Deux créneaux à la fois' if release_in_pairs else 'Tous les créneaux libres' }}</span>
+              <span id="public-booking-mode-status" class="agenda-setting-status">{{ 'Deux créneaux à la fois' if release_in_pairs else 'Tous les créneaux libres' }}</span>
             </div>
             <button type="submit" name="release_in_pairs" value="{{ '0' if release_in_pairs else '1' }}"
                     role="switch" aria-checked="{{ 'true' if release_in_pairs else 'false' }}"
@@ -107,6 +109,41 @@
             </button>
           </form>
           <p id="public-booking-mode-feedback" class="public-booking-mode-feedback" role="status"></p>
+          </div>
+
+          {% if agenda_only %}
+          <section class="public-booking-mode booking-alerts" id="booking-alerts" aria-labelledby="booking-alert-label">
+            <div>
+              <strong id="booking-alert-label">Notifications Gmail</strong>
+              <span id="booking-alert-status" class="agenda-setting-status">
+                {{ booking_alert_email or ('Désactivées · ' ~ gmail_sender if gmail_sender else 'Nouveaux rendez-vous en ligne') }}
+              </span>
+              <span id="booking-alert-delivery" class="agenda-setting-status" role="status">
+                {{ {'sent': 'Dernière notification envoyée', 'unconfirmed': 'Dernier envoi non confirmé · vérifiez Gmail',
+                    'reconnect': 'Envoi impossible · reconnectez Gmail', 'pending': 'Envoi en attente',
+                    'sending': 'Envoi en cours'}.get(booking_alert_status, '') }}
+              </span>
+            </div>
+            <form id="booking-alert-form" method="post" action="{{ url_for('admin_set_booking_alerts') }}"
+                  data-gmail-sender="{{ gmail_sender or '' }}" {% if not (gmail_sender or booking_alert_email) %}hidden{% endif %}>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="week_date" value="{{ selected_date }}">
+              <button type="submit" name="enabled" value="{{ '0' if booking_alert_email else '1' }}"
+                      role="switch" aria-checked="{{ 'true' if booking_alert_email else 'false' }}"
+                      aria-labelledby="booking-alert-label" aria-describedby="booking-alert-status">
+                <span aria-hidden="true"></span>
+              </button>
+            </form>
+            <form id="booking-alert-connect" method="post" action="{{ url_for('google_login_start') }}"
+                  {% if (gmail_sender or booking_alert_email) and booking_alert_status != 'reconnect' %}hidden{% endif %}>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="booking-alert-connect" {% if not google_oauth_ready %}disabled{% endif %}>
+                {{ 'Reconnecter Gmail' if booking_alert_status == 'reconnect' else 'Connecter Gmail' }}
+              </button>
+            </form>
+          </section>
+          {% endif %}
+          </div>
 
           <div class="appointment-calendar-scroll">
             <div id="internal-calendar-grid" data-endpoint="{{ url_for('admin_appointments', date=selected_date, fragment='calendar') }}">{% include '_internal_calendar_grid.html' %}</div>

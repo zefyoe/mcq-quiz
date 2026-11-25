@@ -115,6 +115,26 @@ class GmailConnection(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
+class BookingAlertSettings(db.Model):
+    """One opted-in, verified Gmail mailbox for the practice."""
+    id = db.Column(db.Integer, primary_key=True)
+    subscription = db.Column(db.String(36), nullable=True)
+    user_id = db.Column(db.Integer, nullable=True)
+    google_subject = db.Column(db.String(255), nullable=True)
+    email = db.Column(db.String(255), nullable=True)
+
+
+class BookingAlert(db.Model):
+    """Delivery queue with only the appointment time and subscription identifier."""
+    id = db.Column(db.String(36), primary_key=True)
+    subscription = db.Column(db.String(36), nullable=False)
+    starts_at = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    status = db.Column(db.String(16), nullable=False, default="pending")
+    attempted_at = db.Column(db.DateTime, nullable=True)
+    __table_args__ = (db.Index("ix_booking_alert_queue", "subscription", "status", "created_at"),)
+
+
 class AppointmentReport(db.Model):
     """Private report linked to a specific booking, with an identity snapshot."""
     id = db.Column(db.Integer, primary_key=True)

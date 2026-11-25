@@ -52,6 +52,33 @@
       control.disabled = false;
     }
   });
+  const alertForm = document.getElementById('booking-alert-form');
+  alertForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const control = alertForm.elements.enabled;
+    if (control.disabled) return;
+    const status = document.getElementById('booking-alert-status');
+    const feedback = document.getElementById('booking-alert-delivery');
+    const connect = document.getElementById('booking-alert-connect');
+    const sender = alertForm.dataset.gmailSender;
+    const body = new FormData(alertForm);
+    body.set(control.name, control.value);
+    control.disabled = true;
+    feedback.textContent = 'Enregistrement…';
+    try {
+      const result = await request(alertForm.action, {method: 'POST', body});
+      control.setAttribute('aria-checked', String(Boolean(result.email)));
+      control.value = result.email ? '0' : '1';
+      status.textContent = result.email || (sender ? 'Désactivées · ' + sender : 'Nouveaux rendez-vous en ligne');
+      feedback.textContent = result.email ? 'Notifications activées.' : 'Notifications désactivées.';
+      connect.hidden = Boolean(result.email || sender);
+      alertForm.hidden = !result.email && !sender;
+    } catch (error) {
+      feedback.textContent = 'Modification non confirmée. Actualisez l’agenda avant de réessayer.';
+    } finally {
+      control.disabled = false;
+    }
+  });
   const feedback = document.getElementById('availability-feedback');
   function notify(message) { feedback.hidden = false; feedback.textContent = message; }
   function updateSlot(start, isOpen) {

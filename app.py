@@ -57,7 +57,11 @@ from historical_dossiers import register_historical_dossiers, historical_riziv_r
 from appointment_moves import register_appointment_moves
 from appointment_trash import register_appointment_trash
 from internal_invoices import register_internal_invoices
-from models import AppointmentBookingSettings, AppointmentMoveReceipt, AppointmentTrash
+from booking_alerts import (
+    alert_settings, alert_status, queue_booking_alert, set_alert_mailbox,
+    start_booking_alert_worker, wake_booking_alert_worker,
+)
+from models import AppointmentBookingSettings, AppointmentMoveReceipt, AppointmentTrash, BookingAlert, BookingAlertSettings
 from practice_settings import (AGENDA_ONLY, PRACTICE_NAME, PRACTICE_SHORT_NAME,
     PRACTICE_ENGLISH_NAME, PUBLIC_CLOSURE_MESSAGE, PUBLIC_BOOKING_ENABLED, BOOKING_START_DATE, practice_address)
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
@@ -855,6 +859,9 @@ def ensure_appointment_schema() -> None:
             db.session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN billing_code VARCHAR(6) NOT NULL DEFAULT ''"))
     db.session.commit()
     GmailConnection.__table__.create(bind=db.engine, checkfirst=True)
+    if AGENDA_ONLY:
+        BookingAlertSettings.__table__.create(bind=db.engine, checkfirst=True)
+        BookingAlert.__table__.create(bind=db.engine, checkfirst=True)
     for model in (InvoiceSettings,PatientInvoice,InvoiceSequence,InvoiceDelivery):
         model.__table__.create(bind=db.engine,checkfirst=True)
     hold_columns = {column["name"] for column in inspect(db.engine).get_columns("appointment_hold")}
@@ -4181,6 +4188,30 @@ def admin_set_public_booking_mode():
     return redirect(url_for("admin_appointments", date=request.form.get("week_date")))
 
 
+@app.post("/admin/appointments/booking-alerts")
+def admin_set_booking_alerts():
+    denied = admin_required()
+    if denied:
+        return denied
+    if not AGENDA_ONLY:
+        abort(404)
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    enabled = request.form.get("enabled")
+    if enabled not in {"0", "1"}:
+        abort(400)
+    ensure_appointment_schema()
+    connection = active_gmail_connection() if enabled == "1" else None
+    if enabled == "1" and connection is None:
+        return jsonify(error="Connectez votre compte Gmail pour activer les notifications."), 409
+    set_alert_mailbox(connection)
+    db.session.commit()
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        settings = alert_settings()
+        return jsonify(ok=True, email=settings.email if settings else None)
+    return redirect(url_for("admin_appointments", date=request.form.get("week_date"), _anchor="booking-alerts"))
+
+
 @app.post("/admin/appointments/availability")
 def admin_set_appointment_availability():
     admin_redirect = admin_required()
@@ -4635,6 +4666,10 @@ def admin_appointments():
                        available_count=context["available_count"], booked_count=context["booked_count"], patient_total=len(patient_rows),
                        patient_list_html=render_template("_internal_patient_list.html", **context),
                        day_summary_html=render_template("_internal_day_summary.html", **context))
+    if AGENDA_ONLY:
+        settings = alert_settings()
+        context.update(booking_alert_email=settings.email if settings else None,
+                       booking_alert_status=alert_status(settings))
     return render_template("admin_appointments.html", **context)
 
 
@@ -4759,6 +4794,7 @@ def admin_book_appointment():
         prescription_mimetype=prescription_mimetype,
         prescription_data=prescription_data,
     )
+    queued_alert = False
     try:
         confirmation_pdf = (create_appointment_confirmation_pdf(
             patient_name=patient_name,
@@ -4784,6 +4820,8 @@ def admin_book_appointment():
             if patient_invoice:
                 patient_invoice.context_key = appointment_report_key(appointment)
             db.session.delete(hold)
+        if public and AGENDA_ONLY:
+            queued_alert = queue_booking_alert(starts_at)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -4800,6 +4838,8 @@ def admin_book_appointment():
         ))
 
     if public:
+        if queued_alert:
+            wake_booking_alert_worker()
         response = make_response(confirmation_pdf)
         response.headers["Content-Type"] = "application/pdf"
         response.headers["Content-Disposition"] = 'inline; filename="confirmation-rendez-vous.pdf"'
@@ -5721,6 +5761,9 @@ def initialize_database_schema():
 # DDL locks before Gunicorn can serve its health check.
 if not os.environ.get("RENDER") or os.environ.get("RUN_STARTUP_MIGRATIONS") == "1":
     initialize_database_schema()
+
+if AGENDA_ONLY and os.environ.get("RENDER") and google_oauth_configured():
+    start_booking_alert_worker(app, user_has_admin_access)
 
 if __name__ == "__main__":
     app.run(debug=True)

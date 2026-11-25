@@ -51,7 +51,11 @@ def token_cipher(secret):
     return Fernet(base64.urlsafe_b64encode(key))
 
 
-def send_gmail_attachment(*, connection, secret, recipient, pdf, message_key, subject, body, filename):
+class GmailConnectionError(ReportMailError):
+    """The Gmail request could not be authenticated before sending."""
+
+
+def send_gmail_message(*, connection, secret, recipient, message_key, subject, body, pdf=None, filename=None):
     try:
         refresh_token = token_cipher(secret).decrypt(connection.encrypted_refresh_token.encode()).decode()
         credentials = Credentials(token=None, refresh_token=refresh_token,
@@ -60,14 +64,15 @@ def send_gmail_attachment(*, connection, secret, recipient, pdf, message_key, su
             client_secret=os.environ["GOOGLE_OAUTH_CLIENT_SECRET"], scopes=SCOPES)
         credentials.refresh(partial(GoogleRequest(), timeout=20))
     except (InvalidToken, GoogleAuthError, requests.RequestException, ValueError, KeyError):
-        raise ReportMailError("La connexion Gmail a expiré. Reconnectez votre compte Google.") from None
+        raise GmailConnectionError("La connexion Gmail a expiré. Reconnectez votre compte Google.") from None
     message = EmailMessage()
     message["From"] = connection.email
     message["To"] = recipient
     message["Subject"] = subject
     message["Message-ID"] = f"<{message_key}@{connection.email.rsplit('@',1)[-1]}>"
     message.set_content(body)
-    message.add_attachment(pdf, maintype="application", subtype="pdf", filename=filename)
+    if pdf is not None:
+        message.add_attachment(pdf, maintype="application", subtype="pdf", filename=filename)
     raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
     try:
         response = requests.post("https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
@@ -82,14 +87,27 @@ def send_gmail_attachment(*, connection, secret, recipient, pdf, message_key, su
 
 
 def send_gmail_report(*, connection, secret, recipient, pdf, message_key):
-    return send_gmail_attachment(connection=connection,secret=secret,recipient=recipient,pdf=pdf,message_key=message_key,
+    return send_gmail_message(connection=connection,secret=secret,recipient=recipient,pdf=pdf,message_key=message_key,
         subject="Compte rendu radiologique - "+PRACTICE_NAME,
         body="Bonjour,\n\nVeuillez trouver en pièce jointe le compte rendu radiologique.\n\n"+PRACTICE_NAME,
         filename="compte-rendu-radiologique.pdf")
 
 
 def send_gmail_invoice(*, connection, secret, recipient, pdf, number, message_key):
-    return send_gmail_attachment(connection=connection,secret=secret,recipient=recipient,pdf=pdf,message_key=message_key,
+    return send_gmail_message(connection=connection,secret=secret,recipient=recipient,pdf=pdf,message_key=message_key,
         subject="Votre facture "+number+" - "+PRACTICE_NAME,
         body="Bonjour,\n\nVeuillez trouver votre facture en pièce jointe. Les coordonnées bancaires, la communication et l’échéance figurent sur le document.\n\n"+PRACTICE_NAME,
         filename="facture-"+number+".pdf")
+
+
+def send_gmail_booking_alert(*, connection, secret, starts_at, alert_id):
+    moment = starts_at.strftime("%d/%m/%Y à %H:%M")
+    return send_gmail_message(
+        connection=connection,
+        secret=secret,
+        recipient=connection.email,
+        message_key="wirc-booking-" + alert_id,
+        subject="WIRC · Nouveau rendez-vous",
+        body=f"Un rendez-vous a été confirmé pour le {moment} (heure de Bruxelles).\n\n"
+             "Ouvrir l’agenda interne : https://wirc.be/admin/appointments\n",
+    )
