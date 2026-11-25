@@ -145,6 +145,12 @@ class AppointmentSlotOverride(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
+class AppointmentBookingSettings(db.Model):
+    """Public booking mode for this practice database."""
+    id = db.Column(db.Integer, primary_key=True)
+    release_in_pairs = db.Column(db.Boolean, nullable=False)
+
+
 class HistoricalDossier(db.Model):
     """Manually entered legacy examination; never occupies a calendar slot."""
     id = db.Column(db.Integer, primary_key=True)

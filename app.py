@@ -57,7 +57,7 @@ from historical_dossiers import register_historical_dossiers, historical_riziv_r
 from appointment_moves import register_appointment_moves
 from appointment_trash import register_appointment_trash
 from internal_invoices import register_internal_invoices
-from models import AppointmentMoveReceipt, AppointmentTrash
+from models import AppointmentBookingSettings, AppointmentMoveReceipt, AppointmentTrash
 from practice_settings import (AGENDA_ONLY, PRACTICE_NAME, PRACTICE_SHORT_NAME,
     PRACTICE_ENGLISH_NAME, PUBLIC_CLOSURE_MESSAGE, PUBLIC_BOOKING_ENABLED, BOOKING_START_DATE, practice_address)
 from inami_ultrasound_catalog import INTERNAL_INAMI_CHOICES, INTERNAL_INAMI_CODES
@@ -842,6 +842,7 @@ def ensure_appointment_schema() -> None:
     inspector = inspect(db.engine)
     AppointmentHold.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentSlotOverride.__table__.create(bind=db.engine, checkfirst=True)
+    AppointmentBookingSettings.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentMoveReceipt.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentTrash.__table__.create(bind=db.engine, checkfirst=True)
     AppointmentReport.__table__.create(bind=db.engine, checkfirst=True)
@@ -3875,8 +3876,15 @@ def appointment_availability_overrides(start, end):
                   AppointmentSlotOverride.starts_at >= start, AppointmentSlotOverride.starts_at < end).all()}
 
 
-def bookable_appointment_slots(day, availability_overrides=None):
-    """Expose two adjacent openings, advancing only past an occupied first slot."""
+def public_booking_releases_in_pairs():
+    settings = db.session.get(AppointmentBookingSettings, 1)
+    return settings.release_in_pairs if settings is not None else not AGENDA_ONLY
+
+
+def bookable_appointment_slots(day, availability_overrides=None, *, release_in_pairs=None):
+    """Return free public slots, optionally limited to the first adjacent pair."""
+    if release_in_pairs is None:
+        release_in_pairs = public_booking_releases_in_pairs()
     if availability_overrides is None:
         availability_overrides = {item.starts_at: item.is_open for item in AppointmentSlotOverride.query.filter(
             AppointmentSlotOverride.starts_at >= datetime.combine(day, time.min),
@@ -3902,13 +3910,13 @@ def bookable_appointment_slots(day, availability_overrides=None):
                            and item.starts_at + timedelta(minutes=item.duration_minutes) > stamp
                            for item in appointments))
         if unavailable:
-            if visible_slots:
+            if release_in_pairs and visible_slots:
                 break
             continue
-        if visible_slots and stamp != visible_slots[-1] + timedelta(minutes=APPOINTMENT_SLOT_MINUTES):
+        if release_in_pairs and visible_slots and stamp != visible_slots[-1] + timedelta(minutes=APPOINTMENT_SLOT_MINUTES):
             break
         visible_slots.append(stamp)
-        if len(visible_slots) == 2:
+        if release_in_pairs and len(visible_slots) == 2:
             break
     return tuple(visible_slots)
 
@@ -4067,7 +4075,9 @@ def public_agenda():
         AppointmentSlotOverride.starts_at >= datetime.combine(start, time.min),
         AppointmentSlotOverride.starts_at < datetime.combine(end, time.min)).all()}
     days, rows = build_appointment_slot_grid(start, [], "fr", availability_overrides)
-    visible_slots = {day["date"]: set(bookable_appointment_slots(day["date"], availability_overrides))
+    release_in_pairs = public_booking_releases_in_pairs()
+    visible_slots = {day["date"]: set(bookable_appointment_slots(
+        day["date"], availability_overrides, release_in_pairs=release_in_pairs))
                      for day in days}
     for row in rows:
         for slot in row["slots"]:
@@ -4106,7 +4116,7 @@ def public_agenda_hold():
             or exam_code not in PUBLIC_APPOINTMENT_LABELS or not is_valid_patient_name(patient_name)):
         return jsonify(error="Indiquez le prénom et le nom complets (au moins 5 lettres) et choisissez un examen. Le créneau ne peut pas être réservé sans ces informations."), 400
     if stamp not in bookable_appointment_slots(stamp.date()):
-        return jsonify(error="Les créneaux se libèrent dans l’ordre chronologique. Choisissez l’un des créneaux disponibles."), 409
+        return jsonify(error="Ce créneau n’est plus disponible. Actualisez l’agenda et choisissez un créneau proposé."), 409
     if not claim_agenda_slot(stamp, agenda_token()) or slot_is_booked(stamp):
         db.session.rollback()
         return jsonify(error="Ce créneau n’est plus disponible."), 409
@@ -4147,6 +4157,28 @@ def public_agenda_draft():
     hold.draft_data = json.dumps(data, ensure_ascii=False)
     db.session.commit()
     return jsonify(ok=True)
+
+
+@app.post("/admin/appointments/availability/mode")
+def admin_set_public_booking_mode():
+    admin_redirect = admin_required()
+    if admin_redirect:
+        return admin_redirect
+    if not secrets.compare_digest(request.form.get("csrf_token", ""), agenda_token()):
+        abort(400)
+    mode = request.form.get("release_in_pairs")
+    if mode not in {"0", "1"}:
+        abort(400)
+    ensure_appointment_schema()
+    release_in_pairs = mode == "1"
+    db.session.execute(text(
+        "INSERT INTO appointment_booking_settings (id, release_in_pairs) VALUES (1, :release_in_pairs) "
+        "ON CONFLICT (id) DO UPDATE SET release_in_pairs = excluded.release_in_pairs"
+    ), {"release_in_pairs": release_in_pairs})
+    db.session.commit()
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify(ok=True, release_in_pairs=release_in_pairs)
+    return redirect(url_for("admin_appointments", date=request.form.get("week_date")))
 
 
 @app.post("/admin/appointments/availability")
@@ -4568,6 +4600,7 @@ def admin_appointments():
     )
     context = dict(
         patient_rows=patient_rows,
+        release_in_pairs=public_booking_releases_in_pairs(),
         agenda_asset_version=os.stat(os.path.join(app.static_folder, 'internal_agenda.js')).st_mtime_ns,
         shift_appointments=[a for a in appointments if a.starts_at.date() == shift_date],
         shift_date=shift_date,

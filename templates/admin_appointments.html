@@ -93,6 +93,21 @@
             </div>
           </div>
 
+          <form id="public-booking-mode" class="public-booking-mode" method="post" action="{{ url_for('admin_set_public_booking_mode') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="week_date" value="{{ selected_date }}">
+            <div>
+              <strong id="public-booking-mode-label">Créneaux publics par deux</strong>
+              <span id="public-booking-mode-status">{{ 'Deux créneaux à la fois' if release_in_pairs else 'Tous les créneaux libres' }}</span>
+            </div>
+            <button type="submit" name="release_in_pairs" value="{{ '0' if release_in_pairs else '1' }}"
+                    role="switch" aria-checked="{{ 'true' if release_in_pairs else 'false' }}"
+                    aria-labelledby="public-booking-mode-label" aria-describedby="public-booking-mode-status">
+              <span aria-hidden="true"></span>
+            </button>
+          </form>
+          <p id="public-booking-mode-feedback" class="public-booking-mode-feedback" role="status"></p>
+
           <div class="appointment-calendar-scroll">
             <div id="internal-calendar-grid" data-endpoint="{{ url_for('admin_appointments', date=selected_date, fragment='calendar') }}">{% include '_internal_calendar_grid.html' %}</div>
           </div>

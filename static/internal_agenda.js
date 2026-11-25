@@ -28,6 +28,30 @@
     } finally { clearTimeout(timer); }
   }
   window.internalAgenda = {request};
+  const bookingModeForm = document.getElementById('public-booking-mode');
+  bookingModeForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const control = bookingModeForm.elements.release_in_pairs;
+    if (control.disabled) return;
+    const status = document.getElementById('public-booking-mode-status');
+    const feedback = document.getElementById('public-booking-mode-feedback');
+    const body = new FormData(bookingModeForm);
+    body.set(control.name, control.value);
+    control.disabled = true;
+    feedback.textContent = 'Enregistrement…';
+    try {
+      const result = await request(bookingModeForm.action, {method: 'POST', body});
+      const enabled = result.release_in_pairs;
+      control.setAttribute('aria-checked', String(enabled));
+      control.value = enabled ? '0' : '1';
+      status.textContent = enabled ? 'Deux créneaux à la fois' : 'Tous les créneaux libres';
+      feedback.textContent = 'Agenda public mis à jour.';
+    } catch (error) {
+      feedback.textContent = 'Modification non confirmée. Réessayez ou actualisez l’agenda.';
+    } finally {
+      control.disabled = false;
+    }
+  });
   const feedback = document.getElementById('availability-feedback');
   function notify(message) { feedback.hidden = false; feedback.textContent = message; }
   function updateSlot(start, isOpen) {

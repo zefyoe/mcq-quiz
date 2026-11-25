@@ -321,3 +321,55 @@
 @media(max-width:760px) { .agenda-app-full-name { font-size: 11px; } .agenda-app-brand-copy { font-size: 10px; } }
 .agenda-quick-closure { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 0; padding: 11px 10px; border: 1px solid #e6eae2; border-radius: 7px; color: #78816e; background: #f7f8f4; font-size: 10px; }
 .agenda-quick-closure span { font-size: 9px; color: #8b9481; white-space: nowrap; }
+
+.public-booking-mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: fit-content;
+  min-width: min(255px, 100%);
+  padding: 5px 8px 5px 14px;
+  margin: 0 0 16px;
+  border: 1px solid #dde7e1;
+  border-radius: 10px;
+  background: #f5f9f7;
+}
+.public-booking-mode strong,
+#public-booking-mode-status { display: block; }
+.public-booking-mode strong { color: #294d40; font-size: 13px; }
+#public-booking-mode-status { margin-top: 3px; color: #586f64; font-size: 11px; }
+.public-booking-mode button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 54px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.public-booking-mode button span {
+  display: flex;
+  align-items: center;
+  width: 44px;
+  height: 25px;
+  padding: 3px;
+  border-radius: 20px;
+  background: #6c8077;
+}
+.public-booking-mode button span::after {
+  content: "";
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .15s ease;
+}
+.public-booking-mode button[aria-checked="true"] span { background: #176b60; }
+.public-booking-mode button[aria-checked="true"] span::after { transform: translateX(19px); }
+.public-booking-mode button:disabled { opacity: .6; cursor: wait; }
+.public-booking-mode-feedback { margin: -9px 0 13px; font-size: 12px; color: #455f54; }
+.public-booking-mode-feedback:empty { display: none; }

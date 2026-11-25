@@ -80,8 +80,7 @@ try:
         confirmation=PdfReader(io.BytesIO(create_appointment_confirmation_pdf(patient_name="PATIENT FICTIF WIRC",starts_at=day,
             examination="Examen fictif",practice_address="Adresse fictive WIRC")))
         assert "WIRC" in confirmation.pages[0].extract_text() and confirmation.metadata.author==PRACTICE_NAME
-        # WIRC opens Thursday mornings, with the existing two-adjacent-slot
-        # policy and ten-minute visits. Other former practice hours stay shut.
+        # WIRC opens Thursday mornings with ten-minute visits.
         thursday=(day+timedelta(days=2)).replace(hour=8,minute=0)
         with app.app_context():
             assert all(appointment_slot_is_open(thursday+timedelta(minutes=10*i)) for i in range(24))
@@ -107,7 +106,49 @@ try:
         early_csrf=re.search(r'name="csrf_token" value="([^"]+)"',early_page.text)[1]
         assert public.post('/agenda/book',base_url=base,data=dict(csrf_token=early_csrf,
             slot_start=early.isoformat(),patient_name='Patient Trop Tot',inami_code='459712')).status_code==400
-        opened=public.get("/agenda?date="+thursday.date().isoformat(),base_url=base)
+        week_url = "/agenda?date=" + thursday.date().isoformat()
+        mode_url = "/admin/appointments/availability/mode"
+        def visible_slots():
+            return re.findall(r'data-slot="([^"]+)"', public.get(week_url, base_url=base).text)
+        def slot(index):
+            return (thursday + timedelta(minutes=10 * index)).isoformat(timespec="minutes")
+        def set_mode(mode):
+            return admin.post(mode_url, base_url=base,
+                data=dict(csrf_token=admin_csrf, release_in_pairs=mode),
+                headers={"X-Requested-With": "XMLHttpRequest"})
+        with admin.session_transaction(base_url=base) as session:
+            admin_csrf = session["agenda_token"]
+        assert public.post(mode_url, base_url=base).status_code == 302
+        assert admin.post(mode_url, base_url=base, data={"release_in_pairs": "1"}).status_code == 400
+        assert set_mode("invalid").status_code == 400
+        assert visible_slots() == [slot(i) for i in range(24)]
+        assert 'role="switch" aria-checked="false"' in internal.text
+        assert 'id="public-booking-mode"' not in public.get(week_url, base_url=base).text
+        booking = dict(csrf_token=early_csrf, patient_name="Patient Fictif", inami_code="459712")
+        assert public.post("/agenda/book", base_url=base, data=dict(booking, slot_start=slot(12))).status_code == 200
+        assert slot(12) not in visible_slots()
+        assert set_mode("1").json["release_in_pairs"] is True
+        assert 'role="switch" aria-checked="true"' in admin.get("/admin/appointments", base_url=base).text
+        assert public.post("/agenda/hold", base_url=base, data=dict(booking, slot_start=slot(2))).status_code == 409
+        assert public.post("/agenda/book", base_url=base, data=dict(booking, slot_start=slot(2))).status_code == 409
+        assert public.post("/agenda/hold", base_url=base, data=dict(booking, slot_start=slot(1))).status_code == 200
+        assert visible_slots() == [slot(0)]
+        assert set_mode("0").json["release_in_pairs"] is False
+        with app.app_context():
+            db.session.add(AppointmentSlotOverride(starts_at=thursday + timedelta(minutes=40), is_open=False))
+            db.session.commit()
+        assert visible_slots() == [slot(i) for i in range(24) if i not in {1, 4, 12}]
+        assert public.post("/agenda/book", base_url=base, data=dict(booking, slot_start=slot(4))).status_code == 400
+        assert set_mode("1").json["release_in_pairs"] is True
+        assert public.post("/agenda/book", base_url=base, data=dict(booking, slot_start=slot(0))).status_code == 200
+        assert visible_slots() == [slot(2), slot(3)]
+        with app.app_context():
+            Appointment.query.delete()
+            AppointmentHold.query.delete()
+            AppointmentSlotOverride.query.delete()
+            db.session.commit()
+
+        opened=public.get(week_url,base_url=base)
         assert opened.status_code==200 and 'Choisissez une disponibilité' in opened.text
         assert re.findall(r'data-slot="([^"]+)"',opened.text)==[
             thursday.isoformat(timespec="minutes"),(thursday+timedelta(minutes=10)).isoformat(timespec="minutes")]
@@ -156,6 +197,7 @@ try:
             assert import_accounts(key,envelope(accounts))==['y@bymed.be','ybahkani@gmail.com']
             assert User.query.count()==2 and all(u.check_password('test-password') and u.is_admin for u in User.query.all())
             assert GmailConnection.query.count()==0 and Appointment.query.count()==0
+        assert set_mode("0").json["release_in_pairs"] is False
     else:
         assert "PATIENT ARCHIVE FICTIF" in internal.text
     with app.app_context():
